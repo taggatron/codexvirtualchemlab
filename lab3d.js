@@ -178,20 +178,50 @@ export class LabRenderer3D{
     body.geometry.computeVertexNormals();
     g.add(body);
     const liqMat = new THREE.MeshPhysicalMaterial({color: 0x319bd3, transparent: true, opacity: 0.8, roughness: 0.1, transmission: 0.2, side: THREE.DoubleSide});
-    const liquid = cylinder(0.81, 0.28, liqMat, 64);
-    liquid.position.y = 0.18;
+    const liqProfile = [[0,0], [.3,0], [.5,.03], [.7,.13], [.85,.30], [0,.30]].map(([x,y]) => new THREE.Vector2(x,y));
+    const liquid = new THREE.Mesh(new THREE.LatheGeometry(liqProfile, 64), liqMat);
+    liquid.geometry.computeVertexNormals();
+    liquid.position.y = 0.022;
+    liquid.scale.set(0.98, 0.98, 0.98);
     g.add(liquid);
     if(crystalsQ > 0){
        const crMat = solid(0x2774d6, 0.9);
-       for(let i=0; i<40; i++){
-          const a = i*2.4, r = Math.pow(i/40, 0.5)*0.8;
+       const clusters = [
+          {cx: 0.15, cz: 0.1}, {cx: -0.25, cz: 0.3},
+          {cx: 0.3, cz: -0.2}, {cx: -0.4, cz: -0.25},
+          {cx: 0.0, cz: -0.45}, {cx: 0.45, cz: 0.25}
+       ];
+       for(let i=0; i<45; i++){
+          const cluster = clusters[i % clusters.length];
+          const angle = i * 2.399;
+          const dist = ((i * 17) % 100) / 100 * 0.28;
+          let x = cluster.cx + Math.cos(angle) * dist;
+          let z = cluster.cz + Math.sin(angle) * dist;
+          
+          let r = Math.hypot(x, z);
+          if (r > 0.8) {
+             x = (x / r) * 0.8;
+             z = (z / r) * 0.8;
+             r = 0.8;
+          }
+          
+          let baseY = 0.02;
+          if (r > 0.3 && r <= 0.5) baseY = 0.02 + (r - 0.3) / 0.2 * 0.03;
+          else if (r > 0.5 && r <= 0.7) baseY = 0.05 + (r - 0.5) / 0.2 * 0.10;
+          else if (r > 0.7) baseY = 0.15 + (r - 0.7) / 0.15 * 0.17;
+          
           const cr = new THREE.Mesh(new THREE.DodecahedronGeometry(0.04+0.02*(i%3), 0), crMat);
-          cr.position.set(Math.cos(a)*r, 0.15 + (i%5)*0.015, Math.sin(a)*r);
+          cr.position.set(x, baseY + 0.015 + ((i * 23) % 100) / 100 * 0.04, z);
           cr.rotation.set(i*1.1, i*0.7, i*2.2);
-          cr.scale.setScalar(crystalsQ);
+          cr.scale.set(
+             crystalsQ * (0.6 + ((i * 31) % 100)/100 * 0.8),
+             crystalsQ * (0.6 + ((i * 47) % 100)/100 * 0.8),
+             crystalsQ * (0.6 + ((i * 59) % 100)/100 * 0.8)
+          );
           g.add(cr);
        }
-       liquid.scale.y = Math.max(0.01, 1 - crystalsQ);
+       const s = Math.max(0.01, 1 - crystalsQ);
+       liquid.scale.set(0.98 * s, 0.98 * s, 0.98 * s);
     }
     return shadowReady(g);
   }
@@ -214,7 +244,7 @@ export class LabRenderer3D{
       if(state.drag?.kind==='palette'){const pos=this.posFromScreen(state.drag.x,state.drag.y),ghost=this.itemObject({type:state.drag.type});ghost.traverse(o=>{if(o.material){o.material=o.material.clone();o.material.transparent=true;o.material.opacity=.35}});this.add(ghost,pos.x,pos.z,0,1.08)}
     }
     else if(id==='rates'||id==='temp'){const transfer=Math.min(1,state.transferred||0);const source=this.add(this.flask(.62-transfer*.34,0xc8e8ee),-2.1,.1,0,.88);const receiver=this.flask(.48+transfer*.24,id==='temp'?0xc05b8e:0xe8ce52);if(state.running)receiver.add(this.bubbleCloud(id==='rates'?22:12,.46,.55,id==='rates'?0xf0db72:0xf8ffff));const target=this.add(receiver,1.25,.05,0,1.04);if(state.pour){source.position.set(-.25,1.8,.05);source.rotation.z=-1.14;const stream=this.tubeBetween(new THREE.Vector3(.22,1.62,.05),new THREE.Vector3(1.25,1.86,.05),.045,new THREE.MeshPhysicalMaterial({color:0x9be7f7,transparent:true,opacity:.82,roughness:.05,transmission:.18}));this.root.add(stream)}if(id==='temp')this.add(this.thermometer(),1.58,.05,.65,.75)}
-    else if(id==='salts'){const stage=state.saltsStage||0,t=state.saltsTimer||0;if(stage===0||stage===1){const beaker=this.beaker(stage===1?0.35+(t/2.5)*0.05:0.35,0xd0e8ef);this.add(beaker,0,.1,0,1.0);if(stage===1){const pourQ=Math.min(1,t/1.5),cPos=new THREE.Vector3(1.5,0,.1).lerp(new THREE.Vector3(-.28,2.05,.1),pourQ),cRot=pourQ*-1.8,c=this.crucible({product:true,productColor:0x111111,productScale:1-Math.max(0,(t-1.5))});c.position.copy(cPos);c.rotation.z=cRot;this.root.add(c);if(t>1.4&&t<2.5){const powder=cylinder(.04,.9,solid(0x111111,.9),12);powder.position.set(0,1.05,.1);this.root.add(powder)}}}else if(stage===2){const appearQ=Math.min(1,t/1.0),pourQ=Math.max(0,Math.min(1,(t-1.2)/1.5)),flask=this.flask(.1+pourQ*.25,0x319bd3),funnel=this.filterFunnel();funnel.position.y=1.9;flask.add(funnel);const fPos=new THREE.Vector3(2.5,.1,.1).lerp(new THREE.Vector3(0,.1,.1),Math.pow(appearQ,.5));this.add(flask,fPos.x,fPos.z,fPos.y,1.0);const bPos=appearQ<1?new THREE.Vector3(0,.1,0).lerp(new THREE.Vector3(-1.8,0,.1),Math.pow(appearQ,.5)):new THREE.Vector3(-1.8,0,.1).lerp(new THREE.Vector3(-1.45,3.36,.1),pourQ>0?Math.min(1,pourQ*3):0),bRot=pourQ>0?-1.4*Math.min(1,pourQ*3):0,beaker=this.beaker(.4-pourQ*.4,0x319bd3);beaker.position.copy(bPos);beaker.rotation.z=bRot;this.root.add(beaker);if(pourQ>.2&&pourQ<.9){const stream=this.tubeBetween(new THREE.Vector3(0,2.9,.1),new THREE.Vector3(0,2.2,.1),.03,new THREE.MeshPhysicalMaterial({color:0x319bd3,transparent:true,opacity:.8}));this.root.add(stream)}}else if(stage===3||stage===4){this.add(this.tripod(),0,.1);this.add(this.bunsen(state.burner,.76),0,.1);let dishY=1.88,dishX=0,dishZ=.1,dishScale=.96,crystalsQ=0;if(stage===4){const moveQ=Math.min(1,t/1.5);dishZ=.1+moveQ*1.3;dishY=1.88*(1-moveQ);crystalsQ=Math.max(0,Math.min(1,(t-1.5)/3.0))}const basin=this.evaporatingBasin(crystalsQ);if(stage===3&&state.burner)basin.add(this.bubbleCloud(18,.4,.3));this.add(basin,dishX,dishZ,dishY,dishScale)}}
+    else if(id==='salts'){const stage=state.saltsStage||0,t=state.saltsTimer||0;if(stage===0||stage===1){const beaker=this.beaker(stage===1?0.35+(t/2.5)*0.05:0.35,0xd0e8ef);this.add(beaker,0,.1,0,1.0);if(stage===1){const pourQ=Math.min(1,t/1.5),cPos=new THREE.Vector3(1.5,0,.1).lerp(new THREE.Vector3(-.28,2.05,.1),pourQ),cRot=pourQ*-1.8,c=this.crucible({product:true,productColor:0x111111,productScale:1-Math.max(0,(t-1.5))});c.position.copy(cPos);c.rotation.z=cRot;this.root.add(c);if(t>1.4&&t<2.5){const powder=cylinder(.04,.9,solid(0x111111,.9),12);powder.position.set(0,1.05,.1);this.root.add(powder)}}}else if(stage===2){const appearQ=Math.min(1,t/1.0),pourQ=Math.max(0,Math.min(1,(t-1.2)/1.5)),flask=this.flask(.1+pourQ*.25,0x319bd3),funnel=this.filterFunnel();funnel.position.y=1.9;flask.add(funnel);const fPos=new THREE.Vector3(2.5,.1,.1).lerp(new THREE.Vector3(0,.1,.1),Math.pow(appearQ,.5));this.add(flask,fPos.x,fPos.z,fPos.y,1.0);const bPos=appearQ<1?new THREE.Vector3(0,.1,0).lerp(new THREE.Vector3(-1.8,0,.1),Math.pow(appearQ,.5)):new THREE.Vector3(-1.8,0,.1).lerp(new THREE.Vector3(-1.45,3.36,.1),pourQ>0?Math.min(1,pourQ*3):0),bRot=pourQ>0?-1.4*Math.min(1,pourQ*3):0,beaker=this.beaker(.4-pourQ*.4,0x319bd3);beaker.position.copy(bPos);beaker.rotation.z=bRot;this.root.add(beaker);if(pourQ>.2&&pourQ<.9){const stream=this.tubeBetween(new THREE.Vector3(0,2.9,.1),new THREE.Vector3(0,2.2,.1),.03,new THREE.MeshPhysicalMaterial({color:0x319bd3,transparent:true,opacity:.8}));this.root.add(stream)}}else if(stage===3||stage===4){let baseZ=.1,dishY=1.88,dishX=0,dishZ=.1,dishScale=.96,crystalsQ=0;if(stage===4){const moveQ=Math.min(1,t/1.5);baseZ=.1-moveQ*.4;dishZ=.1+moveQ*1.5;dishY=1.88*(1-moveQ);crystalsQ=Math.max(0,Math.min(1,(t-1.5)/3.0))}this.add(this.tripod(),0,baseZ);this.add(this.bunsen(state.burner,.76),0,baseZ);const basin=this.evaporatingBasin(crystalsQ);if(stage===3&&state.burner)basin.add(this.bubbleCloud(18,.4,.3));this.add(basin,dishX,dishZ,dishY,dishScale)}}
     else if(id==='mass'){const stage=state.massStage||0,transfer=state.massTransfer,q=Math.min(1,(transfer?.t||0)/1.55),settle=transfer?.direction==='toBalance'&&q>.66?4.18+Math.sin(q*34)*(1-q)*.24:0,reading=stage===0?4.01:stage===7?4.18:settle;this.add(this.balance(reading),-2.5,.2,0,.9);this.add(this.tripod(),1.3,.05);this.add(this.bunsen(state.burner,.8),1.3,.05);let pos=stage===0||stage===7?new THREE.Vector3(-2.5,.83,.2):new THREE.Vector3(1.3,1.87,.05);if(transfer){const from=transfer.direction==='toTripod'?new THREE.Vector3(-2.5,.83,.2):new THREE.Vector3(1.3,1.87,.05),to=transfer.direction==='toTripod'?new THREE.Vector3(1.3,1.87,.05):new THREE.Vector3(-2.5,.83,.2),ease=q*q*(3-2*q);pos=new THREE.Vector3().lerpVectors(from,to,ease);pos.y+=Math.sin(Math.PI*q)*1.12}const product=stage>=5;this.add(this.crucible({burning:stage===4&&state.running,lidOn:state.massLidOn,product}),pos.x,pos.z,pos.y,1.08)}
     else if(id==='hydrogen'){this.root.add(this.hydrogenRig(state))}
     else if(id==='co2'){const reaction=this.flask(.5+(state.transferred||0)*.12,0xd6d0ad);if(state.running)reaction.add(this.bubbleCloud(18,.42,.72));this.add(reaction,-1.75,.05,0,.95);this.add(this.testTube(.48,0xe8e8d8,state.running),1.75,.05,0,1.02);this.root.add(this.delivery(new THREE.Vector3(-1.75,1.8,.05),new THREE.Vector3(1.75,1.35,.05)));}
