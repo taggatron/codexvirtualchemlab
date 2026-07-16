@@ -162,6 +162,62 @@ export class LabRenderer3D{
     if(stage===4){const approach=Math.min(1,t/.34),tip=new THREE.Vector3(-.78+1.38*approach,2.03,.08),handle=tip.clone().add(new THREE.Vector3(-1.55,.34,.03)),wood=this.tubeBetween(handle,tip,.025,new THREE.MeshStandardMaterial({color:0xb57a3a,roughness:.72}));g.add(wood);const ember=new THREE.Mesh(new THREE.SphereGeometry(.06,24,16),new THREE.MeshBasicMaterial({color:0xffd37a,toneMapped:false}));ember.position.copy(tip);g.add(ember);const splintFlame=new THREE.Mesh(new THREE.ConeGeometry(.075,.25,32),new THREE.MeshBasicMaterial({color:0xff8b32,transparent:true,opacity:.92,blending:THREE.AdditiveBlending,depthWrite:false,toneMapped:false}));splintFlame.position.copy(tip).add(new THREE.Vector3(0,.14,0));g.add(splintFlame);if(t>.36&&t<.88){const q=(t-.36)/.52,puff=new THREE.Mesh(new THREE.SphereGeometry(.22,32,20),new THREE.MeshBasicMaterial({color:q<.45?0xffdd88:0x72cfff,transparent:true,opacity:.72*(1-q),blending:THREE.AdditiveBlending,depthWrite:false,toneMapped:false}));puff.position.set(tubeX,2.02+q*.32,.02);puff.scale.set(1+q*1.6,.65+q,.8+q);g.add(puff);const frontQ=Math.max(0,Math.min(1,(t-.4)/.43)),front=new THREE.Mesh(new THREE.SphereGeometry(.19,32,18),new THREE.MeshBasicMaterial({color:frontQ<.55?0x4baeff:0xffd478,transparent:true,opacity:.88*(1-frontQ*.35),blending:THREE.AdditiveBlending,depthWrite:false,toneMapped:false}));front.scale.set(.82,1.25,.82);front.position.set(tubeX,.28+frontQ*1.55,.02);g.add(front);const flash=new THREE.PointLight(0xffc76f,8*(1-q),4,1.5);flash.position.copy(front.position);g.add(flash)}}
     return shadowReady(g)
   }
+  saltsRig(state){
+    const g=new THREE.Group(),stage=state.saltsStage||0,t=state.saltsTimer||0;
+    if(stage<=1){
+      const q=stage===1?Math.min(1,t/2.5):0,rColor=new THREE.Color(0xc6eef3).lerp(new THREE.Color(0x319bd3),q);
+      const beaker=this.beaker(.45,rColor.getHex());beaker.position.set(0,0,.1);g.add(beaker);
+      if(stage===1){
+        const pourQ=Math.min(1,t/2.25),lift=Math.min(1,pourQ/.2),retreat=Math.max(0,Math.min(1,(pourQ-.85)/.15));
+        const crucible=this.crucible({lidOn:false,product:false});
+        crucible.position.set(1.4,0,.1).lerp(new THREE.Vector3(.6,1.45,.1),lift).lerp(new THREE.Vector3(1.4,0,.1),retreat);
+        crucible.rotation.z=-2.2*lift*(1-retreat);g.add(crucible);
+        if(pourQ>.2&&pourQ<.85){
+           const oxideMat=new THREE.MeshBasicMaterial({color:0x222222});
+           for(let i=0;i<6;i++){
+             const drop=new THREE.Mesh(new THREE.SphereGeometry(.025,8,8),oxideMat);
+             drop.position.lerpVectors(new THREE.Vector3(.25,1.3,.1),new THREE.Vector3(0,.4,.1),.2+i*.16);
+             drop.position.y-=((t*2.5+i*.16)%1)*.9;g.add(drop);
+           }
+        }
+      }
+    }else if(stage===2){
+      const flask=this.flask(.25*Math.min(1,t/3),0x319bd3);flask.position.set(0,0,.1);g.add(flask);
+      const funnelMat=new THREE.MeshPhysicalMaterial({color:0xffffff,transparent:true,opacity:.4,transmission:.5});
+      const funnel=new THREE.Mesh(new THREE.ConeGeometry(.4,.6,32,1,true),funnelMat);funnel.position.set(0,1.3,.1);funnel.rotation.x=Math.PI;g.add(funnel);
+      const stem=cylinder(.04,.6,funnelMat,16);stem.position.set(0,.8,.1);g.add(stem);
+      const paper=new THREE.Mesh(new THREE.ConeGeometry(.38,.58,32,1,true),new THREE.MeshBasicMaterial({color:0xffffff,side:THREE.DoubleSide}));paper.position.set(0,1.31,.1);paper.rotation.x=Math.PI;g.add(paper);
+      const filterQ=Math.min(1,t/3);
+      if(filterQ<.9){
+         const pool=new THREE.Mesh(new THREE.ConeGeometry(.35,.5,32),new THREE.MeshBasicMaterial({color:0x202020}));
+         pool.position.set(0,1.35,.1);pool.rotation.x=Math.PI;pool.scale.setScalar(1-filterQ*.8);g.add(pool);
+      }
+      const beaker=this.beaker(.45*(1-filterQ),0x222222);beaker.position.set(.8,1.6,.1);beaker.rotation.z=-1.2;g.add(beaker);
+      if(filterQ>.1&&filterQ<.9){const stream=this.tubeBetween(new THREE.Vector3(.38,1.5,.1),new THREE.Vector3(0,1.4,.1),.02,new THREE.MeshBasicMaterial({color:0x222222}));g.add(stream);}
+      if(filterQ>.1&&filterQ<.95){const drop=new THREE.Mesh(new THREE.SphereGeometry(.03,8,8),new THREE.MeshBasicMaterial({color:0x319bd3}));drop.position.set(0,.5-((t*3)%1)*.4,.1);g.add(drop);}
+    }else if(stage===3){
+      const tripod=this.tripod();tripod.position.set(0,0,.1);g.add(tripod);
+      const bunsen=this.bunsen(state.burner,.76);bunsen.position.set(0,0,.1);g.add(bunsen);
+      const basin=new THREE.Mesh(new THREE.SphereGeometry(.5,32,16,0,Math.PI*2,0,Math.PI/2),new THREE.MeshPhysicalMaterial({color:0xfcfcfc,roughness:.7}));
+      basin.rotation.x=Math.PI;basin.position.set(0,1.86,.1);basin.scale.y=.4;g.add(basin);
+      const evaporateQ=Math.min(1,t/4),liquid=new THREE.Mesh(new THREE.CylinderGeometry(.45,.45,.05,32),new THREE.MeshPhysicalMaterial({color:0x319bd3,transparent:true,opacity:.8,roughness:.1}));
+      liquid.position.set(0,1.9,.1);liquid.scale.setScalar(1-evaporateQ*.4);g.add(liquid);
+      if(state.burner)liquid.add(this.bubbleCloud(14,.3,.1,0xe9fbff));
+    }else if(stage===4){
+      const basin=new THREE.Mesh(new THREE.SphereGeometry(.5,32,16,0,Math.PI*2,0,Math.PI/2),new THREE.MeshPhysicalMaterial({color:0xfcfcfc,roughness:.7}));
+      basin.rotation.x=Math.PI;basin.position.set(0,.2,.1);basin.scale.y=.4;g.add(basin);
+      const coolQ=Math.min(1,t/5),liquid=new THREE.Mesh(new THREE.CylinderGeometry(.45,.45,.05,32),new THREE.MeshPhysicalMaterial({color:0x319bd3,transparent:true,opacity:.8,roughness:.1}));
+      liquid.position.set(0,.25,.1);liquid.scale.setScalar(.6-coolQ*.4);g.add(liquid);
+      const crystalMat=new THREE.MeshStandardMaterial({color:0x2288cc,roughness:.2,metalness:.1});
+      for(let i=0;i<40;i++){
+        const scale=coolQ*(.03+Math.abs(Math.sin(i*23))*.04);if(scale<.01)continue;
+        const crystal=new THREE.Mesh(new THREE.OctahedronGeometry(scale,0),crystalMat),a=i*1.23,r=Math.abs(Math.cos(i*77))*.35;
+        crystal.position.set(Math.cos(a)*r,.22,Math.sin(a)*r+.1);
+        crystal.rotation.set(i*1.1,i*2.2,i*3.3);g.add(crystal);
+      }
+    }
+    return shadowReady(g)
+  }
   thermometer(){const g=new THREE.Group();const stem=cylinder(.045,1.7,solid(0xdfe8e9,.2),20);stem.position.y=.92;g.add(stem);const red=cylinder(.017,1.35,new THREE.MeshBasicMaterial({color:0xc93b36}),16);red.position.y=.7;g.add(red);const bulb=new THREE.Mesh(new THREE.SphereGeometry(.11,24,16),new THREE.MeshStandardMaterial({color:0xc93b36}));bulb.position.y=.1;g.add(bulb);return g}
   meter(){const g=new THREE.Group();const body=new THREE.Mesh(new THREE.BoxGeometry(.85,1.15,.42),solid(0x263d47,.3));body.position.y=.6;g.add(body);const screen=new THREE.Mesh(new THREE.PlaneGeometry(.56,.3),new THREE.MeshBasicMaterial({color:0x54d995}));screen.position.set(0,.73,.216);g.add(screen);const probe=cylinder(.035,1.3,metal(0x9eacb0),16);probe.position.set(.65,.22,0);g.add(probe);return shadowReady(g)}
   tubeBetween(a,b,r=.045,mat=solid(0x83989f,.5)){const d=b.clone().sub(a),m=a.clone().add(b).multiplyScalar(.5);const mesh=cylinder(r,d.length(),mat,18);mesh.position.copy(m);mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.clone().normalize());return mesh}
@@ -176,7 +232,7 @@ export class LabRenderer3D{
       if(state.drag?.kind==='palette'){const pos=this.posFromScreen(state.drag.x,state.drag.y),ghost=this.itemObject({type:state.drag.type});ghost.traverse(o=>{if(o.material){o.material=o.material.clone();o.material.transparent=true;o.material.opacity=.35}});this.add(ghost,pos.x,pos.z,0,1.08)}
     }
     else if(id==='rates'||id==='temp'){const transfer=Math.min(1,state.transferred||0);const source=this.add(this.flask(.62-transfer*.34,0xc8e8ee),-2.1,.1,0,.88);const receiver=this.flask(.48+transfer*.24,id==='temp'?0xc05b8e:0xe8ce52);if(state.running)receiver.add(this.bubbleCloud(id==='rates'?22:12,.46,.55,id==='rates'?0xf0db72:0xf8ffff));const target=this.add(receiver,1.25,.05,0,1.04);if(state.pour){source.position.set(-.25,1.8,.05);source.rotation.z=-1.14;const stream=this.tubeBetween(new THREE.Vector3(.22,1.62,.05),new THREE.Vector3(1.25,1.86,.05),.045,new THREE.MeshPhysicalMaterial({color:0x9be7f7,transparent:true,opacity:.82,roughness:.05,transmission:.18}));this.root.add(stream)}if(id==='temp')this.add(this.thermometer(),1.58,.05,.65,.75)}
-    else if(id==='salts'){this.add(this.tripod(),0,.1);this.add(this.bunsen(state.burner,.76),0,.1);const vessel=this.beaker(.55+(state.transferred||0)*.13,0x319bd3);if(state.burner)vessel.add(this.bubbleCloud(18,.48,.55));this.add(vessel,0,.1,1.88,.96)}
+    else if(id==='salts'){this.root.add(this.saltsRig(state))}
     else if(id==='mass'){const stage=state.massStage||0,transfer=state.massTransfer,q=Math.min(1,(transfer?.t||0)/1.55),settle=transfer?.direction==='toBalance'&&q>.66?4.18+Math.sin(q*34)*(1-q)*.24:0,reading=stage===0?4.01:stage===7?4.18:settle;this.add(this.balance(reading),-2.5,.2,0,.9);this.add(this.tripod(),1.3,.05);this.add(this.bunsen(state.burner,.8),1.3,.05);let pos=stage===0||stage===7?new THREE.Vector3(-2.5,.83,.2):new THREE.Vector3(1.3,1.87,.05);if(transfer){const from=transfer.direction==='toTripod'?new THREE.Vector3(-2.5,.83,.2):new THREE.Vector3(1.3,1.87,.05),to=transfer.direction==='toTripod'?new THREE.Vector3(1.3,1.87,.05):new THREE.Vector3(-2.5,.83,.2),ease=q*q*(3-2*q);pos=new THREE.Vector3().lerpVectors(from,to,ease);pos.y+=Math.sin(Math.PI*q)*1.12}const product=stage>=5;this.add(this.crucible({burning:stage===4&&state.running,lidOn:state.massLidOn,product}),pos.x,pos.z,pos.y,1.08)}
     else if(id==='hydrogen'){this.root.add(this.hydrogenRig(state))}
     else if(id==='co2'){const reaction=this.flask(.5+(state.transferred||0)*.12,0xd6d0ad);if(state.running)reaction.add(this.bubbleCloud(18,.42,.72));this.add(reaction,-1.75,.05,0,.95);this.add(this.testTube(.48,0xe8e8d8,state.running),1.75,.05,0,1.02);this.root.add(this.delivery(new THREE.Vector3(-1.75,1.8,.05),new THREE.Vector3(1.75,1.35,.05)));}
