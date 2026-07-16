@@ -145,13 +145,14 @@ export class LabRenderer3D{
     const palmPad=new THREE.Mesh(new THREE.SphereGeometry(.38,40,26),skinLight);palmPad.scale.set(1.06,.9,.67);palmPad.position.set(1.24,1.19,.2);g.add(palmPad);
     const wrist=new THREE.Mesh(new THREE.CapsuleGeometry(.275,.72,12,34),skin);wrist.rotation.z=Math.PI/2;wrist.position.set(2.13,1.06,.2);wrist.scale.set(1.15,1.15,.8);g.add(wrist);
     const thenar=new THREE.Mesh(new THREE.SphereGeometry(.25,36,24),skinLight);thenar.scale.set(1.33,1.01,.78);thenar.position.set(1.28,1.41,.24);g.add(thenar);
-    const fingerRows=[.86,1.04,1.22,1.4],fingerReach=[.56,.62,.64,.58];
+    const fingerRows=[.86,1.04,1.22,1.4],fingerReach=[.64,.71,.73,.66];
+    const backOfHand=new THREE.Mesh(new THREE.CapsuleGeometry(.3,.6,12,32),skin);backOfHand.rotation.z=Math.PI/2 - 0.25;backOfHand.position.set(1.7,1.28,.22);g.add(backOfHand);
     for(let i=0;i<4;i++){
       const y=fingerRows[i],reach=fingerReach[i],mat=i===3?skinLight:skin,base=new THREE.Vector3(1.24,y,-.055+i*.018),p1=new THREE.Vector3(1.24-reach*.34,y+.012,-.145+i*.012),p2=new THREE.Vector3(1.24-reach*.7,y-.006,-.105+i*.01),tip=new THREE.Vector3(1.24-reach,y-.025,.035+i*.008);
-      g.add(capsuleBetween(base,p1,.094-i*.004,mat),capsuleBetween(p1,p2,.085-i*.004,mat),capsuleBetween(p2,tip,.075-i*.003,skinLight));
-      addJoint(base,.101-i*.004,mat,p1.clone().sub(base));addJoint(p1,.092-i*.004,mat,p2.clone().sub(p1));addJoint(p2,.082-i*.003,skinLight,tip.clone().sub(p2));
-      const fingertip=new THREE.Mesh(new THREE.SphereGeometry(.079-i*.003,28,18),skinLight);fingertip.scale.set(.92,1.02,.9);fingertip.position.copy(tip);g.add(fingertip);
-      const fingerNail=new THREE.Mesh(new THREE.SphereGeometry(.058-i*.002,24,16),nailMat);fingerNail.scale.set(.72,.42,.24);fingerNail.position.copy(tip).add(new THREE.Vector3(-.018,.02,.066));g.add(fingerNail);
+      g.add(capsuleBetween(base,p1,.108-i*.004,mat),capsuleBetween(p1,p2,.098-i*.004,mat),capsuleBetween(p2,tip,.086-i*.003,skinLight));
+      addJoint(base,.115-i*.004,mat,p1.clone().sub(base));addJoint(p1,.105-i*.004,mat,p2.clone().sub(p1));addJoint(p2,.095-i*.003,skinLight,tip.clone().sub(p2));
+      const fingertip=new THREE.Mesh(new THREE.SphereGeometry(.090-i*.003,28,18),skinLight);fingertip.scale.set(.92,1.02,.9);fingertip.position.copy(tip);g.add(fingertip);
+      const fingerNail=new THREE.Mesh(new THREE.SphereGeometry(.066-i*.002,24,16),nailMat);fingerNail.scale.set(.72,.42,.24);fingerNail.position.copy(tip).add(new THREE.Vector3(-.02,.02,.075));g.add(fingerNail);
     }
     const thumbSealed=stage===0||stage===2||stage===3||(stage===1&&t>1.85),thumbSealQ=stage===0||stage===2||stage===3?1:stage===1?Math.max(0,Math.min(1,(t-1.62)/.42)):0,thumbStart=new THREE.Vector3(1.28,1.36,.26),sealed=[new THREE.Vector3(1.06,1.58,.22),new THREE.Vector3(.86,1.81,.14),new THREE.Vector3(.68,1.94,.08)],open=[new THREE.Vector3(1.37,1.5,.25),new THREE.Vector3(1.54,1.63,.2),new THREE.Vector3(1.62,1.74,.14)],thumbPoints=[thumbStart,...open.map((point,i)=>point.clone().lerp(sealed[i],thumbSealQ))];
     for(let i=0;i<3;i++)g.add(capsuleBetween(thumbPoints[i],thumbPoints[i+1],.135-i*.014,skinLight,32));
