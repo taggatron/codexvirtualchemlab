@@ -165,38 +165,36 @@ export class LabRenderer3D{
   saltsRig(state){
     const g=new THREE.Group(),stage=state.saltsStage||0,t=state.saltsTimer||0;
     if(stage<=1){
-      const q=stage===1?Math.min(1,t/2.5):0,rColor=new THREE.Color(0xc6eef3).lerp(new THREE.Color(0x319bd3),q);
+      const q=stage===1?Math.min(1,t/2.5):0, smoothQ=q*q*(3-2*q), rColor=new THREE.Color(0xc6eef3).lerp(new THREE.Color(0x319bd3),smoothQ);
       const beaker=this.beaker(.45,rColor.getHex());beaker.position.set(0,0,.1);g.add(beaker);
-      if(stage===1){
-        const pourQ=Math.min(1,t/2.25),lift=Math.min(1,pourQ/.2),retreat=Math.max(0,Math.min(1,(pourQ-.85)/.15));
-        const crucible=this.crucible({lidOn:false,product:true,productColor:0x222222,productScale:Math.max(0,1-pourQ*1.5)});
-        crucible.position.set(1.4,0,.1).lerp(new THREE.Vector3(.6,1.45,.1),lift).lerp(new THREE.Vector3(1.4,0,.1),retreat);
-        crucible.rotation.z=-2.2*lift*(1-retreat);g.add(crucible);
-        if(pourQ>.2&&pourQ<.85){
-           const oxideMat=new THREE.MeshBasicMaterial({color:0x222222});
-           for(let i=0;i<6;i++){
-             const drop=new THREE.Mesh(new THREE.SphereGeometry(.025,8,8),oxideMat);
-             drop.position.lerpVectors(new THREE.Vector3(.25,1.3,.1),new THREE.Vector3(0,.4,.1),.2+i*.16);
-             drop.position.y-=((t*2.5+i*.16)%1)*.9;g.add(drop);
-           }
-        }
+      const pourQ=Math.max(0,Math.min(1,(smoothQ-.2)/.8)),lift=Math.min(1,smoothQ/.3),retreat=Math.max(0,Math.min(1,(pourQ-.85)/.15));
+      const crucible=this.crucible({lidOn:false,product:true,productColor:0x222222,productScale:Math.max(0,1-pourQ*1.5)});
+      crucible.position.set(1.4,0,.1).lerp(new THREE.Vector3(.6,1.45,.1),lift).lerp(new THREE.Vector3(1.4,0,.1),retreat);
+      crucible.rotation.z=-2.2*lift*(1-retreat);g.add(crucible);
+      if(stage===1&&pourQ>.05&&pourQ<.85){
+         const oxideMat=new THREE.MeshBasicMaterial({color:0x222222});
+         for(let i=0;i<6;i++){
+           const drop=new THREE.Mesh(new THREE.SphereGeometry(.025,8,8),oxideMat);
+           drop.position.lerpVectors(new THREE.Vector3(.25,1.3,.1),new THREE.Vector3(0,.4,.1),.2+i*.16);
+           drop.position.y-=((t*2.5+i*.16)%1)*.9;g.add(drop);
+         }
       }
     }else if(stage===2){
-      const appearQ=Math.min(1,t/1.5);
-      const filterQ=Math.max(0,Math.min(1,(t-1.5)/2.5));
-      const flask=this.flask(.25*filterQ,0x319bd3);flask.position.set(0,1.5*(1-appearQ),.1);g.add(flask);
+      const appearQ=Math.min(1,t/1.5), appearSmooth=appearQ*appearQ*(3-2*appearQ);
+      const filterQ=Math.max(0,Math.min(1,(t-1.5)/2.5)), filterSmooth=filterQ*filterQ*(3-2*filterQ);
+      const flask=this.flask(.25*filterSmooth,0x319bd3);flask.position.set(0,1.5*(1-appearSmooth),.1);g.add(flask);
       const funnelMat=new THREE.MeshPhysicalMaterial({color:0xffffff,transparent:true,opacity:.4,transmission:.5});
-      const funnel=new THREE.Mesh(new THREE.ConeGeometry(.4,.6,32,1,true),funnelMat);funnel.position.set(0,1.3+1.5*(1-appearQ),.1);funnel.rotation.x=Math.PI;g.add(funnel);
-      const stem=cylinder(.04,.6,funnelMat,16);stem.position.set(0,.8+1.5*(1-appearQ),.1);g.add(stem);
-      const paper=new THREE.Mesh(new THREE.ConeGeometry(.38,.58,32,1,true),new THREE.MeshBasicMaterial({color:0xffffff,side:THREE.DoubleSide}));paper.position.set(0,1.31+1.5*(1-appearQ),.1);paper.rotation.x=Math.PI;g.add(paper);
-      if(filterQ<.9){
+      const funnel=new THREE.Mesh(new THREE.ConeGeometry(.4,.6,32,1,true),funnelMat);funnel.position.set(0,1.3+1.5*(1-appearSmooth),.1);funnel.rotation.x=Math.PI;g.add(funnel);
+      const stem=cylinder(.04,.6,funnelMat,16);stem.position.set(0,.8+1.5*(1-appearSmooth),.1);g.add(stem);
+      const paper=new THREE.Mesh(new THREE.ConeGeometry(.38,.58,32,1,true),new THREE.MeshBasicMaterial({color:0xffffff,side:THREE.DoubleSide}));paper.position.set(0,1.31+1.5*(1-appearSmooth),.1);paper.rotation.x=Math.PI;g.add(paper);
+      if(filterSmooth<.9){
          const pool=new THREE.Mesh(new THREE.ConeGeometry(.35,.5,32),new THREE.MeshBasicMaterial({color:0x202020}));
-         pool.position.set(0,1.35+1.5*(1-appearQ),.1);pool.rotation.x=Math.PI;pool.scale.setScalar(1-filterQ*.8);g.add(pool);
+         pool.position.set(0,1.35+1.5*(1-appearSmooth),.1);pool.rotation.x=Math.PI;pool.scale.setScalar(1-filterSmooth*.8);g.add(pool);
       }
-      const lift=Math.min(1,appearQ/.8);
-      const beaker=this.beaker(.45*(1-filterQ),0x222222);beaker.position.set(0,0,.1).lerp(new THREE.Vector3(.8,1.6,.1),lift);beaker.rotation.z=-1.2*lift;g.add(beaker);
-      if(filterQ>.1&&filterQ<.9){const stream=this.tubeBetween(new THREE.Vector3(.38,1.5,.1),new THREE.Vector3(0,1.4,.1),.02,new THREE.MeshBasicMaterial({color:0x222222}));g.add(stream);}
-      if(filterQ>.1&&filterQ<.95){const drop=new THREE.Mesh(new THREE.SphereGeometry(.03,8,8),new THREE.MeshBasicMaterial({color:0x319bd3}));drop.position.set(0,.5-(((t-1.5)*3)%1)*.4,.1);g.add(drop);}
+      const lift=Math.min(1,appearSmooth/.8);
+      const beaker=this.beaker(.45*(1-filterSmooth),0x222222);beaker.position.set(0,0,.1).lerp(new THREE.Vector3(1.5,.57,.1),lift);beaker.rotation.z=1.2*lift;g.add(beaker);
+      if(filterSmooth>.1&&filterSmooth<.9){const stream=this.tubeBetween(new THREE.Vector3(0,1.65,.1),new THREE.Vector3(0,1.4,.1),.02,new THREE.MeshBasicMaterial({color:0x222222}));g.add(stream);}
+      if(filterSmooth>.1&&filterSmooth<.95){const drop=new THREE.Mesh(new THREE.SphereGeometry(.03,8,8),new THREE.MeshBasicMaterial({color:0x319bd3}));drop.position.set(0,.5-(((t-1.5)*3)%1)*.4,.1);g.add(drop);}
     }else if(stage===3){
       const tripod=this.tripod();tripod.position.set(0,0,.1);g.add(tripod);
       const bunsen=this.bunsen(state.burner,.76);bunsen.position.set(0,0,.1);g.add(bunsen);
@@ -206,14 +204,14 @@ export class LabRenderer3D{
       liquid.position.set(0,1.9,.1);liquid.scale.setScalar(1-evaporateQ*.4);g.add(liquid);
       if(state.burner)liquid.add(this.bubbleCloud(14,.3,.1,0xe9fbff));
     }else if(stage===4){
-      const moveQ=Math.min(1,t/1.5);
+      const moveQ=Math.min(1,t/1.5), moveSmooth=moveQ*moveQ*(3-2*moveQ);
       const coolQ=Math.max(0,Math.min(1,(t-1.5)/4.5));
-      const tripod=this.tripod();tripod.position.set(0,0,.1);tripod.position.x=-2.2*moveQ;g.add(tripod);
-      const bunsen=this.bunsen(state.burner,.76);bunsen.position.set(0,0,.1);bunsen.position.x=-2.2*moveQ;g.add(bunsen);
+      const tripod=this.tripod();tripod.position.set(0,0,.1);tripod.position.x=-2.2*moveSmooth;g.add(tripod);
+      const bunsen=this.bunsen(state.burner,.76);bunsen.position.set(0,0,.1);bunsen.position.x=-2.2*moveSmooth;g.add(bunsen);
       const basin=new THREE.Mesh(new THREE.SphereGeometry(.5,32,16,0,Math.PI*2,0,Math.PI/2),new THREE.MeshPhysicalMaterial({color:0xfcfcfc,roughness:.7}));
-      basin.rotation.x=Math.PI;basin.position.set(0,1.86-1.66*moveQ,.1);basin.scale.y=.4;g.add(basin);
+      basin.rotation.x=Math.PI;basin.position.set(0,1.86-1.66*moveSmooth,.1);basin.scale.y=.4;g.add(basin);
       const liquid=new THREE.Mesh(new THREE.CylinderGeometry(.45,.45,.05,32),new THREE.MeshPhysicalMaterial({color:0x319bd3,transparent:true,opacity:.8,roughness:.1}));
-      liquid.position.set(0,1.9-1.65*moveQ,.1);liquid.scale.setScalar(.6-coolQ*.4);g.add(liquid);
+      liquid.position.set(0,1.9-1.65*moveSmooth,.1);liquid.scale.setScalar(.6-coolQ*.4);g.add(liquid);
       const crystalMat=new THREE.MeshStandardMaterial({color:0x2288cc,roughness:.2,metalness:.1});
       for(let i=0;i<40;i++){
         const scale=coolQ*(.03+Math.abs(Math.sin(i*23))*.04);if(scale<.01)continue;
