@@ -1,0 +1,30 @@
+import {chromium} from 'playwright';
+import fs from 'node:fs';
+
+const out='/private/tmp/chem-titration-final';
+fs.mkdirSync(out,{recursive:true});
+const browser=await chromium.launch({headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+const page=await browser.newPage({viewport:{width:1440,height:900},deviceScaleFactor:1});
+const errors=[];
+page.on('console',message=>{if(message.type()==='error')errors.push(message.text())});
+page.on('pageerror',error=>errors.push(error.message));
+await page.goto(`http://127.0.0.1:4173/?titration-final=${Date.now()}`,{waitUntil:'domcontentloaded'});
+await page.waitForFunction(()=>typeof window.render_game_to_text==='function');
+await page.evaluate(()=>{window.__manualSimulationTime=true});
+const read=async()=>JSON.parse(await page.evaluate(()=>window.render_game_to_text()));
+await page.mouse.click(135,282);
+await page.mouse.click(375,837);
+await page.mouse.click(375,837);
+await page.evaluate(()=>window.advanceTime(5300));
+for(let i=0;i<5;i++){await page.mouse.click(375,837);await page.evaluate(()=>window.advanceTime(470))}
+await page.waitForTimeout(80);
+await page.screenshot({path:`${out}/02-endpoint.png`,fullPage:true});
+const endpoint=await read();
+await page.mouse.click(375,837);
+const recorded=await read();
+fs.writeFileSync(`${out}/result.json`,JSON.stringify({endpoint,recorded,errors},null,2));
+if(endpoint.titration?.titre_cm3!==25.05||endpoint.titration?.flask_colour!=='permanent very pale pink'||!endpoint.complete)throw new Error('Endpoint state failed');
+if(recorded.tab!=='graph'||!recorded.titration?.titre_recorded)throw new Error('Titre recording failed');
+if(errors.length)throw new Error(errors.join('\n'));
+await browser.close();
+console.log('titration final QA passed');

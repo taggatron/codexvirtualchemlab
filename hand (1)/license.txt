@@ -1,0 +1,8 @@
+Model Information:
+* title:	Hand
+* source:	https://sketchfab.com/3d-models/hand-6f344275d79649fd8993f7b6843c9dfb
+* author:	Ray3DH (https://sketchfab.com/ray3dh)
+
+Model License:
+* license type:	SKETCHFAB Standard (https://sketchfab.com/licenses)
+* requirements:	Under basic restrictions, use worldwide, on all types of media, commercially or not, and in all types of derivative works
