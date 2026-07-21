@@ -1,5 +1,12 @@
 Original prompt: Build a very realistic virtual interactive chemistry lab web simulaiton app with required practicals for the OCR combined GCSE science specification. When the user clicks on one of these practicals the equipment loads up in to the main arena. Display kep chemical reactions and have a 'shelf' of key reactants and measuring devices like thermometers and pH meters. Also have graph plotting capabilities.
 
+- Current request: add a complete flame-tests practical in which several metallic salts are scooped onto a metal spatula, moved into a roaring blue Bunsen flame, and reveal their characteristic flame colours; replace a conventional results table with visible-light absorption spectra containing metal-specific dark bands.
+- Flame-test implementation plan: five salts (lithium, sodium, potassium, calcium and copper), staged scoop/insert/reveal interactions, a dedicated Three.js bench rig, and a spectra view showing simplified characteristic absorption bands.
+
+- Current request: add a complete metal-displacement practical section showing a series of reactions in test tubes, with more reactive metals displacing less reactive metals from their salt solutions.
+- Added a thirteenth guided practical for a four-test-tube displacement series: Mg, Zn and Fe in CuSO₄ plus Cu in AgNO₃. Added staged lowering/reaction/record/reset controls, a dedicated results table, fair-test guidance and structured text state.
+- Built a WebGL test-tube rack with four rounded glass tubes, equal solution levels, cleaned metal strips, progressive copper/silver coatings, settled metal crystals and distinct solution-colour changes.
+
 - Current request: replace the water-purification Bunsen setup with an animated school-lab glass distillation rig, including a round-bottom boiling flask seated in an electric heating mantle and a water-cooled condenser circuit.
 
 - Started from an empty workspace.
@@ -204,3 +211,11 @@ Original prompt: Build a very realistic virtual interactive chemistry lab web si
 - Shifted the bath tag 0.18 scene units right and 13 screen pixels down. The Na₂S₂O₃(aq) tag is now omitted during bath conditioning and transfer, then appears 32 pixels below its projected flask anchor only once the flask reaches the paper cross.
 - Required-client and full composited WebGL QA passed the hidden-in-bath and visible-after-transfer label states. The final tag clears the paper card, the bath tag remains inside the arena, and the browser console contained no errors.
 - Current request: form the iron product as one smooth amorphous blob that remains lightly glowing for a short time after the main thermite reaction.
+- Replaced the former flat pool and separate slag pieces with one high-resolution, smoothly displaced metallic iron mesh. It grows from the reaction cup as a single irregular molten mass, then remains as the same continuous amorphous blob throughout cooling.
+- Added a 4.6-second real-time afterglow: the product eases from hot orange-red through a subtle ember glow to dark, rough iron after the spark fountain ends. The renderer continues updating after the practical completes so the fade stays smooth.
+- Required-client validation passed with WebGL enabled. Deterministic full thermite QA verified the molten single-blob phase, bright completion frame, measurable low afterglow, fully cooled product, graph and reset without console or page errors; all three product stages were visually inspected.
+- Current request: route the carbon-dioxide delivery tube through central one-hole bungs in two conical flasks, submerge the receiver dip tube below the limewater, animate bubbles from that outlet, and replace the graph with a bird’s-eye turbidity view.
+- Rebuilt the CO₂ apparatus with two bung-sealed conical flasks, a flexible delivery hose between central glass stems, and an inlet tube extending below the limewater surface. Added a receiver bubble plume originating at the submerged outlet, progressive milky liquid optics and calcium-carbonate haze.
+- Replaced the CO₂ graph tab with a live bird’s-eye limewater observation showing turbidity, target visibility, surface bubbles and clear/clouding/milky status. Structured state now describes the bungs, submerged inlet, bubbles and observation view. JavaScript syntax validation passed; browser QA remains to run.
+- Increased the limewater depth and rebuilt the receiver bubbles as bright individual rings rising from the submerged tube outlet, making the bubbling path legible through the glass without obscuring the dip tube.
+- Required-client state validation and full-page deterministic WebGL QA passed ready, active bubbling, two motion-separated bubble frames, partial/cloudy bird’s-eye observations, fully milky completion and restart. Both bungs and the submerged inlet remained visibly aligned, the graph was absent, structured state matched the visuals, and no console/page errors were recorded.

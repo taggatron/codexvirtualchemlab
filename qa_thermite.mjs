@@ -42,11 +42,11 @@ const decay=await capture('08-decay-and-smoke');
 await page.evaluate(()=>window.advanceTime(1300));
 const complete=await capture('09-contained-cooling-product');
 
-await page.waitForTimeout(2200);
+await page.waitForTimeout(350);
 await page.evaluate(()=>window.advanceTime(17));
 const afterglow=await capture('10-amorphous-iron-afterglow');
 
-await page.waitForTimeout(2500);
+await page.waitForTimeout(4700);
 await page.evaluate(()=>window.advanceTime(17));
 const cooled=await capture('11-amorphous-iron-cooled');
 
