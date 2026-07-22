@@ -432,7 +432,7 @@ function activatePondweed(label) {
     state.pondweedBubbles = bpm;
     state.running = true;
     state.complete = true;
-    state.points.push({ x: state.pondweedDistance, y: bpm, xValue: state.pondweedDistance, yValue: bpm });
+    state.points.push({ x: state.pondweedDistance / 60, y: bpm / 60, xValue: state.pondweedDistance, yValue: bpm });
     if (!state.pondweedResults.some(r => r.distance === state.pondweedDistance)) {
       state.pondweedResults.push({ distance: state.pondweedDistance, bubbles: bpm });
     }

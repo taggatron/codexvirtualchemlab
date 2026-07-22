@@ -602,24 +602,24 @@ export class LabRenderer3D{
     const lampOn = state.pondweedLampOn !== false;
     const beakerX = 1.5, beakerZ = -0.6;
 
-    // 1. Detailed 3D Wooden Meter Ruler from beaker base (x = 1.5) extending leftwards in direction of LED lamp
+    // 1. Detailed 3D Wooden Meter Ruler on top of bench surface (y = 0.1125) extending from beaker base (x = 1.0) leftwards
     const rulerGroup = new THREE.Group();
     const rulerMat = new THREE.MeshStandardMaterial({ color: 0xd4a359, roughness: 0.65 });
-    const rulerLen = 3.6;
+    const rulerLen = 3.2;
     const ruler = new THREE.Mesh(new THREE.BoxGeometry(rulerLen, 0.025, 0.28), rulerMat);
-    ruler.position.set(beakerX - rulerLen / 2 + 0.1, 0.0125, beakerZ);
+    ruler.position.set(-0.25, 0.1125, beakerZ);
     rulerGroup.add(ruler);
 
-    // Dark tick marks along the ruler
+    // Dark tick marks along the ruler (0cm to 50cm)
     const tickMat = new THREE.MeshBasicMaterial({ color: 0x221a0f });
     for (let cm = 0; cm <= 50; cm += 2) {
       const isMajor = cm % 10 === 0;
-      const tickX = beakerX - (cm / 50) * 2.2 - 0.2;
+      const tickX = 1.0 - (cm / 50) * 2.5;
       const tick = new THREE.Mesh(
         new THREE.BoxGeometry(0.015, 0.027, isMajor ? 0.22 : 0.12),
         tickMat
       );
-      tick.position.set(tickX, 0.013, beakerZ);
+      tick.position.set(tickX, 0.126, beakerZ);
       rulerGroup.add(tick);
     }
     g.add(rulerGroup);
@@ -646,11 +646,11 @@ export class LabRenderer3D{
     stemGroup.position.set(beakerX, 0.15, beakerZ);
     g.add(stemGroup);
 
-    // 4. Massively Improved LED Desk Lamp Geometry
-    const lampX = (beakerX - 0.2) - (dist / 50) * 2.2;
+    // 4. Massively Improved LED Desk Lamp Geometry aligned with ruler distance
+    const lampX = 1.0 - (dist / 50) * 2.5;
     const lampGroup = new THREE.Group();
 
-    // Heavy weighted circular base with rubber rim
+    // Heavy weighted circular base with rubber rim resting on bench (y = 0.1)
     const baseMat = new THREE.MeshStandardMaterial({ color: 0x181a1d, metalness: 0.85, roughness: 0.25 });
     const base = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.36, 0.06, 32), baseMat);
     lampGroup.add(base);
@@ -710,7 +710,7 @@ export class LabRenderer3D{
       lampGroup.add(light.target);
     }
 
-    lampGroup.position.set(lampX, 0.03, beakerZ);
+    lampGroup.position.set(lampX, 0.1, beakerZ);
     g.add(lampGroup);
 
     // 5. Dynamic Oxygen Bubbles rising from stem tip
