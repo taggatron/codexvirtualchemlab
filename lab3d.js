@@ -596,6 +596,154 @@ export class LabRenderer3D{
     g.add(paper);
     return shadowReady(g);
   }
+  pondweedRig(state) {
+    const g = new THREE.Group();
+    const dist = state.pondweedDistance || 10;
+    const lampOn = state.pondweedLampOn !== false;
+    const rulerGeo = new THREE.BoxGeometry(4.8, 0.04, 0.4);
+    const rulerMat = new THREE.MeshStandardMaterial({ color: 0xe0d6b8, roughness: 0.5 });
+    const ruler = new THREE.Mesh(rulerGeo, rulerMat);
+    ruler.position.set(0, 0.02, -0.6);
+    g.add(ruler);
+    const beakerX = 1.5, beakerZ = -0.6;
+    const beaker = this.beaker(0.75, 0x36a676);
+    beaker.position.set(beakerX, 0.1, beakerZ);
+    beaker.scale.setScalar(1.1);
+    g.add(beaker);
+    const stemGroup = new THREE.Group();
+    const stemMat = new THREE.MeshStandardMaterial({ color: 0x2e7d32, roughness: 0.4 });
+    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.035, 1.2, 12), stemMat);
+    stem.position.y = 0.6;
+    stemGroup.add(stem);
+    const leafMat = new THREE.MeshStandardMaterial({ color: 0x4caf50, roughness: 0.3, side: THREE.DoubleSide });
+    for (let i = 0; i < 16; i++) {
+      const leaf = new THREE.Mesh(new THREE.PlaneGeometry(0.18, 0.08), leafMat);
+      leaf.position.set(Math.sin(i * 1.2) * 0.06, 0.2 + i * 0.055, Math.cos(i * 1.2) * 0.06);
+      leaf.rotation.set(0.3, i * 1.2, 0.2);
+      stemGroup.add(leaf);
+    }
+    stemGroup.position.set(beakerX, 0.15, beakerZ);
+    g.add(stemGroup);
+    const lampX = beakerX - (dist / 50) * 3.2 - 0.4;
+    const lampGroup = new THREE.Group();
+    const lampBaseMat = new THREE.MeshStandardMaterial({ color: 0x212121, metalness: 0.8, roughness: 0.2 });
+    const lampBase = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.38, 0.08, 24), lampBaseMat);
+    lampGroup.add(lampBase);
+    const armMat = new THREE.MeshStandardMaterial({ color: 0x616161, metalness: 0.9, roughness: 0.2 });
+    const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.5, 12), armMat);
+    arm.position.set(0.15, 0.75, 0);
+    arm.rotation.z = -0.3;
+    lampGroup.add(arm);
+    const headMat = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.7, roughness: 0.3 });
+    const head = new THREE.Mesh(new THREE.ConeGeometry(0.28, 0.45, 24), headMat);
+    head.position.set(0.4, 1.35, 0);
+    head.rotation.z = -Math.PI / 2.3;
+    lampGroup.add(head);
+    if (lampOn) {
+      const bulbMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), bulbMat);
+      bulb.position.set(0.48, 1.32, 0);
+      lampGroup.add(bulb);
+      const light = new THREE.SpotLight(0xfff8e7, 4.5, 6, Math.PI / 6, 0.4);
+      light.position.set(0.48, 1.32, 0);
+      light.target.position.set(beakerX, 0.6, beakerZ);
+      lampGroup.add(light);
+      lampGroup.add(light.target);
+    }
+    lampGroup.position.set(lampX, 0.1, beakerZ);
+    g.add(lampGroup);
+    if (lampOn) {
+      const bpm = Math.round(52 / Math.pow(dist / 10, 1.8) + 4);
+      for (let b = 0; b < Math.min(15, Math.ceil(bpm / 3)); b++) {
+        const bubble = new THREE.Mesh(
+          new THREE.SphereGeometry(0.025 + (b % 3) * 0.008, 12, 12),
+          new THREE.MeshPhysicalMaterial({ color: 0xe0ffff, transparent: true, opacity: 0.8, transmission: 0.9, roughness: 0.05 })
+        );
+        const phase = (b / 15);
+        this.dynamic.push({
+          kind: 'bubble',
+          mesh: bubble,
+          speed: 0.4 + (b % 4) * 0.1,
+          phase,
+          height: 0.8,
+          startY: 0.8,
+          baseY: 0.8
+        });
+        bubble.position.set(beakerX + (Math.random() - 0.5) * 0.08, 0.8, beakerZ + (Math.random() - 0.5) * 0.08);
+        g.add(bubble);
+      }
+    }
+    return shadowReady(g);
+  }
+  newton2Rig(state) {
+    const g = new THREE.Group();
+    const pos = state.newtonPos || 0;
+    const force = state.newtonForce || 0.2;
+    const mass = state.newtonMass || 1.0;
+    const trackMat = new THREE.MeshStandardMaterial({ color: 0xb0bec5, metalness: 0.8, roughness: 0.2 });
+    const track = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.08, 0.35), trackMat);
+    track.position.set(0, 0.3, 0);
+    g.add(track);
+    const pulleyGroup = new THREE.Group();
+    const pStand = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.35, 0.06), trackMat);
+    pStand.position.set(1.95, 0.45, 0);
+    pulleyGroup.add(pStand);
+    const pWheelMat = new THREE.MeshStandardMaterial({ color: 0x37474f, roughness: 0.3 });
+    const pWheel = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.04, 24), pWheelMat);
+    pWheel.rotation.x = Math.PI / 2;
+    pWheel.position.set(1.95, 0.6, 0);
+    pulleyGroup.add(pWheel);
+    g.add(pulleyGroup);
+    const gateMat = new THREE.MeshStandardMaterial({ color: 0xd32f2f, roughness: 0.4 });
+    [ -0.6, 1.0 ].forEach(gx => {
+      const gate = new THREE.Group();
+      const arch = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.45, 0.42), gateMat);
+      arch.position.set(gx, 0.52, 0);
+      gate.add(arch);
+      const sensorMat = new THREE.MeshBasicMaterial({ color: 0x00e676 });
+      const sensor = new THREE.Mesh(new THREE.SphereGeometry(0.03, 8, 8), sensorMat);
+      sensor.position.set(gx, 0.68, 0);
+      gate.add(sensor);
+      g.add(gate);
+    });
+    const trolleyX = -1.8 + pos * 3.5;
+    const trolleyGroup = new THREE.Group();
+    const chassisMat = new THREE.MeshStandardMaterial({ color: 0x0288d1, roughness: 0.3 });
+    const chassis = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.12, 0.28), chassisMat);
+    chassis.position.y = 0.42;
+    trolleyGroup.add(chassis);
+    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x212121, roughness: 0.5 });
+    [ [-0.18, -0.15], [-0.18, 0.15], [0.18, -0.15], [0.18, 0.15] ].forEach(([wx, wz]) => {
+      const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.03, 16), wheelMat);
+      wheel.rotation.x = Math.PI / 2;
+      wheel.position.set(wx, 0.36, wz);
+      trolleyGroup.add(wheel);
+    });
+    const weightsCount = Math.round(mass / 0.5);
+    const weightMat = new THREE.MeshStandardMaterial({ color: 0x78909c, metalness: 0.7, roughness: 0.3 });
+    for (let w = 0; w < weightsCount; w++) {
+      const weight = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.06, 20), weightMat);
+      weight.position.set(0, 0.51 + w * 0.065, 0);
+      trolleyGroup.add(weight);
+    }
+    trolleyGroup.position.x = trolleyX;
+    g.add(trolleyGroup);
+    const stringMat = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2 });
+    const stringGeo = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(trolleyX + 0.28, 0.42, 0),
+      new THREE.Vector3(1.95, 0.6, 0),
+      new THREE.Vector3(1.95, 0.6 - pos * 0.4, 0)
+    ]);
+    const stringLine = new THREE.Line(stringGeo, stringMat);
+    g.add(stringLine);
+    const hangerGroup = new THREE.Group();
+    const hangerMat = new THREE.MeshStandardMaterial({ color: 0xffb300, metalness: 0.8, roughness: 0.2 });
+    const hanger = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.12 + force * 0.4, 16), hangerMat);
+    hanger.position.set(1.95, 0.5 - pos * 0.4, 0);
+    hangerGroup.add(hanger);
+    g.add(hangerGroup);
+    return shadowReady(g);
+  }
   rebuild(state,p){this.clear();const id=p.id;
     if(id==='free'){
       for(const it of state.workspace){let anchor=it,elevation=0;if((it.type==='beaker'||it.type==='flask')&&it.snappedTo){const support=state.workspace.find(a=>a.uid===it.snappedTo&&a.type==='tripod');if(support){anchor=support;elevation=2.1}}const pos=this.posFromScreen(anchor.x,anchor.y),flameHeight=it.type==='bunsen'?this.freeBunsenHeight(it,state):1,o=this.itemObject(it,flameHeight);this.add(o,pos.x,pos.z,elevation,1.15);if(state.drag?.targetUid===it.uid){const ring=new THREE.Mesh(new THREE.TorusGeometry(1,.045,12,48),new THREE.MeshBasicMaterial({color:0x20d4b0}));ring.rotation.x=Math.PI/2;ring.position.set(pos.x,elevation+.05,pos.z);this.root.add(ring)}if(it.type==='tripod'&&state.drag?.snapUid===it.uid){const target=new THREE.Mesh(new THREE.TorusGeometry(.88,.055,16,72),new THREE.MeshBasicMaterial({color:0x21d6b1,transparent:true,opacity:.92,depthWrite:false}));target.rotation.x=Math.PI/2;target.position.set(pos.x,2.17,pos.z);target.renderOrder=12;this.root.add(target)}}
@@ -664,6 +812,8 @@ export class LabRenderer3D{
     else if(id==='chrom'){this.add(this.beaker(.16,0x87cad8),0,.1,0,1.18);this.add(this.chromatographyPaper(),0,.18,1.25,1.05)}
     else if(id==='water'){this.root.add(this.waterDistillationRig(state))}
     else if(id==='thermite'){this.root.add(this.thermiteRig(state))}
+    else if(id==='pondweed'){this.root.add(this.pondweedRig(state))}
+    else if(id==='newton2'){this.root.add(this.newton2Rig(state))}
   }
   sync(state,p){
     if(!this.available)return;
@@ -675,7 +825,7 @@ export class LabRenderer3D{
     const visualDrag=state.drag&&['palette','free-reactant','workspace'].includes(state.drag.kind)?{kind:state.drag.kind,type:state.drag.type,uid:state.drag.uid,targetUid:state.drag.targetUid,snapUid:state.drag.snapUid}:state.drag?{kind:state.drag.kind}:null;
     const visualWorkspace=state.workspace.map(({temperature,reaction,...it})=>{const frozen=dragUid===it.uid&&state.drag?.origin;const view=frozen?{...it,x:state.drag.origin.x,y:state.drag.origin.y}:it;return {...view,temperatureBand:Math.floor((temperature||20)/10),reaction:reaction&&{ruleId:reaction.ruleId,progress:Math.round((reaction.progress||0)*20),complete:!!reaction.complete}}});
     const temperatureKey=p.id==='temp'?Math.round((state.temp||20)*10):p.id==='rates'?Math.round((state.ratesBathTemp||20)*10):0;
-    const signature=JSON.stringify({id:p.id,workspace:visualWorkspace,drag:visualDrag,running:p.id==='titration'||p.id==='thermite'||p.id==='displacement'?false:state.running,burner:state.burner,coolingWater:state.coolingWater,pour:!!state.pour,pourTick:state.pour&&Math.round(state.pour.t*24),lastReactant:state.lastReactant,transferred:Math.round((state.transferred||0)*20),temperature:temperatureKey,ratesStage:state.ratesStage,ratesTick:p.id==='rates'?Math.round((state.ratesStageTimer||0)*18):0,ratesTarget:state.ratesTargetTemp,ratesConditioning:!!state.ratesConditioning,massStage:state.massStage,massLidOn:state.massLidOn,massTransfer:state.massTransfer&&{direction:state.massTransfer.direction,tick:Math.round(state.massTransfer.t*12)},massProgress:['water','electro','titration','thermite','displacement'].includes(p.id)?0:Math.round((state.progress||0)*20),electroWeighing:!!state.electroWeighing,electroRecorded:!!state.electroRecorded,hydrogenStage:state.hydrogenStage,hydrogenTick:Math.round((state.hydrogenTimer||0)*6),hydrogenGas:Math.round((state.hydrogenGas||0)/2),saltsStage:state.saltsStage,saltsTick:Math.round((state.saltsTimer||0)*10),flameTestStage:state.flameTestStage,flameTestSalt:state.flameTestSalt,flameTestTested:state.flameTestTested,titrationStage:state.titrationStage,titrationIndicator:state.titrationIndicator,titrationIndicatorAdding:(state.titrationIndicatorTimer||0)>0,titrationComplete:p.id==='titration'&&state.complete,titrationDropping:(state.titrationDropTimer||0)>0,titrationReading:p.id==='titration'&&!state.running?Math.round((state.titrationVolume||0)*20):0,displacementStage:state.displacementStage,thermiteComplete:p.id==='thermite'&&!!state.complete});
+    const signature=JSON.stringify({id:p.id,workspace:visualWorkspace,drag:visualDrag,running:p.id==='titration'||p.id==='thermite'||p.id==='displacement'?false:state.running,burner:state.burner,coolingWater:state.coolingWater,pour:!!state.pour,pourTick:state.pour&&Math.round(state.pour.t*24),lastReactant:state.lastReactant,transferred:Math.round((state.transferred||0)*20),temperature:temperatureKey,ratesStage:state.ratesStage,ratesTick:p.id==='rates'?Math.round((state.ratesStageTimer||0)*18):0,ratesTarget:state.ratesTargetTemp,ratesConditioning:!!state.ratesConditioning,massStage:state.massStage,massLidOn:state.massLidOn,massTransfer:state.massTransfer&&{direction:state.massTransfer.direction,tick:Math.round(state.massTransfer.t*12)},massProgress:['water','electro','titration','thermite','displacement'].includes(p.id)?0:Math.round((state.progress||0)*20),electroWeighing:!!state.electroWeighing,electroRecorded:!!state.electroRecorded,hydrogenStage:state.hydrogenStage,hydrogenTick:Math.round((state.hydrogenTimer||0)*6),hydrogenGas:Math.round((state.hydrogenGas||0)/2),saltsStage:state.saltsStage,saltsTick:Math.round((state.saltsTimer||0)*10),flameTestStage:state.flameTestStage,flameTestSalt:state.flameTestSalt,flameTestTested:state.flameTestTested,titrationStage:state.titrationStage,titrationIndicator:state.titrationIndicator,titrationIndicatorAdding:(state.titrationIndicatorTimer||0)>0,titrationComplete:p.id==='titration'&&state.complete,titrationDropping:(state.titrationDropTimer||0)>0,titrationReading:p.id==='titration'&&!state.running?Math.round((state.titrationVolume||0)*20):0,displacementStage:state.displacementStage,thermiteComplete:p.id==='thermite'&&!!state.complete,pondweedDistance:state.pondweedDistance,pondweedLampOn:state.pondweedLampOn,newtonForce:state.newtonForce,newtonMass:state.newtonMass,newtonPos:Math.round((state.newtonPos||0)*50)});
     if(signature!==this.signature){this.signature=signature;this.rebuild(state,p)}
   }
   render(time,state,p){
