@@ -15,7 +15,7 @@ await page.evaluate(()=>{window.__manualSimulationTime=true});
 const read=async()=>JSON.parse(await page.evaluate(()=>window.render_game_to_text()));
 const capture=async name=>{await page.waitForTimeout(120);await page.screenshot({path:`${out}/${name}.png`,fullPage:true});return read()};
 
-await page.mouse.click(100,885);
+await page.mouse.click(135,800);
 await page.waitForTimeout(350);
 const ready=await capture('01-ready-shielded-rig');
 
