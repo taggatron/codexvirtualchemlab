@@ -104,7 +104,7 @@ const freeReactionRules = [
   { id: 'h2so4-lime', reactants: ['h2so4', 'lime'], symbol: 'H₂SO₄(aq) + Ca(OH)₂(aq) → CaSO₄(s) + 2H₂O(l)', word: 'sulfuric acid + limewater → calcium sulfate + water', kind: 'precipitate', precipitate: true, product: 'calcium sulfate precipitate', productColor: 0xd9d4bd, heat: 6, duration: 3 },
   { id: 'lime-co2', reactants: ['lime', 'CO₂'], symbol: 'Ca(OH)₂(aq) + CO₂(g) → CaCO₃(s) + H₂O(l)', word: 'limewater + carbon dioxide → calcium carbonate + water', kind: 'precipitate', precipitate: true, product: 'milky calcium carbonate', productColor: 0xe8e6d9, duration: 3 }
 ];
-const state = { selected: 0, subject: 'chemistry', subjectTabX: 149, subjectTabW: 114, running: false, complete: false, temp: 20, ph: 7, time: 0, volume: 0, progress: 0, tab: 'equipment', points: [], hover: null, toast: 'Click equipment to add it, or drag it onto the bench.', drag: null, pour: null, burner: false, coolingWater: false, particles: [], layout: null, flamePhase: 0, transferred: 0, workspace: [], nextItem: 1, dose: null, reaction: null, massStage: 0, massLidOn: true, massTransfer: null, massBefore: 4.01, massAfter: null, hydrogenStage: 0, hydrogenTimer: 0, hydrogenAudioPlayed: false, hydrogenGas: 0, saltsStage: 0, saltsTimer: 0, chromSelectedDye: null, electroRecorded: false, electroWeighing: false, electroWeighTimer: 0, titrationStage: 0, titrationVolume: 0, titrationDropTimer: 0, titrationDrops: 0, titrationIndicator: false, titrationIndicatorTimer: 0, titrationRecorded: false, ratesStage: 0, ratesStageTimer: 0, ratesTrialIndex: 0, ratesTargetTemp: 20, ratesBathTemp: 20, ratesConditioning: false, ratesResults: [], thermiteTimer: 0, thermiteAudioPlayed: false, displacementStage: 0, displacementTimer: 0, displacementRecorded: false, flameTestStage: 0, flameTestTimer: 0, flameTestSalt: 0, flameTestTested: [], pondweedDistance: 10, pondweedLampOn: true, pondweedTimer: 0, pondweedBubbles: 0, pondweedResults: [], newtonForce: 0.2, newtonMass: 1.0, newtonPos: 0, newtonVel: 0, newtonAcc: 0.2, newtonTimer: 0, newtonRunning: false, newtonGate1Time: null, newtonGate2Time: null, newtonResults: [] };
+const state = { selected: 0, subject: 'chemistry', subjectTabX: 149, subjectTabW: 114, running: false, complete: false, temp: 20, ph: 7, time: 0, volume: 0, progress: 0, tab: 'equipment', points: [], hover: null, toast: 'Click equipment to add it, or drag it onto the bench.', drag: null, pour: null, burner: false, coolingWater: false, particles: [], layout: null, flamePhase: 0, transferred: 0, workspace: [], nextItem: 1, dose: null, reaction: null, massStage: 0, massLidOn: true, massTransfer: null, massBefore: 4.01, massAfter: null, hydrogenStage: 0, hydrogenTimer: 0, hydrogenAudioPlayed: false, hydrogenGas: 0, saltsStage: 0, saltsTimer: 0, chromSelectedDye: null, electroRecorded: false, electroWeighing: false, electroWeighTimer: 0, titrationStage: 0, titrationVolume: 0, titrationDropTimer: 0, titrationDrops: 0, titrationIndicator: false, titrationIndicatorTimer: 0, titrationRecorded: false, ratesStage: 0, ratesStageTimer: 0, ratesTrialIndex: 0, ratesTargetTemp: 20, ratesBathTemp: 20, ratesConditioning: false, ratesResults: [], thermiteTimer: 0, thermiteAudioPlayed: false, displacementStage: 0, displacementTimer: 0, displacementRecorded: false, flameTestStage: 0, flameTestTimer: 0, flameTestSalt: 0, flameTestTested: [], pondweedDistance: 20, pondweedLampOn: true, pondweedTimer: 0, pondweedBubbles: 0, pondweedResults: [], newtonForce: 0.2, newtonMass: 1.0, newtonPos: 0, newtonVel: 0, newtonAcc: 0.2, newtonTimer: 0, newtonRunning: false, newtonGate1Time: null, newtonGate2Time: null, newtonResults: [] };
 let lastSelectedPractical = state.selected;
 const ratesTemperatures = [20, 30, 40, 50, 60], ratesBathPosition = { x: 2.55, y: .43, z: -.42 }, ratesCrossPosition = { x: .72, y: .12, z: .25 };
 function ratesMeasuredTime(temp = state.ratesTargetTemp) { return +(42 * Math.pow(.72, (temp - 20) / 10)).toFixed(1) }
@@ -245,11 +245,10 @@ function main() {
   let topg = ctx.createLinearGradient(x, benchY, x, benchY + 25); topg.addColorStop(0, '#789aaa'); topg.addColorStop(.18, '#4f788b'); topg.addColorStop(1, '#244f66'); ctx.fillStyle = topg; ctx.fillRect(x, benchY, w, 25); let frontg = ctx.createLinearGradient(x, benchY + 25, x, H); frontg.addColorStop(0, '#28566d'); frontg.addColorStop(1, '#14384d'); ctx.fillStyle = frontg; ctx.fillRect(x, benchY + 25, w, H - benchY - 25); ctx.save(); ctx.globalAlpha = .48; ctx.fillStyle = ctx.createPattern(asphaltTile, 'repeat'); ctx.fillRect(x, benchY + 20, w, H - benchY - 20); ctx.restore(); ctx.strokeStyle = 'rgba(183,217,228,.1)'; for (let gx = x; gx < x + w; gx += 150) { ctx.beginPath(); ctx.moveTo(gx, benchY + 28); ctx.lineTo(gx + 80, H); ctx.stroke() }
   const cx = x + w * .52, cy = benchY - 57; if (lab3d.available) { lab3d.resize(x, arenaTop, w, Math.max(180, benchY - arenaTop)); registerWebGLInteractions(p.id, cx, cy); ctx.save(); ctx.globalCompositeOperation = 'destination-out'; ctx.fillRect(x, arenaTop, w, benchY - arenaTop); ctx.restore(); if (!free) drawChemicalTags(p.id); if (p.id === 'mass' && state.massStage === 2 && state.massLidOn && state.layout?.lid) { const lp = state.layout.lid; rr(lp.x - 76, lp.y - 64, 152, 27, 8, 'rgba(255,255,255,.96)', 'rgba(124,98,184,.6)'); text('CLICK LID TO REMOVE', lp.x, lp.y - 50, 9.5, '#6b52a6', 800, 'center') } if (p.id === 'hydrogen' && ((state.hydrogenStage === 4 && state.hydrogenTimer > .36) || state.hydrogenStage === 5)) { const active = state.hydrogenStage === 4, hp = lab3d.projectToScreen(.65, active ? 3.35 : 2.85, .02); if (hp) { rr(hp.x - 72, hp.y - 14, 144, 30, 9, active ? 'rgba(255,245,224,.97)' : 'rgba(232,247,241,.97)', active ? 'rgba(228,93,79,.72)' : 'rgba(8,127,117,.55)'); text(active ? 'SQUEAKY POP!' : 'HYDROGEN CONFIRMED', hp.x, hp.y + 1, 10, active ? '#c94b3f' : C.teal, 850, 'center') } } } else drawApparatus(p.id, cx, cy, w, benchY, x);
 function drawPondweedControls(x, benchY) {
-  button('DISTANCE -10cm', x + 15, benchY + 46, 115, 38, false);
-  button('DISTANCE +10cm', x + 138, benchY + 46, 115, 38, false);
-  button(state.pondweedLampOn ? 'LAMP OFF' : 'LAMP ON', x + 261, benchY + 46, 95, 38, state.pondweedLampOn);
-  button('COUNT 1 MIN', x + 364, benchY + 46, 105, 38, state.running);
-  button('RECORD', x + 477, benchY + 46, 85, 38, false);
+  button('DISTANCE -10cm', x + 20, benchY + 46, 125, 38, false);
+  button('DISTANCE +10cm', x + 155, benchY + 46, 125, 38, false);
+  button(state.pondweedLampOn ? 'LAMP OFF' : 'LAMP ON', x + 290, benchY + 46, 105, 38, state.pondweedLampOn);
+  button('COUNT 1 MIN', x + 405, benchY + 46, 125, 38, state.running);
 }
 function drawNewton2Controls(x, benchY) {
   button('FORCE -0.1N', x + 15, benchY + 46, 105, 38, false);
@@ -433,16 +432,13 @@ function activatePondweed(label) {
     state.pondweedBubbles = bpm;
     state.running = true;
     state.complete = true;
-    state.toast = `1 minute count complete: ${bpm} oxygen bubbles produced at ${state.pondweedDistance} cm.`;
-  } else if (label === 'RECORD READING' || label === 'RECORD') {
-    const bpm = state.pondweedLampOn ? Math.round(52 / Math.pow(state.pondweedDistance / 10, 1.8) + 4) : 0;
     state.points.push({ x: state.pondweedDistance, y: bpm, xValue: state.pondweedDistance, yValue: bpm });
     if (!state.pondweedResults.some(r => r.distance === state.pondweedDistance)) {
       state.pondweedResults.push({ distance: state.pondweedDistance, bubbles: bpm });
     }
-    state.toast = `Recorded ${bpm} bubbles/min at ${state.pondweedDistance} cm.`;
+    state.toast = `1 min count complete: ${bpm} oxygen bubbles at ${state.pondweedDistance} cm. Automatically added to graph!`;
   } else if (label === 'RESET PRACTICAL') {
-    state.pondweedDistance = 10;
+    state.pondweedDistance = 20;
     state.pondweedLampOn = true;
     state.pondweedTimer = 0;
     state.pondweedBubbles = 0;
@@ -450,7 +446,7 @@ function activatePondweed(label) {
     state.points = [];
     state.running = false;
     state.complete = false;
-    state.toast = 'Pondweed practical reset to 10 cm.';
+    state.toast = 'Pondweed practical reset to 20 cm.';
   } else if (label === 'RESULTS' || label === 'GRAPH') {
     state.tab = 'graph';
   }

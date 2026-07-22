@@ -598,18 +598,39 @@ export class LabRenderer3D{
   }
   pondweedRig(state) {
     const g = new THREE.Group();
-    const dist = state.pondweedDistance || 10;
+    const dist = state.pondweedDistance || 20;
     const lampOn = state.pondweedLampOn !== false;
-    const rulerGeo = new THREE.BoxGeometry(4.8, 0.04, 0.4);
-    const rulerMat = new THREE.MeshStandardMaterial({ color: 0xe0d6b8, roughness: 0.5 });
-    const ruler = new THREE.Mesh(rulerGeo, rulerMat);
-    ruler.position.set(0, 0.02, -0.6);
-    g.add(ruler);
     const beakerX = 1.5, beakerZ = -0.6;
+
+    // 1. Detailed 3D Wooden Meter Ruler from beaker base (x = 1.5) extending leftwards in direction of LED lamp
+    const rulerGroup = new THREE.Group();
+    const rulerMat = new THREE.MeshStandardMaterial({ color: 0xd4a359, roughness: 0.65 });
+    const rulerLen = 3.6;
+    const ruler = new THREE.Mesh(new THREE.BoxGeometry(rulerLen, 0.025, 0.28), rulerMat);
+    ruler.position.set(beakerX - rulerLen / 2 + 0.1, 0.0125, beakerZ);
+    rulerGroup.add(ruler);
+
+    // Dark tick marks along the ruler
+    const tickMat = new THREE.MeshBasicMaterial({ color: 0x221a0f });
+    for (let cm = 0; cm <= 50; cm += 2) {
+      const isMajor = cm % 10 === 0;
+      const tickX = beakerX - (cm / 50) * 2.2 - 0.2;
+      const tick = new THREE.Mesh(
+        new THREE.BoxGeometry(0.015, 0.027, isMajor ? 0.22 : 0.12),
+        tickMat
+      );
+      tick.position.set(tickX, 0.013, beakerZ);
+      rulerGroup.add(tick);
+    }
+    g.add(rulerGroup);
+
+    // 2. Beaker with NaHCO3 solution & Elodea
     const beaker = this.beaker(0.75, 0x36a676);
     beaker.position.set(beakerX, 0.1, beakerZ);
     beaker.scale.setScalar(1.1);
     g.add(beaker);
+
+    // 3. Elodea Stem & Leaves
     const stemGroup = new THREE.Group();
     const stemMat = new THREE.MeshStandardMaterial({ color: 0x2e7d32, roughness: 0.4 });
     const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.035, 1.2, 12), stemMat);
@@ -624,34 +645,75 @@ export class LabRenderer3D{
     }
     stemGroup.position.set(beakerX, 0.15, beakerZ);
     g.add(stemGroup);
-    const lampX = beakerX - (dist / 50) * 3.2 - 0.4;
+
+    // 4. Massively Improved LED Desk Lamp Geometry
+    const lampX = (beakerX - 0.2) - (dist / 50) * 2.2;
     const lampGroup = new THREE.Group();
-    const lampBaseMat = new THREE.MeshStandardMaterial({ color: 0x212121, metalness: 0.8, roughness: 0.2 });
-    const lampBase = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.38, 0.08, 24), lampBaseMat);
-    lampGroup.add(lampBase);
-    const armMat = new THREE.MeshStandardMaterial({ color: 0x616161, metalness: 0.9, roughness: 0.2 });
-    const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.5, 12), armMat);
-    arm.position.set(0.15, 0.75, 0);
-    arm.rotation.z = -0.3;
-    lampGroup.add(arm);
-    const headMat = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.7, roughness: 0.3 });
-    const head = new THREE.Mesh(new THREE.ConeGeometry(0.28, 0.45, 24), headMat);
-    head.position.set(0.4, 1.35, 0);
-    head.rotation.z = -Math.PI / 2.3;
-    lampGroup.add(head);
+
+    // Heavy weighted circular base with rubber rim
+    const baseMat = new THREE.MeshStandardMaterial({ color: 0x181a1d, metalness: 0.85, roughness: 0.25 });
+    const base = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.36, 0.06, 32), baseMat);
+    lampGroup.add(base);
+    const rubberMat = new THREE.MeshStandardMaterial({ color: 0x0c0d0e, roughness: 0.8 });
+    const rubberRing = new THREE.Mesh(new THREE.TorusGeometry(0.35, 0.022, 12, 32), rubberMat);
+    rubberRing.rotation.x = Math.PI / 2;
+    rubberRing.position.y = 0.01;
+    lampGroup.add(rubberRing);
+
+    // Articulated dual chrome & matte black gooseneck arm
+    const chromeMat = new THREE.MeshStandardMaterial({ color: 0xe8e8e8, metalness: 0.95, roughness: 0.1 });
+    const lowerStem = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.04, 0.55, 16), chromeMat);
+    lowerStem.position.set(0, 0.3, 0);
+    lampGroup.add(lowerStem);
+
+    const jointMat = new THREE.MeshStandardMaterial({ color: 0x2b2e33, metalness: 0.7, roughness: 0.3 });
+    const elbowJoint = new THREE.Mesh(new THREE.SphereGeometry(0.055, 16, 16), jointMat);
+    elbowJoint.position.set(0, 0.58, 0);
+    lampGroup.add(elbowJoint);
+
+    const upperArm = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.75, 16), chromeMat);
+    upperArm.position.set(0.18, 0.92, 0);
+    upperArm.rotation.z = -0.45;
+    lampGroup.add(upperArm);
+
+    // Sleek Rectangular LED Lamp Head Hood with Heat Sink Fins
+    const headGroup = new THREE.Group();
+    const hoodMat = new THREE.MeshStandardMaterial({ color: 0x22252a, roughness: 0.3, metalness: 0.4 });
+    const hood = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.12, 0.26), hoodMat);
+    headGroup.add(hood);
+
+    // Top Heat Sink Fins
+    const finMat = new THREE.MeshStandardMaterial({ color: 0x889098, metalness: 0.8, roughness: 0.2 });
+    for (let f = -0.14; f <= 0.14; f += 0.07) {
+      const fin = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.06, 0.22), finMat);
+      fin.position.set(f, 0.08, 0);
+      headGroup.add(fin);
+    }
+
+    // Underside LED Diffuser Panel
+    const diffuserMat = new THREE.MeshBasicMaterial({ color: lampOn ? 0xffffff : 0xcccccc });
+    const diffuser = new THREE.Mesh(new THREE.PlaneGeometry(0.38, 0.2), diffuserMat);
+    diffuser.rotation.x = Math.PI / 2;
+    diffuser.position.set(0, -0.061, 0);
+    headGroup.add(diffuser);
+
+    headGroup.position.set(0.48, 1.25, 0);
+    headGroup.rotation.z = -Math.PI / 2.3;
+    lampGroup.add(headGroup);
+
+    // SpotLight cone
     if (lampOn) {
-      const bulbMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-      const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 16), bulbMat);
-      bulb.position.set(0.48, 1.32, 0);
-      lampGroup.add(bulb);
-      const light = new THREE.SpotLight(0xfff8e7, 4.5, 6, Math.PI / 6, 0.4);
-      light.position.set(0.48, 1.32, 0);
-      light.target.position.set(beakerX, 0.6, beakerZ);
+      const light = new THREE.SpotLight(0xfffaed, 5.0, 7, Math.PI / 5, 0.35);
+      light.position.set(0.55, 1.22, 0);
+      light.target.position.set(beakerX, 0.4, beakerZ);
       lampGroup.add(light);
       lampGroup.add(light.target);
     }
-    lampGroup.position.set(lampX, 0.1, beakerZ);
+
+    lampGroup.position.set(lampX, 0.03, beakerZ);
     g.add(lampGroup);
+
+    // 5. Dynamic Oxygen Bubbles rising from stem tip
     if (lampOn) {
       const bpm = Math.round(52 / Math.pow(dist / 10, 1.8) + 4);
       for (let b = 0; b < Math.min(15, Math.ceil(bpm / 3)); b++) {
@@ -673,6 +735,7 @@ export class LabRenderer3D{
         g.add(bubble);
       }
     }
+
     return shadowReady(g);
   }
   newton2Rig(state) {
