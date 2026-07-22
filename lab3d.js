@@ -97,8 +97,8 @@ export class LabRenderer3D{
             vUv=uv;
             vec3 p=position;
             float lift=smoothstep(.08,1.,uv.y);
-            p.x+=(sin(uv.y*11.7+uTime*2.3+uSeed)*.018+sin(uv.y*27.0-uTime*3.7+uSeed*.4)*.006)*lift;
-            p.y+=sin(uv.y*15.0-uTime*2.1+uSeed)*.006*lift;
+            p.x+=(sin(uv.y*8.0+uTime*1.2+uSeed)*.0015+sin(uv.y*18.0-uTime*1.8+uSeed*.4)*.0005)*lift;
+            p.y+=sin(uv.y*10.0-uTime*1.2+uSeed)*.001*lift;
             gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.0);
           }
         `,
@@ -114,9 +114,9 @@ export class LabRenderer3D{
             float y=clamp(vUv.y,0.,1.);
             float turbulence=fbm(vec2(y*5.2-uTime*.58+uSeed,vUv.x*3.1+uTime*.09));
             float fine=noise(vec2(y*17.0+uTime*1.25,vUv.x*9.0-uTime*.35+uSeed));
-            float sway=(sin(y*12.0+uTime*2.0+uSeed)*.017+sin(y*29.0-uTime*3.4)*.006)*smoothstep(.12,1.,y);
+            float sway=(sin(y*6.0+uTime*0.8+uSeed)*.0015+sin(y*14.0-uTime*1.5)*.0005)*smoothstep(.12,1.,y);
             float x=vUv.x-.5-sway;
-            float width=mix(.315,.008,pow(y,.76))*(.93+turbulence*.14+fine*.028);
+            float width=mix(.315,.008,pow(y,.76))*(.97+turbulence*.025+fine*.005);
             float q=abs(x)/max(width,.004);
             float outer=1.0-smoothstep(.72,1.08,q);
             float edge=smoothstep(.48,.88,q)*(1.0-smoothstep(.88,1.08,q));
@@ -167,8 +167,8 @@ export class LabRenderer3D{
     const g=new THREE.Group(),glass=new THREE.MeshPhysicalMaterial({color:0xd9f6ff,transparent:true,opacity:.42,transmission:.7,roughness:.035,ior:1.46,thickness:.1,clearcoat:.9,clearcoatRoughness:.04,side:THREE.DoubleSide,depthWrite:false}),steel=metal(0xa9b6ba,.2),saltMat=new THREE.MeshPhysicalMaterial({color:solidColor,roughness:.76,metalness:.02,clearcoat:.08});
     const wall=new THREE.Mesh(new THREE.CylinderGeometry(.34,.36,.72,64,1,true),glass);wall.position.y=.38;g.add(wall);const bottom=cylinder(.36,.055,glass,64);bottom.position.y=.035;g.add(bottom);const rim=new THREE.Mesh(new THREE.TorusGeometry(.34,.035,14,64),glass);rim.rotation.x=Math.PI/2;rim.position.y=.75;g.add(rim);const saltBed=cylinder(.29,.18,saltMat,56);saltBed.position.y=.14;g.add(saltBed);
     for(let i=0;i<28;i++){const a=i*2.399,r=.035+(i%6)*.043,grain=new THREE.Mesh(new THREE.DodecahedronGeometry(.025+(i%4)*.006,0),saltMat);grain.position.set(Math.cos(a)*r,.24+(i%3)*.012,Math.sin(a)*r);grain.rotation.set(i*.71,i*.37,i*.93);grain.scale.set(1.35,.7,1);g.add(grain)}
-    const labelCanvas=document.createElement('canvas'),lc=labelCanvas.getContext('2d');labelCanvas.width=512;labelCanvas.height=260;lc.fillStyle='#fffdf5';lc.fillRect(0,0,512,260);lc.fillStyle=selected?'#c44939':'#203943';lc.font='800 88px Inter, sans-serif';lc.textAlign='center';lc.textBaseline='middle';lc.fillText(label,256,92);lc.fillStyle='#66777d';lc.font='650 43px Inter, sans-serif';lc.fillText(name.toUpperCase(),256,184);const texture=new THREE.CanvasTexture(labelCanvas);texture.colorSpace=THREE.SRGBColorSpace;const labelMesh=new THREE.Mesh(new THREE.PlaneGeometry(.55,.28),new THREE.MeshBasicMaterial({map:texture,toneMapped:false}));labelMesh.position.set(0,.43,.345);labelMesh.renderOrder=9;g.add(labelMesh);
-    const lid=cylinder(.39,.08,steel,64);lid.position.set(.47,.05,-.08);lid.rotation.z=.08;g.add(lid);if(selected){const ring=new THREE.Mesh(new THREE.TorusGeometry(.48,.035,12,64),new THREE.MeshBasicMaterial({color:0x20d4b0,transparent:true,opacity:.84,depthWrite:false,toneMapped:false}));ring.rotation.x=Math.PI/2;ring.position.y=.035;ring.renderOrder=10;g.add(ring)}return shadowReady(g)
+    const labelCanvas=document.createElement('canvas'),lc=labelCanvas.getContext('2d');labelCanvas.width=512;labelCanvas.height=260;lc.fillStyle='#fffdf5';lc.fillRect(0,0,512,260);lc.fillStyle=selected?'#c44939':'#203943';lc.font='800 88px Inter, sans-serif';lc.textAlign='center';lc.textBaseline='middle';lc.fillText(label,256,92);lc.fillStyle='#66777d';lc.font='650 43px Inter, sans-serif';lc.fillText(name.toUpperCase(),256,184);const texture=new THREE.CanvasTexture(labelCanvas);texture.colorSpace=THREE.SRGBColorSpace;const arc=0.55/0.351;const labelGeo=new THREE.CylinderGeometry(0.347,0.355,0.28,48,1,true,-arc/2,arc);const labelMat=new THREE.MeshBasicMaterial({map:texture,side:THREE.DoubleSide,toneMapped:false});const labelMesh=new THREE.Mesh(labelGeo,labelMat);labelMesh.position.set(0,.43,0);labelMesh.renderOrder=9;g.add(labelMesh);
+    if(selected){const ring=new THREE.Mesh(new THREE.TorusGeometry(.48,.035,12,64),new THREE.MeshBasicMaterial({color:0x20d4b0,transparent:true,opacity:.84,depthWrite:false,toneMapped:false}));ring.rotation.x=Math.PI/2;ring.position.y=.035;ring.renderOrder=10;g.add(ring)}return shadowReady(g)
   }
   flameTestRig(state){
     const g=new THREE.Group(),salts=[
