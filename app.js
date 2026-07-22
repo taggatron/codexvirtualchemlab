@@ -17,7 +17,7 @@ const practicals = [
   { id: 'water', subject: 'chemistry', icon: '💧', color: '#2d91c3', title: 'Water purification', sub: 'Analyse and distil', objective: 'Compare water samples and obtain pure water.', eq: 'H₂O(l) → H₂O(g) → H₂O(l)', word: 'liquid water → water vapour → liquid water (change of state)', steps: ['Measure and filter the sample', 'Run cooling water into the lower condenser inlet', 'Switch on the electric heating mantle', 'Collect and test the distillate'], gear: ['Round-bottom flask', 'Glass distillation column', 'Water-cooled condenser', 'Electric heating mantle'], reactants: ['Water sample', 'Universal indicator'] },
   { id: 'thermite', subject: 'chemistry', icon: '✺', color: '#d95b2f', title: 'Thermite demonstration', sub: 'Extreme exothermic reaction', objective: 'Observe a highly exothermic displacement reaction from behind a protective screen.', eq: 'Fe₂O₃(s) + 2Al(s) → 2Fe(l) + Al₂O₃(s)', word: 'iron(III) oxide + aluminium → molten iron + aluminium oxide', steps: ['Check the shield and sand containment', 'Aim the small blow torch from a safe distance', 'Ignite the magnesium fuse remotely', 'Observe sparks and molten iron behind the shield'], gear: ['Glass safety screen', 'Sand-filled metal can', 'Refractory reaction cup', 'Small blow torch'], reactants: ['Sealed thermite charge', 'Magnesium fuse'] },
   { id: 'pondweed', subject: 'biology', icon: '🌿', color: '#2e7d32', title: 'Light intensity & pondweed', sub: 'Photosynthesis rate', objective: 'Investigate how light intensity affects the rate of photosynthesis in pondweed by measuring oxygen bubble production.', eq: '6CO₂ + 6H₂O —(light)→ C₆H₁₂O₆ + 6O₂', word: 'carbon dioxide + water —(light)→ glucose + oxygen', steps: ['Place pondweed in NaHCO₃ solution', 'Set lamp distance from pondweed (10–50 cm)', 'Switch on LED lamp to acclimatise', 'Count oxygen bubbles produced in 1 minute'], gear: ['Beaker', 'Boiling tube + pondweed', 'Funnel', 'LED lamp', 'Meter ruler'], reactants: ['NaHCO₃ solution', 'Elodea pondweed', 'Water'] },
-  { id: 'newton2', subject: 'physics', icon: '⚡', color: '#0288d1', title: 'Newton’s 2nd Law', sub: 'F = m × a acceleration', objective: 'Investigate how trolley acceleration depends on applied force and mass using light gates.', eq: 'F = m × a   ⇒   a = F / m', word: 'accelerating force (N) = mass (kg) × acceleration (m s⁻²)', steps: ['Set hanging force and total trolley mass', 'Position Light Gate 1 and Light Gate 2 on track', 'Release trolley from top of ramp', 'Record light gate velocities & acceleration'], gear: ['Linear track & pulley', 'Lab trolley + card', '2 × Light gates', 'Slotted masses + hook'], reactants: ['Accelerating force (0.1 N - 0.5 N)', 'Trolley mass (0.5 kg - 1.5 kg)'] }
+  { id: 'newton2', subject: 'physics', icon: '⚡', color: '#0288d1', title: 'Newton’s 2nd Law', sub: 'F = m × a acceleration', objective: 'Investigate how trolley acceleration depends on applied force and mass using light gates.', eq: 'F = m × a   ⇒   a = F / m', word: 'accelerating force (N) = mass (kg) × acceleration (m s⁻²)', steps: ['Set hanging force (0.1 N - 0.5 N)', 'Position Light Gate 1 and Light Gate 2 on elevated track', 'Release trolley down the ramp', 'Automatic acceleration graph plotting'], gear: ['Elevated track & pulley', 'Lab trolley + card', '2 × Light gates', 'Hanging mass hanger'], reactants: ['Accelerating force (0.1 N - 0.5 N)', 'Constant trolley mass (1.0 kg)'] }
 ];
 const graphSpecs = {
   rates: { xLabel: 'temperature / °C', yLabel: 'time for cross to disappear / s', xMin: 20, xMax: 60, yMin: 0, yMax: 50, yDp: 0 },
@@ -251,11 +251,9 @@ function drawPondweedControls(x, benchY) {
   button('COUNT 1 MIN', x + 405, benchY + 46, 125, 38, state.running);
 }
 function drawNewton2Controls(x, benchY) {
-  button('FORCE -0.1N', x + 15, benchY + 46, 105, 38, false);
-  button('FORCE +0.1N', x + 128, benchY + 46, 105, 38, false);
-  button('MASS -0.5kg', x + 241, benchY + 46, 105, 38, false);
-  button('MASS +0.5kg', x + 354, benchY + 46, 105, 38, false);
-  button('RELEASE TROLLEY', x + 467, benchY + 46, 135, 38, state.newtonRunning);
+  button('FORCE -0.1N', x + 20, benchY + 46, 125, 38, false);
+  button('FORCE +0.1N', x + 155, benchY + 46, 125, 38, false);
+  button('RELEASE TROLLEY', x + 290, benchY + 46, 160, 38, state.newtonRunning);
 }
 function rightbar() { const R = Math.max(260, Math.min(330, W * .23)), x = W - R, p = practicals[state.selected], dragLab = p.id === 'rates' || p.id === 'temp'; if (p.id === 'free') { drawFreeLibrary(x, R); return } ctx.fillStyle = '#f4f6f5'; ctx.fillRect(x, 64, R, H - 64); const resultLabel = p.id === 'flame' ? 'SPECTRA' : ['mass', 'electro', 'titration', 'displacement'].includes(p.id) ? 'RESULTS' : p.id === 'chrom' ? 'MEASURE' : p.id === 'salts' ? 'VIEW RESULTS' : p.id === 'co2' ? "BIRD'S EYE" : 'GRAPH'; if (p.id === 'rates') { button('METHOD', x + 10, 82, 76, 32, state.tab === 'bench'); button('GRAPH', x + 93, 82, 70, 32, state.tab === 'graph'); button("BIRD'S EYE", x + 170, 82, R - 180, 32, state.tab === 'birdseye') } else { button('METHOD', x + 18, 82, 92, 32, state.tab === 'bench'); button(resultLabel, x + 118, 82, p.id === 'co2' ? 112 : 92, 32, p.id === 'co2' ? state.tab === 'birdseye' : state.tab === 'graph') } if (state.tab === 'bench') { text('METHOD', x + 22, 132, 10, C.muted, 800); const activeStep = p.id === 'rates' ? ratesStepIndex() : p.id === 'mass' ? massStepIndex() : p.id === 'hydrogen' ? hydrogenStepIndex() : p.id === 'titration' ? titrationStepIndex() : p.id === 'salts' ? saltsStepIndex() : p.id === 'flame' ? flameTestStepIndex() : p.id === 'displacement' ? displacementStepIndex() : p.id === 'thermite' ? thermiteStepIndex() : Math.floor(state.progress * 3); p.steps.forEach((s, i) => { let yy = 155 + i * 40; ctx.fillStyle = i <= activeStep ? C.teal : '#d8e0e2'; ctx.beginPath(); ctx.arc(x + 35, yy, 11, 0, 7); ctx.fill(); text(String(i + 1), x + 35, yy, 9, '#fff', 800, 'center'); text(s, x + 55, yy, 11.2, C.ink, 600) }); text('REACTANTS — CLICK OR DRAG', x + 22, 326, 9.5, C.muted, 800); p.reactants.forEach((r, i) => { let yy = 342 + i * 31, selectedSalt = p.id === 'flame' && state.flameTestSalt === i; rr(x + 20, yy, R - 40, 25, 6, selectedSalt ? '#fff4ef' : '#fff', selectedSalt ? flameTestSalts[i].flameHex : C.line); ctx.fillStyle = p.id === 'flame' ? flameTestSalts[i].flameHex : p.color; ctx.beginPath(); ctx.arc(x + 35, yy + 12.5, 6, 0, 7); ctx.fill(); text(r, x + 49, yy + 12.5, 10.2, C.ink, 650); text(p.id === 'flame' && state.flameTestTested.includes(i) ? '✓' : '↗', x + R - 31, yy + 12.5, 12, C.teal, 700, 'center'); hit('guided-reactant', x + 20, yy, R - 40, 25, r) }); const appY = 350 + p.reactants.length * 31; text('APPARATUS', x + 22, appY, 9.5, C.muted, 800); p.gear.slice(0, 4).forEach((g, i) => { rr(x + 20 + (i % 2) * 133, appY + 15 + Math.floor(i / 2) * 31, 123, 24, 6, '#fff', C.line); text(g, x + 29 + (i % 2) * 133, appY + 27 + Math.floor(i / 2) * 31, 9.5, C.ink, 600) }); const guideY = Math.min(H - 100, appY + 86); text('GUIDANCE', x + 22, guideY, 9.5, C.muted, 800); rr(x + 20, guideY + 15, R - 40, 70, 7, '#e8efed'); wrappedText(state.toast, x + 32, guideY + 32, R - 64, 9.8, C.ink, 600, 12, 2); const hint = p.id === 'rates' ? (state.ratesConditioning ? 'Water bath warming to the next set temperature.' : state.ratesStage === 0 ? 'Move the conditioned flask onto the cross.' : state.ratesStage === 2 ? 'Add HCl to start the timed reaction.' : state.ratesStage === 3 ? 'Observe the cross as sulfur forms.' : 'Repeat at the next temperature.') : p.id === 'co2' ? (state.running ? 'CO₂ bubbles from the submerged inlet tube.' : state.complete ? 'Limewater is milky: carbon dioxide confirmed.' : 'Both bungs seal around their central tubes.') : p.id === 'flame' ? (state.flameTestStage === 0 ? 'Choose a salt, then scoop a small sample.' : state.flameTestStage === 2 ? 'Move the loaded spatula into the blue flame.' : state.flameTestStage >= 4 ? 'Compare the flame colour with its dark absorption bands.' : 'Keep the sample clear of other salt jars.') : p.id === 'displacement' ? (state.running ? 'Compare solution colour and metal coatings.' : state.complete ? 'Record the reactivity order from the four tubes.' : 'Lower all four cleaned strips together.') : p.id === 'thermite' ? 'Remain behind the screen; this is a simulation only.' : p.id === 'pondweed' ? 'Adjust lamp distance (10-50 cm) and measure oxygen bubble production.' : p.id === 'newton2' ? 'Set accelerating force and trolley mass, then release the trolley.' : state.running ? 'Liquid is flowing. Observe the meniscus' : dragLab ? 'Drag HCl flask onto the receiver.' : 'Use a reactant card or controls.'; text(hint, x + 32, guideY + 64, 9.2, C.muted, 500) } else if (p.id === 'rates' && state.tab === 'birdseye') drawRatesBirdsEye(x + 18, 132, R - 36); else if (p.id === 'rates') drawRatesBarChart(x + 18, 132, R - 36, 320); else if (p.id === 'co2' && state.tab === 'birdseye') drawCo2BirdsEye(x + 18, 132, R - 36); else if (p.id === 'flame') drawAbsorptionSpectraPanel(x + 18, 132, R - 36); else if (p.id === 'mass') drawMassResultsTable(x + 18, 132, R - 36); else if (p.id === 'electro') drawElectrolysisResultsTable(x + 18, 132, R - 36); else if (p.id === 'titration') drawTitrationResultsTable(x + 18, 132, R - 36); else if (p.id === 'displacement') drawDisplacementResultsTable(x + 18, 132, R - 36); else if (p.id === 'chrom') drawChromatogramPanel(x + 18, 132, R - 36, Math.min(520, H - 170)); else if (p.id === 'salts') drawSaltMicroscopeResults(x + 18, 132, R - 36, Math.min(520, H - 170)); else drawGraph(x + 18, 132, R - 36, 300) }
 // controls
@@ -458,13 +456,8 @@ function activateNewton2(label) {
   } else if (label === 'FORCE +0.1N') {
     state.newtonForce = +(Math.min(0.5, state.newtonForce + 0.1)).toFixed(1);
     state.toast = `Accelerating force set to ${state.newtonForce.toFixed(1)} N.`;
-  } else if (label === 'MASS -0.5kg') {
-    state.newtonMass = +(Math.max(0.5, state.newtonMass - 0.5)).toFixed(1);
-    state.toast = `Total trolley mass set to ${state.newtonMass.toFixed(1)} kg.`;
-  } else if (label === 'MASS +0.5kg') {
-    state.newtonMass = +(Math.min(1.5, state.newtonMass + 0.5)).toFixed(1);
-    state.toast = `Total trolley mass set to ${state.newtonMass.toFixed(1)} kg.`;
-  } else if (label === 'RELEASE TROLLEY') {
+  } else if (label === 'RELEASE TROLLEY' && !state.newtonRunning) {
+    state.newtonMass = 1.0;
     state.newtonPos = 0;
     state.newtonVel = 0;
     state.newtonAcc = +(state.newtonForce / state.newtonMass).toFixed(2);
@@ -472,15 +465,10 @@ function activateNewton2(label) {
     state.running = true;
     state.complete = false;
     state.newtonTimer = 0;
-    state.toast = `Trolley released! Accelerating at ${state.newtonAcc.toFixed(2)} m/s².`;
-  } else if (label === 'RECORD ACCELERATION' || label === 'RECORD') {
-    const acc = +(state.newtonForce / state.newtonMass).toFixed(2);
-    state.points.push({ x: state.newtonForce, y: acc, xValue: state.newtonForce, yValue: acc });
-    if (!state.newtonResults.some(r => r.force === state.newtonForce && r.mass === state.newtonMass)) {
-      state.newtonResults.push({ force: state.newtonForce, mass: state.newtonMass, acceleration: acc });
-    }
-    state.toast = `Recorded acceleration ${acc.toFixed(2)} m/s² for F=${state.newtonForce}N, m=${state.newtonMass}kg.`;
+    state.toast = `Trolley released! Accelerating down the elevated track...`;
   } else if (label === 'RESET TROLLEY' || label === 'RESET PRACTICAL') {
+    state.newtonForce = 0.2;
+    state.newtonMass = 1.0;
     state.newtonPos = 0;
     state.newtonVel = 0;
     state.newtonRunning = false;
@@ -489,7 +477,7 @@ function activateNewton2(label) {
     state.newtonTimer = 0;
     state.newtonResults = [];
     state.points = [];
-    state.toast = 'Trolley reset to top of track.';
+    state.toast = 'Newton\'s 2nd Law practical reset.';
   } else if (label === 'RESULTS' || label === 'GRAPH') {
     state.tab = 'graph';
   }
@@ -629,7 +617,14 @@ function update(dt, skipDraw = false) {
         state.newtonRunning = false;
         state.running = false;
         state.complete = true;
-        state.toast = `Run complete! Acceleration a = ${acc.toFixed(2)} m/s² (Gate 1: ${(state.newtonVel * 0.6).toFixed(2)} m/s, Gate 2: ${state.newtonVel.toFixed(2)} m/s).`;
+        const calcAcc = +(state.newtonForce / (state.newtonMass || 1.0)).toFixed(2);
+        const normX = state.newtonForce / 0.6;
+        const normY = Math.max(0, Math.min(1, calcAcc / 1.2));
+        state.points.push({ x: normX, y: normY, xValue: state.newtonForce, yValue: calcAcc });
+        if (!state.newtonResults.some(r => r.force === state.newtonForce)) {
+          state.newtonResults.push({ force: state.newtonForce, mass: state.newtonMass, acceleration: calcAcc });
+        }
+        state.toast = `Run complete! Acceleration a = ${calcAcc.toFixed(2)} m/s². Automatically added to graph!`;
       }
     }
     if (!skipDraw && (state.newtonRunning || state.running)) draw();

@@ -742,68 +742,106 @@ export class LabRenderer3D{
     const g = new THREE.Group();
     const pos = state.newtonPos || 0;
     const force = state.newtonForce || 0.2;
-    const mass = state.newtonMass || 1.0;
-    const trackMat = new THREE.MeshStandardMaterial({ color: 0xb0bec5, metalness: 0.8, roughness: 0.2 });
-    const track = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.08, 0.35), trackMat);
-    track.position.set(0, 0.3, 0);
+
+    // 1. Solid Heavy Metallic Support Pillars elevating the runway to height y = 1.0
+    const pillarMat = new THREE.MeshStandardMaterial({ color: 0x263238, metalness: 0.8, roughness: 0.25 });
+    const legL = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.9, 0.42), pillarMat);
+    legL.position.set(-1.6, 0.55, 0);
+    g.add(legL);
+
+    const legR = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.9, 0.42), pillarMat);
+    legR.position.set(1.6, 0.55, 0);
+    g.add(legR);
+
+    // 2. Elevated Extruded Aluminum Runway Track at y = 1.0
+    const trackMat = new THREE.MeshStandardMaterial({ color: 0xb0bec5, metalness: 0.85, roughness: 0.2 });
+    const track = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.08, 0.38), trackMat);
+    track.position.set(0, 1.0, 0);
     g.add(track);
+
+    // Side guide rails
+    const railMat = new THREE.MeshStandardMaterial({ color: 0x0288d1, roughness: 0.3 });
+    [-0.18, 0.18].forEach(rz => {
+      const rail = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.03, 0.02), railMat);
+      rail.position.set(0, 1.05, rz);
+      g.add(rail);
+    });
+
+    // 3. End Pulley Assembly extending at right end (x = 1.95)
     const pulleyGroup = new THREE.Group();
     const pStand = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.35, 0.06), trackMat);
-    pStand.position.set(1.95, 0.45, 0);
+    pStand.position.set(1.95, 1.15, 0);
     pulleyGroup.add(pStand);
+
     const pWheelMat = new THREE.MeshStandardMaterial({ color: 0x37474f, roughness: 0.3 });
     const pWheel = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.04, 24), pWheelMat);
     pWheel.rotation.x = Math.PI / 2;
-    pWheel.position.set(1.95, 0.6, 0);
+    pWheel.position.set(1.95, 1.3, 0);
     pulleyGroup.add(pWheel);
     g.add(pulleyGroup);
+
+    // 4. Red IR Photogates
     const gateMat = new THREE.MeshStandardMaterial({ color: 0xd32f2f, roughness: 0.4 });
-    [ -0.6, 1.0 ].forEach(gx => {
+    [-0.6, 1.0].forEach(gx => {
       const gate = new THREE.Group();
-      const arch = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.45, 0.42), gateMat);
-      arch.position.set(gx, 0.52, 0);
+      const arch = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.45, 0.44), gateMat);
+      arch.position.set(gx, 1.22, 0);
       gate.add(arch);
       const sensorMat = new THREE.MeshBasicMaterial({ color: 0x00e676 });
       const sensor = new THREE.Mesh(new THREE.SphereGeometry(0.03, 8, 8), sensorMat);
-      sensor.position.set(gx, 0.68, 0);
+      sensor.position.set(gx, 1.38, 0);
       gate.add(sensor);
       g.add(gate);
     });
+
+    // 5. Dynamics Trolley with 4 Wheels & Stacked Steel Weights
     const trolleyX = -1.8 + pos * 3.5;
     const trolleyGroup = new THREE.Group();
     const chassisMat = new THREE.MeshStandardMaterial({ color: 0x0288d1, roughness: 0.3 });
     const chassis = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.12, 0.28), chassisMat);
-    chassis.position.y = 0.42;
+    chassis.position.y = 1.12;
     trolleyGroup.add(chassis);
+
     const wheelMat = new THREE.MeshStandardMaterial({ color: 0x212121, roughness: 0.5 });
-    [ [-0.18, -0.15], [-0.18, 0.15], [0.18, -0.15], [0.18, 0.15] ].forEach(([wx, wz]) => {
+    [[-0.18, -0.15], [-0.18, 0.15], [0.18, -0.15], [0.18, 0.15]].forEach(([wx, wz]) => {
       const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.03, 16), wheelMat);
       wheel.rotation.x = Math.PI / 2;
-      wheel.position.set(wx, 0.36, wz);
+      wheel.position.set(wx, 1.06, wz);
       trolleyGroup.add(wheel);
     });
-    const weightsCount = Math.round(mass / 0.5);
+
+    // 2 Stacked Mass Disks for Constant 1.0 kg Mass
     const weightMat = new THREE.MeshStandardMaterial({ color: 0x78909c, metalness: 0.7, roughness: 0.3 });
-    for (let w = 0; w < weightsCount; w++) {
+    for (let w = 0; w < 2; w++) {
       const weight = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.06, 20), weightMat);
-      weight.position.set(0, 0.51 + w * 0.065, 0);
+      weight.position.set(0, 1.21 + w * 0.065, 0);
       trolleyGroup.add(weight);
     }
     trolleyGroup.position.x = trolleyX;
     g.add(trolleyGroup);
+
+    // 6. Connecting String & Descending Mass Hanger
+    const hangerY = 1.2 - pos * 0.75;
     const stringMat = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2 });
     const stringGeo = new THREE.BufferGeometry().setFromPoints([
-      new THREE.Vector3(trolleyX + 0.28, 0.42, 0),
-      new THREE.Vector3(1.95, 0.6, 0),
-      new THREE.Vector3(1.95, 0.6 - pos * 0.4, 0)
+      new THREE.Vector3(trolleyX + 0.28, 1.12, 0),
+      new THREE.Vector3(1.95, 1.3, 0),
+      new THREE.Vector3(1.95, hangerY + 0.08 + force * 0.2, 0)
     ]);
     const stringLine = new THREE.Line(stringGeo, stringMat);
     g.add(stringLine);
+
+    // Slotted Mass Hanger (Visibly hanging off the elevated pulley!)
     const hangerGroup = new THREE.Group();
     const hangerMat = new THREE.MeshStandardMaterial({ color: 0xffb300, metalness: 0.8, roughness: 0.2 });
-    const hanger = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.12 + force * 0.4, 16), hangerMat);
-    hanger.position.set(1.95, 0.5 - pos * 0.4, 0);
-    hangerGroup.add(hanger);
+    const hangerBody = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.14 + force * 0.4, 16), hangerMat);
+    hangerBody.position.set(1.95, hangerY, 0);
+    hangerGroup.add(hangerBody);
+
+    const hookRing = new THREE.Mesh(new THREE.TorusGeometry(0.03, 0.008, 12, 16), hangerMat);
+    hookRing.position.set(1.95, hangerY + 0.08 + force * 0.2, 0);
+    hangerGroup.add(hookRing);
+
     g.add(hangerGroup);
     return shadowReady(g);
   }
