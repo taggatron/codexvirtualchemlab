@@ -104,7 +104,7 @@ const freeReactionRules = [
   { id: 'h2so4-lime', reactants: ['h2so4', 'lime'], symbol: 'H₂SO₄(aq) + Ca(OH)₂(aq) → CaSO₄(s) + 2H₂O(l)', word: 'sulfuric acid + limewater → calcium sulfate + water', kind: 'precipitate', precipitate: true, product: 'calcium sulfate precipitate', productColor: 0xd9d4bd, heat: 6, duration: 3 },
   { id: 'lime-co2', reactants: ['lime', 'CO₂'], symbol: 'Ca(OH)₂(aq) + CO₂(g) → CaCO₃(s) + H₂O(l)', word: 'limewater + carbon dioxide → calcium carbonate + water', kind: 'precipitate', precipitate: true, product: 'milky calcium carbonate', productColor: 0xe8e6d9, duration: 3 }
 ];
-const state = { selected: 0, subject: 'chemistry', subjectTabX: 180, subjectTabW: 105, running: false, complete: false, temp: 20, ph: 7, time: 0, volume: 0, progress: 0, tab: 'equipment', points: [], hover: null, toast: 'Click equipment to add it, or drag it onto the bench.', drag: null, pour: null, burner: false, coolingWater: false, particles: [], layout: null, flamePhase: 0, transferred: 0, workspace: [], nextItem: 1, dose: null, reaction: null, massStage: 0, massLidOn: true, massTransfer: null, massBefore: 4.01, massAfter: null, hydrogenStage: 0, hydrogenTimer: 0, hydrogenAudioPlayed: false, hydrogenGas: 0, saltsStage: 0, saltsTimer: 0, chromSelectedDye: null, electroRecorded: false, electroWeighing: false, electroWeighTimer: 0, titrationStage: 0, titrationVolume: 0, titrationDropTimer: 0, titrationDrops: 0, titrationIndicator: false, titrationIndicatorTimer: 0, titrationRecorded: false, ratesStage: 0, ratesStageTimer: 0, ratesTrialIndex: 0, ratesTargetTemp: 20, ratesBathTemp: 20, ratesConditioning: false, ratesResults: [], thermiteTimer: 0, thermiteAudioPlayed: false, displacementStage: 0, displacementTimer: 0, displacementRecorded: false, flameTestStage: 0, flameTestTimer: 0, flameTestSalt: 0, flameTestTested: [], pondweedDistance: 10, pondweedLampOn: true, pondweedTimer: 0, pondweedBubbles: 0, pondweedResults: [], newtonForce: 0.2, newtonMass: 1.0, newtonPos: 0, newtonVel: 0, newtonAcc: 0.2, newtonTimer: 0, newtonRunning: false, newtonGate1Time: null, newtonGate2Time: null, newtonResults: [] };
+const state = { selected: 0, subject: 'chemistry', subjectTabX: 149, subjectTabW: 114, running: false, complete: false, temp: 20, ph: 7, time: 0, volume: 0, progress: 0, tab: 'equipment', points: [], hover: null, toast: 'Click equipment to add it, or drag it onto the bench.', drag: null, pour: null, burner: false, coolingWater: false, particles: [], layout: null, flamePhase: 0, transferred: 0, workspace: [], nextItem: 1, dose: null, reaction: null, massStage: 0, massLidOn: true, massTransfer: null, massBefore: 4.01, massAfter: null, hydrogenStage: 0, hydrogenTimer: 0, hydrogenAudioPlayed: false, hydrogenGas: 0, saltsStage: 0, saltsTimer: 0, chromSelectedDye: null, electroRecorded: false, electroWeighing: false, electroWeighTimer: 0, titrationStage: 0, titrationVolume: 0, titrationDropTimer: 0, titrationDrops: 0, titrationIndicator: false, titrationIndicatorTimer: 0, titrationRecorded: false, ratesStage: 0, ratesStageTimer: 0, ratesTrialIndex: 0, ratesTargetTemp: 20, ratesBathTemp: 20, ratesConditioning: false, ratesResults: [], thermiteTimer: 0, thermiteAudioPlayed: false, displacementStage: 0, displacementTimer: 0, displacementRecorded: false, flameTestStage: 0, flameTestTimer: 0, flameTestSalt: 0, flameTestTested: [], pondweedDistance: 10, pondweedLampOn: true, pondweedTimer: 0, pondweedBubbles: 0, pondweedResults: [], newtonForce: 0.2, newtonMass: 1.0, newtonPos: 0, newtonVel: 0, newtonAcc: 0.2, newtonTimer: 0, newtonRunning: false, newtonGate1Time: null, newtonGate2Time: null, newtonResults: [] };
 let lastSelectedPractical = state.selected;
 const ratesTemperatures = [20, 30, 40, 50, 60], ratesBathPosition = { x: 2.55, y: .43, z: -.42 }, ratesCrossPosition = { x: .72, y: .12, z: .25 };
 function ratesMeasuredTime(temp = state.ratesTargetTemp) { return +(42 * Math.pow(.72, (temp - 20) / 10)).toFixed(1) }
@@ -166,7 +166,14 @@ function header() {
 
   const activeIndex = Math.max(0, subjects.findIndex(s => s.id === (state.subject || 'chemistry')));
   const targetX = tabStartX + 4 + activeIndex * tabW;
-  state.subjectTabX = (state.subjectTabX == null) ? targetX : state.subjectTabX + (targetX - state.subjectTabX) * 0.22;
+  if (state.subjectTabX == null) {
+    state.subjectTabX = targetX;
+  } else if (Math.abs(targetX - state.subjectTabX) > 0.5) {
+    state.subjectTabX += (targetX - state.subjectTabX) * 0.32;
+    requestAnimationFrame(() => draw(true));
+  } else {
+    state.subjectTabX = targetX;
+  }
 
   const activeSubject = subjects[activeIndex] || subjects[0];
   rr(state.subjectTabX, tabY + 4, tabW, tabH - 8, 16, activeSubject.color, null);
