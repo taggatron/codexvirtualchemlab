@@ -1,4 +1,4 @@
-import { LabRenderer3D } from './lab3d.js?v=20260721-50';
+import { LabRenderer3D } from './lab3d.js?v=20260721-51';
 const canvas = document.getElementById('lab'), visibleCtx = canvas.getContext('2d'), buffer = document.createElement('canvas'), webglCanvas = document.getElementById('webgl'), lab3d = new LabRenderer3D(webglCanvas); let ctx = buffer.getContext('2d');
 const C = { navy: '#102a3a', ink: '#17313e', muted: '#657881', teal: '#087f75', cyan: '#4fc3b5', paper: '#f7f8f6', line: '#d8e0e2', orange: '#e48b35', red: '#b94b44', blue: '#3c78a8' };
 const practicals = [
