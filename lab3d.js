@@ -399,14 +399,23 @@ export class LabRenderer3D{
     const panel=(geometry,position)=>{const mesh=new THREE.Mesh(geometry,glass);mesh.position.copy(position);mesh.renderOrder=8;mesh.castShadow=false;g.add(mesh);return mesh};
     panel(new THREE.BoxGeometry(5.8,3.65,.045),new THREE.Vector3(0,1.86,-1.62));
     panel(new THREE.BoxGeometry(.045,3.65,2.45),new THREE.Vector3(-2.88,1.86,-.42));
-    panel(new THREE.BoxGeometry(.045,3.65,2.45),new THREE.Vector3(2.88,1.86,-.42));
+
+    const rightDoor=new THREE.Group();rightDoor.position.set(2.88,0,-1.62);
+    const rightGlass=new THREE.Mesh(new THREE.BoxGeometry(.045,3.65,2.44),glass);rightGlass.position.set(0,1.86,1.22);rightGlass.renderOrder=8;rightGlass.castShadow=false;rightDoor.add(rightGlass);
+    const rightTopBar=this.tubeBetween(new THREE.Vector3(0,3.7,0),new THREE.Vector3(0,3.7,2.44),.035,frame);
+    const rightBottomBar=this.tubeBetween(new THREE.Vector3(0,.04,0),new THREE.Vector3(0,.04,2.44),.035,frame);
+    const rightFrontBar=this.tubeBetween(new THREE.Vector3(0,.04,2.44),new THREE.Vector3(0,3.7,2.44),.035,frame);
+    rightDoor.add(rightTopBar,rightBottomBar,rightFrontBar);
+    g.add(rightDoor);
+
     const bars=[
-      [new THREE.Vector3(-2.9,.04,-1.64),new THREE.Vector3(-2.9,3.7,-1.64)],[new THREE.Vector3(2.9,.04,-1.64),new THREE.Vector3(2.9,3.7,-1.64)],
-      [new THREE.Vector3(-2.9,3.7,-1.64),new THREE.Vector3(2.9,3.7,-1.64)],[new THREE.Vector3(-2.9,.04,-1.64),new THREE.Vector3(2.9,.04,-1.64)],
-      [new THREE.Vector3(-2.9,.04,.82),new THREE.Vector3(-2.9,3.7,.82)],[new THREE.Vector3(2.9,.04,.82),new THREE.Vector3(2.9,3.7,.82)],
-      [new THREE.Vector3(-2.9,3.7,-1.64),new THREE.Vector3(-2.9,3.7,.82)],[new THREE.Vector3(2.9,3.7,-1.64),new THREE.Vector3(2.9,3.7,.82)]
+      [new THREE.Vector3(-2.88,.04,-1.62),new THREE.Vector3(-2.88,3.7,-1.62)],[new THREE.Vector3(2.88,.04,-1.62),new THREE.Vector3(2.88,3.7,-1.62)],
+      [new THREE.Vector3(-2.88,3.7,-1.62),new THREE.Vector3(2.88,3.7,-1.62)],[new THREE.Vector3(-2.88,.04,-1.62),new THREE.Vector3(2.88,.04,-1.62)],
+      [new THREE.Vector3(-2.88,.04,.82),new THREE.Vector3(-2.88,3.7,.82)],
+      [new THREE.Vector3(-2.88,3.7,-1.62),new THREE.Vector3(-2.88,3.7,.82)],[new THREE.Vector3(-2.88,.04,-1.62),new THREE.Vector3(-2.88,.04,.82)]
     ];
     for(const [a,b] of bars){const rail=this.tubeBetween(a,b,.035,frame);rail.castShadow=true;g.add(rail)}
+    const hingeMat=metal(0x455257,.3);for(const y of [.35,1.85,3.35]){const hinge=cylinder(.052,.12,hingeMat);hinge.position.set(2.88,y,-1.62);g.add(hinge)}
     const shieldGlowMat=new THREE.MeshBasicMaterial({color:0xff8a30,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false,toneMapped:false,side:THREE.DoubleSide}),shieldGlow=new THREE.Mesh(new THREE.PlaneGeometry(5.55,3.4),shieldGlowMat);shieldGlow.position.set(0,1.86,-1.59);shieldGlow.renderOrder=7;g.add(shieldGlow);
 
     const canWall=new THREE.Mesh(new THREE.CylinderGeometry(1.34,1.3,1.22,72,1,true),new THREE.MeshPhysicalMaterial({color:0x9da9ab,metalness:.73,roughness:.38,clearcoat:.2,side:THREE.DoubleSide}));canWall.position.y=.61;g.add(canWall);
@@ -436,7 +445,7 @@ export class LabRenderer3D{
     const nearSparkGeometry=new THREE.CylinderGeometry(.021,.038,.28,6),nearSparkMats=[0xffffff,0xffe2a0,0xffa326].map(color=>new THREE.MeshBasicMaterial({color,transparent:true,opacity:.98,blending:THREE.AdditiveBlending,depthWrite:false,depthTest:false,toneMapped:false})),nearSparks=[];for(let i=0;i<48;i++){const trail=new THREE.Mesh(nearSparkGeometry,nearSparkMats[i%nearSparkMats.length]);trail.renderOrder=30;trail.visible=false;g.add(trail);nearSparks.push(trail)}
     const smoke=[];for(let i=0;i<22;i++){const puff=new THREE.Mesh(new THREE.SphereGeometry(.18+(i%5)*.045,20,14),new THREE.MeshStandardMaterial({color:i%3===0?0x5b5550:0x77716d,transparent:true,opacity:0,roughness:1,depthWrite:false}));puff.visible=false;g.add(puff);smoke.push({mesh:puff,angle:i*2.399,delay:(i%8)*.17,speed:.3+(i%5)*.04,drift:.12+(i%4)*.05})}
     const sandDust=[];for(let i=0;i<34;i++){const mote=new THREE.Mesh(new THREE.DodecahedronGeometry(.018+(i%3)*.007,0),new THREE.MeshBasicMaterial({color:0xd9bb7c,transparent:true,opacity:0,depthWrite:false}));mote.visible=false;g.add(mote);sandDust.push({mesh:mote,angle:i*2.399,speed:.18+(i%6)*.05,delay:(i%9)*.04})}
-    this.dynamic.push({kind:'thermite',torch,outerFlame,innerFlame,torchLight,torchStart,torchTarget,fuseCurve,fuseSegments,fuseEmber,fuseLight,fuseSparks,mgoPowder,mgoPuffs,flashCore,corona,fireColumn,flashLight,shockwaves,sparkMesh,sparkData,nearSparks,dummy,ironBlob,ironGlowLight,smoke,sandDust,shieldGlow,afterglowStart:0});
+    this.dynamic.push({kind:'thermite',torch,outerFlame,innerFlame,torchLight,torchStart,torchTarget,fuseCurve,fuseSegments,fuseEmber,fuseLight,fuseSparks,mgoPowder,mgoPuffs,flashCore,corona,fireColumn,flashLight,shockwaves,sparkMesh,sparkData,nearSparks,dummy,ironBlob,ironGlowLight,smoke,sandDust,shieldGlow,rightDoor,afterglowStart:0});
     g.userData.thermiteRig=true;g.userData.containment='U-shaped heat-resistant glass shield and sand-filled corrugated metal can';return shadowReady(g)
   }
   liquidPourStream(a,b,{color=0xa9eeff,time=0,radius=.045,opacity=.74,sag=.055,breakup=.7,droplets=5,splash=true}={}){
@@ -703,6 +712,7 @@ export class LabRenderer3D{
       else if(d.kind==='thermite'){
         const t=state.complete?8:state.running?Math.max(0,state.thermiteTimer||0):0,clamp=q=>Math.max(0,Math.min(1,q)),smooth=q=>{q=clamp(q);return q*q*(3-2*q)},running=!!state.running;
         const approach=smooth(t/1.1),retreat=smooth((t-2.05)/.65);d.torch.position.lerpVectors(d.torchStart,d.torchTarget,approach);if(retreat>0)d.torch.position.lerpVectors(d.torchTarget,d.torchStart,retreat);d.torch.position.y+=Math.sin(approach*Math.PI)*.05;d.torch.visible=!state.complete&&t<2.72;
+        const doorCloseQ=state.complete?1:state.running?smooth((t-2.05)/.65):0;if(d.rightDoor)d.rightDoor.rotation.y=-0.85*(1-doorCloseQ);
         const torchActive=running&&t<2.46;d.outerFlame.visible=torchActive;d.innerFlame.visible=torchActive;d.torchLight.intensity=torchActive?1.65+.22*Math.sin(time*.028):0;if(torchActive){const flicker=1+Math.sin(time*.035)*.045;d.outerFlame.scale.set(flicker,1+.035*Math.sin(time*.051),flicker);d.innerFlame.scale.set(1/flicker,1+.026*Math.sin(time*.043),1/flicker)}
         const fuseQ=clamp((t-1.1)/1.5),remainingFuse=1-fuseQ,fuseBurning=running&&t>=1.1&&t<2.64,emberPoint=d.fuseCurve.getPoint(remainingFuse);d.fuseEmber.visible=fuseBurning;d.fuseEmber.position.copy(emberPoint);d.fuseEmber.material.opacity=fuseBurning?.9:0;d.fuseEmber.scale.setScalar(.8+.28*Math.sin(time*.042));d.fuseLight.position.copy(emberPoint);d.fuseLight.intensity=fuseBurning?2.8+.65*Math.sin(time*.031):0;
         for(const segment of d.fuseSegments){const distance=remainingFuse-segment.userData.mid,atFront=fuseBurning&&distance>=0&&distance<.075;segment.visible=segment.userData.mid<=remainingFuse+.008;segment.material.emissive.setHex(atFront?0x9a2d00:0x191919);segment.material.emissiveIntensity=atFront?1.55:0;segment.material.transparent=atFront;segment.material.opacity=atFront?clamp(distance/.075)*.78+.2:1}
