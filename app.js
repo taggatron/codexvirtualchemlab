@@ -448,7 +448,86 @@ function drawDensityControls(x, benchY) {
   button('CHANGE SAMPLE', x + 185, benchY + 46, 140, 38, busy);
   button('RESET PRACTICAL', x + 335, benchY + 46, 145, 38, false);
 }
-function rightbar() { const R = Math.max(260, Math.min(330, W * .23)), x = W - R, p = practicals[state.selected], dragLab = p.id === 'rates' || p.id === 'temp'; if (p.id === 'free') { drawFreeLibrary(x, R); return } ctx.fillStyle = '#f4f6f5'; ctx.fillRect(x, 64, R, H - 64); const resultLabel = p.id === 'flame' ? 'SPECTRA' : ['mass', 'electro', 'titration', 'displacement'].includes(p.id) ? 'RESULTS' : p.id === 'chrom' ? 'MEASURE' : p.id === 'salts' ? 'VIEW RESULTS' : p.id === 'co2' ? "BIRD'S EYE" : 'GRAPH'; if (p.id === 'rates') { button('METHOD', x + 10, 82, 76, 32, state.tab === 'bench'); button('GRAPH', x + 93, 82, 70, 32, state.tab === 'graph'); button("BIRD'S EYE", x + 170, 82, R - 180, 32, state.tab === 'birdseye') } else { button('METHOD', x + 18, 82, 92, 32, state.tab === 'bench'); button(resultLabel, x + 118, 82, p.id === 'co2' ? 112 : 92, 32, p.id === 'co2' ? state.tab === 'birdseye' : state.tab === 'graph') } if (state.tab === 'bench') { text('METHOD', x + 22, 132, 10, C.muted, 800); const activeStep = p.id === 'rates' ? ratesStepIndex() : p.id === 'mass' ? massStepIndex() : p.id === 'hydrogen' ? hydrogenStepIndex() : p.id === 'titration' ? titrationStepIndex() : p.id === 'salts' ? saltsStepIndex() : p.id === 'flame' ? flameTestStepIndex() : p.id === 'displacement' ? displacementStepIndex() : p.id === 'thermite' ? thermiteStepIndex() : p.id === 'density' ? densityStepIndex() : Math.floor(state.progress * 3); p.steps.forEach((s, i) => { let yy = 152 + i * 36; ctx.fillStyle = i <= activeStep ? C.teal : '#d8e0e2'; ctx.beginPath(); ctx.arc(x + 35, yy, 10, 0, 7); ctx.fill(); text(String(i + 1), x + 35, yy, 8.5, '#fff', 800, 'center'); text(s, x + 52, yy, 10.5, C.ink, 600) }); const reactY = 152 + p.steps.length * 36 + 10; text('REACTANTS — CLICK OR DRAG', x + 22, reactY, 9.5, C.muted, 800); p.reactants.forEach((r, i) => { let yy = reactY + 14 + i * 28, selectedSalt = p.id === 'flame' && state.flameTestSalt === i; rr(x + 20, yy, R - 40, 24, 6, selectedSalt ? '#fff4ef' : '#fff', selectedSalt ? flameTestSalts[i].flameHex : C.line); ctx.fillStyle = p.id === 'flame' ? flameTestSalts[i].flameHex : p.color; ctx.beginPath(); ctx.arc(x + 35, yy + 12, 5.5, 0, 7); ctx.fill(); text(r, x + 49, yy + 12, 9.8, C.ink, 650); text(p.id === 'flame' && state.flameTestTested.includes(i) ? '✓' : '↗', x + R - 31, yy + 12, 11, C.teal, 700, 'center'); hit('guided-reactant', x + 20, yy, R - 40, 24, r) }); const appY = reactY + 14 + p.reactants.length * 28 + 10; text('APPARATUS', x + 22, appY, 9.5, C.muted, 800); p.gear.slice(0, 4).forEach((g, i) => { rr(x + 20 + (i % 2) * 133, appY + 14 + Math.floor(i / 2) * 28, 123, 23, 6, '#fff', C.line); text(g, x + 29 + (i % 2) * 133, appY + 25 + Math.floor(i / 2) * 28, 9.2, C.ink, 600) }); const guideY = appY + 14 + Math.ceil(Math.min(4, p.gear.length) / 2) * 28 + 12; text('GUIDANCE', x + 22, guideY, 9.5, C.muted, 800); rr(x + 20, guideY + 14, R - 40, 58, 7, '#e8efed'); wrappedText(state.toast, x + 32, guideY + 28, R - 64, 9.5, C.ink, 600, 11, 2); const evalY = guideY + 80; rr(x + 20, evalY, R - 40, 46, 8, '#eef7f6', C.teal); ctx.fillStyle = C.teal; ctx.beginPath(); ctx.arc(x + 36, evalY + 23, 11, 0, Math.PI * 2); ctx.fill(); text('📊', x + 36, evalY + 23, 10.5, '#fff', 800, 'center'); text('PRACTICAL EVALUATION', x + 54, evalY + 17, 9.5, C.ink, 800); text('Variables & GCSE answers', x + 54, evalY + 32, 8.5, C.teal, 650); text('↗', x + R - 31, evalY + 23, 13, C.teal, 800, 'center'); hit('practical-evaluation', x + 20, evalY, R - 40, 46) } else if (p.id === 'rates' && state.tab === 'birdseye') drawRatesBirdsEye(x + 18, 132, R - 36); else if (p.id === 'rates') drawRatesBarChart(x + 18, 132, R - 36, 320); else if (p.id === 'co2' && state.tab === 'birdseye') drawCo2BirdsEye(x + 18, 132, R - 36); else if (p.id === 'flame') drawAbsorptionSpectraPanel(x + 18, 132, R - 36); else if (p.id === 'mass') drawMassResultsTable(x + 18, 132, R - 36); else if (p.id === 'electro') drawElectrolysisResultsTable(x + 18, 132, R - 36); else if (p.id === 'titration') drawTitrationResultsTable(x + 18, 132, R - 36); else if (p.id === 'displacement') drawDisplacementResultsTable(x + 18, 132, R - 36); else if (p.id === 'chrom') drawChromatogramPanel(x + 18, 132, R - 36, Math.min(520, H - 170)); else if (p.id === 'salts') drawSaltMicroscopeResults(x + 18, 132, R - 36, Math.min(520, H - 170)); else drawGraph(x + 18, 132, R - 36, 300) }
+function rightbar() {
+  const R = Math.max(260, Math.min(330, W * .23)), x = W - R, p = practicals[state.selected], dragLab = p.id === 'rates' || p.id === 'temp';
+  if (p.id === 'free') { drawFreeLibrary(x, R); return }
+  ctx.fillStyle = '#f4f6f5';
+  ctx.fillRect(x, 64, R, H - 64);
+
+  const resultLabel = p.id === 'flame' ? 'SPECTRA' : ['mass', 'electro', 'titration', 'displacement'].includes(p.id) ? 'RESULTS' : p.id === 'chrom' ? 'MEASURE' : p.id === 'salts' ? 'VIEW RESULTS' : p.id === 'co2' ? "BIRD'S EYE" : 'GRAPH';
+  if (p.id === 'rates') {
+    button('METHOD', x + 10, 82, 76, 32, state.tab === 'bench');
+    button('GRAPH', x + 93, 82, 70, 32, state.tab === 'graph');
+    button("BIRD'S EYE", x + 170, 82, R - 180, 32, state.tab === 'birdseye');
+  } else {
+    button('METHOD', x + 18, 82, 92, 32, state.tab === 'bench');
+    button(resultLabel, x + 118, 82, p.id === 'co2' ? 112 : 92, 32, p.id === 'co2' ? state.tab === 'birdseye' : state.tab === 'graph');
+  }
+
+  // TOP PROMINENT PRACTICAL EVALUATION BANNER CARD
+  const bannerY = 124;
+  rr(x + 16, bannerY, R - 32, 44, 8, '#eef7f6', C.teal);
+  ctx.fillStyle = C.teal;
+  ctx.beginPath();
+  ctx.arc(x + 34, bannerY + 22, 11, 0, Math.PI * 2);
+  ctx.fill();
+  text('📊', x + 34, bannerY + 22, 10.5, '#fff', 800, 'center');
+  text('PRACTICAL EVALUATION', x + 52, bannerY + 16, 9.6, C.ink, 800);
+  text('IV, DV, CVs & GCSE answers', x + 52, bannerY + 31, 8.5, C.teal, 650);
+  text('↗', x + R - 28, bannerY + 22, 13, C.teal, 800, 'center');
+  hit('practical-evaluation', x + 16, bannerY, R - 32, 44);
+
+  if (state.tab === 'bench') {
+    const topOffset = 180;
+    text('METHOD', x + 22, topOffset, 10, C.muted, 800);
+    const activeStep = p.id === 'rates' ? ratesStepIndex() : p.id === 'mass' ? massStepIndex() : p.id === 'hydrogen' ? hydrogenStepIndex() : p.id === 'titration' ? titrationStepIndex() : p.id === 'salts' ? saltsStepIndex() : p.id === 'flame' ? flameTestStepIndex() : p.id === 'displacement' ? displacementStepIndex() : p.id === 'thermite' ? thermiteStepIndex() : p.id === 'density' ? densityStepIndex() : Math.floor(state.progress * 3);
+    p.steps.forEach((s, i) => {
+      let yy = topOffset + 20 + i * 32;
+      ctx.fillStyle = i <= activeStep ? C.teal : '#d8e0e2';
+      ctx.beginPath();
+      ctx.arc(x + 35, yy, 10, 0, 7);
+      ctx.fill();
+      text(String(i + 1), x + 35, yy, 8.5, '#fff', 800, 'center');
+      text(s, x + 52, yy, 10.2, C.ink, 600);
+    });
+
+    const reactY = topOffset + 20 + p.steps.length * 32 + 8;
+    text('REACTANTS — CLICK OR DRAG', x + 22, reactY, 9.5, C.muted, 800);
+    p.reactants.forEach((r, i) => {
+      let yy = reactY + 14 + i * 26, selectedSalt = p.id === 'flame' && state.flameTestSalt === i;
+      rr(x + 20, yy, R - 40, 23, 6, selectedSalt ? '#fff4ef' : '#fff', selectedSalt ? flameTestSalts[i].flameHex : C.line);
+      ctx.fillStyle = p.id === 'flame' ? flameTestSalts[i].flameHex : p.color;
+      ctx.beginPath();
+      ctx.arc(x + 35, yy + 11.5, 5, 0, 7);
+      ctx.fill();
+      text(r, x + 49, yy + 11.5, 9.6, C.ink, 650);
+      text(p.id === 'flame' && state.flameTestTested.includes(i) ? '✓' : '↗', x + R - 31, yy + 11.5, 11, C.teal, 700, 'center');
+      hit('guided-reactant', x + 20, yy, R - 40, 23, r);
+    });
+
+    const appY = reactY + 14 + p.reactants.length * 26 + 8;
+    text('APPARATUS', x + 22, appY, 9.5, C.muted, 800);
+    p.gear.slice(0, 4).forEach((g, i) => {
+      rr(x + 20 + (i % 2) * 133, appY + 14 + Math.floor(i / 2) * 26, 123, 22, 6, '#fff', C.line);
+      text(g, x + 29 + (i % 2) * 133, appY + 23 + Math.floor(i / 2) * 26, 9, C.ink, 600);
+    });
+
+    const guideY = appY + 14 + Math.ceil(Math.min(4, p.gear.length) / 2) * 26 + 8;
+    text('GUIDANCE', x + 22, guideY, 9.5, C.muted, 800);
+    rr(x + 20, guideY + 14, R - 40, 54, 7, '#e8efed');
+    wrappedText(state.toast, x + 32, guideY + 27, R - 64, 9.5, C.ink, 600, 11, 2);
+  } else if (p.id === 'rates' && state.tab === 'birdseye') drawRatesBirdsEye(x + 18, 180, R - 36);
+  else if (p.id === 'rates') drawRatesBarChart(x + 18, 180, R - 36, 320);
+  else if (p.id === 'co2' && state.tab === 'birdseye') drawCo2BirdsEye(x + 18, 180, R - 36);
+  else if (p.id === 'flame') drawAbsorptionSpectraPanel(x + 18, 180, R - 36);
+  else if (p.id === 'mass') drawMassResultsTable(x + 18, 180, R - 36);
+  else if (p.id === 'electro') drawElectrolysisResultsTable(x + 18, 180, R - 36);
+  else if (p.id === 'titration') drawTitrationResultsTable(x + 18, 180, R - 36);
+  else if (p.id === 'displacement') drawDisplacementResultsTable(x + 18, 180, R - 36);
+  else if (p.id === 'chrom') drawChromatogramPanel(x + 18, 180, R - 36, Math.min(520, H - 210));
+  else if (p.id === 'salts') drawSaltMicroscopeResults(x + 18, 180, R - 36, Math.min(520, H - 210));
+  else drawGraph(x + 18, 180, R - 36, 280);
+}
 
 function drawEvaluationModal() {
   const p = practicals[state.selected];
