@@ -41,6 +41,179 @@ const subjects = [
   { id: 'biology', title: 'Biology', icon: '🌿', color: '#2e7d32' },
   { id: 'physics', title: 'Physics', icon: '⚡', color: '#0288d1' }
 ];
+
+const practicalEvaluations = {
+  free: {
+    iv: 'User-defined independent variable (factor deliberately varied).',
+    dv: 'User-defined dependent variable (measured outcome or property).',
+    cvs: 'Environmental temperature, reactant concentration, solution volume, glassware dimensions.',
+    improvements: [
+      'Use calibrated digital sensors (pH probe, temperature probe) rather than manual visual indicators.',
+      'Perform at least 3 repeat trials per condition to identify anomalies and calculate a mean.',
+      'Control ambient laboratory temperature using a thermostatically controlled water bath.'
+    ]
+  },
+  rates: {
+    iv: 'Temperature of sodium thiosulfate solution (°C)',
+    dv: 'Time taken for the black cross to be obscured by sulfur precipitate (s)',
+    cvs: 'Volume of sodium thiosulfate (50 cm³), volume of HCl (10 cm³), concentration of both reagents, size & thickness of cross, observer.',
+    improvements: [
+      'Use a digital colorimeter / light sensor with data logger to measure light transmission quantitatively instead of subjective human eyesight.',
+      'Use a thermostatically controlled water bath to maintain exact temperature throughout each trial.',
+      'Test smaller temperature intervals (e.g. 5 °C increments) to plot a smoother rate curve and identify trends accurately.'
+    ]
+  },
+  temp: {
+    iv: 'Volume of hydrochloric acid added to alkali (cm³)',
+    dv: 'Maximum temperature reached during the exothermic reaction (°C)',
+    cvs: 'Initial solution temperatures, concentration of HCl and NaOH (1.0 mol/dm³), total solution volume, vessel type.',
+    improvements: [
+      'Use a polystyrene cup in a glass beaker with a fitted lid (hole for thermometer) to minimise heat loss via conduction and convection.',
+      'Use a digital thermometer reading to 0.1 °C to reduce measurement uncertainty.',
+      'Repeat each volume combination 3 times to identify anomalies and calculate a mean maximum temperature.'
+    ]
+  },
+  titration: {
+    iv: 'Volume of NaOH added from burette (cm³)',
+    dv: 'Exact volume (titre) required to neutralise 25.0 cm³ of HCl (cm³)',
+    cvs: 'Volume of HCl in flask (25.0 cm³ using volumetric pipette), concentration of acid, indicator type (phenolphthalein) & volume (2 drops).',
+    improvements: [
+      'Swirl flask continuously and add titrant dropwise near endpoint to obtain concordant titres within 0.10 cm³ of each other.',
+      'Place a white tile beneath the flask to detect the subtle initial colour change (colourless to permanent pale pink) clearly.',
+      'Read burette meniscus at eye level from the bottom of the curve to eliminate parallax error.'
+    ]
+  },
+  salts: {
+    iv: 'Mass of insoluble copper(II) oxide added to warm sulfuric acid (g)',
+    dv: 'Yield and purity of hydrated copper(II) sulfate crystals produced (g)',
+    cvs: 'Volume (50 cm³) & concentration (1.0 mol/dm³) of sulfuric acid, heating temperature before addition, evaporation rate.',
+    improvements: [
+      'Add copper oxide in excess to ensure all acid is fully neutralized before filtering.',
+      'Filter mixture while warm to remove unreacted CuO without crystallising product in the filter paper.',
+      'Evaporate gently over a water bath to crystallisation point rather than heating to dryness to prevent thermal decomposition.'
+    ]
+  },
+  mass: {
+    iv: 'Duration of heating magnesium ribbon in crucible (s)',
+    dv: 'Total mass of crucible + contents after reaction (g)',
+    cvs: 'Initial mass of magnesium (4.01 g), crucible dimensions, air/oxygen supply.',
+    improvements: [
+      'Lift crucible lid periodically for 1–2 seconds to allow oxygen to enter while preventing white MgO smoke/powder from escaping.',
+      'Heat, cool, and re-weigh to constant mass to ensure the oxidation reaction has gone to complete conversion.',
+      'Clean magnesium ribbon with emery paper before weighing to remove pre-existing oxide layer.'
+    ]
+  },
+  hydrogen: {
+    iv: 'Mass / surface area of magnesium ribbon (g)',
+    dv: 'Volume of hydrogen gas collected (cm³) and characteristic squeaky pop test sound',
+    cvs: 'Volume (25 cm³) and concentration (1.0 mol/dm³) of dilute HCl, ambient temperature and pressure.',
+    improvements: [
+      'Collect gas over water into an inverted measuring cylinder or gas syringe to quantify gas volume vs time precisely.',
+      'Use a bung with delivery tube attached immediately after adding magnesium to prevent gas escaping before collection.',
+      'Repeat tests with identical ribbon lengths to ensure reliable pop audio detection.'
+    ]
+  },
+  co2: {
+    iv: 'Mass of calcium carbonate reacted with HCl (g)',
+    dv: 'Turbidity / opacity of limewater as white CaCO₃ precipitate forms (%)',
+    cvs: 'Volume (20 cm³) and concentration of limewater (Ca(OH)₂), delivery tube immersion depth, solution temperature.',
+    improvements: [
+      'Use a digital turbidity sensor or colorimeter to quantify limewater cloudiness objectively instead of visual timing.',
+      'Ensure delivery tube tip remains fully submerged beneath limewater surface throughout gas evolution.',
+      'Use a gas syringe in parallel to measure total CO₂ gas volume evolved over time.'
+    ]
+  },
+  electro: {
+    iv: 'Electric potential difference / current across graphite electrodes (V / A)',
+    dv: 'Mass of copper deposited at cathode (g) and volume of chlorine gas at anode (cm³)',
+    cvs: 'Concentration of CuCl₂ solution, electrode surface area & spacing, duration of electrolysis (minutes).',
+    improvements: [
+      'Gently rinse cathode with propanone/distilled water and air-dry thoroughly before weighing to avoid rubbing off copper deposit.',
+      'Use inverted test tubes or gas syringes filled with solution over electrodes to collect evolved gases quantitatively.',
+      'Maintain constant current using a rheostat / variable resistor to ensure uniform rate of deposition.'
+    ]
+  },
+  flame: {
+    iv: 'Type of metal chloride salt (Li⁺, Na⁺, K⁺, Ca²⁺, Cu²⁺)',
+    dv: 'Characteristic flame emission color and absorption spectrum wavelengths (nm)',
+    cvs: 'Bunsen burner setting (roaring blue flame), cleanliness of wire loop/spatula, sample quantity.',
+    improvements: [
+      'Clean nichrome wire with concentrated HCl and heat in roaring flame between tests until no flame color appears to prevent cross-contamination.',
+      'Use flame emission spectroscopy for precise quantitative identification of mixed metal ions.',
+      'Observe flame through blue cobalt glass when testing potassium to mask intense yellow sodium contamination.'
+    ]
+  },
+  displacement: {
+    iv: 'Type of metal strip added (Mg, Zn, Fe, Cu)',
+    dv: 'Temperature change ΔT (°C), solution colour change, and displaced metal coating',
+    cvs: 'Volume (25 cm³) & concentration (0.5 mol/dm³) of salt solutions, surface area of metal strips, reaction time.',
+    improvements: [
+      'Clean metal strips with sandpaper immediately before testing to remove oxide coating that delays reaction.',
+      'Use an insulated polystyrene cup calorimeter with lid to measure exact temperature rise ΔT to calculate enthalpy change.',
+      'Filter and weigh displaced metal after drying to compare stoichiometry quantitatively.'
+    ]
+  },
+  chrom: {
+    iv: 'Type of food dye / pigment mixture',
+    dv: 'Distance travelled by pigment spot (cm) and calculated Retention Factor (Rf)',
+    cvs: 'Type of solvent (water), chromatography paper type, baseline height from bottom (1.5 cm), solvent front height.',
+    improvements: [
+      'Use a fine capillary tube to apply small, concentrated dye spots to prevent spreading and overlapping.',
+      'Cover container with a lid to saturate internal atmosphere with solvent vapour and prevent solvent evaporation.',
+      'Ensure pencil is used for baseline since ink would dissolve in solvent and contaminate the chromatogram.'
+    ]
+  },
+  water: {
+    iv: 'Type / origin of water sample (sea water, waste water, distilled water)',
+    dv: 'Boiling point (°C), pH, and mass of dissolved solid residue remaining after evaporation (g)',
+    cvs: 'Volume of water sample tested (50 cm³), distillation heating rate, condenser cooling water flow rate.',
+    improvements: [
+      'Run cooling water into the bottom inlet of the Liebig condenser to keep condenser completely full of cold water (counter-current flow).',
+      'Add anti-bumping granules to heating flask to ensure smooth, even boiling without liquid splashing into delivery tube.',
+      'Use a digital electrical conductivity meter to verify pure distillate has zero dissolved ionic salts.'
+    ]
+  },
+  thermite: {
+    iv: 'Mass ratio of aluminium powder to iron(III) oxide charge',
+    dv: 'Peak core temperature reached (°C) and mass of molten iron produced (g)',
+    cvs: 'Length of magnesium fuse, sand containment volume, distance behind protective blast screen.',
+    improvements: [
+      'Dry reactants thoroughly in an oven/desiccator before ignition to eliminate moisture that causes steam explosions.',
+      'Use an infrared optical pyrometer to record peak thermal radiation safely from behind the blast shield.',
+      'Ignite electronically or with a remote fuse to ensure complete operator isolation.'
+    ]
+  },
+  pondweed: {
+    iv: 'Distance of LED lamp from pondweed (cm) [Light intensity ∝ 1 / distance²]',
+    dv: 'Number of oxygen bubbles produced per minute (or volume of O₂ collected in cm³)',
+    cvs: 'Sodium hydrogen carbonate (NaHCO₃) concentration, water bath temperature, pondweed length (8 cm), light wavelength.',
+    improvements: [
+      'Increase the number of intermediate distances tested (e.g. 5 cm intervals between 10–50 cm) to obtain a detailed rate curve.',
+      'Use an LED lamp (or place a glass water heat-shield between lamp and tube) to prevent lamp heat from altering water temperature.',
+      'Collect oxygen gas in an inverted measuring cylinder / micro-burette instead of counting bubbles to eliminate error from varying bubble sizes.'
+    ]
+  },
+  newton2: {
+    iv: 'Accelerating force F (N) [hanging mass] OR total mass m (kg) [trolley mass]',
+    dv: 'Acceleration of trolley a (m/s²), calculated from light gate velocities (v₂ - v₁) / t',
+    cvs: 'Track elevation angle, distance between light gates, width of trolley interrupt card (3.0 cm).',
+    improvements: [
+      'Slightly elevate the track to compensate for friction so the trolley travels at constant velocity when no external force acts.',
+      'Use dual light-gates connected to a computer data logger to measure velocity and acceleration automatically without human reaction error.',
+      'Keep total mass constant when varying force by transferring masses from trolley to mass hanger.'
+    ]
+  },
+  density: {
+    iv: 'Material / object type of irregular solid (Granite, Brass, Aluminium, Steel)',
+    dv: 'Displaced water volume V (cm³) in measuring cylinder and dry mass m (g) on balance',
+    cvs: 'Water density (1.0 g/cm³), Eureka can fill level (filled until spout stops dripping before test).',
+    improvements: [
+      'Fill Eureka can until spout drips, then wait until dripping stops completely before placing measuring cylinder under spout.',
+      'Lower solid object slowly using a thin thread to prevent splashing water or trapping air bubbles on the object surface.',
+      'Read measuring cylinder meniscus at eye level to measure displaced volume with high precision.'
+    ]
+  }
+};
 const chromPigments = [
   { id: 'magenta', label: 'Magenta', color: '#e23d79', hex: 0xe23d79, x: -.39, end: .61 },
   { id: 'blue', label: 'Blue', color: '#2879d8', hex: 0x2879d8, x: -.13, end: .75 },
@@ -275,7 +448,102 @@ function drawDensityControls(x, benchY) {
   button('CHANGE SAMPLE', x + 185, benchY + 46, 140, 38, busy);
   button('RESET PRACTICAL', x + 335, benchY + 46, 145, 38, false);
 }
-function rightbar() { const R = Math.max(260, Math.min(330, W * .23)), x = W - R, p = practicals[state.selected], dragLab = p.id === 'rates' || p.id === 'temp'; if (p.id === 'free') { drawFreeLibrary(x, R); return } ctx.fillStyle = '#f4f6f5'; ctx.fillRect(x, 64, R, H - 64); const resultLabel = p.id === 'flame' ? 'SPECTRA' : ['mass', 'electro', 'titration', 'displacement'].includes(p.id) ? 'RESULTS' : p.id === 'chrom' ? 'MEASURE' : p.id === 'salts' ? 'VIEW RESULTS' : p.id === 'co2' ? "BIRD'S EYE" : 'GRAPH'; if (p.id === 'rates') { button('METHOD', x + 10, 82, 76, 32, state.tab === 'bench'); button('GRAPH', x + 93, 82, 70, 32, state.tab === 'graph'); button("BIRD'S EYE", x + 170, 82, R - 180, 32, state.tab === 'birdseye') } else { button('METHOD', x + 18, 82, 92, 32, state.tab === 'bench'); button(resultLabel, x + 118, 82, p.id === 'co2' ? 112 : 92, 32, p.id === 'co2' ? state.tab === 'birdseye' : state.tab === 'graph') } if (state.tab === 'bench') { text('METHOD', x + 22, 132, 10, C.muted, 800); const activeStep = p.id === 'rates' ? ratesStepIndex() : p.id === 'mass' ? massStepIndex() : p.id === 'hydrogen' ? hydrogenStepIndex() : p.id === 'titration' ? titrationStepIndex() : p.id === 'salts' ? saltsStepIndex() : p.id === 'flame' ? flameTestStepIndex() : p.id === 'displacement' ? displacementStepIndex() : p.id === 'thermite' ? thermiteStepIndex() : p.id === 'density' ? densityStepIndex() : Math.floor(state.progress * 3); p.steps.forEach((s, i) => { let yy = 155 + i * 40; ctx.fillStyle = i <= activeStep ? C.teal : '#d8e0e2'; ctx.beginPath(); ctx.arc(x + 35, yy, 11, 0, 7); ctx.fill(); text(String(i + 1), x + 35, yy, 9, '#fff', 800, 'center'); text(s, x + 55, yy, 11.2, C.ink, 600) }); text('REACTANTS — CLICK OR DRAG', x + 22, 326, 9.5, C.muted, 800); p.reactants.forEach((r, i) => { let yy = 342 + i * 31, selectedSalt = p.id === 'flame' && state.flameTestSalt === i; rr(x + 20, yy, R - 40, 25, 6, selectedSalt ? '#fff4ef' : '#fff', selectedSalt ? flameTestSalts[i].flameHex : C.line); ctx.fillStyle = p.id === 'flame' ? flameTestSalts[i].flameHex : p.color; ctx.beginPath(); ctx.arc(x + 35, yy + 12.5, 6, 0, 7); ctx.fill(); text(r, x + 49, yy + 12.5, 10.2, C.ink, 650); text(p.id === 'flame' && state.flameTestTested.includes(i) ? '✓' : '↗', x + R - 31, yy + 12.5, 12, C.teal, 700, 'center'); hit('guided-reactant', x + 20, yy, R - 40, 25, r) }); const appY = 350 + p.reactants.length * 31; text('APPARATUS', x + 22, appY, 9.5, C.muted, 800); p.gear.slice(0, 4).forEach((g, i) => { rr(x + 20 + (i % 2) * 133, appY + 15 + Math.floor(i / 2) * 31, 123, 24, 6, '#fff', C.line); text(g, x + 29 + (i % 2) * 133, appY + 27 + Math.floor(i / 2) * 31, 9.5, C.ink, 600) }); const guideY = Math.min(H - 100, appY + 86); text('GUIDANCE', x + 22, guideY, 9.5, C.muted, 800); rr(x + 20, guideY + 15, R - 40, 70, 7, '#e8efed'); wrappedText(state.toast, x + 32, guideY + 32, R - 64, 9.8, C.ink, 600, 12, 2); const hint = p.id === 'rates' ? (state.ratesConditioning ? 'Water bath warming to the next set temperature.' : state.ratesStage === 0 ? 'Move the conditioned flask onto the cross.' : state.ratesStage === 2 ? 'Add HCl to start the timed reaction.' : state.ratesStage === 3 ? 'Observe the cross as sulfur forms.' : 'Repeat at the next temperature.') : p.id === 'co2' ? (state.running ? 'CO₂ bubbles from the submerged inlet tube.' : state.complete ? 'Limewater is milky: carbon dioxide confirmed.' : 'Both bungs seal around their central tubes.') : p.id === 'flame' ? (state.flameTestStage === 0 ? 'Choose a salt, then scoop a small sample.' : state.flameTestStage === 2 ? 'Move the loaded spatula into the blue flame.' : state.flameTestStage >= 4 ? 'Compare the flame colour with its dark absorption bands.' : 'Keep the sample clear of other salt jars.') : p.id === 'displacement' ? (state.running ? 'Compare solution colour and metal coatings.' : state.complete ? 'Record the reactivity order from the four tubes.' : 'Lower all four cleaned strips together.') : p.id === 'thermite' ? 'Remain behind the screen; this is a simulation only.' : p.id === 'pondweed' ? 'Adjust lamp distance (10-50 cm) and measure oxygen bubble production.' : p.id === 'newton2' ? 'Set accelerating force and trolley mass, then release the trolley.' : p.id === 'density' ? (state.densityStage === 0 ? 'Click WEIGH OBJECT to measure sample mass.' : state.densityStage === 1 ? 'Mass measured. Click FILL EUREKA CAN.' : state.densityStage === 2 ? 'Click LOWER OBJECT to submerge it.' : state.densityStage === 3 ? 'Water overflowing into measuring cylinder...' : 'Displaced volume V measured. Calculate ρ = m / V.') : state.running ? 'Liquid is flowing. Observe the meniscus' : dragLab ? 'Drag HCl flask onto the receiver.' : 'Use a reactant card or controls.'; text(hint, x + 32, guideY + 64, 9.2, C.muted, 500) } else if (p.id === 'rates' && state.tab === 'birdseye') drawRatesBirdsEye(x + 18, 132, R - 36); else if (p.id === 'rates') drawRatesBarChart(x + 18, 132, R - 36, 320); else if (p.id === 'co2' && state.tab === 'birdseye') drawCo2BirdsEye(x + 18, 132, R - 36); else if (p.id === 'flame') drawAbsorptionSpectraPanel(x + 18, 132, R - 36); else if (p.id === 'mass') drawMassResultsTable(x + 18, 132, R - 36); else if (p.id === 'electro') drawElectrolysisResultsTable(x + 18, 132, R - 36); else if (p.id === 'titration') drawTitrationResultsTable(x + 18, 132, R - 36); else if (p.id === 'displacement') drawDisplacementResultsTable(x + 18, 132, R - 36); else if (p.id === 'chrom') drawChromatogramPanel(x + 18, 132, R - 36, Math.min(520, H - 170)); else if (p.id === 'salts') drawSaltMicroscopeResults(x + 18, 132, R - 36, Math.min(520, H - 170)); else drawGraph(x + 18, 132, R - 36, 300) }
+function rightbar() { const R = Math.max(260, Math.min(330, W * .23)), x = W - R, p = practicals[state.selected], dragLab = p.id === 'rates' || p.id === 'temp'; if (p.id === 'free') { drawFreeLibrary(x, R); return } ctx.fillStyle = '#f4f6f5'; ctx.fillRect(x, 64, R, H - 64); const resultLabel = p.id === 'flame' ? 'SPECTRA' : ['mass', 'electro', 'titration', 'displacement'].includes(p.id) ? 'RESULTS' : p.id === 'chrom' ? 'MEASURE' : p.id === 'salts' ? 'VIEW RESULTS' : p.id === 'co2' ? "BIRD'S EYE" : 'GRAPH'; if (p.id === 'rates') { button('METHOD', x + 10, 82, 76, 32, state.tab === 'bench'); button('GRAPH', x + 93, 82, 70, 32, state.tab === 'graph'); button("BIRD'S EYE", x + 170, 82, R - 180, 32, state.tab === 'birdseye') } else { button('METHOD', x + 18, 82, 92, 32, state.tab === 'bench'); button(resultLabel, x + 118, 82, p.id === 'co2' ? 112 : 92, 32, p.id === 'co2' ? state.tab === 'birdseye' : state.tab === 'graph') } if (state.tab === 'bench') { text('METHOD', x + 22, 132, 10, C.muted, 800); const activeStep = p.id === 'rates' ? ratesStepIndex() : p.id === 'mass' ? massStepIndex() : p.id === 'hydrogen' ? hydrogenStepIndex() : p.id === 'titration' ? titrationStepIndex() : p.id === 'salts' ? saltsStepIndex() : p.id === 'flame' ? flameTestStepIndex() : p.id === 'displacement' ? displacementStepIndex() : p.id === 'thermite' ? thermiteStepIndex() : p.id === 'density' ? densityStepIndex() : Math.floor(state.progress * 3); p.steps.forEach((s, i) => { let yy = 155 + i * 40; ctx.fillStyle = i <= activeStep ? C.teal : '#d8e0e2'; ctx.beginPath(); ctx.arc(x + 35, yy, 11, 0, 7); ctx.fill(); text(String(i + 1), x + 35, yy, 9, '#fff', 800, 'center'); text(s, x + 55, yy, 11.2, C.ink, 600) }); text('REACTANTS — CLICK OR DRAG', x + 22, 326, 9.5, C.muted, 800); p.reactants.forEach((r, i) => { let yy = 342 + i * 31, selectedSalt = p.id === 'flame' && state.flameTestSalt === i; rr(x + 20, yy, R - 40, 25, 6, selectedSalt ? '#fff4ef' : '#fff', selectedSalt ? flameTestSalts[i].flameHex : C.line); ctx.fillStyle = p.id === 'flame' ? flameTestSalts[i].flameHex : p.color; ctx.beginPath(); ctx.arc(x + 35, yy + 12.5, 6, 0, 7); ctx.fill(); text(r, x + 49, yy + 12.5, 10.2, C.ink, 650); text(p.id === 'flame' && state.flameTestTested.includes(i) ? '✓' : '↗', x + R - 31, yy + 12.5, 12, C.teal, 700, 'center'); hit('guided-reactant', x + 20, yy, R - 40, 25, r) }); const appY = 350 + p.reactants.length * 31; text('APPARATUS', x + 22, appY, 9.5, C.muted, 800); p.gear.slice(0, 4).forEach((g, i) => { rr(x + 20 + (i % 2) * 133, appY + 15 + Math.floor(i / 2) * 31, 123, 24, 6, '#fff', C.line); text(g, x + 29 + (i % 2) * 133, appY + 27 + Math.floor(i / 2) * 31, 9.5, C.ink, 600) });     const guideY = Math.min(H - 170, appY + 86); text('GUIDANCE', x + 22, guideY, 9.5, C.muted, 800); rr(x + 20, guideY + 15, R - 40, 70, 7, '#e8efed'); wrappedText(state.toast, x + 32, guideY + 32, R - 64, 9.8, C.ink, 600, 12, 2); const hint = p.id === 'rates' ? (state.ratesConditioning ? 'Water bath warming to the next set temperature.' : state.ratesStage === 0 ? 'Move the conditioned flask onto the cross.' : state.ratesStage === 2 ? 'Add HCl to start the timed reaction.' : state.ratesStage === 3 ? 'Observe the cross as sulfur forms.' : 'Repeat at the next temperature.') : p.id === 'co2' ? (state.running ? 'CO₂ bubbles from the submerged inlet tube.' : state.complete ? 'Limewater is milky: carbon dioxide confirmed.' : 'Both bungs seal around their central tubes.') : p.id === 'flame' ? (state.flameTestStage === 0 ? 'Choose a salt, then scoop a small sample.' : state.flameTestStage === 2 ? 'Move the loaded spatula into the blue flame.' : state.flameTestStage >= 4 ? 'Compare the flame colour with its dark absorption bands.' : 'Keep the sample clear of other salt jars.') : p.id === 'displacement' ? (state.running ? 'Compare solution colour and metal coatings.' : state.complete ? 'Record the reactivity order from the four tubes.' : 'Lower all four cleaned strips together.') : p.id === 'thermite' ? 'Remain behind the screen; this is a simulation only.' : p.id === 'pondweed' ? 'Adjust lamp distance (10-50 cm) and measure oxygen bubble production.' : p.id === 'newton2' ? 'Set accelerating force and trolley mass, then release the trolley.' : p.id === 'density' ? (state.densityStage === 0 ? 'Click WEIGH OBJECT to measure sample mass.' : state.densityStage === 1 ? 'Mass measured. Click FILL EUREKA CAN.' : state.densityStage === 2 ? 'Click LOWER OBJECT to submerge it.' : state.densityStage === 3 ? 'Water overflowing into measuring cylinder...' : 'Displaced volume V measured. Calculate ρ = m / V.') : state.running ? 'Liquid is flowing. Observe the meniscus' : dragLab ? 'Drag HCl flask onto the receiver.' : 'Use a reactant card or controls.'; text(hint, x + 32, guideY + 64, 9.2, C.muted, 500); const evalY = guideY + 95; if (evalY + 48 < benchY) { rr(x + 20, evalY, R - 40, 48, 9, '#eef7f6', C.teal); ctx.fillStyle = C.teal; ctx.beginPath(); ctx.arc(x + 36, evalY + 24, 11, 0, Math.PI * 2); ctx.fill(); text('📊', x + 36, evalY + 24, 11, '#fff', 800, 'center'); text('PRACTICAL EVALUATION', x + 55, evalY + 18, 9.8, C.ink, 800); text('Variables & GCSE answers', x + 55, evalY + 34, 8.8, C.teal, 600); text('↗', x + R - 31, evalY + 24, 14, C.teal, 800, 'center'); hit('practical-evaluation', x + 20, evalY, R - 40, 48); } } else if (p.id === 'rates' && state.tab === 'birdseye') drawRatesBirdsEye(x + 18, 132, R - 36); else if (p.id === 'rates') drawRatesBarChart(x + 18, 132, R - 36, 320); else if (p.id === 'co2' && state.tab === 'birdseye') drawCo2BirdsEye(x + 18, 132, R - 36); else if (p.id === 'flame') drawAbsorptionSpectraPanel(x + 18, 132, R - 36); else if (p.id === 'mass') drawMassResultsTable(x + 18, 132, R - 36); else if (p.id === 'electro') drawElectrolysisResultsTable(x + 18, 132, R - 36); else if (p.id === 'titration') drawTitrationResultsTable(x + 18, 132, R - 36); else if (p.id === 'displacement') drawDisplacementResultsTable(x + 18, 132, R - 36); else if (p.id === 'chrom') drawChromatogramPanel(x + 18, 132, R - 36, Math.min(520, H - 170)); else if (p.id === 'salts') drawSaltMicroscopeResults(x + 18, 132, R - 36, Math.min(520, H - 170)); else drawGraph(x + 18, 132, R - 36, 300) }
+
+function drawEvaluationModal() {
+  const p = practicals[state.selected];
+  const evalData = practicalEvaluations[p.id] || practicalEvaluations.free;
+  ctx.fillStyle = 'rgba(9, 23, 32, 0.62)';
+  ctx.fillRect(0, 0, W, H);
+  hit('close-evaluation-modal', 0, 0, W, H);
+
+  const w = Math.min(740, W - 40);
+  const h = Math.min(570, H - 40);
+  const x = (W - w) / 2;
+  const y = (H - h) / 2;
+
+  ctx.save();
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.38)';
+  ctx.shadowBlur = 24;
+  ctx.shadowOffsetY = 8;
+  rr(x, y, w, h, 16, '#ffffff', '#cbd6d8');
+  ctx.restore();
+
+  const pColor = p.color || C.teal;
+  ctx.save();
+  ctx.beginPath();
+  ctx.roundRect(x, y, w, 68, [16, 16, 0, 0]);
+  ctx.clip();
+  ctx.fillStyle = pColor;
+  ctx.fillRect(x, y, w, 68);
+  ctx.restore();
+
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.22)';
+  ctx.beginPath();
+  ctx.arc(x + 36, y + 34, 18, 0, Math.PI * 2);
+  ctx.fill();
+  text(p.icon, x + 36, y + 34, 14, '#ffffff', 800, 'center');
+
+  text('PRACTICAL EVALUATION & GCSE VARIABLES', x + 64, y + 25, 9.5, 'rgba(255, 255, 255, 0.85)', 800);
+  text(p.title, x + 64, y + 46, 17, '#ffffff', 800);
+
+  rr(x + w - 48, y + 18, 32, 32, 16, 'rgba(255, 255, 255, 0.25)', null);
+  text('✕', x + w - 32, y + 34, 14, '#ffffff', 800, 'center');
+  hit('close-evaluation-modal', x + w - 48, y + 18, 32, 32);
+
+  let curY = y + 84;
+
+  text('EXPERIMENTAL VARIABLES', x + 24, curY, 9.5, C.muted, 800);
+  curY += 14;
+
+  const varBoxW = (w - 48 - 24) / 3;
+  const varBoxH = 100;
+
+  // IV
+  rr(x + 24, curY, varBoxW, varBoxH, 10, '#f0f7f6', C.teal);
+  rr(x + 34, curY + 12, varBoxW - 20, 20, 5, C.teal);
+  text('INDEPENDENT (IV)', x + 34 + (varBoxW - 20) / 2, curY + 22, 8.5, '#ffffff', 800, 'center');
+  wrappedText(evalData.iv, x + 34, curY + 44, varBoxW - 20, 9.6, C.ink, 650, 13, 3);
+
+  // DV
+  rr(x + 24 + varBoxW + 12, curY, varBoxW, varBoxH, 10, '#fff8f2', C.orange);
+  rr(x + 34 + varBoxW + 12, curY + 12, varBoxW - 20, 20, 5, C.orange);
+  text('DEPENDENT (DV)', x + 34 + varBoxW + 12 + (varBoxW - 20) / 2, curY + 22, 8.5, '#ffffff', 800, 'center');
+  wrappedText(evalData.dv, x + 34 + varBoxW + 12, curY + 44, varBoxW - 20, 9.6, C.ink, 650, 13, 3);
+
+  // CVs
+  rr(x + 24 + (varBoxW + 12) * 2, curY, varBoxW, varBoxH, 10, '#f5f3f9', '#7c62b8');
+  rr(x + 34 + (varBoxW + 12) * 2, curY + 12, varBoxW - 20, 20, 5, '#7c62b8');
+  text('CONTROL (CVs)', x + 34 + (varBoxW + 12) * 2 + (varBoxW - 20) / 2, curY + 22, 8.5, '#ffffff', 800, 'center');
+  wrappedText(evalData.cvs, x + 34 + (varBoxW + 12) * 2, curY + 44, varBoxW - 20, 9.4, C.ink, 650, 12, 3);
+
+  curY += varBoxH + 20;
+
+  text('PROCEDURAL IMPROVEMENTS & GCSE EXAM ANSWERS', x + 24, curY, 9.5, C.muted, 800);
+  curY += 14;
+
+  const impBoxW = w - 48;
+  evalData.improvements.forEach((impText, idx) => {
+    const impH = 54;
+    rr(x + 24, curY, impBoxW, impH, 8, '#f8faf9', C.line);
+    
+    ctx.fillStyle = C.teal;
+    ctx.beginPath();
+    ctx.arc(x + 44, curY + impH / 2, 11, 0, Math.PI * 2);
+    ctx.fill();
+    text('✓', x + 44, curY + impH / 2, 10, '#ffffff', 800, 'center');
+
+    wrappedText(impText, x + 64, curY + 18, impBoxW - 52, 10.2, C.ink, 650, 14, 2);
+    curY += impH + 10;
+  });
+
+  const btnW = 180, btnH = 38;
+  const btnX = x + (w - btnW) / 2;
+  const btnY = y + h - 50;
+  rr(btnX, btnY, btnW, btnH, 8, C.teal, C.teal);
+  text('CLOSE EVALUATION', btnX + btnW / 2, btnY + btnH / 2, 11, '#ffffff', 800, 'center');
+  hit('close-evaluation-modal', btnX, btnY, btnW, btnH);
+}
 // controls
 if (free) { button('CLEAR BENCH', x + 30, benchY + 46, 112, 38, false); button('UNDO LAST', x + 152, benchY + 46, 105, 38, false); text(`${state.workspace.length} item${state.workspace.length === 1 ? '' : 's'} on bench`, x + 278, benchY + 65, 11, '#d8e8ed', 650) } else if (p.id === 'rates') drawRatesControls(x, benchY); else if (p.id === 'mass') drawMassControls(x, benchY); else if (p.id === 'hydrogen') drawHydrogenControls(x, benchY); else if (p.id === 'titration') drawTitrationControls(x, benchY); else if (p.id === 'salts') drawSaltsControls(x, benchY); else if (p.id === 'water') drawWaterControls(x, benchY); else if (p.id === 'electro') drawElectroControls(x, benchY); else if (p.id === 'flame') drawFlameTestControls(x, benchY); else if (p.id === 'displacement') drawDisplacementControls(x, benchY); else if (p.id === 'thermite') drawThermiteControls(x, benchY); else if (p.id === 'pondweed') drawPondweedControls(x, benchY); else if (p.id === 'newton2') drawNewton2Controls(x, benchY); else if (p.id === 'density') drawDensityControls(x, benchY); else { button(state.running ? 'RESET' : 'START', x + 30, benchY + 46, 112, 38, state.running); button('ADD REAGENT', x + 152, benchY + 46, 120, 38, false); button('RECORD', x + 282, benchY + 46, 90, 38, false) }
 // meters
