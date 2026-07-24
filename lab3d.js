@@ -767,17 +767,33 @@ export class LabRenderer3D{
       g.add(rail);
     });
 
-    // 3. End Pulley Assembly extending at right end (x = 1.95)
+    // 3. End Pulley Assembly overhanging right end of runway at a 45-degree angle
     const pulleyGroup = new THREE.Group();
-    const pStand = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.35, 0.06), trackMat);
-    pStand.position.set(1.95, 1.15, 0);
-    pulleyGroup.add(pStand);
+    const clampMat = new THREE.MeshStandardMaterial({ color: 0x37474f, metalness: 0.8, roughness: 0.3 });
+    const pClamp = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 0.22), clampMat);
+    pClamp.position.set(2.02, 1.02, 0);
+    pulleyGroup.add(pClamp);
 
-    const pWheelMat = new THREE.MeshStandardMaterial({ color: 0x37474f, roughness: 0.3 });
-    const pWheel = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.04, 24), pWheelMat);
+    // 45-degree Angled Overhanging Arm extending beyond the runway end (x = 2.10)
+    const armMat = new THREE.MeshStandardMaterial({ color: 0x90a4ae, metalness: 0.85, roughness: 0.2 });
+    const pArm = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.45, 16), armMat);
+    pArm.rotation.z = -Math.PI / 4; // 45 degrees up and right
+    pArm.position.set(2.18, 1.20, 0);
+    pulleyGroup.add(pArm);
+
+    // Pulley Wheel & Axle at top of angled arm (x = 2.34, y = 1.36)
+    const wheelCenter = new THREE.Vector3(2.34, 1.36, 0);
+    const pWheelMat = new THREE.MeshStandardMaterial({ color: 0x263238, roughness: 0.3 });
+    const pWheel = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 0.035, 24), pWheelMat);
     pWheel.rotation.x = Math.PI / 2;
-    pWheel.position.set(1.95, 1.3, 0);
+    pWheel.position.copy(wheelCenter);
     pulleyGroup.add(pWheel);
+
+    const axleMat = new THREE.MeshStandardMaterial({ color: 0xcfd8dc, metalness: 0.9, roughness: 0.1 });
+    const pAxle = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.08, 12), axleMat);
+    pAxle.position.copy(wheelCenter);
+    pulleyGroup.add(pAxle);
+
     g.add(pulleyGroup);
 
     // 4. Red IR Photogates
@@ -821,25 +837,32 @@ export class LabRenderer3D{
     g.add(trolleyGroup);
 
     // 6. Connecting String & Descending Mass Hanger
-    const hangerY = 1.2 - pos * 0.75;
+    // String drops vertically from the rightmost edge of pulley wheel (x = 2.45)
+    const stringDropX = 2.45;
+    const stringTopY = 1.47;
+    const stringDropY = 1.36;
+    const hangerY = 1.15 - pos * 0.70;
+    const hookY = hangerY + 0.08 + force * 0.2;
+
     const stringMat = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2 });
     const stringGeo = new THREE.BufferGeometry().setFromPoints([
       new THREE.Vector3(trolleyX + 0.28, 1.12, 0),
-      new THREE.Vector3(1.95, 1.3, 0),
-      new THREE.Vector3(1.95, hangerY + 0.08 + force * 0.2, 0)
+      new THREE.Vector3(wheelCenter.x, stringTopY, 0),
+      new THREE.Vector3(stringDropX, stringDropY, 0),
+      new THREE.Vector3(stringDropX, hookY, 0)
     ]);
     const stringLine = new THREE.Line(stringGeo, stringMat);
     g.add(stringLine);
 
-    // Slotted Mass Hanger (Visibly hanging off the elevated pulley!)
+    // Slotted Mass Hanger (Visibly hanging off the 45° overhanging pulley clear of the runway!)
     const hangerGroup = new THREE.Group();
     const hangerMat = new THREE.MeshStandardMaterial({ color: 0xffb300, metalness: 0.8, roughness: 0.2 });
     const hangerBody = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.14 + force * 0.4, 16), hangerMat);
-    hangerBody.position.set(1.95, hangerY, 0);
+    hangerBody.position.set(stringDropX, hangerY, 0);
     hangerGroup.add(hangerBody);
 
     const hookRing = new THREE.Mesh(new THREE.TorusGeometry(0.03, 0.008, 12, 16), hangerMat);
-    hookRing.position.set(1.95, hangerY + 0.08 + force * 0.2, 0);
+    hookRing.position.set(stringDropX, hookY, 0);
     hangerGroup.add(hookRing);
 
     g.add(hangerGroup);
