@@ -868,10 +868,217 @@ export class LabRenderer3D{
     g.add(hangerGroup);
     return shadowReady(g);
   }
+  densityRig(state) {
+    const g = new THREE.Group();
+    const stage = state.densityStage || 0;
+    const sampleIndex = state.densitySample || 0;
+    const samples = [
+      { name: 'Granite stone', mass: 187.5, vol: 75.0, density: 2.50, color: 0x78909c, shape: 'stone' },
+      { name: 'Brass weight', mass: 212.5, vol: 25.0, density: 8.50, color: 0xd4af37, shape: 'brass' },
+      { name: 'Aluminum block', mass: 108.0, vol: 40.0, density: 2.70, color: 0xb0bec5, shape: 'block' },
+      { name: 'Steel nut', mass: 157.0, vol: 20.0, density: 7.85, color: 0x546e7a, shape: 'nut' }
+    ];
+    const sample = samples[sampleIndex] || samples[0];
+
+    // 1. Electronic Balance on the Left (x = -2.2)
+    const reading = stage === 0 ? 0 : stage === 1 ? sample.mass : 0;
+    const bal = this.balance(reading);
+    bal.scale.setScalar(0.85);
+    bal.position.set(-2.2, 0, 0);
+    g.add(bal);
+
+    // 2. Eureka Can (Displacement Can) in Center (x = -0.3)
+    const eurekaGroup = new THREE.Group();
+    eurekaGroup.position.set(-0.3, 0, 0);
+
+    // Riser Stand
+    const riserMat = new THREE.MeshStandardMaterial({ color: 0x263238, roughness: 0.3 });
+    const riser = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.12, 0.85), riserMat);
+    riser.position.y = 0.06;
+    eurekaGroup.add(riser);
+
+    // Outer Metallic Can Body
+    const canMat = new THREE.MeshStandardMaterial({ color: 0xcfd8dc, metalness: 0.85, roughness: 0.2 });
+    const canBody = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 1.10, 32), canMat);
+    canBody.position.y = 0.67;
+    eurekaGroup.add(canBody);
+
+    // Rim ring
+    const innerRimMat = new THREE.MeshStandardMaterial({ color: 0x90a4ae, metalness: 0.8, roughness: 0.25 });
+    const innerRim = new THREE.Mesh(new THREE.TorusGeometry(0.42, 0.02, 12, 32), innerRimMat);
+    innerRim.rotation.x = Math.PI / 2;
+    innerRim.position.y = 1.22;
+    eurekaGroup.add(innerRim);
+
+    // Eureka Spout (angled tube extending down & right)
+    const spoutMat = new THREE.MeshStandardMaterial({ color: 0x90a4ae, metalness: 0.85, roughness: 0.2 });
+    const spout = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.028, 0.35, 16), spoutMat);
+    spout.rotation.z = -Math.PI / 6; // -30 degrees
+    spout.position.set(0.48, 1.05, 0);
+    eurekaGroup.add(spout);
+
+    // Water level inside Eureka Can
+    if (stage >= 2) {
+      const waterMat = new THREE.MeshPhysicalMaterial({
+        color: 0x29b6f6,
+        transparent: true,
+        opacity: 0.72,
+        roughness: 0.1,
+        transmission: 0.6,
+        ior: 1.33
+      });
+      const eurekaWater = new THREE.Mesh(new THREE.CylinderGeometry(0.40, 0.40, 0.95, 32), waterMat);
+      eurekaWater.position.y = 0.60;
+      eurekaGroup.add(eurekaWater);
+
+      const surfaceMat = new THREE.MeshPhysicalMaterial({
+        color: 0x81d4fa,
+        transparent: true,
+        opacity: 0.8,
+        roughness: 0.05
+      });
+      const waterSurface = new THREE.Mesh(new THREE.CircleGeometry(0.40, 32), surfaceMat);
+      waterSurface.rotation.x = -Math.PI / 2;
+      waterSurface.position.y = 1.075;
+      eurekaGroup.add(waterSurface);
+    }
+    g.add(eurekaGroup);
+
+    // 3. Measuring Cylinder under spout on Right (x = 0.8)
+    const cylGroup = new THREE.Group();
+    cylGroup.position.set(0.8, 0, 0);
+
+    const cylGlassMat = new THREE.MeshPhysicalMaterial({
+      color: 0xe0f7fa,
+      transparent: true,
+      opacity: 0.38,
+      roughness: 0.1,
+      transmission: 0.85
+    });
+    // Hex Base
+    const cylBase = new THREE.Mesh(new THREE.CylinderGeometry(0.30, 0.32, 0.05, 6), riserMat);
+    cylBase.position.y = 0.025;
+    cylGroup.add(cylBase);
+
+    // Glass Cylinder Tube
+    const cylTube = new THREE.Mesh(new THREE.CylinderGeometry(0.20, 0.20, 1.15, 32), cylGlassMat);
+    cylTube.position.y = 0.60;
+    cylGroup.add(cylTube);
+
+    // Graduation rings
+    const markMat = new THREE.MeshBasicMaterial({ color: 0x37474f });
+    for (let m = 1; m <= 8; m++) {
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.201, 0.004, 8, 24), markMat);
+      ring.rotation.x = Math.PI / 2;
+      ring.position.y = 0.12 + m * 0.11;
+      cylGroup.add(ring);
+    }
+
+    // Displaced Water inside Measuring Cylinder
+    const animProgress = stage === 3 ? Math.min(1, (state.densityTimer || 0) / 4.0) : stage >= 4 ? 1.0 : 0;
+    const targetVol = sample.vol;
+    const currentVol = targetVol * animProgress;
+    if (currentVol > 0.5) {
+      const fillFraction = currentVol / 100.0;
+      const cylWaterHeight = Math.max(0.04, fillFraction * 0.90);
+      const cylWaterMat = new THREE.MeshPhysicalMaterial({
+        color: 0x29b6f6,
+        transparent: true,
+        opacity: 0.75,
+        roughness: 0.1,
+        transmission: 0.6,
+        ior: 1.33
+      });
+      const cylWater = new THREE.Mesh(new THREE.CylinderGeometry(0.185, 0.185, cylWaterHeight, 32), cylWaterMat);
+      cylWater.position.y = 0.05 + cylWaterHeight / 2;
+      cylGroup.add(cylWater);
+
+      const cylMeniscus = new THREE.Mesh(new THREE.CircleGeometry(0.185, 32), new THREE.MeshBasicMaterial({ color: 0x81d4fa, transparent: true, opacity: 0.85 }));
+      cylMeniscus.rotation.x = -Math.PI / 2;
+      cylMeniscus.position.y = 0.05 + cylWaterHeight;
+      cylGroup.add(cylMeniscus);
+    }
+    g.add(cylGroup);
+
+    // 4. Irregular Solid Object
+    let objGeo;
+    if (sample.shape === 'brass') {
+      objGeo = new THREE.OctahedronGeometry(0.16, 1);
+    } else if (sample.shape === 'block') {
+      objGeo = new THREE.BoxGeometry(0.22, 0.18, 0.20);
+    } else if (sample.shape === 'nut') {
+      objGeo = new THREE.TorusGeometry(0.12, 0.06, 12, 6);
+    } else {
+      objGeo = new THREE.DodecahedronGeometry(0.18, 1);
+    }
+    const objMat = new THREE.MeshStandardMaterial({
+      color: sample.color,
+      metalness: sample.shape === 'brass' || sample.shape === 'nut' ? 0.8 : 0.2,
+      roughness: sample.shape === 'stone' ? 0.8 : 0.3
+    });
+    const solidMesh = new THREE.Mesh(objGeo, objMat);
+
+    // Position of solid object
+    let objX, objY, objZ = 0;
+    if (stage === 0 || stage === 1) {
+      // On balance pan
+      objX = -2.2;
+      objY = 0.78;
+    } else if (stage === 2) {
+      // Suspended above Eureka Can
+      objX = -0.3;
+      objY = 1.75;
+    } else if (stage === 3) {
+      // Animating down into Eureka Can
+      const q = Math.min(1, (state.densityTimer || 0) / 4.0);
+      const ease = q * q * (3 - 2 * q);
+      objX = -0.3;
+      objY = 1.75 - ease * 1.30;
+    } else {
+      // Submerged inside Eureka Can
+      objX = -0.3;
+      objY = 0.45;
+    }
+    solidMesh.position.set(objX, objY, objZ);
+    g.add(solidMesh);
+
+    // String (if stage >= 2)
+    if (stage >= 2) {
+      const stringMat = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2 });
+      const stringGeo = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(objX, 2.4, objZ),
+        new THREE.Vector3(objX, objY + 0.15, objZ)
+      ]);
+      const stringLine = new THREE.Line(stringGeo, stringMat);
+      g.add(stringLine);
+    }
+
+    // Water Stream pouring from Spout to Measuring Cylinder
+    if (stage === 3 && animProgress > 0.05 && animProgress < 0.98) {
+      const spoutTip = new THREE.Vector3(0.33, 0.98, 0);
+      const cylFillY = 0.05 + (currentVol / 100.0) * 0.90;
+      const cylTarget = new THREE.Vector3(0.80, cylFillY, 0);
+
+      const streamPoints = [];
+      const steps = 12;
+      for (let i = 0; i <= steps; i++) {
+        const t = i / steps;
+        const x = spoutTip.x + t * (cylTarget.x - spoutTip.x);
+        const y = spoutTip.y + t * (cylTarget.y - spoutTip.y) - Math.sin(t * Math.PI) * 0.08;
+        streamPoints.push(new THREE.Vector3(x, y, 0));
+      }
+      const streamGeo = new THREE.BufferGeometry().setFromPoints(streamPoints);
+      const streamMat = new THREE.LineBasicMaterial({ color: 0x81d4fa, linewidth: 4 });
+      const streamLine = new THREE.Line(streamGeo, streamMat);
+      g.add(streamLine);
+    }
+
+    return shadowReady(g);
+  }
   rebuild(state,p){this.clear();const id=p.id;
     if(id==='free'){
       for(const it of state.workspace){let anchor=it,elevation=0;if((it.type==='beaker'||it.type==='flask')&&it.snappedTo){const support=state.workspace.find(a=>a.uid===it.snappedTo&&a.type==='tripod');if(support){anchor=support;elevation=2.1}}const pos=this.posFromScreen(anchor.x,anchor.y),flameHeight=it.type==='bunsen'?this.freeBunsenHeight(it,state):1,o=this.itemObject(it,flameHeight);this.add(o,pos.x,pos.z,elevation,1.15);if(state.drag?.targetUid===it.uid){const ring=new THREE.Mesh(new THREE.TorusGeometry(1,.045,12,48),new THREE.MeshBasicMaterial({color:0x20d4b0}));ring.rotation.x=Math.PI/2;ring.position.set(pos.x,elevation+.05,pos.z);this.root.add(ring)}if(it.type==='tripod'&&state.drag?.snapUid===it.uid){const target=new THREE.Mesh(new THREE.TorusGeometry(.88,.055,16,72),new THREE.MeshBasicMaterial({color:0x21d6b1,transparent:true,opacity:.92,depthWrite:false}));target.rotation.x=Math.PI/2;target.position.set(pos.x,2.17,pos.z);target.renderOrder=12;this.root.add(target)}}
-      if(state.drag?.kind==='palette'){const pos=this.posFromScreen(state.drag.x,state.drag.y),ghost=this.itemObject({type:state.drag.type});ghost.traverse(o=>{if(o.material){o.material=o.material.clone();o.material.transparent=true;o.material.opacity=.35}});this.add(ghost,pos.x,pos.z,0,1.08)}
+      if(state.drag?.kind==='palette'){const pos=this.posFromScreen(state.drag.x,state.drag.y),ghost=this.itemObject({type:state.drag.type});ghost.traverse(o=>{if(o.material){o.material=o.material.clone();o.material.transparent=true;o.opacity=.35}});this.add(ghost,pos.x,pos.z,0,1.08)}
     }
     else if(id==='rates'){
       const transfer=Math.min(1,state.transferred||0),stage=state.ratesStage||0,moveQ=stage===1?Math.max(0,Math.min(1,(state.ratesStageTimer||0)/1.8)):stage===0?0:1,ease=moveQ*moveQ*(3-2*moveQ),bathPos=new THREE.Vector3(2.55,.43,-.42),crossPos=new THREE.Vector3(.72,.12,.25),receiverPos=new THREE.Vector3().lerpVectors(bathPos,crossPos,ease);if(stage===1)receiverPos.y+=Math.sin(Math.PI*ease)*.72;
@@ -938,6 +1145,7 @@ export class LabRenderer3D{
     else if(id==='thermite'){this.root.add(this.thermiteRig(state))}
     else if(id==='pondweed'){this.root.add(this.pondweedRig(state))}
     else if(id==='newton2'){this.root.add(this.newton2Rig(state))}
+    else if(id==='density'){this.root.add(this.densityRig(state))}
   }
   sync(state,p){
     if(!this.available)return;
