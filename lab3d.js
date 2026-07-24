@@ -6,6 +6,7 @@ const solid = (color,roughness=.46) => new THREE.MeshStandardMaterial({color,rou
 
 function shadowReady(root){root.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});return root}
 function cylinder(r,h,mat,segments=40){return new THREE.Mesh(new THREE.CylinderGeometry(r,r,h,segments),mat)}
+function roundedBox(w,h,d,r=.035,smooth=4){const shape=new THREE.Shape(),hw=w/2-r,hh=h/2-r;shape.moveTo(-hw,-h/2);shape.lineTo(hw,-h/2);shape.quadraticCurveTo(w/2,-h/2,w/2,-hh);shape.lineTo(w/2,hh);shape.quadraticCurveTo(w/2,h/2,hw,h/2);shape.lineTo(-hw,h/2);shape.quadraticCurveTo(-w/2,h/2,-w/2,hh);shape.lineTo(-w/2,-hh);shape.quadraticCurveTo(-w/2,-h/2,-hw,-h/2);const geo=new THREE.ExtrudeGeometry(shape,{depth:Math.max(.001,d-r*2),bevelEnabled:true,bevelSegments:smooth,steps:1,bevelSize:r,bevelThickness:r,curveSegments:smooth*2});geo.center();return geo}
 
 export class LabRenderer3D{
   constructor(canvas){
@@ -308,23 +309,20 @@ export class LabRenderer3D{
   ratesCrossPaper(){const g=new THREE.Group(),paperMat=new THREE.MeshStandardMaterial({color:0xfffdf1,roughness:.92,metalness:0,side:THREE.DoubleSide}),inkMat=new THREE.MeshStandardMaterial({color:0x11191c,roughness:.84,metalness:0});const paper=new THREE.Mesh(new THREE.BoxGeometry(1.62,.025,1.34),paperMat);paper.position.y=.115;g.add(paper);for(const angle of [Math.PI/4,-Math.PI/4]){const stroke=new THREE.Mesh(new THREE.BoxGeometry(1.4,.018,.105),inkMat);stroke.rotation.y=angle;stroke.position.y=.142;g.add(stroke)}const curl=new THREE.Mesh(new THREE.TorusGeometry(.72,.012,6,60,Math.PI*.45),new THREE.MeshBasicMaterial({color:0xe3dfcd,transparent:true,opacity:.55}));curl.rotation.set(Math.PI/2,0,Math.PI*.27);curl.position.set(-.06,.148,.04);g.add(curl);return shadowReady(g)}
   electricWaterBath(temperature=20,target=20,active=false){
     const g=new THREE.Group(),bathW=2.08,bathD=1.54,bodyMat=new THREE.MeshPhysicalMaterial({color:0xf7f8f6,roughness:.24,metalness:.04,clearcoat:.72,clearcoatRoughness:.15}),rimMat=new THREE.MeshPhysicalMaterial({color:0xffffff,roughness:.2,metalness:.02,clearcoat:.8,clearcoatRoughness:.12}),steelMat=metal(0xc4d0d3,.16),dark=solid(0x152830,.55),waterMat=new THREE.MeshPhysicalMaterial({color:0x55b9d2,transparent:true,opacity:.58,roughness:.08,transmission:.23,clearcoat:.8,depthWrite:false});
-    const base=new THREE.Mesh(new THREE.BoxGeometry(bathW,.66,bathD),bodyMat);base.position.y=.33;g.add(base);
-    // The inner floor remains white enamel beneath the liquid; the blue water
-    // is a real shallow volume with a gently animated surface rather than a
-    // single dark inset line.
-    const well=new THREE.Mesh(new THREE.BoxGeometry(1.76,.13,1.22),rimMat);well.position.y=.695;g.add(well);
+    const base=new THREE.Mesh(roundedBox(bathW,.66,bathD,.045),bodyMat);base.position.y=.33;g.add(base);
+    const well=new THREE.Mesh(roundedBox(1.76,.13,1.22,.02),rimMat);well.position.y=.695;g.add(well);
     const waterVolume=new THREE.Mesh(new THREE.BoxGeometry(1.68,.23,1.14),waterMat);waterVolume.position.y=.815;waterVolume.renderOrder=2;g.add(waterVolume);
     const water=new THREE.Mesh(new THREE.BoxGeometry(1.68,.025,1.14),new THREE.MeshPhysicalMaterial({color:0x71d2e4,transparent:true,opacity:.66,roughness:.06,transmission:.28,clearcoat:.9,depthWrite:false}));water.position.y=.937;water.renderOrder=3;g.add(water);
     const wallHeight=.34,wallY=.83,wallThickness=.12;
     for(const [x,z,sx,sz] of [[0,bathD/2-wallThickness/2,bathW,wallThickness],[0,-bathD/2+wallThickness/2,bathW,wallThickness],[-bathW/2+wallThickness/2,0,wallThickness,bathD-wallThickness*2],[bathW/2-wallThickness/2,0,wallThickness,bathD-wallThickness*2]]){
-      const wall=new THREE.Mesh(new THREE.BoxGeometry(sx,wallHeight,sz),rimMat);wall.position.set(x,wallY,z);g.add(wall)
+      const wall=new THREE.Mesh(roundedBox(sx,wallHeight,sz,.025),rimMat);wall.position.set(x,wallY,z);g.add(wall)
     }
-    const panel=new THREE.Mesh(new THREE.BoxGeometry(1.22,.34,.06),dark);panel.position.set(0,.3,bathD/2+.031);g.add(panel);
+    const panel=new THREE.Mesh(roundedBox(.96,.34,.05,.025),dark);panel.position.set(0,.3,bathD/2+.031);g.add(panel);
     const displayCanvas=document.createElement('canvas'),dc=displayCanvas.getContext('2d');displayCanvas.width=512;displayCanvas.height=160;dc.fillStyle='#071d20';dc.fillRect(0,0,512,160);dc.shadowColor='#71ffe8';dc.shadowBlur=18;dc.fillStyle='#83f7df';dc.font='800 66px ui-monospace, SFMono-Regular, Menlo, monospace';dc.textAlign='center';dc.textBaseline='middle';dc.fillText(`${temperature.toFixed(1)} °C`,256,65);dc.shadowBlur=0;dc.fillStyle='#b8c6c8';dc.font='700 27px Inter, sans-serif';dc.fillText(`SET ${target.toFixed(0)} °C`,256,128);
-    const texture=new THREE.CanvasTexture(displayCanvas);texture.colorSpace=THREE.SRGBColorSpace;const display=new THREE.Mesh(new THREE.PlaneGeometry(.88,.275),new THREE.MeshBasicMaterial({map:texture,toneMapped:false}));display.position.set(0,.31,bathD/2+.064);g.add(display);
-    const indicator=new THREE.Mesh(new THREE.SphereGeometry(.048,20,12),new THREE.MeshBasicMaterial({color:active?0xff7b3d:0x41d38b,toneMapped:false}));indicator.scale.z=.32;indicator.position.set(.73,.31,bathD/2+.067);g.add(indicator);
-    const dial=cylinder(.1,.06,steelMat,32);dial.rotation.x=Math.PI/2;dial.position.set(-.72,.31,bathD/2+.063);g.add(dial);
-    for(const x of [-.72,.72])for(const z of [-.55,.55]){const foot=new THREE.Mesh(new THREE.BoxGeometry(.2,.07,.17),dark);foot.position.set(x,.035,z);g.add(foot)}
+    const texture=new THREE.CanvasTexture(displayCanvas);texture.colorSpace=THREE.SRGBColorSpace;const display=new THREE.Mesh(new THREE.PlaneGeometry(.76,.26),new THREE.MeshBasicMaterial({map:texture,toneMapped:false}));display.position.set(0,.31,bathD/2+.058);g.add(display);
+    const indicator=new THREE.Mesh(new THREE.SphereGeometry(.048,20,12),new THREE.MeshBasicMaterial({color:active?0xff7b3d:0x41d38b,toneMapped:false}));indicator.scale.z=.32;indicator.position.set(.68,.31,bathD/2+.067);g.add(indicator);
+    const dial=cylinder(.1,.06,steelMat,32);dial.rotation.x=Math.PI/2;dial.position.set(-.68,.31,bathD/2+.063);g.add(dial);
+    for(const x of [-.72,.72])for(const z of [-.55,.55]){const foot=new THREE.Mesh(roundedBox(.2,.07,.17,.015),dark);foot.position.set(x,.035,z);g.add(foot)}
     const bathThermometer=this.thermometer(temperature);bathThermometer.scale.setScalar(.54);bathThermometer.position.set(.55,.68,.02);bathThermometer.rotation.z=-.06;g.add(bathThermometer);
     const heaterLight=new THREE.PointLight(0xff7048,active?2.4:.25,2.2,1.7);heaterLight.position.set(0,.5,0);g.add(heaterLight);this.dynamic.push({kind:'bathWater',surface:water,indicator,light:heaterLight,active,baseY:.937});g.userData.electricWaterBath=true;return shadowReady(g)
   }
