@@ -767,30 +767,30 @@ export class LabRenderer3D{
       g.add(rail);
     });
 
-    // 3. End Pulley Assembly overhanging right end of runway at a 45-degree angle
+    // 3. End Pulley Assembly with a compact 45-degree overhanging arm at right end of runway
     const pulleyGroup = new THREE.Group();
     const clampMat = new THREE.MeshStandardMaterial({ color: 0x37474f, metalness: 0.8, roughness: 0.3 });
-    const pClamp = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 0.22), clampMat);
-    pClamp.position.set(2.02, 1.02, 0);
+    const pClamp = new THREE.Mesh(new THREE.BoxGeometry(0.10, 0.10, 0.20), clampMat);
+    pClamp.position.set(2.04, 1.02, 0);
     pulleyGroup.add(pClamp);
 
-    // 45-degree Angled Overhanging Arm extending beyond the runway end (x = 2.10)
+    // Compact 45-degree Angled Pole (length = 0.22)
     const armMat = new THREE.MeshStandardMaterial({ color: 0x90a4ae, metalness: 0.85, roughness: 0.2 });
-    const pArm = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.45, 16), armMat);
+    const pArm = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.22, 16), armMat);
     pArm.rotation.z = -Math.PI / 4; // 45 degrees up and right
-    pArm.position.set(2.18, 1.20, 0);
+    pArm.position.set(2.12, 1.12, 0);
     pulleyGroup.add(pArm);
 
-    // Pulley Wheel & Axle at top of angled arm (x = 2.34, y = 1.36)
-    const wheelCenter = new THREE.Vector3(2.34, 1.36, 0);
+    // Pulley Wheel & Axle at top of angled pole (x = 2.20, y = 1.20)
+    const wheelCenter = new THREE.Vector3(2.20, 1.20, 0);
     const pWheelMat = new THREE.MeshStandardMaterial({ color: 0x263238, roughness: 0.3 });
-    const pWheel = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 0.035, 24), pWheelMat);
+    const pWheel = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.03, 24), pWheelMat);
     pWheel.rotation.x = Math.PI / 2;
     pWheel.position.copy(wheelCenter);
     pulleyGroup.add(pWheel);
 
     const axleMat = new THREE.MeshStandardMaterial({ color: 0xcfd8dc, metalness: 0.9, roughness: 0.1 });
-    const pAxle = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.08, 12), axleMat);
+    const pAxle = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.07, 12), axleMat);
     pAxle.position.copy(wheelCenter);
     pulleyGroup.add(pAxle);
 
@@ -837,11 +837,11 @@ export class LabRenderer3D{
     g.add(trolleyGroup);
 
     // 6. Connecting String & Descending Mass Hanger
-    // String drops vertically from the rightmost edge of pulley wheel (x = 2.45)
-    const stringDropX = 2.45;
-    const stringTopY = 1.47;
-    const stringDropY = 1.36;
-    const hangerY = 1.15 - pos * 0.70;
+    // String drops vertically from the rightmost edge of pulley wheel (x = 2.29)
+    const stringDropX = 2.29;
+    const stringTopY = 1.29;
+    const stringDropY = 1.20;
+    const hangerY = 1.05 - pos * 0.65;
     const hookY = hangerY + 0.08 + force * 0.2;
 
     const stringMat = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2 });
@@ -854,14 +854,14 @@ export class LabRenderer3D{
     const stringLine = new THREE.Line(stringGeo, stringMat);
     g.add(stringLine);
 
-    // Slotted Mass Hanger (Visibly hanging off the 45° overhanging pulley clear of the runway!)
+    // Slotted Mass Hanger (Hanging off the compact 45° pulley clear of the runway)
     const hangerGroup = new THREE.Group();
     const hangerMat = new THREE.MeshStandardMaterial({ color: 0xffb300, metalness: 0.8, roughness: 0.2 });
-    const hangerBody = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.14 + force * 0.4, 16), hangerMat);
+    const hangerBody = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.14 + force * 0.4, 16), hangerMat);
     hangerBody.position.set(stringDropX, hangerY, 0);
     hangerGroup.add(hangerBody);
 
-    const hookRing = new THREE.Mesh(new THREE.TorusGeometry(0.03, 0.008, 12, 16), hangerMat);
+    const hookRing = new THREE.Mesh(new THREE.TorusGeometry(0.026, 0.007, 12, 16), hangerMat);
     hookRing.position.set(stringDropX, hookY, 0);
     hangerGroup.add(hookRing);
 
