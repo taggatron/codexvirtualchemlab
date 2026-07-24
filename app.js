@@ -445,6 +445,8 @@ function activatePondweed(label) {
     state.running = false;
     state.complete = false;
     state.toast = 'Pondweed practical reset to 20 cm.';
+  } else if (label === 'METHOD') {
+    state.tab = 'bench';
   } else if (label === 'RESULTS' || label === 'GRAPH') {
     state.tab = 'graph';
   }
@@ -478,14 +480,16 @@ function activateNewton2(label) {
     state.newtonResults = [];
     state.points = [];
     state.toast = 'Newton\'s 2nd Law practical reset.';
+  } else if (label === 'METHOD') {
+    state.tab = 'bench';
   } else if (label === 'RESULTS' || label === 'GRAPH') {
     state.tab = 'graph';
   }
 }
 function activate(label) {
   const id = practicals[state.selected].id;
-  if (id === 'pondweed') { activatePondweed(label); draw(); return }
-  if (id === 'newton2') { activateNewton2(label); draw(); return }
+  if (id === 'pondweed' && ['DISTANCE -10cm', 'DISTANCE +10cm', 'LAMP ON', 'LAMP OFF', 'COUNT 1 MIN', 'RESET PRACTICAL', 'METHOD', 'RESULTS', 'GRAPH'].includes(label)) { activatePondweed(label); draw(); return }
+  if (id === 'newton2' && ['FORCE -0.1N', 'FORCE +0.1N', 'RELEASE TROLLEY', 'RESET TROLLEY', 'RESET PRACTICAL', 'METHOD', 'RESULTS', 'GRAPH'].includes(label)) { activateNewton2(label); draw(); return }
   if (id === 'rates' && ['MOVE TO CROSS', 'MOVING FLASK…', 'ADD HCl', 'REACTION RUNNING…', 'NEXT TEMPERATURE', 'VIEW GRAPH', 'RESET SERIES', "BIRD'S EYE", 'HEATING BATH…'].includes(label)) { activateRates(label); draw(); return }
   if (id === 'titration' && ['ADD INDICATOR', 'OPEN TAP', 'TAP OPEN…', 'ADD ONE DROP', 'RECORD TITRE', 'RESET PRACTICAL', 'RESULTS'].includes(label)) { activateTitration(label); draw(); return }
   if (id === 'water' && ['WATER ON', 'WATER OFF', 'HEATER ON', 'HEATER OFF', 'RECORD'].includes(label)) { activateWater(label); draw(); return }
