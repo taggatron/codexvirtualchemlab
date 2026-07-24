@@ -99,7 +99,7 @@ export class LabRenderer3D{
             vUv=uv;
             vec3 p=position;
             float lift=smoothstep(.08,1.,uv.y);
-            p.x+=(sin(uv.y*8.0+uTime*1.2+uSeed)*.0015+sin(uv.y*18.0-uTime*1.8+uSeed*.4)*.0005)*lift;
+            p.x+=(sin(uv.y*8.0+uTime*1.2+uSeed)*.0003+sin(uv.y*18.0-uTime*1.8+uSeed*.4)*.0001)*lift;
             p.y+=sin(uv.y*10.0-uTime*1.2+uSeed)*.001*lift;
             gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.0);
           }
@@ -116,7 +116,7 @@ export class LabRenderer3D{
             float y=clamp(vUv.y,0.,1.);
             float turbulence=fbm(vec2(y*5.2-uTime*.58+uSeed,vUv.x*3.1+uTime*.09));
             float fine=noise(vec2(y*17.0+uTime*1.25,vUv.x*9.0-uTime*.35+uSeed));
-            float sway=(sin(y*6.0+uTime*0.8+uSeed)*.0015+sin(y*14.0-uTime*1.5)*.0005)*smoothstep(.12,1.,y);
+            float sway=(sin(y*6.0+uTime*0.8+uSeed)*.0003+sin(y*14.0-uTime*1.5)*.0001)*smoothstep(.12,1.,y);
             float x=vUv.x-.5-sway;
             float width=mix(.315,.008,pow(y,.76))*(.97+turbulence*.025+fine*.005);
             float q=abs(x)/max(width,.004);
@@ -156,11 +156,10 @@ export class LabRenderer3D{
       const rimMat=new THREE.MeshBasicMaterial({color:0x77deff,transparent:true,opacity:.64,toneMapped:false,depthWrite:false});
       const rim=new THREE.Mesh(new THREE.TorusGeometry(.118,.015,12,64),rimMat);rim.rotation.x=Math.PI/2;rim.position.y=1.31;rim.renderOrder=7;rim.castShadow=false;
       const hotBase=new THREE.Mesh(new THREE.CircleGeometry(.088,64),new THREE.MeshBasicMaterial({color:0xdcfbff,transparent:true,opacity:.72,side:THREE.DoubleSide,toneMapped:false,depthWrite:false}));hotBase.rotation.x=-Math.PI/2;hotBase.position.y=1.315;hotBase.renderOrder=8;hotBase.castShadow=false;
-      const jetMat=new THREE.MeshBasicMaterial({color:0x79dfff,transparent:true,opacity:.48,depthWrite:false,toneMapped:false});
-      const jets=[];for(let i=0;i<10;i++){const a=i/10*Math.PI*2,jet=new THREE.Mesh(new THREE.ConeGeometry(.016,.14,12),jetMat);jet.position.set(Math.cos(a)*.09,1.39,Math.sin(a)*.09);jet.renderOrder=7;jet.castShadow=false;g.add(jet);jets.push(jet)}
+      const jets=[];for(let i=0;i<10;i++){const a=i/10*Math.PI*2,mat=new THREE.MeshBasicMaterial({color:0x79dfff,transparent:true,opacity:.52,depthWrite:false,toneMapped:false}),jet=new THREE.Mesh(new THREE.ConeGeometry(.016,.14,12),mat);jet.position.set(Math.cos(a)*.09,1.39,Math.sin(a)*.09);jet.renderOrder=7;jet.castShadow=false;g.add(jet);jets.push(jet)}
       let wrap=null,wrapJets=[],wrapY=1.29+1.42*flameHeight*.94;if(wrapMode){const wrapMat=new THREE.MeshBasicMaterial({color:0x73dfff,transparent:true,opacity:.3,depthWrite:false,blending:THREE.AdditiveBlending,toneMapped:false});wrap=new THREE.Mesh(new THREE.TorusGeometry(.48,.052,14,64),wrapMat);wrap.rotation.x=Math.PI/2;wrap.position.y=wrapY;wrap.scale.z=.72;wrap.renderOrder=7;g.add(wrap);for(let i=0;i<8;i++){const a=i/8*Math.PI*2,jet=new THREE.Mesh(new THREE.ConeGeometry(.04,.2,12),wrapMat);jet.position.set(Math.cos(a)*.48,wrapY+.045,Math.sin(a)*.48);jet.scale.y=.72+(i%3)*.12;jet.renderOrder=7;g.add(jet);wrapJets.push(jet)}}
       const glow=new THREE.PointLight(0x249dff,3.8,4.2,1.8);glow.position.y=1.7;
-      g.add(sheet,veil,rim,hotBase,glow);shadowReady(g);[sheet,veil,rim,hotBase,...jets,...wrapJets].forEach(o=>{o.castShadow=false;o.receiveShadow=false});this.flames.push({sheet,veil,uniforms,veilUniforms:veilMat.uniforms,glow,height:flameHeight,seed:uniforms.uSeed.value,wrap,wrapJets,wrapY})
+      g.add(sheet,veil,rim,hotBase,glow);shadowReady(g);[sheet,veil,rim,hotBase,...jets,...wrapJets].forEach(o=>{o.castShadow=false;o.receiveShadow=false});this.flames.push({sheet,veil,uniforms,veilUniforms:veilMat.uniforms,glow,height:flameHeight,seed:uniforms.uSeed.value,wrap,wrapJets,wrapY,jets})
       return g
     }
     return shadowReady(g)
@@ -1162,7 +1161,7 @@ export class LabRenderer3D{
   }
   render(time,state,p){
     if(!this.available)return;const frameDt=this.lastRenderTime?Math.min(.05,Math.max(0,(time-this.lastRenderTime)/1000)):1/60;this.lastRenderTime=time;this.coolantTransitionTarget=state.coolingWater?1:0;this.coolantVisualLevel=THREE.MathUtils.lerp(this.coolantVisualLevel,this.coolantTransitionTarget,1-Math.exp(-frameDt*4.4));if(Math.abs(this.coolantVisualLevel-this.coolantTransitionTarget)<.002)this.coolantVisualLevel=this.coolantTransitionTarget;this.sync(state,p);this.camera.position.set(0,4.65,8.55);this.camera.lookAt(0,1.05,0);
-    for(const f of this.flames){const seconds=time*.001,pulse=1+Math.sin(time*.009+f.seed)*.018+Math.sin(time*.021+f.seed)*.009,lean=Math.sin(time*.0047+f.seed)*.013;f.uniforms.uTime.value=seconds;f.veilUniforms.uTime.value=seconds;f.sheet.scale.set(pulse,f.height*(1+Math.sin(time*.012+f.seed)*.022),1);f.veil.scale.set(.82/pulse,f.height*(1.02+Math.sin(time*.015+f.seed)*.026),.82);f.sheet.rotation.z=lean;f.veil.rotation.z=-lean*.7;f.glow.intensity=3.4+Math.sin(time*.011+f.seed)*.28;if(f.wrap){const wrapPulse=.92+.1*Math.sin(time*.014+f.seed);f.wrap.scale.set(wrapPulse,.98,wrapPulse*.72);f.wrap.material.opacity=.22+.08*Math.sin(time*.011+f.seed);for(const jet of f.wrapJets)jet.scale.x=wrapPulse;}}
+    for(const f of this.flames){const seconds=time*.001,pulse=1+Math.sin(time*.009+f.seed)*.018+Math.sin(time*.021+f.seed)*.009,lean=Math.sin(time*.0047+f.seed)*.0018;f.uniforms.uTime.value=seconds;f.veilUniforms.uTime.value=seconds;f.sheet.scale.set(pulse,f.height*(1+Math.sin(time*.012+f.seed)*.022),1);f.veil.scale.set(.82/pulse,f.height*(1.02+Math.sin(time*.015+f.seed)*.026),.82);f.sheet.rotation.z=lean;f.veil.rotation.z=-lean*.7;f.glow.intensity=3.4+Math.sin(time*.011+f.seed)*.28;if(f.wrap){const wrapPulse=.92+.1*Math.sin(time*.014+f.seed);f.wrap.scale.set(wrapPulse,.98,wrapPulse*.72);f.wrap.material.opacity=.22+.08*Math.sin(time*.011+f.seed);for(const jet of f.wrapJets)jet.scale.x=wrapPulse;}if(f.jets){const spatulaAbove=(p.id==='flame'&&(state.flameTestStage===3||state.flameTestStage>=4));for(let i=0;i<f.jets.length;i++){const jet=f.jets[i],dy=(Math.sin(seconds*24.0+i*2.3+f.seed)*.007+Math.sin(seconds*48.0+i*4.1)*.0035)*(1+(spatulaAbove?.6:0));jet.position.y=1.38+dy;jet.scale.y=1.0+Math.sin(seconds*32.0+i*3.3)*.18;const n1=Math.sin(seconds*16.0+i*3.7+f.seed),n2=Math.sin(seconds*35.0+i*5.3),rawFlicker=n1*.6+n2*.4,thresh=spatulaAbove?.22:.78;let opacity=.52;if(rawFlicker>thresh){const dip=Math.abs(Math.sin((rawFlicker-thresh)*22.0));opacity*=spatulaAbove?.05+.25*dip:.2+.3*dip}jet.material.opacity=opacity}}}
     for(const d of this.dynamic){
       if(d.kind==='bubble'){const q=(time*.001*d.speed+d.phase)%1;d.mesh.position.y=d.mesh.userData.baseY+q*d.height;const pulse=.82+Math.sin(time*.006+d.phase*20)*.18;d.mesh.scale.setScalar(pulse)}
       else if(d.kind==='flameTest'){
