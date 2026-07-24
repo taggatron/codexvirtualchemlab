@@ -938,61 +938,31 @@ export class LabRenderer3D{
     }
     g.add(eurekaGroup);
 
-    // 3. Measuring Cylinder under spout on Right (x = 0.8)
-    const cylGroup = new THREE.Group();
-    cylGroup.position.set(0.8, 0, 0);
-
-    const cylGlassMat = new THREE.MeshPhysicalMaterial({
-      color: 0xe0f7fa,
-      transparent: true,
-      opacity: 0.38,
-      roughness: 0.1,
-      transmission: 0.85
-    });
-    // Hex Base
-    const cylBase = new THREE.Mesh(new THREE.CylinderGeometry(0.30, 0.32, 0.05, 6), riserMat);
-    cylBase.position.y = 0.025;
-    cylGroup.add(cylBase);
-
-    // Glass Cylinder Tube
-    const cylTube = new THREE.Mesh(new THREE.CylinderGeometry(0.20, 0.20, 1.15, 32), cylGlassMat);
-    cylTube.position.y = 0.60;
-    cylGroup.add(cylTube);
-
-    // Graduation rings
-    const markMat = new THREE.MeshBasicMaterial({ color: 0x37474f });
-    for (let m = 1; m <= 8; m++) {
-      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.201, 0.004, 8, 24), markMat);
-      ring.rotation.x = Math.PI / 2;
-      ring.position.y = 0.12 + m * 0.11;
-      cylGroup.add(ring);
-    }
-
-    // Displaced Water inside Measuring Cylinder
+    // 3. Measuring Cylinder under spout on Right (x = 0.82)
     const animProgress = stage === 3 ? Math.min(1, (state.densityTimer || 0) / 4.0) : stage >= 4 ? 1.0 : 0;
     const targetVol = sample.vol;
     const currentVol = targetVol * animProgress;
-    if (currentVol > 0.5) {
-      const fillFraction = currentVol / 100.0;
-      const cylWaterHeight = Math.max(0.04, fillFraction * 0.90);
-      const cylWaterMat = new THREE.MeshPhysicalMaterial({
-        color: 0x29b6f6,
-        transparent: true,
-        opacity: 0.75,
-        roughness: 0.1,
-        transmission: 0.6,
-        ior: 1.33
-      });
-      const cylWater = new THREE.Mesh(new THREE.CylinderGeometry(0.185, 0.185, cylWaterHeight, 32), cylWaterMat);
-      cylWater.position.y = 0.05 + cylWaterHeight / 2;
-      cylGroup.add(cylWater);
+    const fillFraction = currentVol / 100.0;
+    const cylinderMesh = this.measuringCylinder(fillFraction);
+    cylinderMesh.scale.setScalar(0.76);
+    cylinderMesh.position.set(0.82, 0, 0);
+    g.add(cylinderMesh);
 
-      const cylMeniscus = new THREE.Mesh(new THREE.CircleGeometry(0.185, 32), new THREE.MeshBasicMaterial({ color: 0x81d4fa, transparent: true, opacity: 0.85 }));
-      cylMeniscus.rotation.x = -Math.PI / 2;
-      cylMeniscus.position.y = 0.05 + cylWaterHeight;
-      cylGroup.add(cylMeniscus);
+    // Overflow stream from Eureka spout into measuring cylinder
+    if (stage === 3 && animProgress > 0.05 && animProgress < 0.95) {
+      const spoutTip = new THREE.Vector3(0.18, 0.98, 0);
+      const cylMouth = new THREE.Vector3(0.74, 1.25, 0);
+      g.add(this.liquidPourStream(spoutTip, cylMouth, {
+        color: 0x4eb7e5,
+        time: (state.densityTimer || 0),
+        radius: 0.024,
+        opacity: 0.78,
+        sag: 0.015,
+        breakup: 0.45,
+        droplets: 6,
+        splash: true
+      }));
     }
-    g.add(cylGroup);
 
     // 4. Irregular Solid Object
     let objGeo;
