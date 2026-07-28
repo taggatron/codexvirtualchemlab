@@ -1,0 +1,35 @@
+{
+  "errors": [],
+  "initial_distance_cm": 20,
+  "minimum_distance_cm": 10,
+  "minimum_geometry_distance_cm": 10,
+  "lamp_off": true,
+  "maximum_distance_cm": 50,
+  "maximum_geometry_distance_cm": 50,
+  "repeated_minimum_click_distance_cm": 10,
+  "recorded_bubbles_per_minute": 56,
+  "graph_x_axis": "distance from beaker edge / cm",
+  "controls": [
+    "- 10cm",
+    "+ 10cm",
+    "LAMP ON/OFF",
+    "COUNT 1 MIN",
+    "GRAPH",
+    "METHOD",
+    "F fullscreen"
+  ],
+  "renderer": {
+    "enabled": true,
+    "renderer": "WebGL / Three.js",
+    "objects": 1,
+    "legacy_2d_apparatus": false
+  },
+  "lamp_model": "traditional adjustable desk filament lamp with a bell shade and visible glowing filament bulb",
+  "ruler_zero_reference": "nearest outside edge of beaker, not the beaker centre",
+  "control_layout": {
+    "distance_button_width_px": 86.3,
+    "count_button_width_px": 110,
+    "count_to_reading_gap_px": 16,
+    "overlaps_reading": false
+  }
+}

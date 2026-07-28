@@ -1,0 +1,61 @@
+{
+  "errors": [],
+  "renderer": {
+    "enabled": true,
+    "renderer": "WebGL / Three.js",
+    "objects": 1,
+    "legacy_2d_apparatus": false
+  },
+  "initial_stage": 0,
+  "transfer_stage": 1,
+  "inward_soak_stage": 2,
+  "inward_direction": "into the potato cells",
+  "soak_complete_stage": 3,
+  "blotting_stage": 4,
+  "ready_to_weigh_stage": 5,
+  "reweighing_stage": 6,
+  "first_result": {
+    "concentration_mol_dm3": 0,
+    "initial_mass_g": 5,
+    "final_mass_g": 5.8,
+    "percentage_change": 16
+  },
+  "outward_direction": "out of the potato cells",
+  "outward_shrinking": true,
+  "results": [
+    {
+      "concentration_mol_dm3": 0,
+      "initial_mass_g": 5,
+      "final_mass_g": 5.8,
+      "percentage_change": 16
+    },
+    {
+      "concentration_mol_dm3": 0.2,
+      "initial_mass_g": 5,
+      "final_mass_g": 5.4,
+      "percentage_change": 8
+    },
+    {
+      "concentration_mol_dm3": 0.4,
+      "initial_mass_g": 5,
+      "final_mass_g": 5.08,
+      "percentage_change": 1.6
+    },
+    {
+      "concentration_mol_dm3": 0.6,
+      "initial_mass_g": 5,
+      "final_mass_g": 4.55,
+      "percentage_change": -9
+    },
+    {
+      "concentration_mol_dm3": 0.8,
+      "initial_mass_g": 5,
+      "final_mass_g": 4.15,
+      "percentage_change": -17
+    }
+  ],
+  "isotonic_point_mol_dm3": 0.43,
+  "graph_tab": "graph",
+  "graph_modal_open": true,
+  "complete": true
+}

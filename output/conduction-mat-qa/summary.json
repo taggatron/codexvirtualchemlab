@@ -1,0 +1,18 @@
+{
+  "errors": [],
+  "renderer": {
+    "enabled": true,
+    "renderer": "WebGL / Three.js",
+    "objects": 1,
+    "legacy_2d_apparatus": false
+  },
+  "practical": "Conduction in metals",
+  "initial_bunsen_lit": false,
+  "heated_bunsen_lit": true,
+  "heated_phase": "shared rod ends heating",
+  "pins_after_2_1_s": {
+    "copper": 1,
+    "aluminium": 0,
+    "steel": 0
+  }
+}

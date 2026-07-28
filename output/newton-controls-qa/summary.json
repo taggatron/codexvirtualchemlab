@@ -1,0 +1,32 @@
+{
+  "errors": [],
+  "renderer": {
+    "enabled": true,
+    "renderer": "WebGL / Three.js",
+    "objects": 1,
+    "legacy_2d_apparatus": false
+  },
+  "initial_force_n": 0.2,
+  "minimum_force_n": 0.1,
+  "maximum_force_n": 0.5,
+  "completed": true,
+  "recorded_result": {
+    "force": 0.5,
+    "mass": 1,
+    "acceleration": 0.5
+  },
+  "graph_readings": 1,
+  "graph_axes": {
+    "x": "force / N",
+    "y": "acceleration / m s⁻²"
+  },
+  "control_layout": {
+    "minus_x_px": 290,
+    "plus_x_px": 390,
+    "release_x_px": 490,
+    "force_button_width_px": 90,
+    "release_button_width_px": 140,
+    "release_to_reading_gap_px": 88.6,
+    "overlaps_reading": false
+  }
+}

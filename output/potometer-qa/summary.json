@@ -1,0 +1,59 @@
+{
+  "errors": [],
+  "renderer": {
+    "enabled": true,
+    "renderer": "WebGL / Three.js",
+    "objects": 1,
+    "legacy_2d_apparatus": false
+  },
+  "initial_stage": 0,
+  "introducing_stage": 1,
+  "bubble_ready_stage": 2,
+  "resetting_stage": 3,
+  "aligned_stage": 4,
+  "still_air_stage": 5,
+  "first_result": {
+    "wind_speed_m_s": 0,
+    "distance_mm": 12,
+    "time_min": 5,
+    "rate_mm_per_min": 2.4
+  },
+  "moving_air_animation": {
+    "capillary_tip_lifts_and_redips": false,
+    "reservoir_plunger_resets_bubble": false,
+    "bubble_moves_smoothly_toward_shoot": true,
+    "fan_blades_and_airflow_ribbons": true,
+    "leaf_flutter_scales_with_wind_speed": true,
+    "timer_accelerates_to_five_minutes": true
+  },
+  "fastest_wind_m_s": 1.5,
+  "results": [
+    {
+      "wind_speed_m_s": 0,
+      "distance_mm": 12,
+      "time_min": 5,
+      "rate_mm_per_min": 2.4
+    },
+    {
+      "wind_speed_m_s": 0.5,
+      "distance_mm": 22,
+      "time_min": 5,
+      "rate_mm_per_min": 4.4
+    },
+    {
+      "wind_speed_m_s": 1,
+      "distance_mm": 34,
+      "time_min": 5,
+      "rate_mm_per_min": 6.8
+    },
+    {
+      "wind_speed_m_s": 1.5,
+      "distance_mm": 47,
+      "time_min": 5,
+      "rate_mm_per_min": 9.4
+    }
+  ],
+  "graph_tab": "graph",
+  "graph_modal_open": true,
+  "complete": true
+}

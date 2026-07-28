@@ -1,0 +1,124 @@
+{
+  "errors": [],
+  "portrait": {
+    "responsive": {
+      "viewport_css_px": {
+        "width": 390,
+        "height": 844
+      },
+      "logical_canvas_px": {
+        "width": 390,
+        "height": 844
+      },
+      "scale": 1,
+      "mode": "portrait rotation prompt",
+      "portrait_prompt_visible": true,
+      "three_column_layout_preserved": false,
+      "pointer_coordinates_scaled": false,
+      "minimum_touch_target_css_px": null
+    },
+    "ui": {
+      "body_locked": true,
+      "prompt_display": "flex",
+      "prompt_bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 844,
+        "top": 0,
+        "right": 390,
+        "bottom": 844,
+        "left": 0
+      },
+      "card_bounds": {
+        "x": 20,
+        "y": 234.875,
+        "width": 350,
+        "height": 374.234375,
+        "top": 234.875,
+        "right": 370,
+        "bottom": 609.109375,
+        "left": 20
+      },
+      "heading": "Rotate to landscape"
+    }
+  },
+  "landscape_initial": {
+    "responsive": {
+      "viewport_css_px": {
+        "width": 844,
+        "height": 390
+      },
+      "logical_canvas_px": {
+        "width": 1298,
+        "height": 600
+      },
+      "scale": 0.65,
+      "mode": "compact landscape",
+      "portrait_prompt_visible": false,
+      "three_column_layout_preserved": true,
+      "pointer_coordinates_scaled": true,
+      "minimum_touch_target_css_px": 44
+    },
+    "practical": "Newton’s 2nd Law",
+    "renderer": {
+      "enabled": true,
+      "renderer": "WebGL / Three.js",
+      "objects": 1,
+      "legacy_2d_apparatus": false
+    },
+    "force_n": 0.2,
+    "ui": {
+      "body_locked": false,
+      "prompt_display": "none",
+      "lab_bounds": {
+        "x": 0,
+        "y": 0,
+        "width": 844,
+        "height": 390,
+        "top": 0,
+        "right": 844,
+        "bottom": 390,
+        "left": 0
+      },
+      "webgl_bounds": {
+        "x": 175.5,
+        "y": 143.640625,
+        "width": 474.375,
+        "height": 163.140625,
+        "top": 143.640625,
+        "right": 649.875,
+        "bottom": 306.78125,
+        "left": 175.5
+      }
+    }
+  },
+  "landscape_after_control": {
+    "force_n": 0.3
+  },
+  "desktop": {
+    "responsive": {
+      "viewport_css_px": {
+        "width": 1440,
+        "height": 900
+      },
+      "logical_canvas_px": {
+        "width": 1440,
+        "height": 900
+      },
+      "scale": 1,
+      "mode": "desktop",
+      "portrait_prompt_visible": false,
+      "three_column_layout_preserved": true,
+      "pointer_coordinates_scaled": false,
+      "minimum_touch_target_css_px": null
+    },
+    "practical": "Newton’s 2nd Law",
+    "renderer": {
+      "enabled": true,
+      "renderer": "WebGL / Three.js",
+      "objects": 1,
+      "legacy_2d_apparatus": false
+    }
+  }
+}

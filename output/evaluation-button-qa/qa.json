@@ -1,0 +1,28 @@
+{
+  "initial": {
+    "practical": "Newton’s 2nd Law",
+    "complete": false,
+    "practical_evaluation": {
+      "position": "below guidance",
+      "section_heading": "PRACTICAL EVALUATION",
+      "button_label": "OPEN EVALUATION",
+      "ready": false,
+      "appearance": "outlined pale teal"
+    }
+  },
+  "complete": {
+    "practical": "Newton’s 2nd Law",
+    "complete": true,
+    "practical_evaluation": {
+      "position": "below guidance",
+      "section_heading": "PRACTICAL EVALUATION",
+      "button_label": "OPEN EVALUATION",
+      "ready": true,
+      "appearance": "filled teal with glow"
+    },
+    "graph_readings": 1,
+    "guidance": "Run complete! Acceleration a = 0.20 m/s². Automatically added to graph!"
+  },
+  "modal_center_has_pixels": true,
+  "errors": []
+}

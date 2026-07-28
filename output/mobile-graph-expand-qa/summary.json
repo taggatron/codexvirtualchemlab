@@ -1,0 +1,98 @@
+{
+  "errors": [],
+  "mobile": {
+    "responsive": {
+      "viewport_css_px": {
+        "width": 1206,
+        "height": 584
+      },
+      "logical_canvas_px": {
+        "width": 1239,
+        "height": 600
+      },
+      "scale": 0.973,
+      "mode": "compact landscape",
+      "portrait_prompt_visible": false,
+      "three_column_layout_preserved": true,
+      "mobile_landscape_layout": true,
+      "pointer_coordinates_scaled": true,
+      "minimum_touch_target_css_px": 44
+    },
+    "graph_modal": {
+      "available": true,
+      "button_visible": true,
+      "button_label": null,
+      "button_icon": "four-corner expand",
+      "button_text_visible": false,
+      "button_row": "method and graph tabs",
+      "open": false,
+      "chart_kind": "lipase-bar-chart",
+      "sidebar_header_layout": {
+        "expand_button_top_y": 82,
+        "expand_button_bottom_y": 114,
+        "graph_heading_center_y": 134,
+        "heading_and_expand_same_row": false,
+        "tabs_and_expand_same_row": true,
+        "description_first_line_center_y": 166,
+        "description_spacing_from_header_centres_px": 32,
+        "description_clearance_below_expand_px": 47,
+        "text_overlap": false
+      },
+      "scaled_view": null
+    },
+    "modal_open_after_icon_tap": true,
+    "renderer": {
+      "enabled": true,
+      "renderer": "WebGL / Three.js",
+      "objects": 1,
+      "legacy_2d_apparatus": false
+    }
+  },
+  "desktop": {
+    "responsive": {
+      "viewport_css_px": {
+        "width": 1280,
+        "height": 720
+      },
+      "logical_canvas_px": {
+        "width": 1280,
+        "height": 720
+      },
+      "scale": 1,
+      "mode": "desktop",
+      "portrait_prompt_visible": false,
+      "three_column_layout_preserved": true,
+      "mobile_landscape_layout": false,
+      "pointer_coordinates_scaled": false,
+      "minimum_touch_target_css_px": null
+    },
+    "graph_modal": {
+      "available": true,
+      "button_visible": true,
+      "button_label": "EXPAND",
+      "button_icon": null,
+      "button_text_visible": true,
+      "button_row": "graph heading",
+      "open": false,
+      "chart_kind": "lipase-bar-chart",
+      "sidebar_header_layout": {
+        "expand_button_top_y": 120,
+        "expand_button_bottom_y": 148,
+        "graph_heading_center_y": 134,
+        "heading_and_expand_same_row": true,
+        "tabs_and_expand_same_row": false,
+        "description_first_line_center_y": 166,
+        "description_spacing_from_header_centres_px": 32,
+        "description_clearance_below_expand_px": 13,
+        "text_overlap": false
+      },
+      "scaled_view": null
+    },
+    "renderer": {
+      "enabled": true,
+      "renderer": "WebGL / Three.js",
+      "objects": 1,
+      "legacy_2d_apparatus": false
+    }
+  }
+}

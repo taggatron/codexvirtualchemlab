@@ -1,0 +1,107 @@
+{
+  "errors": [],
+  "renderer": {
+    "enabled": true,
+    "renderer": "WebGL / Three.js",
+    "objects": 1,
+    "legacy_2d_apparatus": false
+  },
+  "newton": {
+    "readings": 1,
+    "tab_button_visible": true,
+    "modal": {
+      "available": true,
+      "button_visible": true,
+      "button_label": "EXPAND",
+      "open": true,
+      "chart_kind": "line-graph",
+      "sidebar_header_layout": {
+        "expand_button_top_y": 120,
+        "expand_button_bottom_y": 148,
+        "graph_heading_center_y": 134,
+        "heading_and_expand_same_row": true,
+        "description_first_line_center_y": 166,
+        "description_spacing_from_header_centres_px": 32,
+        "description_clearance_below_expand_px": 13,
+        "text_overlap": false
+      },
+      "scaled_view": {
+        "width_px": 1050,
+        "height_px": 680,
+        "axes_scaled": true,
+        "tick_labels_scaled": true,
+        "data_marks_scaled": true,
+        "annotations_scaled": true
+      }
+    },
+    "closed_by_button": true
+  },
+  "rates": {
+    "readings": 1,
+    "tab_button_visible": true,
+    "modal": {
+      "available": true,
+      "button_visible": true,
+      "button_label": "EXPAND",
+      "open": true,
+      "chart_kind": "temperature-bar-chart",
+      "sidebar_header_layout": {
+        "expand_button_top_y": 120,
+        "expand_button_bottom_y": 148,
+        "graph_heading_center_y": 134,
+        "heading_and_expand_same_row": true,
+        "description_first_line_center_y": 166,
+        "description_spacing_from_header_centres_px": 32,
+        "description_clearance_below_expand_px": 13,
+        "text_overlap": false
+      },
+      "scaled_view": {
+        "width_px": 1050,
+        "height_px": 680,
+        "axes_scaled": true,
+        "tick_labels_scaled": true,
+        "data_marks_scaled": true,
+        "annotations_scaled": true
+      }
+    }
+  },
+  "lipase": {
+    "readings": 1,
+    "tab_button_visible": true,
+    "modal": {
+      "available": true,
+      "button_visible": true,
+      "button_label": "EXPAND",
+      "open": true,
+      "chart_kind": "lipase-bar-chart",
+      "sidebar_header_layout": {
+        "expand_button_top_y": 120,
+        "expand_button_bottom_y": 148,
+        "graph_heading_center_y": 134,
+        "heading_and_expand_same_row": true,
+        "description_first_line_center_y": 166,
+        "description_spacing_from_header_centres_px": 32,
+        "description_clearance_below_expand_px": 13,
+        "text_overlap": false
+      },
+      "scaled_view": {
+        "width_px": 1050,
+        "height_px": 680,
+        "axes_scaled": true,
+        "tick_labels_scaled": true,
+        "data_marks_scaled": true,
+        "annotations_scaled": true
+      }
+    },
+    "closed_by_escape": true
+  },
+  "table_exclusion": {
+    "available": false,
+    "button_visible": false,
+    "button_label": null,
+    "open": false,
+    "chart_kind": null,
+    "sidebar_header_layout": null,
+    "scaled_view": null
+  }
+}

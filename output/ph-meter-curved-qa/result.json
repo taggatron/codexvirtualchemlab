@@ -1,0 +1,122 @@
+{
+  "renderer": {
+    "enabled": true,
+    "renderer": "WebGL / Three.js",
+    "objects": 2,
+    "legacy_2d_apparatus": false
+  },
+  "empty_beaker": {
+    "beaker": {
+      "uid": 1,
+      "type": "beaker",
+      "x": 345,
+      "y": 528,
+      "lit": false,
+      "snapped_to": null,
+      "temperature_c": 20,
+      "heating": false,
+      "liquid_ph": null,
+      "contents": []
+    },
+    "meter": {
+      "uid": 2,
+      "type": "phmeter",
+      "x": 345,
+      "y": 528,
+      "lit": false,
+      "snapped_to": null,
+      "temperature_c": 20,
+      "heating": false,
+      "form": "one continuous red tapered pencil-like probe",
+      "attached_to": 1,
+      "auto_positioned": true,
+      "display_location": "built into wider top section",
+      "display_surface": "curved cylindrical arc following the upper housing",
+      "display_ph": null,
+      "raised_for_nib_visibility": true,
+      "metallic_sensor_nib_visible": true,
+      "nib_state": "visible and immersed in sample",
+      "contents": []
+    }
+  },
+  "hcl_display_ph": 1,
+  "neutral_display_ph": 7,
+  "test_tube_dock": {
+    "tube": {
+      "uid": 3,
+      "type": "tube",
+      "x": 555,
+      "y": 528,
+      "lit": false,
+      "snapped_to": null,
+      "temperature_c": 20,
+      "heating": false,
+      "liquid_ph": null,
+      "contents": []
+    },
+    "meter": {
+      "uid": 2,
+      "type": "phmeter",
+      "x": 555,
+      "y": 528,
+      "lit": false,
+      "snapped_to": null,
+      "temperature_c": 20,
+      "heating": false,
+      "form": "one continuous red tapered pencil-like probe",
+      "attached_to": 3,
+      "auto_positioned": true,
+      "display_location": "built into wider top section",
+      "display_surface": "curved cylindrical arc following the upper housing",
+      "display_ph": null,
+      "raised_for_nib_visibility": true,
+      "metallic_sensor_nib_visible": true,
+      "nib_state": "visible and immersed in sample",
+      "contents": []
+    }
+  },
+  "test_tube_naoh_display_ph": 13,
+  "moved_test_tube": {
+    "target": {
+      "uid": 3,
+      "type": "tube",
+      "x": 700,
+      "y": 488,
+      "lit": false,
+      "snapped_to": null,
+      "temperature_c": 20,
+      "heating": false,
+      "liquid_ph": 13,
+      "contents": [
+        {
+          "id": "naoh",
+          "name": "Sodium hydroxide",
+          "amount": 25,
+          "unit": "mL",
+          "color": 13758194
+        }
+      ]
+    },
+    "meter": {
+      "uid": 2,
+      "type": "phmeter",
+      "x": 700,
+      "y": 488,
+      "lit": false,
+      "snapped_to": null,
+      "temperature_c": 20,
+      "heating": false,
+      "form": "one continuous red tapered pencil-like probe",
+      "attached_to": 3,
+      "auto_positioned": true,
+      "display_location": "built into wider top section",
+      "display_surface": "curved cylindrical arc following the upper housing",
+      "display_ph": 13,
+      "raised_for_nib_visibility": true,
+      "metallic_sensor_nib_visible": true,
+      "nib_state": "visible and immersed in sample",
+      "contents": []
+    }
+  },
+  "errors": []
+}

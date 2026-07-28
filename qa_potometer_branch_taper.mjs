@@ -1,0 +1,25 @@
+import { chromium } from 'playwright';
+import fs from 'node:fs';
+
+const out = 'output/potometer-branch-taper-final';
+fs.mkdirSync(out, { recursive: true });
+const browser = await chromium.launch({ headless: true, args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
+const page = await browser.newPage({ viewport: { width: 2068, height: 1278 }, deviceScaleFactor: 1 });
+const errors = [];
+page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+page.on('pageerror', error => errors.push(error.message));
+await page.goto(`http://127.0.0.1:4173/?potometer-branch-taper=${Date.now()}`, { waitUntil: 'networkidle' });
+await page.waitForFunction(() => typeof window.render_game_to_text === 'function');
+await page.mouse.click(320, 32);
+await page.mouse.click(135, 288);
+await page.waitForTimeout(650);
+await page.screenshot({ path: `${out}/01-full-2068x1278.png`, fullPage: true });
+await page.screenshot({ path: `${out}/02-shoot-close-up.png`, clip: { x: 575, y: 245, width: 760, height: 610 } });
+const snapshot = JSON.parse(await page.evaluate(() => window.render_game_to_text()));
+const sample = snapshot.bubble_potometer_practical?.biological_sample;
+fs.writeFileSync(`${out}/summary.json`, JSON.stringify({ errors, practical: snapshot.practical, biological_sample: sample }, null, 2));
+if (snapshot.practical !== 'Bubble potometer') throw new Error(`Unexpected practical: ${snapshot.practical}`);
+if (sample?.horizontal_branch_length_scale !== 0.72 || !sample?.branches_taper_smoothly_to_petiole_diameter) throw new Error('Branch refinement state missing');
+if (errors.length) throw new Error(errors.join('\n'));
+console.log(JSON.stringify({ errors, practical: snapshot.practical, biological_sample: sample }, null, 2));
+await browser.close();

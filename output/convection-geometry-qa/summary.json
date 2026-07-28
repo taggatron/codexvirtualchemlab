@@ -1,0 +1,23 @@
+{
+  "errors": [],
+  "renderer": {
+    "enabled": true,
+    "renderer": "WebGL / Three.js",
+    "objects": 1,
+    "legacy_2d_apparatus": false
+  },
+  "initial_geometry": {
+    "centreline_bottom_y": 1.38,
+    "centreline_top_y": 2.78,
+    "total_outside_height": 1.98,
+    "burner_body_top_y": 1.023,
+    "tube_outside_bottom_y": 1.09,
+    "tube_clearance_above_burner": 0.067,
+    "tube_above_burner": true,
+    "shortened_to_fit_arena": true
+  },
+  "active_phase": "heating and circulating",
+  "active_flow": "clockwise: up heated left side, across top, down cooler right side",
+  "complete": true,
+  "loop_visible": true
+}

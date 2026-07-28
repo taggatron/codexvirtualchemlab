@@ -1,0 +1,17 @@
+{
+  "errors": [],
+  "practical": "Bubble potometer",
+  "biological_sample": {
+    "type": "fresh leafy shoot",
+    "cut_underwater_at_angle": true,
+    "stem_remains_water_connected": true,
+    "total_leaf_area_controlled": true,
+    "leaf_blades_have_contained_veins": true,
+    "leaf_petiole_axis_aligned_with_branch": true,
+    "every_branch_meets_its_leaf_petiole_base": true,
+    "horizontal_branch_length_scale": 0.72,
+    "branches_taper_smoothly_to_petiole_diameter": true,
+    "leaf_flutter_in_airflow": false,
+    "transpiration_visualised_at_stomata": false
+  }
+}

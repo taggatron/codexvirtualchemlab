@@ -1,0 +1,108 @@
+{
+  "errors": [],
+  "renderer": {
+    "enabled": true,
+    "renderer": "WebGL / Three.js",
+    "objects": 1,
+    "legacy_2d_apparatus": false
+  },
+  "electromagnet": {
+    "initial_phase": "switch open",
+    "energised_phase": "electromagnet energised",
+    "layout": {
+      "clamp_stand_position": "right of the power pack with a clear horizontal gap",
+      "electromagnet_orientation": "horizontal, long axis left-to-right, working pole facing right",
+      "lead_direction": "red and black leads enter from the power pack on the left",
+      "paper_clip_position": "tray and attracted clips beneath the right-facing working pole",
+      "moving_carriage": "boss, right-extending clamp arm and horizontal electromagnet lower and lift together"
+    },
+    "display_off": {
+      "type": "integrated two-line digital display",
+      "current_a": 0,
+      "voltage_v": 0,
+      "units_visible": [
+        "A",
+        "V"
+      ],
+      "output_on": false
+    },
+    "display_on": {
+      "type": "integrated two-line digital display",
+      "current_a": 0.5,
+      "voltage_v": 3,
+      "units_visible": [
+        "A",
+        "V"
+      ],
+      "output_on": true
+    },
+    "lowering_phase": "core lowering",
+    "lifting_phase": "core lifting",
+    "suspended_clips": 2,
+    "results": [
+      {
+        "turns": 10,
+        "clips": 2
+      },
+      {
+        "turns": 20,
+        "clips": 4
+      },
+      {
+        "turns": 30,
+        "clips": 7
+      },
+      {
+        "turns": 40,
+        "clips": 10
+      },
+      {
+        "turns": 50,
+        "clips": 13
+      }
+    ],
+    "complete": true,
+    "graph_axes": {
+      "x": "number of wire turns",
+      "y": "paper clips lifted"
+    }
+  },
+  "convection": {
+    "initial_phase": "still water ready",
+    "tracer_phase": "adding tracer crystal",
+    "rising_flow": "clockwise: up heated left side, across top, down cooler right side",
+    "loop_visible_mid": false,
+    "complete": true,
+    "observation_view": "animated convection-current observation",
+    "safety": "hazardous; simulation / teacher demonstration only"
+  },
+  "conduction": {
+    "initial_phase": "equal waxed pins ready",
+    "pins_after_2_1_s": {
+      "copper": 1,
+      "aluminium": 0,
+      "steel": 0
+    },
+    "pins_midway": {
+      "copper": 4,
+      "aluminium": 3,
+      "steel": 2
+    },
+    "complete": true,
+    "order": [
+      "copper",
+      "aluminium",
+      "steel"
+    ],
+    "results_view": "drawing-pin fall-time comparison table"
+  },
+  "thermal": {
+    "initial_phase": "ambient apparatus ready",
+    "hot_cube": true,
+    "camera_moving": true,
+    "foreground_display": true,
+    "display_content": "live false-colour bench view with the hot-water flask, Leslie cube, filler neck, rails, work surface and tiled wall",
+    "captured": true,
+    "complete": true
+  }
+}

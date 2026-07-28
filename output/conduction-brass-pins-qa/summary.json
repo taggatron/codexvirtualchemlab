@@ -1,0 +1,24 @@
+{
+  "errors": [],
+  "renderer": {
+    "enabled": true,
+    "renderer": "WebGL / Three.js",
+    "objects": 1,
+    "legacy_2d_apparatus": false
+  },
+  "drawing_pin_design": {
+    "head_material": "polished brass",
+    "head_shape": "low-profile flat circular disc with a softly rounded rim",
+    "shaft_attachment": "exact geometric centre of the brass head",
+    "shaft_angle_to_head_degrees": 90,
+    "settled_pose": "brass head flat on the bench with the sharp point upright"
+  },
+  "initial_phase": "equal waxed pins ready",
+  "complete_phase": "shared rod ends heating",
+  "pins_fallen": {
+    "copper": 4,
+    "aluminium": 4,
+    "steel": 4
+  },
+  "complete": false
+}

@@ -1,0 +1,512 @@
+{
+  "errors": [],
+  "renderer": {
+    "enabled": true,
+    "renderer": "WebGL / Three.js",
+    "objects": 1,
+    "legacy_2d_apparatus": false
+  },
+  "wire": {
+    "initial": {
+      "stage": 0,
+      "phase": "switch open at measured length",
+      "elapsed_stage_s": 0,
+      "independent_variable": "wire length between crocodile contacts",
+      "length_cm": 20,
+      "fixed_contact_cm": 0,
+      "sliding_contact_cm": 20,
+      "wire": {
+        "material": "nichrome",
+        "uniform_diameter": true,
+        "straight_against_metre_ruler": true
+      },
+      "switch_closed": false,
+      "supply_voltage_v": 0,
+      "ammeter_current_a": 0,
+      "calculated_resistance_ohm": 1.8,
+      "calculation": "1.50 V ÷ 0.83 A = 1.8 Ω",
+      "contact_motion": "stationary",
+      "switch_open_between_readings_to_limit_heating": true,
+      "measured_results": [],
+      "graph_axes": {
+        "x": "wire length / cm",
+        "y": "resistance / Ω"
+      },
+      "smooth_stage_animation": true
+    },
+    "settling": {
+      "stage": 1,
+      "phase": "switch closing and meters settling",
+      "elapsed_stage_s": 0.65,
+      "independent_variable": "wire length between crocodile contacts",
+      "length_cm": 20,
+      "fixed_contact_cm": 0,
+      "sliding_contact_cm": 20,
+      "wire": {
+        "material": "nichrome",
+        "uniform_diameter": true,
+        "straight_against_metre_ruler": true
+      },
+      "switch_closed": true,
+      "supply_voltage_v": 1.5,
+      "ammeter_current_a": 0.83,
+      "calculated_resistance_ohm": 1.8,
+      "calculation": "1.50 V ÷ 0.83 A = 1.8 Ω",
+      "contact_motion": "stationary",
+      "switch_open_between_readings_to_limit_heating": true,
+      "measured_results": [],
+      "graph_axes": {
+        "x": "wire length / cm",
+        "y": "resistance / Ω"
+      },
+      "smooth_stage_animation": true
+    },
+    "steady": {
+      "stage": 2,
+      "phase": "steady voltage and current ready to record",
+      "elapsed_stage_s": 0,
+      "independent_variable": "wire length between crocodile contacts",
+      "length_cm": 20,
+      "fixed_contact_cm": 0,
+      "sliding_contact_cm": 20,
+      "wire": {
+        "material": "nichrome",
+        "uniform_diameter": true,
+        "straight_against_metre_ruler": true
+      },
+      "switch_closed": true,
+      "supply_voltage_v": 1.5,
+      "ammeter_current_a": 0.83,
+      "calculated_resistance_ohm": 1.8,
+      "calculation": "1.50 V ÷ 0.83 A = 1.8 Ω",
+      "contact_motion": "stationary",
+      "switch_open_between_readings_to_limit_heating": true,
+      "measured_results": [],
+      "graph_axes": {
+        "x": "wire length / cm",
+        "y": "resistance / Ω"
+      },
+      "smooth_stage_animation": true
+    },
+    "first_recorded": [
+      {
+        "length_cm": 20,
+        "voltage_v": 1.5,
+        "current_a": 0.83,
+        "resistance_ohm": 1.8
+      }
+    ],
+    "moving": {
+      "stage": 4,
+      "phase": "crocodile contact moving to next ruler mark",
+      "elapsed_stage_s": 1.13,
+      "independent_variable": "wire length between crocodile contacts",
+      "length_cm": 20,
+      "fixed_contact_cm": 0,
+      "sliding_contact_cm": 20,
+      "wire": {
+        "material": "nichrome",
+        "uniform_diameter": true,
+        "straight_against_metre_ruler": true
+      },
+      "switch_closed": false,
+      "supply_voltage_v": 0,
+      "ammeter_current_a": 0,
+      "calculated_resistance_ohm": 1.8,
+      "calculation": "1.50 V ÷ 0.83 A = 1.8 Ω",
+      "contact_motion": "jaws open, lift, glide, lower and close",
+      "switch_open_between_readings_to_limit_heating": true,
+      "measured_results": [
+        {
+          "length_cm": 20,
+          "voltage_v": 1.5,
+          "current_a": 0.83,
+          "resistance_ohm": 1.8
+        }
+      ],
+      "graph_axes": {
+        "x": "wire length / cm",
+        "y": "resistance / Ω"
+      },
+      "smooth_stage_animation": true
+    },
+    "second_length_cm": 40,
+    "complete": true,
+    "results": [
+      {
+        "length_cm": 20,
+        "voltage_v": 1.5,
+        "current_a": 0.83,
+        "resistance_ohm": 1.8
+      },
+      {
+        "length_cm": 40,
+        "voltage_v": 1.5,
+        "current_a": 0.42,
+        "resistance_ohm": 3.6
+      },
+      {
+        "length_cm": 60,
+        "voltage_v": 1.5,
+        "current_a": 0.28,
+        "resistance_ohm": 5.4
+      },
+      {
+        "length_cm": 80,
+        "voltage_v": 1.5,
+        "current_a": 0.21,
+        "resistance_ohm": 7.2
+      },
+      {
+        "length_cm": 100,
+        "voltage_v": 1.5,
+        "current_a": 0.17,
+        "resistance_ohm": 9
+      }
+    ],
+    "graph_axes": {
+      "x": "wire length / cm",
+      "y": "resistance / Ω"
+    }
+  },
+  "magnetic_field": {
+    "initial": {
+      "stage": 0,
+      "phase": "fresh paper over magnet arrangement",
+      "elapsed_stage_s": 0,
+      "configuration": "single",
+      "configuration_label": "SINGLE BAR MAGNET",
+      "apparatus": [
+        "bar magnet or matched pair below paper",
+        "white paper on clear acrylic support",
+        "sealed perforated iron-filings shaker",
+        "soft gentle tapping tool"
+      ],
+      "magnets_below_paper": true,
+      "poles": "red north poles and blue south poles",
+      "filings": {
+        "individually_modelled": true,
+        "fine_layer": true,
+        "visible_fraction": 0,
+        "aligned_to_local_field": false,
+        "temporary_induced_magnets": false,
+        "safe_sealed_simulation": true
+      },
+      "observation": null,
+      "recorded_patterns": [],
+      "direction_note": "filings show shape and relative strength but not direction; outside a magnet direction is N to S",
+      "smooth_stage_animation": true
+    },
+    "sprinkling": {
+      "stage": 1,
+      "phase": "filings shaker moving and sprinkling",
+      "elapsed_stage_s": 1.6,
+      "configuration": "single",
+      "configuration_label": "SINGLE BAR MAGNET",
+      "apparatus": [
+        "bar magnet or matched pair below paper",
+        "white paper on clear acrylic support",
+        "sealed perforated iron-filings shaker",
+        "soft gentle tapping tool"
+      ],
+      "magnets_below_paper": true,
+      "poles": "red north poles and blue south poles",
+      "filings": {
+        "individually_modelled": true,
+        "fine_layer": true,
+        "visible_fraction": 0.48,
+        "aligned_to_local_field": false,
+        "temporary_induced_magnets": false,
+        "safe_sealed_simulation": true
+      },
+      "observation": null,
+      "recorded_patterns": [],
+      "direction_note": "filings show shape and relative strength but not direction; outside a magnet direction is N to S",
+      "smooth_stage_animation": true
+    },
+    "loose": {
+      "stage": 2,
+      "phase": "loose filings ready to tap",
+      "elapsed_stage_s": 0,
+      "configuration": "single",
+      "configuration_label": "SINGLE BAR MAGNET",
+      "apparatus": [
+        "bar magnet or matched pair below paper",
+        "white paper on clear acrylic support",
+        "sealed perforated iron-filings shaker",
+        "soft gentle tapping tool"
+      ],
+      "magnets_below_paper": true,
+      "poles": "red north poles and blue south poles",
+      "filings": {
+        "individually_modelled": true,
+        "fine_layer": true,
+        "visible_fraction": 1,
+        "aligned_to_local_field": false,
+        "temporary_induced_magnets": false,
+        "safe_sealed_simulation": true
+      },
+      "observation": null,
+      "recorded_patterns": [],
+      "direction_note": "filings show shape and relative strength but not direction; outside a magnet direction is N to S",
+      "smooth_stage_animation": true
+    },
+    "aligning": {
+      "stage": 3,
+      "phase": "paper tapping and filings aligning",
+      "elapsed_stage_s": 2.2,
+      "configuration": "single",
+      "configuration_label": "SINGLE BAR MAGNET",
+      "apparatus": [
+        "bar magnet or matched pair below paper",
+        "white paper on clear acrylic support",
+        "sealed perforated iron-filings shaker",
+        "soft gentle tapping tool"
+      ],
+      "magnets_below_paper": true,
+      "poles": "red north poles and blue south poles",
+      "filings": {
+        "individually_modelled": true,
+        "fine_layer": true,
+        "visible_fraction": 1,
+        "aligned_to_local_field": false,
+        "temporary_induced_magnets": true,
+        "safe_sealed_simulation": true
+      },
+      "observation": null,
+      "recorded_patterns": [],
+      "direction_note": "filings show shape and relative strength but not direction; outside a magnet direction is N to S",
+      "smooth_stage_animation": true
+    },
+    "single_ready": {
+      "stage": 4,
+      "phase": "field pattern formed ready to record",
+      "elapsed_stage_s": 0,
+      "configuration": "single",
+      "configuration_label": "SINGLE BAR MAGNET",
+      "apparatus": [
+        "bar magnet or matched pair below paper",
+        "white paper on clear acrylic support",
+        "sealed perforated iron-filings shaker",
+        "soft gentle tapping tool"
+      ],
+      "magnets_below_paper": true,
+      "poles": "red north poles and blue south poles",
+      "filings": {
+        "individually_modelled": true,
+        "fine_layer": true,
+        "visible_fraction": 1,
+        "aligned_to_local_field": true,
+        "temporary_induced_magnets": true,
+        "safe_sealed_simulation": true
+      },
+      "observation": "Curved, symmetric loops spread from the north pole to the south pole.",
+      "recorded_patterns": [],
+      "direction_note": "filings show shape and relative strength but not direction; outside a magnet direction is N to S",
+      "smooth_stage_animation": true
+    },
+    "changing": {
+      "stage": 5,
+      "phase": "filings clearing and magnet configuration changing",
+      "elapsed_stage_s": 1.28,
+      "configuration": "single",
+      "configuration_label": "SINGLE BAR MAGNET",
+      "apparatus": [
+        "bar magnet or matched pair below paper",
+        "white paper on clear acrylic support",
+        "sealed perforated iron-filings shaker",
+        "soft gentle tapping tool"
+      ],
+      "magnets_below_paper": true,
+      "poles": "red north poles and blue south poles",
+      "filings": {
+        "individually_modelled": true,
+        "fine_layer": true,
+        "visible_fraction": 1,
+        "aligned_to_local_field": true,
+        "temporary_induced_magnets": true,
+        "safe_sealed_simulation": true
+      },
+      "observation": "Curved, symmetric loops spread from the north pole to the south pole.",
+      "recorded_patterns": [
+        {
+          "id": "single",
+          "label": "SINGLE BAR MAGNET",
+          "short": "single N–S",
+          "observation": "Curved, symmetric loops spread from the north pole to the south pole."
+        }
+      ],
+      "direction_note": "filings show shape and relative strength but not direction; outside a magnet direction is N to S",
+      "smooth_stage_animation": true
+    },
+    "attraction_initial": {
+      "stage": 0,
+      "phase": "fresh paper over magnet arrangement",
+      "elapsed_stage_s": 0,
+      "configuration": "attraction",
+      "configuration_label": "UNLIKE POLES FACING",
+      "apparatus": [
+        "bar magnet or matched pair below paper",
+        "white paper on clear acrylic support",
+        "sealed perforated iron-filings shaker",
+        "soft gentle tapping tool"
+      ],
+      "magnets_below_paper": true,
+      "poles": "red north poles and blue south poles",
+      "filings": {
+        "individually_modelled": true,
+        "fine_layer": true,
+        "visible_fraction": 0,
+        "aligned_to_local_field": false,
+        "temporary_induced_magnets": false,
+        "safe_sealed_simulation": true
+      },
+      "observation": null,
+      "recorded_patterns": [
+        {
+          "id": "single",
+          "label": "SINGLE BAR MAGNET",
+          "short": "single N–S",
+          "observation": "Curved, symmetric loops spread from the north pole to the south pole."
+        }
+      ],
+      "direction_note": "filings show shape and relative strength but not direction; outside a magnet direction is N to S",
+      "smooth_stage_animation": true
+    },
+    "attraction_ready": {
+      "stage": 4,
+      "phase": "field pattern formed ready to record",
+      "elapsed_stage_s": 0,
+      "configuration": "attraction",
+      "configuration_label": "UNLIKE POLES FACING",
+      "apparatus": [
+        "bar magnet or matched pair below paper",
+        "white paper on clear acrylic support",
+        "sealed perforated iron-filings shaker",
+        "soft gentle tapping tool"
+      ],
+      "magnets_below_paper": true,
+      "poles": "red north poles and blue south poles",
+      "filings": {
+        "individually_modelled": true,
+        "fine_layer": true,
+        "visible_fraction": 1,
+        "aligned_to_local_field": true,
+        "temporary_induced_magnets": true,
+        "safe_sealed_simulation": true
+      },
+      "observation": "Dense, nearly straight filing chains bridge the gap between unlike poles.",
+      "recorded_patterns": [
+        {
+          "id": "single",
+          "label": "SINGLE BAR MAGNET",
+          "short": "single N–S",
+          "observation": "Curved, symmetric loops spread from the north pole to the south pole."
+        }
+      ],
+      "direction_note": "filings show shape and relative strength but not direction; outside a magnet direction is N to S",
+      "smooth_stage_animation": true
+    },
+    "repulsion_initial": {
+      "stage": 0,
+      "phase": "fresh paper over magnet arrangement",
+      "elapsed_stage_s": 0,
+      "configuration": "repulsion",
+      "configuration_label": "LIKE POLES FACING",
+      "apparatus": [
+        "bar magnet or matched pair below paper",
+        "white paper on clear acrylic support",
+        "sealed perforated iron-filings shaker",
+        "soft gentle tapping tool"
+      ],
+      "magnets_below_paper": true,
+      "poles": "red north poles and blue south poles",
+      "filings": {
+        "individually_modelled": true,
+        "fine_layer": true,
+        "visible_fraction": 0,
+        "aligned_to_local_field": false,
+        "temporary_induced_magnets": false,
+        "safe_sealed_simulation": true
+      },
+      "observation": null,
+      "recorded_patterns": [
+        {
+          "id": "single",
+          "label": "SINGLE BAR MAGNET",
+          "short": "single N–S",
+          "observation": "Curved, symmetric loops spread from the north pole to the south pole."
+        },
+        {
+          "id": "attraction",
+          "label": "UNLIKE POLES FACING",
+          "short": "N facing S",
+          "observation": "Dense, nearly straight filing chains bridge the gap between unlike poles."
+        }
+      ],
+      "direction_note": "filings show shape and relative strength but not direction; outside a magnet direction is N to S",
+      "smooth_stage_animation": true
+    },
+    "repulsion_ready": {
+      "stage": 4,
+      "phase": "field pattern formed ready to record",
+      "elapsed_stage_s": 0,
+      "configuration": "repulsion",
+      "configuration_label": "LIKE POLES FACING",
+      "apparatus": [
+        "bar magnet or matched pair below paper",
+        "white paper on clear acrylic support",
+        "sealed perforated iron-filings shaker",
+        "soft gentle tapping tool"
+      ],
+      "magnets_below_paper": true,
+      "poles": "red north poles and blue south poles",
+      "filings": {
+        "individually_modelled": true,
+        "fine_layer": true,
+        "visible_fraction": 1,
+        "aligned_to_local_field": true,
+        "temporary_induced_magnets": true,
+        "safe_sealed_simulation": true
+      },
+      "observation": "Filing chains bow away from the central gap, leaving a weak neutral region.",
+      "recorded_patterns": [
+        {
+          "id": "single",
+          "label": "SINGLE BAR MAGNET",
+          "short": "single N–S",
+          "observation": "Curved, symmetric loops spread from the north pole to the south pole."
+        },
+        {
+          "id": "attraction",
+          "label": "UNLIKE POLES FACING",
+          "short": "N facing S",
+          "observation": "Dense, nearly straight filing chains bridge the gap between unlike poles."
+        }
+      ],
+      "direction_note": "filings show shape and relative strength but not direction; outside a magnet direction is N to S",
+      "smooth_stage_animation": true
+    },
+    "complete": true,
+    "recorded_patterns": [
+      {
+        "id": "single",
+        "label": "SINGLE BAR MAGNET",
+        "short": "single N–S",
+        "observation": "Curved, symmetric loops spread from the north pole to the south pole."
+      },
+      {
+        "id": "attraction",
+        "label": "UNLIKE POLES FACING",
+        "short": "N facing S",
+        "observation": "Dense, nearly straight filing chains bridge the gap between unlike poles."
+      },
+      {
+        "id": "repulsion",
+        "label": "LIKE POLES FACING",
+        "short": "N facing N",
+        "observation": "Filing chains bow away from the central gap, leaving a weak neutral region."
+      }
+    ]
+  }
+}

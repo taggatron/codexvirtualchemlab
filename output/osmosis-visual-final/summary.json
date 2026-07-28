@@ -1,0 +1,13 @@
+{
+  "errors": [],
+  "stage": 4,
+  "animation": {
+    "smooth_forceps_transfer": true,
+    "potato_held_between_forceps_jaws": true,
+    "water_molecules_visible": false,
+    "water_molecule_direction": "into the potato cells",
+    "surface_drain_droplets": true,
+    "two_sheet_blotting_press": true,
+    "balance_reading_settles": false
+  }
+}

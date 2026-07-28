@@ -2,16 +2,28 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Practical Lab — OCR GCSE Chemistry</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Practical Lab — OCR GCSE Combined Science</title>
   <link rel="icon" href="data:," />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=20260728-22" />
 </head>
 <body>
   <main>
-    <canvas id="lab" aria-label="Interactive virtual chemistry laboratory controls"></canvas>
+    <canvas id="lab" aria-label="Interactive virtual GCSE Combined Science laboratory controls"></canvas>
     <canvas id="webgl" aria-label="WebGL laboratory workbench"></canvas>
+    <section id="orientation-prompt" class="orientation-prompt" role="status" aria-live="polite">
+      <div class="orientation-card">
+        <div class="orientation-brand"><span>PRACTICAL</span><strong>LAB</strong></div>
+        <div class="phone-rotate-icon" aria-hidden="true">
+          <span class="rotate-arrow">↻</span>
+          <span class="phone-shape"></span>
+        </div>
+        <h1>Rotate to landscape</h1>
+        <p>This interactive lab needs a wider view. Turn your phone sideways to see the practical, method and controls together.</p>
+        <div class="orientation-hint"><span aria-hidden="true">↔</span> Landscape works best</div>
+      </div>
+    </section>
   </main>
-<script type="module" src="app.js?v=20260724-02"></script>
+<script type="module" src="app.js?v=20260728-29"></script>
 </body>
 </html>

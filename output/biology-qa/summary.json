@@ -1,0 +1,39 @@
+{
+  "errors": [],
+  "renderer": {
+    "enabled": true,
+    "renderer": "WebGL / Three.js",
+    "objects": 1,
+    "legacy_2d_apparatus": false
+  },
+  "starch": {
+    "initial_phase": "fresh leaf above hot water",
+    "boiling_phase": "boiling leaf",
+    "ethanol_phase": "decolourising in warm ethanol",
+    "rinsing_phase": "rinsing and spreading leaf",
+    "tile_ready": true,
+    "iodine_phase": "adding iodine",
+    "final_colour": "blue-black",
+    "starch_present": true,
+    "result_view": "side-by-side fresh leaf and iodine-treated leaf observation",
+    "complete": true
+  },
+  "lipase": {
+    "initial_target_c": 20,
+    "adding_phase": "adding measured lipase",
+    "reacting_colour": "fading pink",
+    "result_20_s": 68,
+    "result_30_s": 39,
+    "result_40_s": 22,
+    "result_50_s": 34,
+    "result_60_s": 104,
+    "graph_axes": {
+      "x": "temperature / °C",
+      "y": "time for pink colour to disappear / s",
+      "chart_type": "bar chart"
+    },
+    "result_count": 5,
+    "complete": true,
+    "evaluation_ready": true
+  }
+}
