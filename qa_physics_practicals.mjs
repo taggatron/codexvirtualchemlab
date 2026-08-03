@@ -25,8 +25,21 @@ const capture = async name => {
 };
 const primary = () => click(372, 837);
 
-await click(435, 32);
-await click(130, 181);
+async function selectPhysicsPractical(titlePattern) {
+  await click(435, 32);
+  const discovered = new Set();
+
+  for (let y = 105; y <= 690; y += 24) {
+    await click(130, y, 22);
+    const snapshot = await state();
+    if (snapshot.practical) discovered.add(snapshot.practical);
+    if (titlePattern.test(snapshot.practical || '')) return snapshot;
+  }
+
+  throw new Error(`Could not locate ${titlePattern} in the Physics sidebar. Saw: ${[...discovered].join(', ')}`);
+}
+
+await selectPhysicsPractical(/electromagnet strength/i);
 const electromagnetInitial = await capture('01-electromagnet-initial');
 await primary();
 await advance(1100);
@@ -53,7 +66,7 @@ for (let trial = 1; trial < 5; trial++) {
 }
 const electromagnetComplete = await capture('06-electromagnet-series-graph');
 
-await click(130, 235);
+await selectPhysicsPractical(/convection currents/i);
 const convectionInitial = await capture('07-convection-initial');
 await primary();
 await advance(980);
@@ -69,7 +82,7 @@ const convectionComplete = await capture('11-convection-complete');
 await click(522, 837);
 const convectionObservation = await capture('12-convection-observation');
 
-await click(130, 289);
+await selectPhysicsPractical(/conduction in metals/i);
 const conductionInitial = await capture('13-conduction-initial');
 await primary();
 await advance(2100);
@@ -81,7 +94,7 @@ const conductionComplete = await capture('16-conduction-complete');
 await click(500, 837);
 const conductionResults = await capture('17-conduction-results');
 
-await click(130, 343);
+await selectPhysicsPractical(/thermal radiation/i);
 const thermalInitial = await capture('18-thermal-initial');
 await primary();
 await advance(1350);
