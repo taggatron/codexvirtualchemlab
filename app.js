@@ -2893,6 +2893,8 @@ canvas.addEventListener('pointerdown', e => {
     state.subject = r.data;
     state.graphModal = false;
     state.reactantSafety = null;
+    state.hookeFocusModal = false;
+    state.hookeFocusProgress = 0;
     const visible = practicals.map((p, i) => ({ ...p, originalIndex: i })).filter(p => (p.subject || 'chemistry') === state.subject);
     if (visible.length > 0 && !visible.some(p => p.originalIndex === state.selected)) {
       state.selected = visible[0].originalIndex;
@@ -2917,7 +2919,7 @@ canvas.addEventListener('pointerdown', e => {
   else if (r.id === 'practical') {
     state.selected = r.data; state.running = false; state.complete = false; state.progress = 0; state.points = [];
     state.temp = practicals[r.data].id === 'free' ? 20 : 25; state.volume = 0; state.ph = 7; state.burner = false; state.coolingWater = false; state.transferred = 0;
-    state.pour = null; state.drag = null; state.dose = null; state.graphModal = false; state.reactantSafety = null; state.lastReactant = null; state.particles = []; state.chromSelectedDye = null; state.electroRecorded = false;
+    state.pour = null; state.drag = null; state.dose = null; state.graphModal = false; state.reactantSafety = null; state.hookeFocusModal = false; state.hookeFocusProgress = 0; state.lastReactant = null; state.particles = []; state.chromSelectedDye = null; state.electroRecorded = false;
     state.tab = practicals[r.data].id === 'free' ? 'equipment' : 'bench';
     const selectedId = practicals[r.data].id;
     if (selectedId === 'rates') resetRatesPractical(); else if (selectedId === 'mass') resetMassPractical(); else if (selectedId === 'hydrogen') resetHydrogenPractical(); else if (selectedId === 'electro') resetElectroPractical(); else if (selectedId === 'titration') resetTitrationPractical(); else if (selectedId === 'thermite') resetThermitePractical(); else if (selectedId === 'starchleaf') resetStarchPractical(); else if (selectedId === 'lipase') resetLipasePractical(); else if (selectedId === 'osmosis') resetOsmosisPractical(); else if (selectedId === 'potometer') resetPotometerPractical(); else if (selectedId === 'quadrats') resetQuadratPractical(); else if (selectedId === 'shoretransect') resetShoreTransectPractical(); else if (selectedId === 'ripple') resetRipplePractical(); else if (selectedId === 'electromagnet') resetElectromagnetPractical(); else if (selectedId === 'convection') resetConvectionPractical(); else if (selectedId === 'conduction') resetConductionPractical(); else if (selectedId === 'thermal') resetThermalPractical(); else if (selectedId === 'density') resetDensityPractical(); else if (selectedId === 'hooke') resetHookePractical(); else if (selectedId === 'specificheat') resetSpecificHeatPractical(); else if (selectedId === 'wirelength') resetWireLengthPractical(); else if (selectedId === 'fieldlines') resetFieldLinePractical(); else state.toast = selectedId === 'free' ? 'Click equipment to add it, or drag it onto the bench.' : selectedId === 'water' ? 'Glassware assembled. Start the cooling water before switching on the electric heating mantle.' : `${practicals[r.data].gear.join(', ')} loaded onto the bench.`;
@@ -2929,6 +2931,7 @@ canvas.addEventListener('pointerdown', e => {
   else if (r.id === 'palette') { state.drag = { kind: 'palette', type: r.data, x: point.x, y: point.y, startX: point.x, startY: point.y, moved: false }; canvas.setPointerCapture?.(e.pointerId); draw() }
   else if (r.id === 'free-reactant') { state.drag = { kind: 'free-reactant', reactantId: r.data, x: point.x, y: point.y, startX: point.x, startY: point.y, moved: false, targetUid: null }; canvas.setPointerCapture?.(e.pointerId); draw() }
   else if (r.id === 'guided-reactant-safety') { state.drag = null; state.graphModal = false; state.evaluationModal = false; state.reactantSafety = guidedReactantSafety(r.data.name, r.data.practicalId); draw() }
+  else if (r.id === 'open-hooke-focus-modal') { state.drag = null; state.graphModal = false; state.evaluationModal = false; state.reactantSafety = null; state.hookeFocusModal = true; state.hookeFocusProgress = 0; draw() }
   else if (r.id === 'workspace-item') { const it = state.workspace.find(a => a.uid === r.data); if (it) { const anchor = workspaceScreenAnchor(it); state.drag = { kind: 'workspace', uid: it.uid, x: point.x, y: point.y, startX: point.x, startY: point.y, dx: point.x - anchor.x, dy: point.y - anchor.y, moved: false, snapUid: null, phTargetUid: null, origin: { x: it.x, y: it.y, snappedTo: it.snappedTo || null, attachedTo: it.attachedTo || null } }; canvas.setPointerCapture?.(e.pointerId) } }
   else if (r.id === 'practical-evaluation') { state.graphModal = false; state.evaluationModal = true; draw(); }
   else if (r.id === 'close-evaluation-modal') { state.evaluationModal = false; draw(); }
@@ -2937,6 +2940,8 @@ canvas.addEventListener('pointerdown', e => {
   else if (r.id === 'graph-modal-body') return;
   else if (r.id === 'close-reactant-safety-modal') { state.reactantSafety = null; draw(); }
   else if (r.id === 'reactant-safety-modal-body') return;
+  else if (r.id === 'close-hooke-focus-modal') { state.hookeFocusModal = false; state.hookeFocusProgress = 0; draw(); }
+  else if (r.id === 'hooke-focus-modal-body') return;
   else if (r.id === 'reagent' && !state.pour) { state.drag = { kind: 'HCl(aq)', x: point.x, y: point.y, startX: point.x, startY: point.y }; canvas.setPointerCapture?.(e.pointerId); state.toast = 'Move the flask close to the receiver, then release.'; draw() }
 });
 canvas.addEventListener('pointerdown', e => { const r = regionAtPoint(pointerPosition(e)); if (r?.id === 'practical' && practicals[r.data]?.id === 'flame') { resetFlameTestPractical(); draw() } else if (r?.id === 'flame-spectrum' && practicals[state.selected].id === 'flame' && !state.running) { state.flameTestSalt = r.data; state.flameTestStage = 0; state.flameTestTimer = 0; state.tab = 'bench'; state.toast = `${flameTestSalts[r.data].salt} selected from the spectrum. Scoop it with the clean spatula.`; draw() } });
@@ -2973,10 +2978,12 @@ canvas.addEventListener('pointerup', e => {
 });
 canvas.addEventListener('pointercancel', () => { if (!state.drag) return; if (state.drag.kind === 'workspace') { const it = state.workspace.find(a => a.uid === state.drag.uid); if (it && state.drag.origin) Object.assign(it, state.drag.origin) } state.toast = 'Interaction cancelled.'; state.drag = null; draw() });
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && (state.graphModal || state.evaluationModal || state.reactantSafety)) {
+  if (e.key === 'Escape' && (state.graphModal || state.evaluationModal || state.reactantSafety || state.hookeFocusModal)) {
     state.graphModal = false;
     state.evaluationModal = false;
     state.reactantSafety = null;
+    state.hookeFocusModal = false;
+    state.hookeFocusProgress = 0;
     e.preventDefault();
     draw();
     return;
@@ -3378,6 +3385,7 @@ function update(dt, skipDraw = false) {
   }
   if (id === 'hooke') {
     let stageJustSettled = false;
+    if (state.hookeFocusModal) state.hookeFocusProgress = Math.min(1, state.hookeFocusProgress + dt / .32);
     if (state.running && state.hookeStage === 1) {
       state.hookeTimer += dt; state.time += dt;
       const q = Math.max(0, Math.min(1, state.hookeTimer / hookeStageDurations[1]));
@@ -3389,7 +3397,7 @@ function update(dt, skipDraw = false) {
         state.toast = `${state.hookeForceN.toFixed(1)} N settled: read ${hookeTotalLengthCm().toFixed(1)} cm total length, then subtract 20.0 cm to find ${hookeExtensionCm().toFixed(1)} cm extension.`;
       }
     }
-    if (!skipDraw && (state.running || state.complete || stageJustSettled)) draw();
+    if (!skipDraw && (state.running || state.complete || stageJustSettled || state.hookeFocusModal)) draw();
     return;
   }
   if (id === 'specificheat') {
