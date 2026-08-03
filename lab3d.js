@@ -83,11 +83,17 @@ export class LabRenderer3D {
     this.scene.fog.color.setHex(background); this.scene.fog.near = outdoor ? 16 : 13; this.scene.fog.far = outdoor ? 30 : 24;
     this.room.hemi.intensity = outdoor ? 2.75 : 2.25; this.room.key.intensity = outdoor ? 3.75 : 3.1; this.room.rim.intensity = outdoor ? 9 : 16;
   }
-  applyCameraForPractical(id) {
+  applyCameraForPractical(id, hookeFocusProgress = 0) {
     if (id === 'quadrats') { this.camera.fov = 40; this.camera.position.set(0, 5.35, 9.45); this.camera.lookAt(0, .55, .42) }
     else if (id === 'shoretransect') { this.camera.fov = 42; this.camera.position.set(0, 5.7, 10.2); this.camera.lookAt(0, .72, -.24) }
     else if (id === 'ripple') { this.camera.fov = 38; this.camera.position.set(0, 5.5, 8.85); this.camera.lookAt(0, 1.12, -.05) }
     else { this.camera.fov = 36; this.camera.position.set(0, 4.65, 8.55); this.camera.lookAt(0, 1.05, 0) }
+    if (id === 'hooke' && hookeFocusProgress > 0) {
+      const q = Math.max(0, Math.min(1, hookeFocusProgress)), eased = q * q * (3 - 2 * q);
+      this.camera.fov = THREE.MathUtils.lerp(36, 24, eased);
+      this.camera.position.set(THREE.MathUtils.lerp(0, .24, eased), THREE.MathUtils.lerp(4.65, 2.42, eased), THREE.MathUtils.lerp(8.55, 4.15, eased));
+      this.camera.lookAt(THREE.MathUtils.lerp(0, .18, eased), THREE.MathUtils.lerp(1.05, 1.42, eased), THREE.MathUtils.lerp(0, .1, eased));
+    }
     this.camera.updateProjectionMatrix();
   }
   resize(left, top, width, height, displayScale = 1) { width = Math.max(1, width); height = Math.max(1, height); displayScale = Math.max(.01, displayScale || 1); const unchanged = this.left === left && this.top === top && this.width === width && this.height === height && this.displayScale === displayScale; this.left = left; this.top = top; this.width = width; this.height = height; this.displayScale = displayScale; const displayLeft = left * displayScale, displayTop = top * displayScale, displayWidth = width * displayScale, displayHeight = height * displayScale; Object.assign(this.canvas.style, { left: `${displayLeft}px`, top: `${displayTop}px`, width: `${displayWidth}px`, height: `${displayHeight}px` }); if (!this.available || unchanged) return; this.renderer.setSize(displayWidth, displayHeight, false); this.camera.aspect = width / height; this.camera.updateProjectionMatrix() }
@@ -2564,14 +2570,13 @@ export class LabRenderer3D {
       const pad = new THREE.Mesh(new THREE.BoxGeometry(.07, .12, .22), black); pad.position.set(springX + side * .055, 2.83, springZ); g.add(pad);
     }
 
-    // White vertical ruler with a full-height linear tick field, labelled
-    // extension readings and a red 10 cm limit-of-proportionality marker.
+    // White vertical ruler with a full-height scale that starts at zero at
+    // its top edge, plus a red 10 cm limit-of-proportionality marker.
     const ruler = new THREE.Mesh(roundedBox(.49, rulerTopY - rulerBottomY, .085, .028, 3), new THREE.MeshPhysicalMaterial({ color: 0xf7f8f2, roughness: .42, clearcoat: .28 }));
     ruler.position.set(rulerX, (rulerTopY + rulerBottomY) / 2, .03); g.add(ruler);
     const rulerEdge = new THREE.Mesh(new THREE.BoxGeometry(.035, rulerTopY - rulerBottomY - .08, .105), metal(0x929fa4, .24)); rulerEdge.position.set(rulerX + .25, (rulerTopY + rulerBottomY) / 2, .03); g.add(rulerEdge);
     const rulerScaleTopY = rulerTopY - .07, rulerScaleBottomY = rulerBottomY + .07;
-    const rulerScaleMinMm = Math.ceil((zeroPointerY - rulerScaleTopY) / scenePerCm * 5) * 2;
-    const rulerScaleMaxMm = Math.floor((zeroPointerY - rulerScaleBottomY) / scenePerCm * 5) * 2;
+    const rulerScaleMaxMm = Math.floor((rulerScaleTopY - rulerScaleBottomY) / scenePerCm * 5) * 2;
     const tickMaterial = new THREE.MeshBasicMaterial({ color: 0x27383e, toneMapped: false });
     const makeLabel = (label, width = .28, height = .12, colour = '#26383e', fontSize = 34) => {
       const canvas = document.createElement('canvas'), dc = canvas.getContext('2d'); canvas.width = 256; canvas.height = 96;
@@ -2579,11 +2584,11 @@ export class LabRenderer3D {
       const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace;
       const mesh = new THREE.Mesh(new THREE.PlaneGeometry(width, height), new THREE.MeshBasicMaterial({ map: texture, transparent: true, toneMapped: false, depthWrite: false })); mesh.renderOrder = 11; return mesh;
     };
-    for (let mm = rulerScaleMinMm; mm <= rulerScaleMaxMm; mm += 2) {
-      const extensionCm = mm / 10, y = zeroPointerY - extensionCm * scenePerCm, centimetre = mm % 10 === 0, fiveMm = mm % 5 === 0;
+    for (let mm = 0; mm <= rulerScaleMaxMm; mm += 2) {
+      const rulerReadingCm = mm / 10, y = rulerScaleTopY - rulerReadingCm * scenePerCm, centimetre = mm % 10 === 0, fiveMm = mm % 5 === 0;
       const length = centimetre ? .22 : fiveMm ? .16 : .1;
       const tick = new THREE.Mesh(new THREE.BoxGeometry(length, .009, .012), tickMaterial); tick.position.set(rulerX - .235 + length / 2, y, .087); g.add(tick);
-      if (centimetre && extensionCm >= 0 && mm % 20 === 0) { const label = makeLabel(String(Math.round(extensionCm))); label.position.set(rulerX + .08, y, .088); g.add(label) }
+      if (centimetre && mm % 20 === 0) { const label = makeLabel(String(Math.round(rulerReadingCm))); label.position.set(rulerX + .08, y, .088); g.add(label) }
     }
     const limitY = zeroPointerY - 10 * scenePerCm;
     const limitLine = new THREE.Mesh(new THREE.BoxGeometry(.5, .014, .018), new THREE.MeshBasicMaterial({ color: 0xc74f52, toneMapped: false })); limitLine.position.set(rulerX, limitY, .095); g.add(limitLine);
@@ -2913,7 +2918,7 @@ export class LabRenderer3D {
     const litBunsens = this.flames.filter(f => f.loadTransition).length;
     if (litBunsens && (practicalChanged || litBunsens > previousLitBunsens)) this.bunsenLoadElapsed = 0;
     this.bunsenTransitionActive = litBunsens > 0 && this.bunsenLoadElapsed < this.bunsenLoadDuration;
-    this.applyCameraForPractical(p.id);
+    this.applyCameraForPractical(p.id, state.hookeFocusProgress || 0);
     if (this.sceneNeedsCompile) {
       this.renderer.compile(this.scene, this.camera); this.sceneNeedsCompile = false;
       if (this.pendingCanvasReveal && this.renderer.compileAsync) {
