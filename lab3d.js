@@ -2506,8 +2506,8 @@ export class LabRenderer3D {
     ruler.position.set(rulerX, (rulerTopY + rulerBottomY) / 2, .03); g.add(ruler);
     const rulerEdge = new THREE.Mesh(new THREE.BoxGeometry(.035, rulerTopY - rulerBottomY - .08, .105), metal(0x929fa4, .24)); rulerEdge.position.set(rulerX + .25, (rulerTopY + rulerBottomY) / 2, .03); g.add(rulerEdge);
     const rulerScaleTopY = rulerTopY - .07, rulerScaleBottomY = rulerBottomY + .07;
-    const rulerScaleMinMm = Math.ceil((zeroPointerY - rulerScaleTopY) / scenePerCm / 2) * 2;
-    const rulerScaleMaxMm = Math.floor((zeroPointerY - rulerScaleBottomY) / scenePerCm / 2) * 2;
+    const rulerScaleMinMm = Math.ceil((zeroPointerY - rulerScaleTopY) / scenePerCm * 5) * 2;
+    const rulerScaleMaxMm = Math.floor((zeroPointerY - rulerScaleBottomY) / scenePerCm * 5) * 2;
     const tickMaterial = new THREE.MeshBasicMaterial({ color: 0x27383e, toneMapped: false });
     const makeLabel = (label, width = .28, height = .12, colour = '#26383e', fontSize = 34) => {
       const canvas = document.createElement('canvas'), dc = canvas.getContext('2d'); canvas.width = 256; canvas.height = 96;
