@@ -923,10 +923,8 @@ function drawThermiteControls(x, benchY) { const primary = state.complete ? 'RES
 function drawDisplacementControls(x, benchY) { const labels = ['LOWER METALS', 'REACTIONS RUNNING…', 'RECORD RESULTS', 'RESET SERIES'], primary = labels[state.displacementStage] || labels[0], status = state.displacementStage === 0 ? '4 TEST TUBES READY' : state.displacementStage === 1 ? `${Math.round(state.progress * 100)}% OBSERVED` : state.displacementStage === 2 ? 'COATINGS FORMED' : 'SERIES RECORDED'; button(primary, x + 30, benchY + 46, 164, 38, state.running); rr(x + 204, benchY + 46, 152, 38, 8, '#f5f7f6', C.line); text(status, x + 280, benchY + 65, 9.2, state.complete ? '#9a542c' : C.ink, 800, 'center'); button('RESULTS', x + 366, benchY + 46, 86, 38, state.tab === 'graph') }
 function drawAlkaliControls(x, benchY) {
   const metal = alkaliMetal(), stage = state.alkaliStage || 0, labels = ['LOWER METAL', 'LOWERING…', 'REACTION RUNNING…', 'RECORD OBSERVATION', state.complete ? 'VIEW RESULTS' : 'NEXT METAL', 'CLEARING…'];
-  const busy = [1, 2, 5].includes(stage), status = stage === 0 ? `${metal.symbol} SAMPLE READY` : stage === 1 ? 'FORCEPS IN MOTION' : stage === 2 ? metal.flame.toUpperCase() : stage === 3 ? 'OBSERVE + RECORD' : state.complete ? 'SERIES COMPLETE' : 'NEXT SAMPLE READY';
+  const busy = [1, 2, 5].includes(stage);
   button(labels[stage] || labels[0], x + 30, benchY + 46, 164, 38, busy);
-  rr(x + 204, benchY + 46, 140, 38, 8, '#f5f7f6', C.line);
-  text(status, x + 274, benchY + 65, status.length > 17 ? 8.1 : 9.2, stage === 2 && metal.id !== 'lithium' ? metal.color : C.ink, 800, 'center');
   button('RESULTS', x + 354, benchY + 46, 90, 38, state.tab === 'graph');
   text(`TRIAL ${Math.min(3, state.alkaliResults.length + 1)} / 3  ·  ${metal.name.toUpperCase()}  ·  SIMULATION ONLY`, x + 30, benchY + 31, 8.8, '#d8e8ed', 750);
 }
