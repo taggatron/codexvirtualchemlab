@@ -32,6 +32,7 @@ if (snapshot.practical !== 'Flame tests') throw new Error('Flame Tests was not s
 if (!geometry.hose_valve_sleeve_flared || geometry.hose_valve_final_approach_axis !== '+x coaxial with the gas-tap outlet') throw new Error('Hose cuff is not coaxial with the tap outlet.');
 if (geometry.hose_valve_sleeve_profile !== 'rubber cuff flares from 0.059 to 0.094 scene-unit radius over the brass barbs' || geometry.hose_overlaps_brass_valve_scene_units !== .2) throw new Error('Hose cuff expansion or brass overlap is incorrect.');
 if (JSON.stringify(geometry.hose_valve_final_tangent) !== '[1,0,0]') throw new Error('Final hose tangent is not aligned to the tap axis.');
+if (geometry.gas_tap_outlet_profile !== 'tapered brass spigot, narrow at the hose entry and widening toward the valve body' || geometry.gas_tap_outlet_entry_radius_scene_units !== .06 || geometry.gas_tap_outlet_base_radius_scene_units !== .078) throw new Error('Gas-tap spigot is not tapered for the hose cuff.');
 if (!snapshot.renderer.enabled || snapshot.renderer.context_lost || errors.length) throw new Error(errors.join('\n') || 'WebGL renderer failed.');
 console.log(JSON.stringify({ practical: snapshot.practical, renderer: snapshot.renderer, hose: { profile: geometry.hose_valve_sleeve_profile, axis: geometry.hose_valve_final_approach_axis, tangent: geometry.hose_valve_final_tangent, overlap: geometry.hose_overlaps_brass_valve_scene_units }, errors }, null, 2));
 await browser.close();

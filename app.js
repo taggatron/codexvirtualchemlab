@@ -62,6 +62,7 @@ const graphSpecs = {
   wirelength: { xLabel: 'wire length / cm', yLabel: 'resistance / Ω', xMin: 0, xMax: 100, yMin: 0, yMax: 10, yDp: 1 }
 };
 const nonGraphResultIds = new Set(['free', 'titration', 'salts', 'mass', 'co2', 'electro', 'flame', 'displacement', 'chrom', 'starchleaf', 'quadrats', 'shoretransect', 'ripple', 'convection', 'conduction', 'thermal', 'fieldlines']);
+nonGraphResultIds.add('alkali');
 const GRAPH_SIDEBAR_HEADER_Y = 134, GRAPH_SIDEBAR_DESCRIPTION_OFFSET = 32;
 function currentGraphModalKind(id = practicals[state.selected]?.id) {
   if (id === 'rates') return 'temperature-bar-chart';
@@ -187,6 +188,16 @@ const practicalEvaluations = {
       'Clean metal strips with sandpaper immediately before testing to remove oxide coating that delays reaction.',
       'Use an insulated polystyrene cup calorimeter with lid to measure exact temperature rise ΔT to calculate enthalpy change.',
       'Filter and weigh displaced metal after drying to compare stoichiometry quantitatively.'
+    ]
+  },
+  alkali: {
+    iv: 'Type of alkali metal added to water (lithium, sodium or potassium)',
+    dv: 'Rate and vigour of fizzing, movement, temperature change and flame colour',
+    cvs: 'Tiny sample size, water volume, water temperature, indicator concentration, same protected water trough and observation time.',
+    improvements: [
+      'Use only a teacher-controlled simulation or approved filmed demonstration: alkali metals react violently with water and must not be handled in a student practical.',
+      'Use equal, freshly cut tiny samples stored under oil so oxide coating and surface area do not confound the comparison.',
+      'Use a temperature probe and video analysis behind a safety screen to compare hydrogen production and reaction speed objectively.'
     ]
   },
   chrom: {
@@ -468,6 +479,38 @@ const freeReactionRules = [
 const state = { selected: 0, subject: 'chemistry', subjectTabX: 149, subjectTabW: 114, sidebarScroll: { chemistry: 0, biology: 0, physics: 0 }, running: false, complete: false, temp: 20, ph: 7, time: 0, volume: 0, progress: 0, tab: 'equipment', graphModal: false, evaluationModal: false, reactantSafety: null, points: [], hover: null, toast: 'Click equipment to add it, or drag it onto the bench.', drag: null, pour: null, burner: false, coolingWater: false, particles: [], layout: null, flamePhase: 0, transferred: 0, workspace: [], nextItem: 1, dose: null, reaction: null, massStage: 0, massLidOn: true, massTransfer: null, massBefore: 4.01, massAfter: null, hydrogenStage: 0, hydrogenTimer: 0, hydrogenAudioPlayed: false, hydrogenGas: 0, saltsStage: 0, saltsTimer: 0, chromSelectedDye: null, electroRecorded: false, electroWeighing: false, electroWeighTimer: 0, titrationStage: 0, titrationVolume: 0, titrationDropTimer: 0, titrationDrops: 0, titrationIndicator: false, titrationIndicatorTimer: 0, titrationRecorded: false, ratesStage: 0, ratesStageTimer: 0, ratesTrialIndex: 0, ratesTargetTemp: 20, ratesBathTemp: 20, ratesConditioning: false, ratesResults: [], thermiteTimer: 0, thermiteAudioPlayed: false, displacementStage: 0, displacementTimer: 0, displacementRecorded: false, flameTestStage: 0, flameTestTimer: 0, flameTestSalt: 0, flameTestTested: [], starchStage: 0, starchTimer: 0, lipaseStage: 0, lipaseTimer: 0, lipaseTrialIndex: 0, lipaseTargetTemp: 20, lipaseBathTemp: 20, lipaseConditioning: false, lipaseResults: [], osmosisStage: 0, osmosisTimer: 0, osmosisTrialIndex: 0, osmosisConcentration: 0, osmosisResults: [], potometerStage: 0, potometerTimer: 0, potometerTrialIndex: 0, potometerWindSpeed: 0, potometerBubbleMm: 0, potometerResults: [], pondweedDistance: 20, pondweedLampOn: true, pondweedTimer: 0, pondweedBubbles: 0, pondweedResults: [], quadratStage: 0, quadratTimer: 0, quadratSampleIndex: 0, quadratCurrentCount: 0, quadratResults: [], meadowWindClock: 0, transectStage: 0, transectTimer: 0, transectStationIndex: 0, transectDistanceM: 0, transectCurrentObservation: null, transectResults: [], shoreTideClock: 0, shoreTideProgress: 0, rippleStage: 0, rippleTimer: 0, rippleTrialIndex: 0, rippleFrequencyHz: 4, rippleTenWavelengthCm: 0, rippleWavelengthCm: 0, rippleSpeedMs: 0, rippleResults: [], rippleWaveClock: 0, newtonForce: 0.2, newtonMass: 1.0, newtonPos: 0, newtonVel: 0, newtonAcc: 0.2, newtonTimer: 0, newtonRunning: false, newtonGate1Time: null, newtonGate2Time: null, newtonResults: [], electromagnetStage: 0, electromagnetTimer: 0, electromagnetTrialIndex: 0, electromagnetTurns: 10, electromagnetClips: 0, electromagnetResults: [], convectionStage: 0, convectionTimer: 0, conductionStage: 0, conductionTimer: 0, thermalStage: 0, thermalTimer: 0, thermalCaptured: false, densityStage: 0, densitySample: 0, densityTimer: 0, densityRecorded: false, densityResults: [], hookeStage: 0, hookeTimer: 0, hookeTrialIndex: 0, hookeForceN: 0, hookeResults: [], shcStage: 0, shcTimer: 0, shcEnergyJ: 0, shcTemperatureC: 20, shcResults: [], wireStage: 0, wireTimer: 0, wireTrialIndex: 0, wireLengthCm: 20, wireVoltageV: 1.5, wireResults: [], fieldStage: 0, fieldTimer: 0, fieldConfigIndex: 0, fieldResults: [] };
 state.hookeFocusModal = false;
 state.hookeFocusProgress = 0;
+const alkaliMetals = [
+  { id: 'lithium', name: 'Lithium', symbol: 'Li', color: '#bf5961', flame: 'no visible flame', observation: 'Floats, fizzes gently and moves slowly across the water surface.', duration: 3.4, temperatureRise: 18 },
+  { id: 'sodium', name: 'Sodium', symbol: 'Na', color: '#d89235', flame: 'yellow-orange flame', observation: 'Melts into a silvery ball, darts rapidly and burns with a yellow-orange flame.', duration: 2.75, temperatureRise: 42 },
+  { id: 'potassium', name: 'Potassium', symbol: 'K', color: '#8c63bc', flame: 'lilac flame', observation: 'Skates vigorously, ignites with a lilac flame and produces the strongest fizzing.', duration: 2.25, temperatureRise: 64 }
+];
+Object.assign(state, { alkaliStage: 0, alkaliTimer: 0, alkaliMetal: 0, alkaliResults: [], alkaliReactionProgress: 0 });
+function alkaliMetal() { return alkaliMetals[Math.max(0, Math.min(alkaliMetals.length - 1, state.alkaliMetal || 0))] }
+function alkaliStepIndex() { return state.alkaliStage === 0 || state.alkaliStage === 5 ? 0 : state.alkaliStage === 1 ? 1 : state.alkaliStage === 2 || state.alkaliStage === 3 ? 2 : 3 }
+function resetAlkaliPractical() {
+  state.running = false; state.complete = false; state.time = 0; state.progress = 0; state.points = []; state.temp = 25; state.ph = 7;
+  state.alkaliStage = 0; state.alkaliTimer = 0; state.alkaliMetal = 0; state.alkaliResults = []; state.alkaliReactionProgress = 0; state.lastReactant = alkaliMetals[0].id; state.tab = 'bench';
+  state.toast = 'Simulation safety screen is in place. Lithium is the first tiny sample ready in the covered water trough.';
+}
+function activateAlkali(label) {
+  const metal = alkaliMetal(), stage = state.alkaliStage;
+  if (label === 'LOWER METAL' && stage === 0) {
+    state.alkaliStage = 1; state.alkaliTimer = 0; state.alkaliReactionProgress = 0; state.progress = (state.alkaliResults.length + .05) / alkaliMetals.length; state.running = true; state.complete = false;
+    state.toast = `Remote forceps are lowering a tiny ${metal.name.toLowerCase()} sample into the protected water trough.`;
+  } else if (label === 'RECORD OBSERVATION' && stage === 3) {
+    if (!state.alkaliResults.some(result => result.id === metal.id)) state.alkaliResults.push({ ...metal });
+    state.progress = state.alkaliResults.length / alkaliMetals.length; state.alkaliStage = 4; state.running = false;
+    state.complete = state.alkaliResults.length === alkaliMetals.length;
+    state.toast = state.complete ? 'All three simulated observations are recorded. Reactivity increases from lithium to sodium to potassium.' : `${metal.name} recorded. Prepare the next protected trial with ${alkaliMetals[state.alkaliResults.length].name.toLowerCase()}.`;
+    if (state.complete) state.tab = 'graph';
+  } else if (label === 'NEXT METAL' && stage === 4 && !state.complete) {
+    state.alkaliStage = 5; state.alkaliTimer = 0; state.running = true; state.progress = state.alkaliResults.length / alkaliMetals.length;
+    state.toast = 'The forceps return to the sample tray while the used reaction is safely cleared from the simulation.';
+  } else if (label === 'VIEW RESULTS' || label === 'RESULTS') {
+    state.tab = 'graph';
+    state.toast = state.alkaliResults.length ? 'Compare the three observations. Reactivity increases down Group 1.' : 'Complete at least one protected trial before opening the comparison.';
+  } else if (label === 'RESET SERIES') resetAlkaliPractical();
+}
 let lastSelectedPractical = state.selected;
 const ratesTemperatures = [20, 30, 40, 50, 60], ratesBathPosition = { x: 2.55, y: .43, z: -.42 }, ratesCrossPosition = { x: -.15, y: .12, z: .25 };
 function ratesMeasuredTime(temp = state.ratesTargetTemp) { return +(42 * Math.pow(.72, (temp - 20) / 10)).toFixed(1) }
@@ -707,6 +750,7 @@ function wrappedText(t, x, y, maxWidth, size = 10, color = C.ink, weight = 600, 
 function guidedReactantSafety(name, practicalId = practicals[state.selected]?.id) {
   const key = String(name).toLowerCase(), practical = practicals.find(item => item.id === practicalId);
   const detail = (rating, color, summary, handling, response, disposal) => ({ name, practicalId, practicalTitle: practical?.title || '', rating, color, summary, handling, response, disposal });
+  if (practicalId === 'alkali') return detail('HIGHLY REACTIVE — SIMULATION ONLY', '#944f8f', 'Lithium, sodium and potassium react exothermically with water, releasing flammable hydrogen and strongly alkaline hydroxide solution.', 'Do not carry out this comparison as a student practical. The screen, tiny stored-under-oil samples and remote forceps are represented only in this simulation or an approved teacher demonstration.', 'Keep clear of any real reaction and alert staff immediately for a spill, fire or splash. Never add water to an alkali-metal fire.', 'Only trained staff may quench and dispose of alkali-metal residues using the current school procedure; never put residues or contaminated water into a normal sink.');
   if (key.includes('thermite')) return detail('DEMONSTRATION ONLY', '#b53f32', 'The sealed charge can produce molten iron, intense heat, sparks and very bright light.', 'Teacher-controlled demonstration only. Keep the safety screen and sand containment in place and observe from the marked distance.', 'Do not approach until the teacher confirms the products are completely cool. Follow the laboratory emergency procedure for fire or burns.', 'Leave all charge residue and hot products for trained staff to dispose of.');
   if (key.includes('potassium dichromate')) return detail('TOXIC — SIMULATION ONLY', '#9d3b63', 'Potassium dichromate is toxic, carcinogenic, oxidising and environmentally hazardous; it is represented only as a simulation here.', 'Do not use this material in a student practical. A teacher should select a safer approved convection tracer for any real investigation.', 'Avoid all contact. If exposure occurs, alert staff immediately and follow the current SDS and school emergency procedure.', 'Treat as hazardous chemical waste; never pour it into a sink.');
   if (key.includes('magnesium fuse')) return detail('EXTREME HEAT / BRIGHT LIGHT', '#c44c32', 'Burning magnesium gives intense ultraviolet-rich light and can ignite nearby materials.', 'Ignite remotely behind the safety screen. Wear eye protection and never stare directly at the burning fuse.', 'For a burn or eye concern, alert staff immediately and cool affected skin with running water as directed by school procedure.', 'Allow residue to cool fully and place it in the designated solid-chemical waste.');
@@ -877,6 +921,15 @@ function flameTestPrimaryLabel() { if (state.flameTestStage === 0) return 'SCOOP
 function drawFlameTestControls(x, benchY) { const salt = flameTestSalts[state.flameTestSalt], primary = flameTestPrimaryLabel(), busy = state.flameTestStage === 1 || state.flameTestStage === 3, status = state.flameTestStage >= 4 ? salt.flame.toUpperCase() : state.flameTestStage >= 2 ? `${salt.formula} ON SPATULA` : `${salt.formula} SELECTED`; button(primary, x + 30, benchY + 46, 156, 38, busy); rr(x + 196, benchY + 46, 150, 38, 8, '#f5f7f6', C.line); text(status, x + 271, benchY + 65, status.length > 18 ? 8.5 : 9.5, state.flameTestStage >= 4 ? salt.flameHex : C.ink, 800, 'center'); button('SPECTRA', x + 356, benchY + 46, 88, 38, state.tab === 'graph') }
 function drawThermiteControls(x, benchY) { const primary = state.complete ? 'RESET PRACTICAL' : state.running ? 'REACTION ACTIVE' : 'IGNITE FUSE', status = state.complete ? 'MOLTEN IRON FORMED' : state.running ? thermitePhase().toUpperCase() : 'SHIELD IN PLACE'; button(primary, x + 30, benchY + 46, 150, 38, state.running); rr(x + 190, benchY + 46, 174, 38, 8, '#f5f7f6', C.line); text(status, x + 277, benchY + 65, status.length > 20 ? 8.5 : 9.5, state.running ? '#d95b2f' : C.ink, 800, 'center'); button('GRAPH', x + 374, benchY + 46, 76, 38, state.tab === 'graph') }
 function drawDisplacementControls(x, benchY) { const labels = ['LOWER METALS', 'REACTIONS RUNNING…', 'RECORD RESULTS', 'RESET SERIES'], primary = labels[state.displacementStage] || labels[0], status = state.displacementStage === 0 ? '4 TEST TUBES READY' : state.displacementStage === 1 ? `${Math.round(state.progress * 100)}% OBSERVED` : state.displacementStage === 2 ? 'COATINGS FORMED' : 'SERIES RECORDED'; button(primary, x + 30, benchY + 46, 164, 38, state.running); rr(x + 204, benchY + 46, 152, 38, 8, '#f5f7f6', C.line); text(status, x + 280, benchY + 65, 9.2, state.complete ? '#9a542c' : C.ink, 800, 'center'); button('RESULTS', x + 366, benchY + 46, 86, 38, state.tab === 'graph') }
+function drawAlkaliControls(x, benchY) {
+  const metal = alkaliMetal(), stage = state.alkaliStage || 0, labels = ['LOWER METAL', 'LOWERING…', 'REACTION RUNNING…', 'RECORD OBSERVATION', state.complete ? 'VIEW RESULTS' : 'NEXT METAL', 'CLEARING…'];
+  const busy = [1, 2, 5].includes(stage), status = stage === 0 ? `${metal.symbol} SAMPLE READY` : stage === 1 ? 'FORCEPS IN MOTION' : stage === 2 ? metal.flame.toUpperCase() : stage === 3 ? 'OBSERVE + RECORD' : state.complete ? 'SERIES COMPLETE' : 'NEXT SAMPLE READY';
+  button(labels[stage] || labels[0], x + 30, benchY + 46, 164, 38, busy);
+  rr(x + 204, benchY + 46, 140, 38, 8, '#f5f7f6', C.line);
+  text(status, x + 274, benchY + 65, status.length > 17 ? 8.1 : 9.2, stage === 2 && metal.id !== 'lithium' ? metal.color : C.ink, 800, 'center');
+  button('RESULTS', x + 354, benchY + 46, 90, 38, state.tab === 'graph');
+  text(`TRIAL ${Math.min(3, state.alkaliResults.length + 1)} / 3  ·  ${metal.name.toUpperCase()}  ·  SIMULATION ONLY`, x + 30, benchY + 31, 8.8, '#d8e8ed', 750);
+}
 function starchPrimaryLabel() { return ['BOIL LEAF', 'BOILING…', 'MOVE TO ETHANOL', 'DECOLOURISING…', 'RINSE LEAF', 'RINSING…', 'ADD IODINE', 'ADDING IODINE…', 'RESET PRACTICAL'][state.starchStage] || 'BOIL LEAF' }
 function drawStarchControls(x, benchY) { const stage = state.starchStage || 0, busy = [1, 3, 5, 7].includes(stage), statuses = ['FRESH GREEN LEAF', 'IN BOILING WATER', 'LEAF SOFTENED', 'CHLOROPHYLL REMOVING', 'PALE LEAF READY', 'RINSING LEAF', 'ON WHITE TILE', 'IODINE SPREADING', 'BLUE-BLACK · STARCH']; button(starchPrimaryLabel(), x + 30, benchY + 46, 166, 38, busy); rr(x + 206, benchY + 46, 164, 38, 8, '#f5f7f6', C.line); text(statuses[stage], x + 288, benchY + 65, (statuses[stage] || '').length > 19 ? 8.1 : 9.1, stage === 8 ? '#26344f' : C.ink, 800, 'center'); button('RESULT', x + 380, benchY + 46, 78, 38, state.tab === 'graph') }
 function lipasePrimaryLabel() { if (state.lipaseConditioning) return 'HEATING BATH…'; if (state.lipaseStage === 0) return 'ADD LIPASE'; if (state.lipaseStage === 1) return 'ADDING LIPASE…'; if (state.lipaseStage === 2) return 'REACTION RUNNING…'; return state.lipaseResults.length < lipaseTemperatures.length ? 'NEXT TEMPERATURE' : 'VIEW GRAPH' }
@@ -957,6 +1010,7 @@ function main() {
   else if (meadowScene) rr(x + 8, benchY + 18, w - 16, 86, 12, 'rgba(12,43,24,.8)', 'rgba(164,224,137,.3)');
   // controls
   if (free) { button('CLEAR BENCH', x + 30, benchY + 46, 112, 38, false); button('UNDO LAST', x + 152, benchY + 46, 105, 38, false); text(`${state.workspace.length} item${state.workspace.length === 1 ? '' : 's'} on bench`, x + 278, benchY + 65, 11, '#d8e8ed', 650) } else if (p.id === 'rates') drawRatesControls(x, benchY); else if (p.id === 'mass') drawMassControls(x, benchY); else if (p.id === 'hydrogen') drawHydrogenControls(x, benchY); else if (p.id === 'titration') drawTitrationControls(x, benchY); else if (p.id === 'salts') drawSaltsControls(x, benchY); else if (p.id === 'water') drawWaterControls(x, benchY); else if (p.id === 'electro') drawElectroControls(x, benchY); else if (p.id === 'flame') drawFlameTestControls(x, benchY); else if (p.id === 'displacement') drawDisplacementControls(x, benchY); else if (p.id === 'thermite') drawThermiteControls(x, benchY); else if (p.id === 'starchleaf') drawStarchControls(x, benchY); else if (p.id === 'lipase') drawLipaseControls(x, benchY); else if (p.id === 'osmosis') drawOsmosisControls(x, benchY); else if (p.id === 'potometer') drawPotometerControls(x, benchY); else if (p.id === 'pondweed') drawPondweedControls(x, benchY, w); else if (p.id === 'quadrats') drawQuadratControls(x, benchY); else if (p.id === 'shoretransect') drawShoreTransectControls(x, benchY); else if (p.id === 'ripple') drawRippleControls(x, benchY); else if (p.id === 'newton2') drawNewton2Controls(x, benchY, w); else if (p.id === 'electromagnet') drawElectromagnetControls(x, benchY); else if (p.id === 'convection') drawConvectionControls(x, benchY); else if (p.id === 'conduction') drawConductionControls(x, benchY); else if (p.id === 'thermal') drawThermalControls(x, benchY); else if (p.id === 'density') drawDensityControls(x, benchY); else if (p.id === 'hooke') drawHookeControls(x, benchY); else if (p.id === 'specificheat') drawSpecificHeatControls(x, benchY); else if (p.id === 'wirelength') drawWireLengthControls(x, benchY); else if (p.id === 'fieldlines') drawFieldLineControls(x, benchY); else { button(state.running ? 'RESET' : 'START', x + 30, benchY + 46, 112, 38, state.running); button('ADD REAGENT', x + 152, benchY + 46, 120, 38, false); button('RECORD', x + 282, benchY + 46, 90, 38, false) }
+  if (p.id === 'alkali') drawAlkaliControls(x, benchY);
   // meters
   rr(x + w - 190, benchY + 35, 164, 58, 8, '#f5f7f6');
   text(p.id === 'thermite' ? 'SIMULATED CORE' : p.id === 'displacement' ? 'SERIES STATUS' : p.id === 'flame' ? 'ACTIVE SAMPLE' : p.id === 'starchleaf' ? 'LEAF TEST' : p.id === 'lipase' ? 'ENZYME TRIAL' : p.id === 'osmosis' ? 'OSMOSIS TRIAL' : p.id === 'potometer' ? 'WATER UPTAKE' : p.id === 'pondweed' ? 'PHOTOSYNTHESIS' : p.id === 'quadrats' ? 'QUADRAT SAMPLE' : p.id === 'shoretransect' ? 'SHORE ZONATION' : p.id === 'ripple' ? 'WAVE SPEED' : p.id === 'newton2' ? 'ACCELERATION' : p.id === 'electromagnet' ? 'MAGNETIC LIFT' : p.id === 'convection' ? 'WATER FLOW' : p.id === 'conduction' ? 'PIN FALL TEST' : p.id === 'thermal' ? 'INFRARED VIEW' : p.id === 'density' ? 'DENSITY MEASURE' : p.id === 'hooke' ? 'FORCE / EXTENSION' : p.id === 'specificheat' ? 'ENERGY / TEMPERATURE' : p.id === 'wirelength' ? 'ELECTRICAL READING' : p.id === 'fieldlines' ? 'FIELD PATTERN' : 'LIVE READINGS', x + w - 177, benchY + 49, 9, C.muted, 800);
@@ -973,6 +1027,10 @@ function main() {
   } else if (p.id === 'displacement') {
     text(`${Math.round(state.progress * 100)}%`, x + w - 177, benchY + 72, 16, '#b96f3e', 800);
     text(state.complete ? 'COMPLETE' : state.running ? 'REACTING' : 'READY', x + w - 74, benchY + 72, 9, state.running ? '#b96f3e' : C.teal, 800, 'center');
+  } else if (p.id === 'alkali') {
+    const metal = alkaliMetal(), label = state.alkaliStage === 3 ? 'OBSERVE' : state.complete ? 'COMPLETE' : state.running ? 'REACTING' : 'READY';
+    text(metal.symbol, x + w - 177, benchY + 72, 18, metal.color, 800);
+    text(label, x + w - 74, benchY + 72, 9, label === 'REACTING' ? metal.color : C.teal, 800, 'center');
   } else if (p.id === 'starchleaf') {
     const leafStatus = state.starchStage >= 8 ? 'BLUE-BLACK' : state.starchStage >= 4 ? 'PALE LEAF' : state.starchStage >= 3 ? 'FADING LEAF' : 'GREEN LEAF';
     text(leafStatus, x + w - 177, benchY + 72, state.starchStage >= 8 ? 9.2 : 11.5, state.starchStage >= 8 ? '#26344f' : '#3f8f4f', 800);
@@ -1316,6 +1374,7 @@ function rightbar() {
   else if (p.id === 'electro') drawElectrolysisResultsTable(x + 18, graphContentY, R - 36);
   else if (p.id === 'titration') drawTitrationResultsTable(x + 18, graphContentY, R - 36);
   else if (p.id === 'displacement') drawDisplacementResultsTable(x + 18, graphContentY, R - 36);
+  else if (p.id === 'alkali') drawAlkaliResults(x + 18, graphContentY, R - 36);
   else if (p.id === 'chrom') drawChromatogramPanel(x + 18, graphContentY, R - 36, Math.min(520, H - graphContentY - 30));
   else if (p.id === 'salts') drawSaltMicroscopeResults(x + 18, graphContentY, R - 36, Math.min(520, H - graphContentY - 30));
   else if (p.id === 'starchleaf') drawStarchLeafResult(x + 18, graphContentY, R - 36);
@@ -1941,6 +2000,27 @@ function drawThermalResults(x, y, w) {
   wrappedText('The same flask, cube, filler neck and bench stay aligned while each finish rotates through the fixed view.', x + 14, noteY + 39, w - 28, 8.9, C.ink, 600, 11, 3);
 }
 
+function drawAlkaliResults(x, y, w) {
+  text('ALKALI METALS', x, y, 10, C.muted, 800);
+  text('Protected simulation comparison', x, y + 17, 9, C.ink, 600);
+  rr(x, y + 34, w, 378, 8, '#fff', C.line);
+  rr(x + 10, y + 46, w - 20, 34, 6, '#f4edf7');
+  text('METAL', x + 20, y + 63, 8.1, C.muted, 800);
+  text('OBSERVATION', x + w - 18, y + 63, 8.1, C.muted, 800, 'right');
+  alkaliMetals.forEach((metal, index) => {
+    const rowY = y + 88 + index * 73, recorded = state.alkaliResults.some(result => result.id === metal.id);
+    rr(x + 10, rowY, w - 20, 65, 6, recorded ? '#faf8fb' : '#f7f8f8', C.line);
+    ctx.fillStyle = metal.color; ctx.beginPath(); ctx.arc(x + 22, rowY + 20, 5, 0, Math.PI * 2); ctx.fill();
+    text(metal.name, x + 33, rowY + 18, 10, C.ink, 800);
+    text(recorded ? metal.flame.toUpperCase() : 'PENDING', x + 33, rowY + 40, 8.1, recorded ? metal.color : C.muted, 750);
+    wrappedText(recorded ? metal.observation : 'Complete this protected trial to reveal the observation.', x + 106, rowY + 16, w - 132, 8.3, recorded ? C.ink : C.muted, 600, 10.2, 4);
+  });
+  const complete = state.alkaliResults.length === alkaliMetals.length;
+  rr(x + 10, y + 318, w - 20, 82, 7, complete ? '#eee9f5' : '#f1f4f3');
+  text(complete ? 'REACTIVITY ORDER' : 'SIMULATION SAFETY', x + 22, y + 337, 8.4, complete ? '#70447d' : C.muted, 800);
+  text(complete ? 'Li < Na < K' : 'Teacher demo / simulation only', x + 22, y + 359, 12, complete ? '#70447d' : C.ink, 800);
+  wrappedText(complete ? 'The reactions become faster and more exothermic down Group 1.' : 'Observe behind the screen. Do not reproduce this as a student practical.', x + 22, y + 378, w - 44, 8.7, C.muted, 600, 10, 2);
+}
 function drawGraph(x, y, w, h) {
   const s = currentGraphSpec(), cardY = y + 36, top = cardY + 30, left = x + 58, right = x + w - 14, bottom = cardY + h - 55, gw = right - left, gh = bottom - top;
   const fmt = (v, dp = 0) => Number(v).toFixed(dp);
@@ -2375,6 +2455,11 @@ applyGuidedReactant = name => {
   if (practicals[state.selected].id === 'displacement') {
     const trial = displacementTrials.find(item => name.includes(item.metal));
     state.toast = trial ? `${trial.metal} is positioned above ${trial.solution}. Use LOWER METALS to start all four fair tests together.` : 'All four labelled reactant pairs are already prepared in the test-tube rack.';
+    return
+  }
+  if (practicals[state.selected].id === 'alkali') {
+    const metal = alkaliMetals.find(item => name.toLowerCase().includes(item.id));
+    state.toast = metal ? `${metal.name} remains sealed under oil until the protected simulation begins. Use LOWER METAL to start the observation.` : 'All alkali-metal samples remain sealed for this simulation-only comparison.';
     return
   }
   baseApplyGuidedReactant(name)
@@ -2859,6 +2944,13 @@ activate = label => {
   }
   co2AwareActivate(label)
 };
+const alkaliAwareActivate = activate;
+activate = label => {
+  if (practicals[state.selected].id === 'alkali' && ['LOWER METAL', 'LOWERING…', 'REACTION RUNNING…', 'RECORD OBSERVATION', 'NEXT METAL', 'VIEW RESULTS', 'RESET SERIES', 'RESULTS'].includes(label)) {
+    activateAlkali(label); draw(); return
+  }
+  alkaliAwareActivate(label)
+};
 function pointerPosition(e) {
   const rect = canvas.getBoundingClientRect();
   return { x: (e.clientX - rect.left) / UI_SCALE, y: (e.clientY - rect.top) / UI_SCALE }
@@ -2973,6 +3065,7 @@ canvas.addEventListener('pointerdown', e => {
   else if (r.id === 'reagent' && !state.pour) { state.drag = { kind: 'HCl(aq)', x: point.x, y: point.y, startX: point.x, startY: point.y }; canvas.setPointerCapture?.(e.pointerId); state.toast = 'Move the flask close to the receiver, then release.'; draw() }
 });
 canvas.addEventListener('pointerdown', e => { const r = regionAtPoint(pointerPosition(e)); if (r?.id === 'practical' && practicals[r.data]?.id === 'flame') { resetFlameTestPractical(); draw() } else if (r?.id === 'flame-spectrum' && practicals[state.selected].id === 'flame' && !state.running) { state.flameTestSalt = r.data; state.flameTestStage = 0; state.flameTestTimer = 0; state.tab = 'bench'; state.toast = `${flameTestSalts[r.data].salt} selected from the spectrum. Scoop it with the clean spatula.`; draw() } });
+canvas.addEventListener('pointerdown', e => { const r = regionAtPoint(pointerPosition(e)); if (r?.id === 'practical' && practicals[r.data]?.id === 'alkali') { resetAlkaliPractical(); draw() } });
 canvas.addEventListener('pointerup', e => {
   if (!state.drag) return;
   const d = state.drag, point = pointerPosition(e);
@@ -3049,6 +3142,28 @@ function update(dt, skipDraw = false) {
   if (id === 'electro' && state.electroWeighing) { state.electroWeighTimer = Math.min(electroWeighDuration, state.electroWeighTimer + dt); const phase = electroWeighPhase(); state.toast = phase === 'lifting from solution' ? 'The released cathode is lifting clear of the copper chloride solution.' : phase === 'moving to balance' ? 'The copper-coated cathode is moving across to the electronic balance.' : phase === 'lowering onto balance' ? 'The cathode is rotating flat and lowering onto the balance pan.' : 'The electronic balance reading is settling.'; if (state.electroWeighTimer >= electroWeighDuration) { state.electroWeighing = false; state.electroRecorded = true; state.tab = 'graph'; state.toast = 'Cathode settled at 13.24 g: a 0.84 g increase from deposited copper.' } if (!skipDraw) draw(); return }
   if (id === 'flame' && state.running) { const salt = flameTestSalts[state.flameTestSalt]; state.flameTestTimer += dt; state.time += dt; if (state.flameTestStage === 1) { if (state.flameTestTimer < .65) state.toast = `Moving the clean spatula above the ${salt.formula} sample jar.`; else if (state.flameTestTimer < 1.35) state.toast = `Scooping a small amount of ${salt.salt}.`; else state.toast = `${salt.formula} crystals are resting on the metal spatula.`; if (state.flameTestTimer >= 2.15) { state.flameTestStage = 2; state.flameTestTimer = 0; state.running = false; state.toast = `${salt.formula} loaded. Insert the spatula into the hottest part of the blue flame.` } } else if (state.flameTestStage === 3) { if (state.flameTestTimer < 1.05) state.toast = 'The loaded spatula is approaching the roaring blue flame.'; else state.toast = `The blue flame is changing to ${salt.flame}: ${salt.symbol} detected.`; if (state.flameTestTimer >= 3.15) { state.flameTestStage = 4; state.flameTestTimer = 0; state.running = false; if (!state.flameTestTested.includes(state.flameTestSalt)) state.flameTestTested.push(state.flameTestSalt); state.progress = state.flameTestTested.length / flameTestSalts.length; state.complete = state.flameTestTested.length === flameTestSalts.length; state.tab = 'graph'; state.toast = `${salt.salt} gives a ${salt.flame} flame. Its simplified absorption spectrum is now highlighted.` } } if (!skipDraw) draw(); return }
   if (id === 'displacement' && state.displacementStage === 1 && state.running) { state.displacementTimer = Math.min(displacementDuration, state.displacementTimer + dt); state.time = state.displacementTimer; state.progress = Math.min(1, state.displacementTimer / displacementDuration); state.temp = 25 + 1.8 * Math.sin(state.progress * Math.PI); state.toast = state.displacementTimer < 1.25 ? 'The cleaned metal strips are lowering into the four salt solutions.' : state.displacementTimer < 3.2 ? 'Copper is depositing on magnesium, zinc and iron; silver crystals are growing on copper.' : 'Compare the different coating textures and the changing solution colours in each test tube.'; if (state.displacementTimer >= displacementDuration) { state.displacementTimer = displacementDuration; state.progress = 1; state.temp = 25; state.running = false; state.complete = true; state.displacementStage = 2; state.toast = 'All four displacement reactions are complete. Record the observations and deduce the reactivity order.' } if (!skipDraw) draw(); return }
+  if (id === 'alkali' && state.running) {
+    const metal = alkaliMetal();
+    state.alkaliTimer += dt; state.time = state.alkaliTimer;
+    if (state.alkaliStage === 1) {
+      const q = Math.min(1, state.alkaliTimer / 1.85);
+      state.alkaliReactionProgress = 0; state.progress = (state.alkaliResults.length + .05) / alkaliMetals.length;
+      state.toast = q < .45 ? `The forceps move ${metal.name.toLowerCase()} above the water behind the safety screen.` : 'The tiny metal sample touches the water surface; keep the protective screen closed.';
+      if (q >= 1) { state.alkaliStage = 2; state.alkaliTimer = 0; state.progress = (state.alkaliResults.length + .14) / alkaliMetals.length; state.toast = `${metal.name} is reacting with water: hydrogen bubbles form and the indicator begins turning purple.`; }
+    } else if (state.alkaliStage === 2) {
+      const q = Math.min(1, state.alkaliTimer / metal.duration), motion = metal.id === 'lithium' ? 'moves slowly across the water' : metal.id === 'sodium' ? 'has melted and is darting across the water' : 'is skimming rapidly behind the screen';
+      state.alkaliReactionProgress = q; state.progress = (state.alkaliResults.length + .15 + q * .75) / alkaliMetals.length; state.temp = 25 + metal.temperatureRise * Math.sin(q * Math.PI * .72); state.ph = 7 + 6.2 * q;
+      state.toast = q < .32 ? `${metal.name} is floating and fizzing as hydrogen forms.` : q < .78 ? `${metal.name} ${motion}${metal.id === 'lithium' ? '.' : ` with a ${metal.flame}.`}` : 'The visible reaction is ending; the alkaline solution remains purple.';
+      if (q >= 1) { state.alkaliStage = 3; state.alkaliTimer = 0; state.alkaliReactionProgress = 1; state.running = false; state.temp = 25 + metal.temperatureRise * .38; state.ph = 13.2; state.progress = (state.alkaliResults.length + .94) / alkaliMetals.length; state.toast = `${metal.name} observation complete. Record the bubbles, motion and ${metal.flame}.`; }
+    } else if (state.alkaliStage === 5) {
+      const q = Math.min(1, state.alkaliTimer / 1.35);
+      state.alkaliReactionProgress = 1 - q; state.progress = state.alkaliResults.length / alkaliMetals.length;
+      state.toast = q < .58 ? 'The forceps withdraw and the protected trough is cleared between simulated trials.' : 'The next sealed sample vial is moving into position.';
+      if (q >= 1) { state.alkaliMetal = Math.min(alkaliMetals.length - 1, state.alkaliResults.length); state.alkaliStage = 0; state.alkaliTimer = 0; state.alkaliReactionProgress = 0; state.running = false; state.progress = state.alkaliResults.length / alkaliMetals.length; state.temp = 25; state.ph = 7; state.lastReactant = alkaliMetal().id; state.toast = `${alkaliMetal().name} is ready for the next protected comparison.`; }
+    }
+    if (!skipDraw) draw();
+    return;
+  }
   if (id === 'thermite' && state.running) {
     state.thermiteTimer = Math.min(thermiteDuration, state.thermiteTimer + dt); state.time = state.thermiteTimer; state.progress = state.thermiteTimer / thermiteDuration;
     const t = state.thermiteTimer, smooth = q => { q = Math.max(0, Math.min(1, q)); return q * q * (3 - 2 * q) };
@@ -4424,6 +4539,9 @@ window.render_game_to_text = () => {
     hose_valve_sleeve_flared: true,
     hose_valve_final_approach_axis: '+x coaxial with the gas-tap outlet',
     hose_valve_final_tangent: [1, 0, 0],
+    gas_tap_outlet_profile: 'tapered brass spigot, narrow at the hose entry and widening toward the valve body',
+    gas_tap_outlet_entry_radius_scene_units: .06,
+    gas_tap_outlet_base_radius_scene_units: .078,
     flame_width_scale_from_previous_geometry: .881,
     dependent_animations_realigned: true,
     collar_turn_uses_updated_geometry: true,

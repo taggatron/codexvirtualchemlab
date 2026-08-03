@@ -3,6 +3,7 @@ Original prompt: Build a very realistic virtual interactive chemistry lab web si
 - Current request: correct the Bunsen gas hose where it reaches the gas tap so the hose expands over part of the brass outlet and is oriented along the outlet rather than meeting it diagonally.
 - Diagnosed the joint as two conflicting geometries: the tap outlet and constant-radius sleeve were horizontal, but the flexible TubeGeometry ended on a diagonal tangent. Reworked only the final spline controls so the original broad U-shaped hose remains smooth and its final tangent becomes coaxial with the tap's +x outlet axis.
 - Replaced the constant-width sleeve with an open flared rubber cuff that grows from 0.059 to 0.094 scene-unit radius, covers 0.20 scene units of the brass barbs and leaves a narrow horizontal lead-in from the flexible hose. The cuff and hose share the same matte-black material, so the connection reads as one continuous fitted tube.
+- Reprofiled the brass gas-tap spigot so its exposed hose-entry end tapers from a 0.060 scene-unit radius to 0.078 at the valve body, with progressively wider barbs. The fitted hose cuff remains coaxial over the tapered entry.
 - Required-client validation, focused composited Flame Tests close-ups and the shared seven-frame Bunsen regression passed with WebGL enabled, the complete safety-to-blue flame/collar animation intact, the independently lit Conduction burner unchanged and no console/page errors.
 - TODO: none for this request.
 

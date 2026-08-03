@@ -31,6 +31,143 @@
       "total_length_cm": 20,
       "extension_cm": 0,
       "extension_m": 0,
+      "ruler": {
+        "origin": "top of vertical ruler",
+        "scale_cm": [
+          0,
+          33.2
+        ],
+        "unloaded_pointer_reading_cm": 17.1,
+        "pointer_reading_cm": 17.1
+      },
+      "guidance_focus": {
+        "available": true,
+        "trigger_bounds": {
+          "x": 1005.5999999999999,
+          "y": 549.5849999999999,
+          "width": 254.40000000000003,
+          "height": 79.6
+        },
+        "open": false,
+        "animation_progress": 0,
+        "focus": "bottom spring, fiducial pointer and ruler scale"
+      },
+      "spring_moving": false,
+      "reading_enabled_only_when_settled": true,
+      "measured_results": [],
+      "graph_axes": {
+        "x": "extension / m",
+        "y": "force / N"
+      },
+      "spring_constant_n_per_m": null,
+      "fitted_linear_region_n": [
+        0,
+        5
+      ],
+      "proportional_limit_n": null,
+      "final_6n_point_beyond_proportionality": false,
+      "conclusion": null,
+      "smooth_stage_animation": true
+    },
+    "guidance_focus_open": {
+      "stage": 0,
+      "phase": "unloaded reference ready",
+      "elapsed_stage_s": 0,
+      "apparatus": [
+        "heavy clamp stand with boss and spring clamp",
+        "continuous helical steel spring with upper and lower hooks",
+        "vertical ruler with eye-level fiducial pointer",
+        "mass hanger with individual 100 g slotted masses",
+        "safety catch tray"
+      ],
+      "zero_reference_length_cm": 20,
+      "load": {
+        "mass_g": 0,
+        "force_n": 0,
+        "conversion": "100 g = 0.100 kg; using g ≈ 10 N kg⁻¹ gives 1.0 N"
+      },
+      "total_length_cm": 20,
+      "extension_cm": 0,
+      "extension_m": 0,
+      "ruler": {
+        "origin": "top of vertical ruler",
+        "scale_cm": [
+          0,
+          33.2
+        ],
+        "unloaded_pointer_reading_cm": 17.1,
+        "pointer_reading_cm": 17.1
+      },
+      "guidance_focus": {
+        "available": true,
+        "trigger_bounds": {
+          "x": 1005.5999999999999,
+          "y": 549.5849999999999,
+          "width": 254.40000000000003,
+          "height": 79.6
+        },
+        "open": true,
+        "animation_progress": 1,
+        "focus": "bottom spring, fiducial pointer and ruler scale"
+      },
+      "spring_moving": false,
+      "reading_enabled_only_when_settled": true,
+      "measured_results": [],
+      "graph_axes": {
+        "x": "extension / m",
+        "y": "force / N"
+      },
+      "spring_constant_n_per_m": null,
+      "fitted_linear_region_n": [
+        0,
+        5
+      ],
+      "proportional_limit_n": null,
+      "final_6n_point_beyond_proportionality": false,
+      "conclusion": null,
+      "smooth_stage_animation": true
+    },
+    "guidance_focus_closed": {
+      "stage": 0,
+      "phase": "unloaded reference ready",
+      "elapsed_stage_s": 0,
+      "apparatus": [
+        "heavy clamp stand with boss and spring clamp",
+        "continuous helical steel spring with upper and lower hooks",
+        "vertical ruler with eye-level fiducial pointer",
+        "mass hanger with individual 100 g slotted masses",
+        "safety catch tray"
+      ],
+      "zero_reference_length_cm": 20,
+      "load": {
+        "mass_g": 0,
+        "force_n": 0,
+        "conversion": "100 g = 0.100 kg; using g ≈ 10 N kg⁻¹ gives 1.0 N"
+      },
+      "total_length_cm": 20,
+      "extension_cm": 0,
+      "extension_m": 0,
+      "ruler": {
+        "origin": "top of vertical ruler",
+        "scale_cm": [
+          0,
+          33.2
+        ],
+        "unloaded_pointer_reading_cm": 17.1,
+        "pointer_reading_cm": 17.1
+      },
+      "guidance_focus": {
+        "available": true,
+        "trigger_bounds": {
+          "x": 1005.5999999999999,
+          "y": 549.5849999999999,
+          "width": 254.40000000000003,
+          "height": 79.6
+        },
+        "open": false,
+        "animation_progress": 0,
+        "focus": "bottom spring, fiducial pointer and ruler scale"
+      },
       "spring_moving": false,
       "reading_enabled_only_when_settled": true,
       "measured_results": [],
@@ -68,6 +205,27 @@
       "total_length_cm": 20,
       "extension_cm": 0,
       "extension_m": 0,
+      "ruler": {
+        "origin": "top of vertical ruler",
+        "scale_cm": [
+          0,
+          33.2
+        ],
+        "unloaded_pointer_reading_cm": 17.1,
+        "pointer_reading_cm": 17.1
+      },
+      "guidance_focus": {
+        "available": true,
+        "trigger_bounds": {
+          "x": 1005.5999999999999,
+          "y": 549.5849999999999,
+          "width": 254.40000000000003,
+          "height": 79.6
+        },
+        "open": false,
+        "animation_progress": 0,
+        "focus": "bottom spring, fiducial pointer and ruler scale"
+      },
       "spring_moving": false,
       "reading_enabled_only_when_settled": true,
       "measured_results": [
@@ -114,6 +272,27 @@
       "total_length_cm": 26,
       "extension_cm": 6,
       "extension_m": 0.06,
+      "ruler": {
+        "origin": "top of vertical ruler",
+        "scale_cm": [
+          0,
+          33.2
+        ],
+        "unloaded_pointer_reading_cm": 17.1,
+        "pointer_reading_cm": 23.1
+      },
+      "guidance_focus": {
+        "available": true,
+        "trigger_bounds": {
+          "x": 1005.5999999999999,
+          "y": 552.112,
+          "width": 254.40000000000003,
+          "height": 76.56
+        },
+        "open": false,
+        "animation_progress": 0,
+        "focus": "bottom spring, fiducial pointer and ruler scale"
+      },
       "spring_moving": true,
       "reading_enabled_only_when_settled": true,
       "measured_results": [
@@ -176,6 +355,22 @@
       "total_length_cm": 33,
       "extension_cm": 13,
       "extension_m": 0.13,
+      "ruler": {
+        "origin": "top of vertical ruler",
+        "scale_cm": [
+          0,
+          33.2
+        ],
+        "unloaded_pointer_reading_cm": 17.1,
+        "pointer_reading_cm": 30.1
+      },
+      "guidance_focus": {
+        "available": true,
+        "trigger_bounds": null,
+        "open": false,
+        "animation_progress": 0,
+        "focus": "bottom spring, fiducial pointer and ruler scale"
+      },
       "spring_moving": false,
       "reading_enabled_only_when_settled": true,
       "measured_results": [
