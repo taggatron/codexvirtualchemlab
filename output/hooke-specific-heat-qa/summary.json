@@ -1,0 +1,575 @@
+{
+  "errors": [],
+  "renderer": {
+    "enabled": true,
+    "renderer": "WebGL / Three.js",
+    "objects": 1,
+    "context_lost": false,
+    "scene_compiling": false,
+    "scene_warmup_frames": 2,
+    "canvas_visible": true,
+    "legacy_2d_apparatus": false
+  },
+  "hooke": {
+    "initial": {
+      "stage": 0,
+      "phase": "unloaded reference ready",
+      "elapsed_stage_s": 0,
+      "apparatus": [
+        "heavy clamp stand with boss and spring clamp",
+        "continuous helical steel spring with upper and lower hooks",
+        "vertical ruler with eye-level fiducial pointer",
+        "mass hanger with individual 100 g slotted masses",
+        "safety catch tray"
+      ],
+      "zero_reference_length_cm": 20,
+      "load": {
+        "mass_g": 0,
+        "force_n": 0,
+        "conversion": "100 g = 0.100 kg; using g ≈ 10 N kg⁻¹ gives 1.0 N"
+      },
+      "total_length_cm": 20,
+      "extension_cm": 0,
+      "extension_m": 0,
+      "spring_moving": false,
+      "reading_enabled_only_when_settled": true,
+      "measured_results": [],
+      "graph_axes": {
+        "x": "extension / m",
+        "y": "force / N"
+      },
+      "spring_constant_n_per_m": null,
+      "fitted_linear_region_n": [
+        0,
+        5
+      ],
+      "proportional_limit_n": null,
+      "final_6n_point_beyond_proportionality": false,
+      "conclusion": null,
+      "smooth_stage_animation": true
+    },
+    "zero": {
+      "stage": 3,
+      "phase": "reading recorded ready for next load",
+      "elapsed_stage_s": 0,
+      "apparatus": [
+        "heavy clamp stand with boss and spring clamp",
+        "continuous helical steel spring with upper and lower hooks",
+        "vertical ruler with eye-level fiducial pointer",
+        "mass hanger with individual 100 g slotted masses",
+        "safety catch tray"
+      ],
+      "zero_reference_length_cm": 20,
+      "load": {
+        "mass_g": 0,
+        "force_n": 0,
+        "conversion": "100 g = 0.100 kg; using g ≈ 10 N kg⁻¹ gives 1.0 N"
+      },
+      "total_length_cm": 20,
+      "extension_cm": 0,
+      "extension_m": 0,
+      "spring_moving": false,
+      "reading_enabled_only_when_settled": true,
+      "measured_results": [
+        {
+          "mass_g": 0,
+          "force_n": 0,
+          "total_length_cm": 20,
+          "extension_cm": 0,
+          "extension_m": 0,
+          "settled": true
+        }
+      ],
+      "graph_axes": {
+        "x": "extension / m",
+        "y": "force / N"
+      },
+      "spring_constant_n_per_m": null,
+      "fitted_linear_region_n": [
+        0,
+        5
+      ],
+      "proportional_limit_n": null,
+      "final_6n_point_beyond_proportionality": false,
+      "conclusion": null,
+      "smooth_stage_animation": true
+    },
+    "settling": {
+      "stage": 1,
+      "phase": "adding slotted mass and spring settling",
+      "elapsed_stage_s": 1.6,
+      "apparatus": [
+        "heavy clamp stand with boss and spring clamp",
+        "continuous helical steel spring with upper and lower hooks",
+        "vertical ruler with eye-level fiducial pointer",
+        "mass hanger with individual 100 g slotted masses",
+        "safety catch tray"
+      ],
+      "zero_reference_length_cm": 20,
+      "load": {
+        "mass_g": 300,
+        "force_n": 3,
+        "conversion": "100 g = 0.100 kg; using g ≈ 10 N kg⁻¹ gives 1.0 N"
+      },
+      "total_length_cm": 26,
+      "extension_cm": 6,
+      "extension_m": 0.06,
+      "spring_moving": true,
+      "reading_enabled_only_when_settled": true,
+      "measured_results": [
+        {
+          "mass_g": 0,
+          "force_n": 0,
+          "total_length_cm": 20,
+          "extension_cm": 0,
+          "extension_m": 0,
+          "settled": true
+        },
+        {
+          "mass_g": 100,
+          "force_n": 1,
+          "total_length_cm": 22,
+          "extension_cm": 2,
+          "extension_m": 0.02,
+          "settled": true
+        },
+        {
+          "mass_g": 200,
+          "force_n": 2,
+          "total_length_cm": 24,
+          "extension_cm": 4,
+          "extension_m": 0.04,
+          "settled": true
+        }
+      ],
+      "graph_axes": {
+        "x": "extension / m",
+        "y": "force / N"
+      },
+      "spring_constant_n_per_m": null,
+      "fitted_linear_region_n": [
+        0,
+        5
+      ],
+      "proportional_limit_n": null,
+      "final_6n_point_beyond_proportionality": false,
+      "conclusion": null,
+      "smooth_stage_animation": true
+    },
+    "fully_loaded": {
+      "stage": 3,
+      "phase": "seven-reading force–extension series complete",
+      "elapsed_stage_s": 3.4,
+      "apparatus": [
+        "heavy clamp stand with boss and spring clamp",
+        "continuous helical steel spring with upper and lower hooks",
+        "vertical ruler with eye-level fiducial pointer",
+        "mass hanger with individual 100 g slotted masses",
+        "safety catch tray"
+      ],
+      "zero_reference_length_cm": 20,
+      "load": {
+        "mass_g": 600,
+        "force_n": 6,
+        "conversion": "100 g = 0.100 kg; using g ≈ 10 N kg⁻¹ gives 1.0 N"
+      },
+      "total_length_cm": 33,
+      "extension_cm": 13,
+      "extension_m": 0.13,
+      "spring_moving": false,
+      "reading_enabled_only_when_settled": true,
+      "measured_results": [
+        {
+          "mass_g": 0,
+          "force_n": 0,
+          "total_length_cm": 20,
+          "extension_cm": 0,
+          "extension_m": 0,
+          "settled": true
+        },
+        {
+          "mass_g": 100,
+          "force_n": 1,
+          "total_length_cm": 22,
+          "extension_cm": 2,
+          "extension_m": 0.02,
+          "settled": true
+        },
+        {
+          "mass_g": 200,
+          "force_n": 2,
+          "total_length_cm": 24,
+          "extension_cm": 4,
+          "extension_m": 0.04,
+          "settled": true
+        },
+        {
+          "mass_g": 300,
+          "force_n": 3,
+          "total_length_cm": 26,
+          "extension_cm": 6,
+          "extension_m": 0.06,
+          "settled": true
+        },
+        {
+          "mass_g": 400,
+          "force_n": 4,
+          "total_length_cm": 28,
+          "extension_cm": 8,
+          "extension_m": 0.08,
+          "settled": true
+        },
+        {
+          "mass_g": 500,
+          "force_n": 5,
+          "total_length_cm": 30,
+          "extension_cm": 10,
+          "extension_m": 0.1,
+          "settled": true
+        },
+        {
+          "mass_g": 600,
+          "force_n": 6,
+          "total_length_cm": 33,
+          "extension_cm": 13,
+          "extension_m": 0.13,
+          "settled": true
+        }
+      ],
+      "graph_axes": {
+        "x": "extension / m",
+        "y": "force / N"
+      },
+      "spring_constant_n_per_m": 50,
+      "fitted_linear_region_n": [
+        0,
+        5
+      ],
+      "proportional_limit_n": 5,
+      "final_6n_point_beyond_proportionality": true,
+      "conclusion": "force is proportional to extension from 0 to 5 N; the 6 N point lies above the straight-line prediction",
+      "smooth_stage_animation": true
+    },
+    "complete": true,
+    "forces_n": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "extensions_cm": [
+      0,
+      2,
+      4,
+      6,
+      8,
+      10,
+      13
+    ],
+    "spring_constant_n_per_m": 50,
+    "proportional_limit_n": 5,
+    "final_point_marked_beyond_proportionality": true,
+    "graph_axes": {
+      "x": "extension / m",
+      "y": "force / N"
+    },
+    "graph_readings": 7
+  },
+  "specific_heat_capacity": {
+    "initial": {
+      "stage": 0,
+      "phase": "unprepared aluminium block",
+      "elapsed_stage_s": 0,
+      "apparatus": [
+        "1.00 kg aluminium block with two separate bores",
+        "12 V cartridge heater",
+        "digital temperature probe",
+        "thermal paste collars",
+        "close-fitting foam insulation",
+        "low-voltage supply",
+        "ammeter and joulemeter"
+      ],
+      "preparation": {
+        "thermal_paste_applied": false,
+        "heater_fully_inserted": false,
+        "probe_fully_inserted": false,
+        "insulation_closed": false
+      },
+      "mass_kg": 1,
+      "supply_voltage_v": 0,
+      "current_a": 0,
+      "power_w": 0,
+      "energy_j": 0,
+      "initial_temperature_c": 20,
+      "temperature_c": 20,
+      "temperature_rise_c": 0,
+      "measured_results": [],
+      "calculation": null,
+      "calculated_specific_heat_j_per_kg_c": null,
+      "specific_heat_capacity_j_per_kg_k": null,
+      "graph_axes": {
+        "x": "temperature rise / °C",
+        "y": "energy transferred / kJ"
+      },
+      "heat_loss_evaluation": null,
+      "smooth_stage_animation": true
+    },
+    "prepared": {
+      "stage": 2,
+      "phase": "prepared and zeroed",
+      "elapsed_stage_s": 0,
+      "apparatus": [
+        "1.00 kg aluminium block with two separate bores",
+        "12 V cartridge heater",
+        "digital temperature probe",
+        "thermal paste collars",
+        "close-fitting foam insulation",
+        "low-voltage supply",
+        "ammeter and joulemeter"
+      ],
+      "preparation": {
+        "thermal_paste_applied": true,
+        "heater_fully_inserted": true,
+        "probe_fully_inserted": true,
+        "insulation_closed": true
+      },
+      "mass_kg": 1,
+      "supply_voltage_v": 0,
+      "current_a": 0,
+      "power_w": 0,
+      "energy_j": 0,
+      "initial_temperature_c": 20,
+      "temperature_c": 20,
+      "temperature_rise_c": 0,
+      "measured_results": [],
+      "calculation": null,
+      "calculated_specific_heat_j_per_kg_c": null,
+      "specific_heat_capacity_j_per_kg_k": null,
+      "graph_axes": {
+        "x": "temperature rise / °C",
+        "y": "energy transferred / kJ"
+      },
+      "heat_loss_evaluation": null,
+      "smooth_stage_animation": true
+    },
+    "heating": {
+      "stage": 3,
+      "phase": "electrical heating and live measurement",
+      "elapsed_stage_s": 4,
+      "apparatus": [
+        "1.00 kg aluminium block with two separate bores",
+        "12 V cartridge heater",
+        "digital temperature probe",
+        "thermal paste collars",
+        "close-fitting foam insulation",
+        "low-voltage supply",
+        "ammeter and joulemeter"
+      ],
+      "preparation": {
+        "thermal_paste_applied": true,
+        "heater_fully_inserted": true,
+        "probe_fully_inserted": true,
+        "insulation_closed": true
+      },
+      "mass_kg": 1,
+      "supply_voltage_v": 12,
+      "current_a": 2,
+      "power_w": 24,
+      "energy_j": 9000,
+      "initial_temperature_c": 20,
+      "temperature_c": 30,
+      "temperature_rise_c": 10,
+      "measured_results": [
+        {
+          "time_s": 0,
+          "energy_j": 0,
+          "temperature_c": 20,
+          "temperature_rise_c": 0
+        },
+        {
+          "time_s": 150,
+          "energy_j": 3600,
+          "temperature_c": 24,
+          "temperature_rise_c": 4
+        },
+        {
+          "time_s": 300,
+          "energy_j": 7200,
+          "temperature_c": 28,
+          "temperature_rise_c": 8
+        }
+      ],
+      "calculation": null,
+      "calculated_specific_heat_j_per_kg_c": null,
+      "specific_heat_capacity_j_per_kg_k": null,
+      "graph_axes": {
+        "x": "temperature rise / °C",
+        "y": "energy transferred / kJ"
+      },
+      "heat_loss_evaluation": null,
+      "smooth_stage_animation": true
+    },
+    "heated": {
+      "stage": 4,
+      "phase": "supply off ready to calculate",
+      "elapsed_stage_s": 8,
+      "apparatus": [
+        "1.00 kg aluminium block with two separate bores",
+        "12 V cartridge heater",
+        "digital temperature probe",
+        "thermal paste collars",
+        "close-fitting foam insulation",
+        "low-voltage supply",
+        "ammeter and joulemeter"
+      ],
+      "preparation": {
+        "thermal_paste_applied": true,
+        "heater_fully_inserted": true,
+        "probe_fully_inserted": true,
+        "insulation_closed": true
+      },
+      "mass_kg": 1,
+      "supply_voltage_v": 0,
+      "current_a": 0,
+      "power_w": 0,
+      "energy_j": 18000,
+      "initial_temperature_c": 20,
+      "temperature_c": 40,
+      "temperature_rise_c": 20,
+      "measured_results": [
+        {
+          "time_s": 0,
+          "energy_j": 0,
+          "temperature_c": 20,
+          "temperature_rise_c": 0
+        },
+        {
+          "time_s": 150,
+          "energy_j": 3600,
+          "temperature_c": 24,
+          "temperature_rise_c": 4
+        },
+        {
+          "time_s": 300,
+          "energy_j": 7200,
+          "temperature_c": 28,
+          "temperature_rise_c": 8
+        },
+        {
+          "time_s": 450,
+          "energy_j": 10800,
+          "temperature_c": 32,
+          "temperature_rise_c": 12
+        },
+        {
+          "time_s": 600,
+          "energy_j": 14400,
+          "temperature_c": 36,
+          "temperature_rise_c": 16
+        },
+        {
+          "time_s": 750,
+          "energy_j": 18000,
+          "temperature_c": 40,
+          "temperature_rise_c": 20
+        }
+      ],
+      "calculation": null,
+      "calculated_specific_heat_j_per_kg_c": null,
+      "specific_heat_capacity_j_per_kg_k": null,
+      "graph_axes": {
+        "x": "temperature rise / °C",
+        "y": "energy transferred / kJ"
+      },
+      "heat_loss_evaluation": null,
+      "smooth_stage_animation": true
+    },
+    "calculated": {
+      "stage": 5,
+      "phase": "specific heat capacity calculated",
+      "elapsed_stage_s": 8,
+      "apparatus": [
+        "1.00 kg aluminium block with two separate bores",
+        "12 V cartridge heater",
+        "digital temperature probe",
+        "thermal paste collars",
+        "close-fitting foam insulation",
+        "low-voltage supply",
+        "ammeter and joulemeter"
+      ],
+      "preparation": {
+        "thermal_paste_applied": true,
+        "heater_fully_inserted": true,
+        "probe_fully_inserted": true,
+        "insulation_closed": true
+      },
+      "mass_kg": 1,
+      "supply_voltage_v": 0,
+      "current_a": 0,
+      "power_w": 0,
+      "energy_j": 18000,
+      "initial_temperature_c": 20,
+      "temperature_c": 40,
+      "temperature_rise_c": 20,
+      "measured_results": [
+        {
+          "time_s": 0,
+          "energy_j": 0,
+          "temperature_c": 20,
+          "temperature_rise_c": 0
+        },
+        {
+          "time_s": 150,
+          "energy_j": 3600,
+          "temperature_c": 24,
+          "temperature_rise_c": 4
+        },
+        {
+          "time_s": 300,
+          "energy_j": 7200,
+          "temperature_c": 28,
+          "temperature_rise_c": 8
+        },
+        {
+          "time_s": 450,
+          "energy_j": 10800,
+          "temperature_c": 32,
+          "temperature_rise_c": 12
+        },
+        {
+          "time_s": 600,
+          "energy_j": 14400,
+          "temperature_c": 36,
+          "temperature_rise_c": 16
+        },
+        {
+          "time_s": 750,
+          "energy_j": 18000,
+          "temperature_c": 40,
+          "temperature_rise_c": 20
+        }
+      ],
+      "calculation": "18,000 J ÷ (1.00 kg × 20.0 °C) = 900 J kg⁻¹ °C⁻¹",
+      "calculated_specific_heat_j_per_kg_c": 900,
+      "specific_heat_capacity_j_per_kg_k": 900,
+      "graph_axes": {
+        "x": "temperature rise / °C",
+        "y": "energy transferred / kJ"
+      },
+      "heat_loss_evaluation": "energy loss to the surroundings makes the measured temperature rise too small and the calculated c too high",
+      "smooth_stage_animation": true
+    },
+    "complete": true,
+    "electrical_energy_j": 18000,
+    "temperature_rise_c": 20,
+    "specific_heat_capacity_j_per_kg_k": 900,
+    "graph_axes": {
+      "x": "temperature rise / °C",
+      "y": "energy transferred / kJ"
+    },
+    "graph_readings": 6
+  }
+}

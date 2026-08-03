@@ -531,14 +531,20 @@ const hookeStageDurations = { 1: 3.4 };
 function hookeExtensionCm(force = state.hookeForceN) { const index = hookeForcesN.indexOf(force); return hookeExtensionsCm[index < 0 ? 0 : index] }
 function hookeTotalLengthCm(force = state.hookeForceN) { return 20 + hookeExtensionCm(force) }
 function hookeSpringConstant() { return 50 }
-function hookeStepIndex() { return state.complete ? 3 : state.hookeStage >= 2 ? 2 : state.hookeResults.length ? 1 : 0 }
+function hookeStepIndex() { return state.complete ? 3 : state.hookeStage === 2 ? 2 : state.hookeStage === 1 || state.hookeResults.length ? 1 : 0 }
 const shcStageDurations = { 1: 3.8, 3: 8 };
 const shcEnergyReadingsJ = [0, 3600, 7200, 10800, 14400, 18000];
 const shcTemperatureReadingsC = [20, 24, 28, 32, 36, 40];
 function shcHeatingProgress() { return state.shcStage < 3 ? 0 : state.shcStage > 3 ? 1 : Math.max(0, Math.min(1, state.shcTimer / shcStageDurations[3])) }
 function shcTemperatureRiseC() { return +(Math.max(0, state.shcTemperatureC - 20)).toFixed(1) }
 function shcCalculatedSpecificHeat() { const rise = shcTemperatureRiseC(); return rise > 0 ? Math.round(state.shcEnergyJ / rise) : 0 }
-function shcStepIndex() { return state.complete ? 3 : state.shcStage >= 4 ? 3 : state.shcStage >= 3 ? 2 : state.shcStage >= 1 ? 1 : 0 }
+function shcStepIndex() {
+  if (state.complete || state.shcStage >= 4) return 3;
+  if (state.shcStage === 3) return 2;
+  if (state.shcStage === 2) return 1;
+  if (state.shcStage === 1) return state.shcTimer / shcStageDurations[1] < .65 ? 0 : 1;
+  return 0;
+}
 const wireLengthsCm = [20, 40, 60, 80, 100];
 const wireResistanceOhms = [1.8, 3.6, 5.4, 7.2, 9.0];
 const wireStageDurations = { 1: 1.45, 4: 2.45 };
@@ -3326,6 +3332,7 @@ function update(dt, skipDraw = false) {
     return;
   }
   if (id === 'hooke') {
+    let stageJustSettled = false;
     if (state.running && state.hookeStage === 1) {
       state.hookeTimer += dt; state.time += dt;
       const q = Math.max(0, Math.min(1, state.hookeTimer / hookeStageDurations[1]));
@@ -3333,10 +3340,11 @@ function update(dt, skipDraw = false) {
       state.toast = q < .3 ? 'A 100 g slotted mass lifts from its tray and moves above the hanger.' : q < .58 ? 'The mass seats on the hanger and the spring extends under the new force.' : q < .9 ? 'The hanger oscillates with decreasing amplitude; wait until the pointer is still.' : 'The final oscillation is dying away and the pointer is settling exactly beside the ruler mark.';
       if (q >= 1) {
         state.hookeStage = 2; state.hookeTimer = hookeStageDurations[1]; state.running = false;
+        stageJustSettled = true;
         state.toast = `${state.hookeForceN.toFixed(1)} N settled: read ${hookeTotalLengthCm().toFixed(1)} cm total length, then subtract 20.0 cm to find ${hookeExtensionCm().toFixed(1)} cm extension.`;
       }
     }
-    if (!skipDraw && (state.running || state.complete)) draw();
+    if (!skipDraw && (state.running || state.complete || stageJustSettled)) draw();
     return;
   }
   if (id === 'specificheat') {
