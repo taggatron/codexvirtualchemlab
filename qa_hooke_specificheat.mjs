@@ -1,4 +1,4 @@
-import { chromium } from 'playwright';
+import { chromium } from './qa_playwright_shim.mjs';
 import fs from 'node:fs';
 
 const out = 'output/hooke-specific-heat-qa';
@@ -15,7 +15,8 @@ page.on('console', message => {
 });
 page.on('pageerror', error => pageErrors.push(`page: ${error.message}`));
 
-await page.goto(`http://127.0.0.1:4173/?hooke-specific-heat-qa=${Date.now()}`, { waitUntil: 'networkidle' });
+const baseUrl = process.env.BASE_URL || 'http://127.0.0.1:4173';
+await page.goto(`${baseUrl}/?hooke-specific-heat-qa=${Date.now()}`, { waitUntil: 'networkidle' });
 await page.waitForFunction(() => typeof window.render_game_to_text === 'function');
 await page.evaluate(() => { window.__manualSimulationTime = true; });
 
@@ -111,6 +112,13 @@ function graphLooksLike(snapshot, firstAxis, secondAxis) {
 // Hooke's law: zero reading, six 1 N loading steps, then graph.
 let hookeInitial = await selectPhysicsPractical(/hooke|force\s*(?:–|-|and)\s*extension/i);
 hookeInitial = await capture('01-hooke-initial');
+const hookeGuidanceBounds = practicalSection(hookeInitial, ['hookes_law_practical', 'hooke_law_practical', 'hooke_practical'], 'hooke')?.guidance_focus?.trigger_bounds;
+assert(hookeGuidanceBounds, 'Hooke Guidance focus target is missing.');
+await click(hookeGuidanceBounds.x + hookeGuidanceBounds.width / 2, hookeGuidanceBounds.y + hookeGuidanceBounds.height / 2);
+await advance(360);
+const hookeFocusOpen = await capture('01a-hooke-ruler-focus-open');
+await page.keyboard.press('Escape');
+const hookeFocusClosed = await capture('01b-hooke-ruler-focus-closed');
 await primary(); // RECORD ZERO
 const hookeZero = await capture('02-hooke-zero-recorded');
 
@@ -193,6 +201,8 @@ const specificHeatCapacity = asNumber(deepFindByKeys(specific, [
   'specific_heat_capacity_j_per_kg_k', 'specific_heat_capacity_j_kg_k', 'calculated_c_j_per_kg_k', 'calculated_c_j_kg_k', 'c_j_per_kg_k'
 ]));
 const hookeInitialSection = practicalSection(hookeInitial, ['hookes_law_practical', 'hooke_law_practical', 'hooke_practical'], 'hooke');
+const hookeFocusOpenSection = practicalSection(hookeFocusOpen, ['hookes_law_practical', 'hooke_law_practical', 'hooke_practical'], 'hooke');
+const hookeFocusClosedSection = practicalSection(hookeFocusClosed, ['hookes_law_practical', 'hooke_law_practical', 'hooke_practical'], 'hooke');
 const hookeZeroSection = practicalSection(hookeZero, ['hookes_law_practical', 'hooke_law_practical', 'hooke_practical'], 'hooke');
 const hookeMidSection = practicalSection(hookeMid, ['hookes_law_practical', 'hooke_law_practical', 'hooke_practical'], 'hooke');
 const hookeLoadedSection = practicalSection(hookeLoaded, ['hookes_law_practical', 'hooke_law_practical', 'hooke_practical'], 'hooke');
@@ -207,6 +217,8 @@ const summary = {
   renderer: hookeInitial.renderer,
   hooke: {
     initial: hookeInitialSection,
+    guidance_focus_open: hookeFocusOpenSection,
+    guidance_focus_closed: hookeFocusClosedSection,
     zero: hookeZeroSection,
     settling: hookeMidSection,
     fully_loaded: hookeLoadedSection,
@@ -240,6 +252,12 @@ const check = (condition, message) => { if (!condition) failures.push(message); 
 check(hookeInitial.renderer?.enabled && !hookeInitial.renderer?.legacy_2d_apparatus, 'Hooke practical did not use the WebGL renderer.');
 check(specificInitial.renderer?.enabled && !specificInitial.renderer?.legacy_2d_apparatus, 'Specific-heat practical did not use the WebGL renderer.');
 check(!!hooke, 'Hooke render_game_to_text payload is missing.');
+check(hookeInitialSection?.ruler?.origin === 'top of vertical ruler', 'Hooke ruler numbering does not start at its physical top edge.');
+check(hookeInitialSection?.ruler?.scale_cm?.[0] === 0, 'Hooke ruler top scale does not begin at 0 cm.');
+check(Math.abs(hookeInitialSection?.ruler?.pointer_reading_cm - hookeInitialSection?.ruler?.unloaded_pointer_reading_cm) <= 1e-6, 'Unloaded Hooke pointer should equal its stored ruler reference reading.');
+check(hookeFocusOpenSection?.guidance_focus?.open, 'Hooke Guidance did not open the ruler-focus modal.');
+check(hookeFocusOpenSection?.guidance_focus?.animation_progress >= .99, 'Hooke ruler-focus modal did not complete its zoom animation.');
+check(!hookeFocusClosedSection?.guidance_focus?.open, 'Escape did not close the Hooke ruler-focus modal.');
 check((deepFindByKeys(hookeZeroSection, ['measured_results']) || []).length === 1, 'RECORD ZERO did not create exactly one unloaded Hooke reading.');
 check(hookeMidSection?.stage === 1 && hookeMidSection?.spring_moving === true, 'Hooke mid-stage capture did not show the third mass being added and the spring moving.');
 check(JSON.stringify(hookeForces) === JSON.stringify([0, 1, 2, 3, 4, 5, 6]), `Hooke forces are incorrect: ${JSON.stringify(hookeForces)}.`);

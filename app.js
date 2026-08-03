@@ -15,6 +15,7 @@ const practicals = [
   { id: 'electro', subject: 'chemistry', icon: '⚡', color: '#815bb4', title: 'Electrolysis', sub: 'Copper chloride', objective: 'Identify products formed at inert electrodes.', eq: 'Cu²⁺(aq) + 2Cl⁻(aq) → Cu(s) + Cl₂(g)', word: 'copper chloride → copper + chlorine', steps: ['Add copper chloride solution', 'Attach crocodile clips to the electrodes', 'Switch on the 6 V DC power pack', 'Remove, dry and reweigh the cathode'], gear: ['Graphite electrodes', 'Crocodile clips + leads', '6 V DC power pack', 'Electronic balance'], reactants: ['Copper chloride', 'Litmus paper'] },
   { id: 'flame', subject: 'chemistry', icon: '♨', color: '#e45845', title: 'Flame tests', sub: 'Identify metal ions', objective: 'Identify metal ions from their characteristic flame colours and absorption bands.', eq: 'M⁺(excited) → M⁺ + light', word: 'heated metal ions release characteristic wavelengths of visible light', steps: ['Choose a metallic salt', 'Scoop a small sample onto the spatula', 'Move the spatula into the roaring blue flame', 'Identify the colour and compare its spectrum'], gear: ['Metal spatula', 'Bunsen burner', 'Salt sample jars', 'Safety glasses'], reactants: ['Lithium chloride', 'Sodium chloride', 'Potassium chloride', 'Calcium chloride', 'Copper(II) chloride'] },
   { id: 'displacement', subject: 'chemistry', icon: '⇄', color: '#b96f3e', title: 'Metal displacement', sub: 'Reactivity in test tubes', objective: 'Compare how more reactive metals displace less reactive metals from their salt solutions.', eq: 'Zn(s) + CuSO₄(aq) → ZnSO₄(aq) + Cu(s)', word: 'zinc + copper sulfate → zinc sulfate + copper', steps: ['Label four test tubes and add salt solutions', 'Clean equal-sized metal strips', 'Lower each metal into its solution', 'Compare coatings and colour changes'], gear: ['Test-tube rack', '4 test tubes', 'Metal strips', 'Safety glasses'], reactants: ['Magnesium + CuSO₄', 'Zinc + CuSO₄', 'Iron + CuSO₄', 'Copper + AgNO₃'] },
+  { id: 'alkali', subject: 'chemistry', icon: '◒', color: '#8d4d93', title: 'Alkali metals in water', sub: 'Lithium, sodium & potassium', objective: 'Compare the reactions of alkali metals with water in a protected simulation.', eq: '2M(s) + 2H₂O(l) → 2MOH(aq) + H₂(g)', word: 'alkali metal + water → metal hydroxide + hydrogen', steps: ['Check the water trough and safety screen', 'Use forceps to lower one tiny metal sample', 'Observe hydrogen bubbles, movement and flame colour', 'Record the increasing reactivity from lithium to potassium'], gear: ['Covered water trough', 'Safety screen', 'Forceps', 'Universal indicator'], reactants: ['Lithium sample', 'Sodium sample', 'Potassium sample'] },
   { id: 'chrom', subject: 'chemistry', icon: '🎨', color: '#dc6b83', title: 'Chromatography', sub: 'Separate food dyes', objective: 'Separate dyes and calculate Rf values.', eq: 'Rf = distance travelled by substance ÷ distance travelled by solvent', word: 'mixture of food dyes → separated dye components (physical separation)', steps: ['Spot dyes on pencil line', 'Add shallow solvent', 'Place paper in beaker', 'Calculate Rf values'], gear: ['Chromatography paper', 'Capillary tube', 'Beaker'], reactants: ['Food dye', 'Water'] },
   { id: 'water', subject: 'chemistry', icon: '💧', color: '#2d91c3', title: 'Water purification', sub: 'Analyse and distil', objective: 'Compare water samples and obtain pure water.', eq: 'H₂O(l) → H₂O(g) → H₂O(l)', word: 'liquid water → water vapour → liquid water (change of state)', steps: ['Measure and filter the sample', 'Run cooling water into the lower condenser inlet', 'Switch on the electric heating mantle', 'Collect and test the distillate'], gear: ['Round-bottom flask', 'Glass distillation column', 'Water-cooled condenser', 'Electric heating mantle'], reactants: ['Water sample', 'Universal indicator'] },
   { id: 'thermite', subject: 'chemistry', icon: '✺', color: '#d95b2f', title: 'Thermite demonstration', sub: 'Extreme exothermic reaction', objective: 'Observe a highly exothermic displacement reaction from behind a protective screen.', eq: 'Fe₂O₃(s) + 2Al(s) → 2Fe(l) + Al₂O₃(s)', word: 'iron(III) oxide + aluminium → molten iron + aluminium oxide', steps: ['Check the shield and sand containment', 'Aim the small blow torch from a safe distance', 'Ignite the magnesium fuse remotely', 'Observe sparks and molten iron behind the shield'], gear: ['Glass safety screen', 'Sand-filled metal can', 'Refractory reaction cup', 'Small blow torch'], reactants: ['Sealed thermite charge', 'Magnesium fuse'] },
@@ -61,8 +62,6 @@ const graphSpecs = {
   wirelength: { xLabel: 'wire length / cm', yLabel: 'resistance / Ω', xMin: 0, xMax: 100, yMin: 0, yMax: 10, yDp: 1 }
 };
 const nonGraphResultIds = new Set(['free', 'titration', 'salts', 'mass', 'co2', 'electro', 'flame', 'displacement', 'chrom', 'starchleaf', 'quadrats', 'shoretransect', 'ripple', 'convection', 'conduction', 'thermal', 'fieldlines']);
-state.hookeFocusModal = false;
-state.hookeFocusProgress = 0;
 const GRAPH_SIDEBAR_HEADER_Y = 134, GRAPH_SIDEBAR_DESCRIPTION_OFFSET = 32;
 function currentGraphModalKind(id = practicals[state.selected]?.id) {
   if (id === 'rates') return 'temperature-bar-chart';
@@ -466,7 +465,9 @@ const freeReactionRules = [
   { id: 'h2so4-lime', reactants: ['h2so4', 'lime'], symbol: 'H₂SO₄(aq) + Ca(OH)₂(aq) → CaSO₄(s) + 2H₂O(l)', word: 'sulfuric acid + limewater → calcium sulfate + water', kind: 'precipitate', precipitate: true, product: 'calcium sulfate precipitate', productColor: 0xd9d4bd, heat: 6, duration: 3 },
   { id: 'lime-co2', reactants: ['lime', 'CO₂'], symbol: 'Ca(OH)₂(aq) + CO₂(g) → CaCO₃(s) + H₂O(l)', word: 'limewater + carbon dioxide → calcium carbonate + water', kind: 'precipitate', precipitate: true, product: 'milky calcium carbonate', productColor: 0xe8e6d9, duration: 3 }
 ];
-const state = { selected: 0, subject: 'chemistry', subjectTabX: 149, subjectTabW: 114, running: false, complete: false, temp: 20, ph: 7, time: 0, volume: 0, progress: 0, tab: 'equipment', graphModal: false, evaluationModal: false, reactantSafety: null, points: [], hover: null, toast: 'Click equipment to add it, or drag it onto the bench.', drag: null, pour: null, burner: false, coolingWater: false, particles: [], layout: null, flamePhase: 0, transferred: 0, workspace: [], nextItem: 1, dose: null, reaction: null, massStage: 0, massLidOn: true, massTransfer: null, massBefore: 4.01, massAfter: null, hydrogenStage: 0, hydrogenTimer: 0, hydrogenAudioPlayed: false, hydrogenGas: 0, saltsStage: 0, saltsTimer: 0, chromSelectedDye: null, electroRecorded: false, electroWeighing: false, electroWeighTimer: 0, titrationStage: 0, titrationVolume: 0, titrationDropTimer: 0, titrationDrops: 0, titrationIndicator: false, titrationIndicatorTimer: 0, titrationRecorded: false, ratesStage: 0, ratesStageTimer: 0, ratesTrialIndex: 0, ratesTargetTemp: 20, ratesBathTemp: 20, ratesConditioning: false, ratesResults: [], thermiteTimer: 0, thermiteAudioPlayed: false, displacementStage: 0, displacementTimer: 0, displacementRecorded: false, flameTestStage: 0, flameTestTimer: 0, flameTestSalt: 0, flameTestTested: [], starchStage: 0, starchTimer: 0, lipaseStage: 0, lipaseTimer: 0, lipaseTrialIndex: 0, lipaseTargetTemp: 20, lipaseBathTemp: 20, lipaseConditioning: false, lipaseResults: [], osmosisStage: 0, osmosisTimer: 0, osmosisTrialIndex: 0, osmosisConcentration: 0, osmosisResults: [], potometerStage: 0, potometerTimer: 0, potometerTrialIndex: 0, potometerWindSpeed: 0, potometerBubbleMm: 0, potometerResults: [], pondweedDistance: 20, pondweedLampOn: true, pondweedTimer: 0, pondweedBubbles: 0, pondweedResults: [], quadratStage: 0, quadratTimer: 0, quadratSampleIndex: 0, quadratCurrentCount: 0, quadratResults: [], meadowWindClock: 0, transectStage: 0, transectTimer: 0, transectStationIndex: 0, transectDistanceM: 0, transectCurrentObservation: null, transectResults: [], shoreTideClock: 0, shoreTideProgress: 0, rippleStage: 0, rippleTimer: 0, rippleTrialIndex: 0, rippleFrequencyHz: 4, rippleTenWavelengthCm: 0, rippleWavelengthCm: 0, rippleSpeedMs: 0, rippleResults: [], rippleWaveClock: 0, newtonForce: 0.2, newtonMass: 1.0, newtonPos: 0, newtonVel: 0, newtonAcc: 0.2, newtonTimer: 0, newtonRunning: false, newtonGate1Time: null, newtonGate2Time: null, newtonResults: [], electromagnetStage: 0, electromagnetTimer: 0, electromagnetTrialIndex: 0, electromagnetTurns: 10, electromagnetClips: 0, electromagnetResults: [], convectionStage: 0, convectionTimer: 0, conductionStage: 0, conductionTimer: 0, thermalStage: 0, thermalTimer: 0, thermalCaptured: false, densityStage: 0, densitySample: 0, densityTimer: 0, densityRecorded: false, densityResults: [], hookeStage: 0, hookeTimer: 0, hookeTrialIndex: 0, hookeForceN: 0, hookeResults: [], shcStage: 0, shcTimer: 0, shcEnergyJ: 0, shcTemperatureC: 20, shcResults: [], wireStage: 0, wireTimer: 0, wireTrialIndex: 0, wireLengthCm: 20, wireVoltageV: 1.5, wireResults: [], fieldStage: 0, fieldTimer: 0, fieldConfigIndex: 0, fieldResults: [] };
+const state = { selected: 0, subject: 'chemistry', subjectTabX: 149, subjectTabW: 114, sidebarScroll: { chemistry: 0, biology: 0, physics: 0 }, running: false, complete: false, temp: 20, ph: 7, time: 0, volume: 0, progress: 0, tab: 'equipment', graphModal: false, evaluationModal: false, reactantSafety: null, points: [], hover: null, toast: 'Click equipment to add it, or drag it onto the bench.', drag: null, pour: null, burner: false, coolingWater: false, particles: [], layout: null, flamePhase: 0, transferred: 0, workspace: [], nextItem: 1, dose: null, reaction: null, massStage: 0, massLidOn: true, massTransfer: null, massBefore: 4.01, massAfter: null, hydrogenStage: 0, hydrogenTimer: 0, hydrogenAudioPlayed: false, hydrogenGas: 0, saltsStage: 0, saltsTimer: 0, chromSelectedDye: null, electroRecorded: false, electroWeighing: false, electroWeighTimer: 0, titrationStage: 0, titrationVolume: 0, titrationDropTimer: 0, titrationDrops: 0, titrationIndicator: false, titrationIndicatorTimer: 0, titrationRecorded: false, ratesStage: 0, ratesStageTimer: 0, ratesTrialIndex: 0, ratesTargetTemp: 20, ratesBathTemp: 20, ratesConditioning: false, ratesResults: [], thermiteTimer: 0, thermiteAudioPlayed: false, displacementStage: 0, displacementTimer: 0, displacementRecorded: false, flameTestStage: 0, flameTestTimer: 0, flameTestSalt: 0, flameTestTested: [], starchStage: 0, starchTimer: 0, lipaseStage: 0, lipaseTimer: 0, lipaseTrialIndex: 0, lipaseTargetTemp: 20, lipaseBathTemp: 20, lipaseConditioning: false, lipaseResults: [], osmosisStage: 0, osmosisTimer: 0, osmosisTrialIndex: 0, osmosisConcentration: 0, osmosisResults: [], potometerStage: 0, potometerTimer: 0, potometerTrialIndex: 0, potometerWindSpeed: 0, potometerBubbleMm: 0, potometerResults: [], pondweedDistance: 20, pondweedLampOn: true, pondweedTimer: 0, pondweedBubbles: 0, pondweedResults: [], quadratStage: 0, quadratTimer: 0, quadratSampleIndex: 0, quadratCurrentCount: 0, quadratResults: [], meadowWindClock: 0, transectStage: 0, transectTimer: 0, transectStationIndex: 0, transectDistanceM: 0, transectCurrentObservation: null, transectResults: [], shoreTideClock: 0, shoreTideProgress: 0, rippleStage: 0, rippleTimer: 0, rippleTrialIndex: 0, rippleFrequencyHz: 4, rippleTenWavelengthCm: 0, rippleWavelengthCm: 0, rippleSpeedMs: 0, rippleResults: [], rippleWaveClock: 0, newtonForce: 0.2, newtonMass: 1.0, newtonPos: 0, newtonVel: 0, newtonAcc: 0.2, newtonTimer: 0, newtonRunning: false, newtonGate1Time: null, newtonGate2Time: null, newtonResults: [], electromagnetStage: 0, electromagnetTimer: 0, electromagnetTrialIndex: 0, electromagnetTurns: 10, electromagnetClips: 0, electromagnetResults: [], convectionStage: 0, convectionTimer: 0, conductionStage: 0, conductionTimer: 0, thermalStage: 0, thermalTimer: 0, thermalCaptured: false, densityStage: 0, densitySample: 0, densityTimer: 0, densityRecorded: false, densityResults: [], hookeStage: 0, hookeTimer: 0, hookeTrialIndex: 0, hookeForceN: 0, hookeResults: [], shcStage: 0, shcTimer: 0, shcEnergyJ: 0, shcTemperatureC: 20, shcResults: [], wireStage: 0, wireTimer: 0, wireTrialIndex: 0, wireLengthCm: 20, wireVoltageV: 1.5, wireResults: [], fieldStage: 0, fieldTimer: 0, fieldConfigIndex: 0, fieldResults: [] };
+state.hookeFocusModal = false;
+state.hookeFocusProgress = 0;
 let lastSelectedPractical = state.selected;
 const ratesTemperatures = [20, 30, 40, 50, 60], ratesBathPosition = { x: 2.55, y: .43, z: -.42 }, ratesCrossPosition = { x: -.15, y: .12, z: .25 };
 function ratesMeasuredTime(temp = state.ratesTargetTemp) { return +(42 * Math.pow(.72, (temp - 20) / 10)).toFixed(1) }
@@ -667,7 +668,7 @@ function updateWorkspaceReaction(dt) { const reaction = state.reaction; if (!rea
 function currentGraphSpec() { return graphSpecs[practicals[state.selected].id] || graphSpecs.rates }
 function graphReading() { const id = practicals[state.selected].id, s = currentGraphSpec(); let xValue = id === 'chrom' ? state.progress * 10 : Math.min(s.xMax, state.time), yValue = state.temp; if (id === 'mass') yValue = 4.01 + .17 * state.progress; else if (id === 'hydrogen') yValue = state.hydrogenGas; else if (id === 'co2') yValue = 100 * state.progress; else if (id === 'electro') yValue = 48 * state.progress; else if (id === 'chrom') yValue = 6.4 * state.progress; else if (id === 'titration') { xValue = state.titrationVolume; yValue = state.ph } else if (id === 'thermite') { xValue = state.thermiteTimer; yValue = state.temp } else if (id === 'wirelength') { xValue = state.wireLengthCm; yValue = wireResistance() } const x = Math.max(0, Math.min(1, (xValue - s.xMin) / (s.xMax - s.xMin))), y = Math.max(0, Math.min(1, (yValue - s.yMin) / (s.yMax - s.yMin))); return { x, y, xValue, yValue, t: state.time } }
 const asphaltTile = document.createElement('canvas'); asphaltTile.width = asphaltTile.height = 96; const asphaltCtx = asphaltTile.getContext('2d'); asphaltCtx.fillStyle = '#1b465c'; asphaltCtx.fillRect(0, 0, 96, 96); let asphaltSeed = 1297; const asphaltRandom = () => ((asphaltSeed = Math.imul(asphaltSeed, 1664525) + 1013904223 >>> 0) / 4294967296); for (let i = 0; i < 520; i++) { asphaltCtx.fillStyle = asphaltRandom() > .52 ? `rgba(137,186,201,${.06 + asphaltRandom() * .16})` : `rgba(3,26,40,${.08 + asphaltRandom() * .18})`; const r = .3 + asphaltRandom() * .9; asphaltCtx.beginPath(); asphaltCtx.arc(asphaltRandom() * 96, asphaltRandom() * 96, r, 0, Math.PI * 2); asphaltCtx.fill() }
-let W = 0, H = 0, D = 1, VIEW_W = 0, VIEW_H = 0, UI_SCALE = 1, portraitPromptVisible = false, mobileLandscapeLayout = false, regions = [], rightSidebarLayoutSnapshot = null;
+let W = 0, H = 0, D = 1, VIEW_W = 0, VIEW_H = 0, UI_SCALE = 1, portraitPromptVisible = false, mobileLandscapeLayout = false, regions = [], rightSidebarLayoutSnapshot = null, hookeGuidanceHitbox = null;
 function responsiveScale(width, height) {
   const compactLandscape = width > height && (width < 1100 || height < 650);
   return compactLandscape ? Math.min(1, width / 1060, height / 600) : 1;
@@ -805,25 +806,42 @@ function header() {
 
   text('OCR GCSE Combined Science', W - 28, 33, 12, '#9fb2b8', 600, 'right')
 }
+function sidebarMetrics(subject = state.subject || 'chemistry') {
+  const visible = practicals.map((p, i) => ({ ...p, originalIndex: i })).filter(p => (p.subject || 'chemistry') === subject);
+  const cardH = 49, gap = 54, contentTop = 101, contentBottom = H - 32, contentHeight = Math.max(0, contentBottom - contentTop);
+  return { visible, cardH, gap, contentTop, contentBottom, contentHeight, maxScroll: Math.max(0, visible.length * gap - 5 - contentHeight) };
+}
+function sidebarScrollBy(delta) {
+  const subject = state.subject || 'chemistry', metrics = sidebarMetrics(subject), current = state.sidebarScroll?.[subject] || 0, next = Math.max(0, Math.min(metrics.maxScroll, current + delta));
+  if (Math.abs(next - current) < .1) return false;
+  state.sidebarScroll ??= {};
+  state.sidebarScroll[subject] = next;
+  return true;
+}
 function sidebar() {
-  const x = 0, y = 64, w = 270;
-  const currentSubject = state.subject || 'chemistry';
-  const visible = practicals.map((p, i) => ({ ...p, originalIndex: i })).filter(p => (p.subject || 'chemistry') === currentSubject);
-  const gap = Math.min(54, (H - 122) / Math.max(1, visible.length)), cardH = Math.max(42, gap - 5);
+  const x = 0, y = 64, w = 270, currentSubject = state.subject || 'chemistry', metrics = sidebarMetrics(currentSubject), scroll = Math.max(0, Math.min(metrics.maxScroll, state.sidebarScroll?.[currentSubject] || 0));
+  state.sidebarScroll ??= {};
+  state.sidebarScroll[currentSubject] = scroll;
   ctx.fillStyle = '#eef3f2'; ctx.fillRect(x, y, w, H - y);
   text(`${currentSubject.toUpperCase()} PRACTICALS`, 20, 88, 10, C.muted, 800);
-  visible.forEach((p, idx) => {
+  ctx.save();
+  ctx.beginPath(); ctx.rect(x, metrics.contentTop, w, metrics.contentHeight); ctx.clip();
+  metrics.visible.forEach((p, idx) => {
     const i = p.originalIndex;
-    let yy = 103 + idx * gap, sel = i === state.selected;
-    rr(10, yy, w - 20, cardH, 10, sel ? '#fff' : 'rgba(255,255,255,.34)', sel ? p.color : 'rgba(200,211,213,.5)');
-    if (sel) { ctx.fillStyle = p.color; ctx.fillRect(10, yy + 7, 4, cardH - 14) }
+    const yy = metrics.contentTop + idx * metrics.gap - scroll, sel = i === state.selected;
+    if (yy + metrics.cardH < metrics.contentTop || yy > metrics.contentBottom) return;
+    rr(10, yy, w - 20, metrics.cardH, 10, sel ? '#fff' : 'rgba(255,255,255,.34)', sel ? p.color : 'rgba(200,211,213,.5)');
+    if (sel) { ctx.fillStyle = p.color; ctx.fillRect(10, yy + 7, 4, metrics.cardH - 14) }
     ctx.fillStyle = sel ? p.color : '#dde6e6';
-    ctx.beginPath(); ctx.arc(36, yy + cardH / 2, 15, 0, 7); ctx.fill();
-    text(p.icon, 36, yy + cardH / 2, p.icon === 'pH' ? 9 : 15, sel ? '#fff' : '#526870', 800, 'center');
-    text(p.title, 59, yy + cardH * .36, 13, sel ? C.ink : '#526870', 750);
-    text(p.sub, 59, yy + cardH * .71, 9.5, C.muted, 550);
-    hit('practical', 10, yy, w - 20, cardH, i)
+    ctx.beginPath(); ctx.arc(36, yy + metrics.cardH / 2, 15, 0, 7); ctx.fill();
+    text(p.icon, 36, yy + metrics.cardH / 2, p.icon === 'pH' ? 9 : 15, sel ? '#fff' : '#526870', 800, 'center');
+    text(p.title, 59, yy + metrics.cardH * .36, 13, sel ? C.ink : '#526870', 750);
+    text(p.sub, 59, yy + metrics.cardH * .71, 9.5, C.muted, 550);
+    const hitTop = Math.max(yy, metrics.contentTop), hitBottom = Math.min(yy + metrics.cardH, metrics.contentBottom);
+    hit('practical', 10, hitTop, w - 20, Math.max(0, hitBottom - hitTop), i)
   });
+  ctx.restore();
+  ctx.fillStyle = '#eef3f2'; ctx.fillRect(x, metrics.contentBottom, w, H - metrics.contentBottom);
   text('Press F for fullscreen', 20, H - 15, 9, C.muted, 600)
 }
 function chemicalTag(label, world, offsetY = 7, options = {}) { const p = lab3d.projectToScreen(...world); if (!p) return; const size = options.size || 10, height = options.height || 23, padding = options.padding || 20; ctx.font = `750 ${size}px Inter,system-ui`; const w = Math.max(options.minWidth || 60, ctx.measureText(label).width + padding), x = p.x - w / 2, y = p.y + offsetY; ctx.save(); ctx.shadowColor = 'rgba(7,31,45,.2)'; ctx.shadowBlur = 5; ctx.shadowOffsetY = 2; rr(x, y, w, height, 6, 'rgba(255,255,255,.96)', 'rgba(95,125,137,.42)'); ctx.restore(); text(label, p.x, y + height / 2, size, C.ink, 750, 'center') }
@@ -1194,6 +1212,7 @@ function drawGraphExpandButton(panelX, panelWidth) {
 function rightbar() {
   const R = Math.max(260, Math.min(330, W * .23)), x = W - R, p = practicals[state.selected], dragLab = p.id === 'rates' || p.id === 'temp';
   rightSidebarLayoutSnapshot = null;
+  hookeGuidanceHitbox = null;
   if (p.id === 'free') { drawFreeLibrary(x, R); return }
   ctx.fillStyle = '#f4f6f5';
   ctx.fillRect(x, 64, R, H - 64);
@@ -1282,6 +1301,7 @@ function rightbar() {
       const iconX = x + R - 39, iconY = cursorY + guideHeight - 18;
       ctx.strokeStyle = p.color; ctx.lineWidth = 1.8; ctx.beginPath(); ctx.arc(iconX - 2, iconY - 2, 5, 0, Math.PI * 2); ctx.moveTo(iconX + 2, iconY + 2); ctx.lineTo(iconX + 7, iconY + 7); ctx.stroke();
       hit('open-hooke-focus-modal', x + 20, cursorY, R - 40, guideHeight);
+      hookeGuidanceHitbox = { x: x + 20, y: cursorY, width: R - 40, height: guideHeight };
     }
     cursorY += guideHeight;
     cursorY += sectionGap; text('PRACTICAL EVALUATION', x + 22, cursorY + headingHeight / 2, headingSize, C.muted, 800); cursorY += sectionHeadingBlock;
@@ -2843,6 +2863,14 @@ function pointerPosition(e) {
   const rect = canvas.getBoundingClientRect();
   return { x: (e.clientX - rect.left) / UI_SCALE, y: (e.clientY - rect.top) / UI_SCALE }
 }
+canvas.addEventListener('wheel', e => {
+  const point = pointerPosition(e);
+  if (point.x < 0 || point.x > 270 || point.y < 64) return;
+  if (sidebarScrollBy(e.deltaY / Math.max(.001, UI_SCALE))) {
+    e.preventDefault();
+    draw();
+  }
+}, { passive: false });
 function regionAtPoint(point) {
   const exact = regions.findLast(a => point.x >= a.x && point.x <= a.x + a.w && point.y >= a.y && point.y <= a.y + a.h);
   if (exact || UI_SCALE >= 1) return exact;
@@ -3956,6 +3984,8 @@ window.render_game_to_text = () => {
       total_length_cm: hookeTotalLengthCm(),
       extension_cm: hookeExtensionCm(),
       extension_m: +(hookeExtensionCm() / 100).toFixed(3),
+      ruler: { origin: 'top of vertical ruler', scale_cm: [0, 33.2], unloaded_pointer_reading_cm: hookeRulerUnloadedReadingCm, pointer_reading_cm: hookeRulerReadingCm() },
+      guidance_focus: { available: true, trigger_bounds: hookeGuidanceHitbox, open: state.hookeFocusModal, animation_progress: +state.hookeFocusProgress.toFixed(2), focus: 'bottom spring, fiducial pointer and ruler scale' },
       spring_moving: state.hookeStage === 1,
       reading_enabled_only_when_settled: true,
       measured_results: state.hookeResults,
@@ -3967,7 +3997,7 @@ window.render_game_to_text = () => {
       conclusion: state.complete ? 'force is proportional to extension from 0 to 5 N; the 6 N point lies above the straight-line prediction' : null,
       smooth_stage_animation: true
     };
-    payload.controls = ['RECORD ZERO', 'ADD 100 g MASS', 'RECORD READING', 'RESET SERIES', 'GRAPH', 'METHOD', 'F fullscreen'];
+    payload.controls = ['RECORD ZERO', 'ADD 100 g MASS', 'RECORD READING', 'RESET SERIES', 'GRAPH', 'METHOD', 'F fullscreen', ...(state.hookeFocusModal ? ['CLOSE RULER VIEW'] : [])];
   } else if (id === 'specificheat') {
     const phases = ['unprepared aluminium block', 'applying paste, inserting probes and closing insulation', 'prepared and zeroed', 'electrical heating and live measurement', 'supply off ready to calculate', 'specific heat capacity calculated'];
     payload.specific_heat_capacity_practical = {
