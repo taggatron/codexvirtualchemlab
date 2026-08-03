@@ -131,7 +131,71 @@ export class LabRenderer3D {
     g.add(marks); Object.assign(g.userData, { container: true, liquid, meniscus, liquidTop, liquidTopRadius }); return shadowReady(g)
   }
   testTube(level = .35, color = 0x5dbddd, cloudy = false) { const g = new THREE.Group(); const tube = new THREE.Mesh(new THREE.CylinderGeometry(.18, .18, 1.65, 32, 1, true), GLASS()); tube.position.y = .86; g.add(tube); const bottom = new THREE.Mesh(new THREE.SphereGeometry(.18, 32, 16, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), GLASS()); bottom.position.y = .035; g.add(bottom); const liq = cylinder(.155, Math.max(.08, level * .8), new THREE.MeshPhysicalMaterial({ color: cloudy ? 0xe8e8d8 : color, transparent: true, opacity: cloudy ? .9 : .7, roughness: cloudy ? .55 : .16 })); liq.position.y = .11 + level * .4; g.add(liq); Object.assign(g.userData, { container: true, liquid: liq }); return shadowReady(g) }
-  gasTap(open = false) { const g = new THREE.Group(), enamel = new THREE.MeshPhysicalMaterial({ color: 0xf7f5ea, roughness: .2, metalness: .03, clearcoat: .9, clearcoatRoughness: .08 }), yellow = new THREE.MeshStandardMaterial({ color: 0xf2c400, roughness: .3, metalness: .12 }), brass = metal(0xb49345, .25); const mountingPlate = new THREE.Mesh(new THREE.CylinderGeometry(.31, .34, .11, 64), enamel); mountingPlate.position.y = .055; g.add(mountingPlate); const body = new THREE.Mesh(new THREE.CylinderGeometry(.17, .2, .55, 56), enamel); body.position.y = .36; g.add(body); const shoulder = new THREE.Mesh(new THREE.SphereGeometry(.19, 48, 24), enamel); shoulder.scale.y = .62; shoulder.position.y = .64; g.add(shoulder); const collar = cylinder(.225, .085, enamel, 56); collar.position.y = .71; g.add(collar); const outlet = this.tubeBetween(new THREE.Vector3(-.39, .38, 0), new THREE.Vector3(-.13, .38, 0), .072, brass); g.add(outlet); for (const x of [-.4, -.34, -.28]) { const ring = new THREE.Mesh(new THREE.TorusGeometry(.079, .012, 8, 28), brass); ring.rotation.y = Math.PI / 2; ring.position.set(x, .38, 0); g.add(ring) } const stem = cylinder(.055, .17, brass, 28); stem.position.y = .83; g.add(stem); const valve = new THREE.Group(); valve.position.y = .93; valve.rotation.y = open ? Math.PI / 2 : 0; const hub = cylinder(.12, .09, yellow, 40); valve.add(hub); for (const side of [-1, 1]) { const wing = new THREE.Mesh(new THREE.BoxGeometry(.25, .075, .15), yellow); wing.position.set(side * .19, .01, 0); valve.add(wing); const end = new THREE.Mesh(new THREE.SphereGeometry(.085, 24, 14), yellow); end.scale.set(.9, .58, .78); end.position.set(side * .32, .01, 0); valve.add(end) } g.add(valve); const band = new THREE.Mesh(new THREE.TorusGeometry(.178, .018, 10, 40), yellow); band.rotation.x = Math.PI / 2; band.position.y = .59; g.add(band); g.position.set(1.82, 0, .24); Object.assign(g.userData, { gasTap: true, outletAxis: '+x', outletStart: [-.39, .38, 0], outletEnd: [-.13, .38, 0], barbRingCount: 3 }); return shadowReady(g) }
+  gasTap(open = false) {
+    const g = new THREE.Group();
+    const enamel = new THREE.MeshPhysicalMaterial({ color: 0xf7f5ea, roughness: .2, metalness: .03, clearcoat: .9, clearcoatRoughness: .08 });
+    const yellow = new THREE.MeshStandardMaterial({ color: 0xf2c400, roughness: .3, metalness: .12 });
+    const brass = metal(0xb49345, .25);
+    const mountingPlate = new THREE.Mesh(new THREE.CylinderGeometry(.31, .34, .11, 64), enamel);
+    mountingPlate.position.y = .055;
+    g.add(mountingPlate);
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(.17, .2, .55, 56), enamel);
+    body.position.y = .36;
+    g.add(body);
+    const shoulder = new THREE.Mesh(new THREE.SphereGeometry(.19, 48, 24), enamel);
+    shoulder.scale.y = .62;
+    shoulder.position.y = .64;
+    g.add(shoulder);
+    const collar = cylinder(.225, .085, enamel, 56);
+    collar.position.y = .71;
+    g.add(collar);
+
+    const outletStart = new THREE.Vector3(-.39, .38, 0);
+    const outletEnd = new THREE.Vector3(-.13, .38, 0);
+    const outlet = this.taperedTubeBetween(outletStart, outletEnd, .06, .078, brass);
+    g.add(outlet);
+    for (const [x, radius] of [[-.36, .066], [-.30, .072], [-.24, .078]]) {
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(radius, .008, 8, 28), brass);
+      ring.rotation.y = Math.PI / 2;
+      ring.position.set(x, .38, 0);
+      g.add(ring);
+    }
+
+    const stem = cylinder(.055, .17, brass, 28);
+    stem.position.y = .83;
+    g.add(stem);
+    const valve = new THREE.Group();
+    valve.position.y = .93;
+    valve.rotation.y = open ? Math.PI / 2 : 0;
+    const hub = cylinder(.12, .09, yellow, 40);
+    valve.add(hub);
+    for (const side of [-1, 1]) {
+      const wing = new THREE.Mesh(new THREE.BoxGeometry(.25, .075, .15), yellow);
+      wing.position.set(side * .19, .01, 0);
+      valve.add(wing);
+      const end = new THREE.Mesh(new THREE.SphereGeometry(.085, 24, 14), yellow);
+      end.scale.set(.9, .58, .78);
+      end.position.set(side * .32, .01, 0);
+      valve.add(end);
+    }
+    g.add(valve);
+    const band = new THREE.Mesh(new THREE.TorusGeometry(.178, .018, 10, 40), yellow);
+    band.rotation.x = Math.PI / 2;
+    band.position.y = .59;
+    g.add(band);
+    g.position.set(1.82, 0, .24);
+    Object.assign(g.userData, {
+      gasTap: true,
+      outletAxis: '+x',
+      outletStart: [-.39, .38, 0],
+      outletEnd: [-.13, .38, 0],
+      outletTapered: true,
+      outletEntryRadius: .06,
+      outletBaseRadius: .078,
+      barbRingCount: 3
+    });
+    return shadowReady(g)
+  }
   bunsen(lit = false, flameHeight = 1, wrapMode = false, options = {}) {
     const g = new THREE.Group();
     const baseMat = new THREE.MeshPhysicalMaterial({ color: 0x0c4177, roughness: .25, metalness: .3, clearcoat: .7, clearcoatRoughness: .12 });
