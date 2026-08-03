@@ -925,7 +925,7 @@ function drawAlkaliControls(x, benchY) {
   const metal = alkaliMetal(), stage = state.alkaliStage || 0, labels = ['LOWER METAL', 'LOWERING…', 'REACTION RUNNING…', 'RECORD OBSERVATION', state.complete ? 'VIEW RESULTS' : 'NEXT METAL', 'CLEARING…'];
   const busy = [1, 2, 5].includes(stage);
   button(labels[stage] || labels[0], x + 30, benchY + 46, 164, 38, busy);
-  button('RESULTS', x + 354, benchY + 46, 90, 38, state.tab === 'graph');
+  button('RESULTS', x + 204, benchY + 46, 90, 38, state.tab === 'graph');
   text(`TRIAL ${Math.min(3, state.alkaliResults.length + 1)} / 3  ·  ${metal.name.toUpperCase()}  ·  SIMULATION ONLY`, x + 30, benchY + 31, 8.8, '#d8e8ed', 750);
 }
 function starchPrimaryLabel() { return ['BOIL LEAF', 'BOILING…', 'MOVE TO ETHANOL', 'DECOLOURISING…', 'RINSE LEAF', 'RINSING…', 'ADD IODINE', 'ADDING IODINE…', 'RESET PRACTICAL'][state.starchStage] || 'BOIL LEAF' }
