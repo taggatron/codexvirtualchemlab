@@ -2500,11 +2500,14 @@ export class LabRenderer3D {
       const pad = new THREE.Mesh(new THREE.BoxGeometry(.07, .12, .22), black); pad.position.set(springX + side * .055, 2.83, springZ); g.add(pad);
     }
 
-    // White vertical ruler with fine millimetre ticks, labelled centimetres and
-    // a red 10 cm limit-of-proportionality marker.
+    // White vertical ruler with a full-height linear tick field, labelled
+    // extension readings and a red 10 cm limit-of-proportionality marker.
     const ruler = new THREE.Mesh(roundedBox(.49, rulerTopY - rulerBottomY, .085, .028, 3), new THREE.MeshPhysicalMaterial({ color: 0xf7f8f2, roughness: .42, clearcoat: .28 }));
     ruler.position.set(rulerX, (rulerTopY + rulerBottomY) / 2, .03); g.add(ruler);
     const rulerEdge = new THREE.Mesh(new THREE.BoxGeometry(.035, rulerTopY - rulerBottomY - .08, .105), metal(0x929fa4, .24)); rulerEdge.position.set(rulerX + .25, (rulerTopY + rulerBottomY) / 2, .03); g.add(rulerEdge);
+    const rulerScaleTopY = rulerTopY - .07, rulerScaleBottomY = rulerBottomY + .07;
+    const rulerScaleMinMm = Math.ceil((zeroPointerY - rulerScaleTopY) / scenePerCm * 5) * 2;
+    const rulerScaleMaxMm = Math.floor((zeroPointerY - rulerScaleBottomY) / scenePerCm * 5) * 2;
     const tickMaterial = new THREE.MeshBasicMaterial({ color: 0x27383e, toneMapped: false });
     const makeLabel = (label, width = .28, height = .12, colour = '#26383e', fontSize = 34) => {
       const canvas = document.createElement('canvas'), dc = canvas.getContext('2d'); canvas.width = 256; canvas.height = 96;
@@ -2512,13 +2515,12 @@ export class LabRenderer3D {
       const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace;
       const mesh = new THREE.Mesh(new THREE.PlaneGeometry(width, height), new THREE.MeshBasicMaterial({ map: texture, transparent: true, toneMapped: false, depthWrite: false })); mesh.renderOrder = 11; return mesh;
     };
-    for (let mm = 0; mm <= 140; mm += 2) {
+    for (let mm = rulerScaleMinMm; mm <= rulerScaleMaxMm; mm += 2) {
       const extensionCm = mm / 10, y = zeroPointerY - extensionCm * scenePerCm, centimetre = mm % 10 === 0, fiveMm = mm % 5 === 0;
       const length = centimetre ? .22 : fiveMm ? .16 : .1;
       const tick = new THREE.Mesh(new THREE.BoxGeometry(length, .009, .012), tickMaterial); tick.position.set(rulerX - .235 + length / 2, y, .087); g.add(tick);
-      if (centimetre && mm % 20 === 0) { const label = makeLabel(String(Math.round(extensionCm))); label.position.set(rulerX + .08, y, .088); g.add(label) }
+      if (centimetre && extensionCm >= 0 && mm % 20 === 0) { const label = makeLabel(String(Math.round(extensionCm))); label.position.set(rulerX + .08, y, .088); g.add(label) }
     }
-    const unitLabel = makeLabel('EXTENSION / cm', .78, .13, '#41565e', 25); unitLabel.position.set(rulerX, rulerTopY + .11, .09); g.add(unitLabel);
     const limitY = zeroPointerY - 10 * scenePerCm;
     const limitLine = new THREE.Mesh(new THREE.BoxGeometry(.5, .014, .018), new THREE.MeshBasicMaterial({ color: 0xc74f52, toneMapped: false })); limitLine.position.set(rulerX, limitY, .095); g.add(limitLine);
     const limitLabel = makeLabel('5 N LIMIT', .48, .11, '#b53f44', 25); limitLabel.position.set(rulerX + .43, limitY, .09); g.add(limitLabel);
