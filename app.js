@@ -61,6 +61,8 @@ const graphSpecs = {
   wirelength: { xLabel: 'wire length / cm', yLabel: 'resistance / Ω', xMin: 0, xMax: 100, yMin: 0, yMax: 10, yDp: 1 }
 };
 const nonGraphResultIds = new Set(['free', 'titration', 'salts', 'mass', 'co2', 'electro', 'flame', 'displacement', 'chrom', 'starchleaf', 'quadrats', 'shoretransect', 'ripple', 'convection', 'conduction', 'thermal', 'fieldlines']);
+state.hookeFocusModal = false;
+state.hookeFocusProgress = 0;
 const GRAPH_SIDEBAR_HEADER_Y = 134, GRAPH_SIDEBAR_DESCRIPTION_OFFSET = 32;
 function currentGraphModalKind(id = practicals[state.selected]?.id) {
   if (id === 'rates') return 'temperature-bar-chart';
@@ -528,7 +530,9 @@ function electromagnetMeasuredClips(turns = state.electromagnetTurns) { const in
 const hookeForcesN = [0, 1, 2, 3, 4, 5, 6];
 const hookeExtensionsCm = [0, 2, 4, 6, 8, 10, 13];
 const hookeStageDurations = { 1: 3.4 };
+const hookeRulerUnloadedReadingCm = 17.1;
 function hookeExtensionCm(force = state.hookeForceN) { const index = hookeForcesN.indexOf(force); return hookeExtensionsCm[index < 0 ? 0 : index] }
+function hookeRulerReadingCm(force = state.hookeForceN) { return +(hookeRulerUnloadedReadingCm + hookeExtensionCm(force)).toFixed(1) }
 function hookeTotalLengthCm(force = state.hookeForceN) { return 20 + hookeExtensionCm(force) }
 function hookeSpringConstant() { return 50 }
 function hookeStepIndex() { return state.complete ? 3 : state.hookeStage === 2 ? 2 : state.hookeStage === 1 || state.hookeResults.length ? 1 : 0 }
@@ -1273,7 +1277,13 @@ function rightbar() {
     cursorY = gearCursorY;
 
     cursorY += sectionGap; text('GUIDANCE', x + 22, cursorY + headingHeight / 2, headingSize, C.muted, 800); cursorY += sectionHeadingBlock;
-    const guideHeight = guideBaseHeight + guideExtra; rr(x + 20, cursorY, R - 40, guideHeight, 7, '#e8efed'); drawTextLines(guideLines, x + 32, cursorY + guideHeight / 2, guideSize, C.ink, 600, guideLineHeight); cursorY += guideHeight;
+    const guideHeight = guideBaseHeight + guideExtra; rr(x + 20, cursorY, R - 40, guideHeight, 7, '#e8efed'); drawTextLines(guideLines, x + 32, cursorY + guideHeight / 2, guideSize, C.ink, 600, guideLineHeight);
+    if (p.id === 'hooke') {
+      const iconX = x + R - 39, iconY = cursorY + guideHeight - 18;
+      ctx.strokeStyle = p.color; ctx.lineWidth = 1.8; ctx.beginPath(); ctx.arc(iconX - 2, iconY - 2, 5, 0, Math.PI * 2); ctx.moveTo(iconX + 2, iconY + 2); ctx.lineTo(iconX + 7, iconY + 7); ctx.stroke();
+      hit('open-hooke-focus-modal', x + 20, cursorY, R - 40, guideHeight);
+    }
+    cursorY += guideHeight;
     cursorY += sectionGap; text('PRACTICAL EVALUATION', x + 22, cursorY + headingHeight / 2, headingSize, C.muted, 800); cursorY += sectionHeadingBlock;
     const evaluationHeight = evaluationBaseHeight + evaluationExtra; drawPracticalEvaluationButton(x + 20, cursorY, R - 40, evaluationHeight);
     const finalBottom = cursorY + evaluationHeight;
@@ -2113,6 +2123,36 @@ function drawGraphModal() {
   if (kind === 'line-graph') drawExpandedLineGraph(contentX, contentY, contentW, contentH);
   else drawExpandedTemperatureBarChart(contentX, contentY, contentW, contentH, kind);
 }
+function hookeFocusViewport() {
+  const R = Math.max(260, Math.min(330, W * .23)), arenaX = 270, arenaY = 205, arenaW = Math.max(1, W - arenaX - R), arenaH = Math.max(180, H - 333);
+  const progress = Math.max(0, Math.min(1, state.hookeFocusProgress || 0)), eased = progress * progress * (3 - 2 * progress);
+  const maxWidth = Math.min(660, Math.max(260, arenaW - 26)), maxHeight = Math.min(410, Math.max(170, arenaH - 20)), scale = .88 + eased * .12;
+  const width = Math.min(maxWidth, maxHeight * 1.78) * scale, height = width / 1.78;
+  return { x: arenaX + (arenaW - width) / 2, y: arenaY + (arenaH - height) / 2, width, height };
+}
+function drawHookeFocusModal() {
+  if (!state.hookeFocusModal) return;
+  const view = hookeFocusViewport(), pointerReading = hookeRulerReadingCm(), extension = hookeExtensionCm();
+  ctx.save();
+  ctx.fillStyle = 'rgba(7, 25, 35, .78)'; ctx.fillRect(0, 0, W, H);
+  ctx.globalCompositeOperation = 'destination-out'; rr(view.x, view.y, view.width, view.height, 12, '#000');
+  ctx.restore();
+  ctx.save();
+  ctx.strokeStyle = '#b55c9d'; ctx.lineWidth = 2; rr(view.x, view.y, view.width, view.height, 12, null, '#b55c9d');
+  rr(view.x + 12, view.y + 12, Math.min(214, view.width - 72), 28, 7, 'rgba(8, 31, 43, .9)', 'rgba(255,255,255,.2)');
+  text('EYE-LEVEL RULER VIEW', view.x + 24, view.y + 26, 9, '#ffffff', 850);
+  rr(view.x + view.width - 42, view.y + 12, 28, 28, 14, 'rgba(8, 31, 43, .9)', 'rgba(255,255,255,.24)');
+  text('X', view.x + view.width - 28, view.y + 26, 11, '#ffffff', 850, 'center');
+  const detailsWidth = Math.min(view.width - 28, 418), detailsY = view.y + view.height - 56;
+  rr(view.x + 14, detailsY, detailsWidth, 42, 8, 'rgba(248,250,249,.96)', '#b55c9d');
+  text(`POINTER ${pointerReading.toFixed(1)} cm`, view.x + 27, detailsY + 15, 9, '#9b4f87', 850);
+  text(`EXTENSION ${extension.toFixed(1)} cm`, view.x + 27, detailsY + 30, 9, C.teal, 800);
+  text(`minus unloaded ${hookeRulerUnloadedReadingCm.toFixed(1)} cm`, view.x + detailsWidth - 14, detailsY + 22, 8.6, C.muted, 700, 'right');
+  ctx.restore();
+  hit('close-hooke-focus-modal', 0, 0, W, H);
+  hit('hooke-focus-modal-body', view.x, view.y, view.width, view.height);
+  hit('close-hooke-focus-modal', view.x + view.width - 42, view.y + 12, 28, 28);
+}
 function idDp(max) { return max < 10 ? 1 : 0 }
 function draw(skipWebGL = false) {
   regions = [];
@@ -2128,6 +2168,11 @@ function draw(skipWebGL = false) {
     if (state.evaluationModal) drawEvaluationModal();
     if (state.graphModal) drawGraphModal();
     if (state.reactantSafety) drawReactantSafetyModal();
+    if (state.hookeFocusModal) {
+      drawHookeFocusModal();
+      const view = hookeFocusViewport();
+      lab3d.resize(view.x, view.y, view.width, view.height, UI_SCALE);
+    }
   }
   visibleCtx.save();
   visibleCtx.setTransform(1, 0, 0, 1, 0, 0);
