@@ -855,6 +855,65 @@ export class LabRenderer3D {
     });
     g.userData.displacementRig = true; g.userData.testTubes = 4; return shadowReady(g)
   }
+  alkaliMetalRig(state) {
+    const g = new THREE.Group();
+    const steel = metal(0xaab8bc, .22), darkSteel = metal(0x405058, .38), trayMat = new THREE.MeshPhysicalMaterial({ color: 0x21373f, roughness: .28, metalness: .64, clearcoat: .32 }), acrylic = new THREE.MeshPhysicalMaterial({ color: 0xd9f5f7, transparent: true, opacity: .22, transmission: .72, roughness: .045, ior: 1.46, thickness: .08, clearcoat: .9, clearcoatRoughness: .06, side: THREE.DoubleSide, depthWrite: false }), waterMat = new THREE.MeshPhysicalMaterial({ color: 0x6ecfe1, transparent: true, opacity: .66, transmission: .24, roughness: .11, clearcoat: .58, clearcoatRoughness: .08, depthWrite: false }), surfaceMat = new THREE.MeshPhysicalMaterial({ color: 0xa5ebef, transparent: true, opacity: .58, transmission: .32, roughness: .055, clearcoat: .86, clearcoatRoughness: .04, depthWrite: false });
+    const troughX = -.34, troughWidth = 4.72, troughDepth = 2.08, waterY = .46;
+    const trayBase = new THREE.Mesh(new THREE.BoxGeometry(troughWidth + .42, .14, troughDepth + .42), trayMat); trayBase.position.set(troughX, .08, 0); g.add(trayBase);
+    const water = new THREE.Mesh(new THREE.BoxGeometry(troughWidth - .18, .33, troughDepth - .18), waterMat); water.position.set(troughX, .26, 0); g.add(water);
+    const surface = new THREE.Mesh(new THREE.BoxGeometry(troughWidth - .16, .035, troughDepth - .16), surfaceMat); surface.position.set(troughX, waterY, 0); surface.renderOrder = 6; g.add(surface);
+    const trayWalls = [
+      [troughX - troughWidth / 2, .43, 0, .07, .7, troughDepth + .08], [troughX + troughWidth / 2, .43, 0, .07, .7, troughDepth + .08],
+      [troughX, .43, -troughDepth / 2, troughWidth + .08, .7, .07], [troughX, .43, troughDepth / 2, troughWidth + .08, .7, .07]
+    ];
+    for (const [x, y, z, width, height, depth] of trayWalls) { const wall = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), acrylic); wall.position.set(x, y, z); wall.renderOrder = 7; g.add(wall) }
+    const rimSegments = [
+      [new THREE.Vector3(troughX - troughWidth / 2, .79, -troughDepth / 2), new THREE.Vector3(troughX + troughWidth / 2, .79, -troughDepth / 2)],
+      [new THREE.Vector3(troughX - troughWidth / 2, .79, troughDepth / 2), new THREE.Vector3(troughX + troughWidth / 2, .79, troughDepth / 2)],
+      [new THREE.Vector3(troughX - troughWidth / 2, .79, -troughDepth / 2), new THREE.Vector3(troughX - troughWidth / 2, .79, troughDepth / 2)],
+      [new THREE.Vector3(troughX + troughWidth / 2, .79, -troughDepth / 2), new THREE.Vector3(troughX + troughWidth / 2, .79, troughDepth / 2)]
+    ];
+    for (const [a, b] of rimSegments) g.add(this.tubeBetween(a, b, .028, steel));
+
+    const screenFrame = metal(0x8a9ba0, .24), panel = (geometry, position, rotation = null) => { const mesh = new THREE.Mesh(geometry, acrylic); mesh.position.copy(position); if (rotation) mesh.rotation.copy(rotation); mesh.renderOrder = 8; mesh.castShadow = false; g.add(mesh); return mesh };
+    panel(new THREE.BoxGeometry(6.22, 2.68, .045), new THREE.Vector3(-.06, 1.72, -1.54));
+    panel(new THREE.BoxGeometry(.045, 2.68, 2.46), new THREE.Vector3(-3.15, 1.72, -.31));
+    panel(new THREE.BoxGeometry(.045, 2.68, 2.46), new THREE.Vector3(3.03, 1.72, -.31));
+    const screenBars = [
+      [new THREE.Vector3(-3.15, .38, -1.54), new THREE.Vector3(3.03, .38, -1.54)], [new THREE.Vector3(-3.15, 3.06, -1.54), new THREE.Vector3(3.03, 3.06, -1.54)],
+      [new THREE.Vector3(-3.15, .38, -1.54), new THREE.Vector3(-3.15, 3.06, -1.54)], [new THREE.Vector3(3.03, .38, -1.54), new THREE.Vector3(3.03, 3.06, -1.54)],
+      [new THREE.Vector3(-3.15, .38, .92), new THREE.Vector3(-3.15, 3.06, .92)], [new THREE.Vector3(3.03, .38, .92), new THREE.Vector3(3.03, 3.06, .92)]
+    ];
+    for (const [a, b] of screenBars) g.add(this.tubeBetween(a, b, .034, screenFrame));
+    const reflectionMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .1, depthWrite: false, toneMapped: false }), reflection = new THREE.Mesh(new THREE.PlaneGeometry(1.55, 2.16), reflectionMat); reflection.position.set(-1.45, 1.78, -1.507); reflection.rotation.z = -.18; reflection.renderOrder = 10; g.add(reflection);
+
+    const vialRack = new THREE.Group(), vialRackBase = new THREE.Mesh(new THREE.BoxGeometry(1.28, .12, .72), trayMat); vialRackBase.position.set(2.54, .13, -.67); vialRack.add(vialRackBase); const vialSlots = [2.16, 2.54, 2.92], vialCaps = [], vialRings = [];
+    vialSlots.forEach((x, index) => {
+      const vial = new THREE.Group(), shell = new THREE.Mesh(new THREE.CylinderGeometry(.13, .145, .52, 40, 1, true), acrylic), bottom = new THREE.Mesh(new THREE.SphereGeometry(.132, 32, 16, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), acrylic), capMat = new THREE.MeshPhysicalMaterial({ color: [0xbd5961, 0xd69235, 0x8862bc][index], roughness: .32, metalness: .15, clearcoat: .42 }), cap = new THREE.Mesh(new THREE.CylinderGeometry(.15, .15, .09, 36), capMat), chip = new THREE.Mesh(new THREE.DodecahedronGeometry(.074, 1), metal(0xd7e1e3, .2));
+      shell.position.y = .48; bottom.position.y = .22; cap.position.y = .79; chip.position.y = .5; vial.add(shell, bottom, cap, chip); vial.position.set(x, 0, -.67); vialRack.add(vial); vialCaps.push(capMat);
+      const ringMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, depthWrite: false, toneMapped: false }), ring = new THREE.Mesh(new THREE.TorusGeometry(.18, .013, 10, 42), ringMat); ring.rotation.x = Math.PI / 2; ring.position.set(x, .205, -.67); vialRack.add(ring); vialRings.push(ring);
+    });
+    g.add(vialRack);
+
+    const forceps = new THREE.Group(), forcepsMat = metal(0xbecbd0, .2), gripMat = solid(0x313c41, .54);
+    const handle = new THREE.Mesh(new THREE.CylinderGeometry(.08, .08, .52, 28), gripMat); handle.rotation.z = Math.PI / 2; handle.position.set(.22, 0, 0); forceps.add(handle);
+    for (const z of [-.07, .07]) { const arm = new THREE.Mesh(new THREE.BoxGeometry(1.32, .034, .034), forcepsMat); arm.position.set(-.56, z * .32, z); arm.rotation.z = z * .13; forceps.add(arm); const tip = new THREE.Mesh(new THREE.ConeGeometry(.036, .23, 18), forcepsMat); tip.rotation.z = -Math.PI / 2; tip.position.set(-1.28, z * .24, z); forceps.add(tip) }
+    const forcepsRest = new THREE.Vector3(2.65, 1.22, .66), forcepsAbove = new THREE.Vector3(-.72, 1.66, .28), forcepsDrop = new THREE.Vector3(-.72, .72, .28); forceps.position.copy(forcepsRest); forceps.rotation.set(.04, -.15, .14); g.add(forceps);
+
+    const sampleMat = new THREE.MeshPhysicalMaterial({ color: 0xd9e1e2, roughness: .2, metalness: .86, clearcoat: .62, clearcoatRoughness: .14, emissive: 0x000000, emissiveIntensity: 0 }), sample = new THREE.Mesh(new THREE.DodecahedronGeometry(.135, 2), sampleMat); sample.castShadow = true; g.add(sample);
+    const sampleHaloMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }), sampleHalo = new THREE.Mesh(new THREE.SphereGeometry(.28, 24, 16), sampleHaloMat); sampleHalo.renderOrder = 13; g.add(sampleHalo);
+    const bubbleEntries = [];
+    for (let index = 0; index < 34; index++) { const bubble = new THREE.Mesh(new THREE.SphereGeometry(.018 + (index % 4) * .008, 14, 10), new THREE.MeshPhysicalMaterial({ color: 0xecffff, transparent: true, opacity: .65, transmission: .3, roughness: .06, depthWrite: false })); bubble.visible = false; bubble.renderOrder = 12; g.add(bubble); bubbleEntries.push({ mesh: bubble, phase: index * .173, angle: index * 2.399, scale: .58 + (index % 5) * .1 }) }
+    const rippleEntries = [];
+    for (let index = 0; index < 5; index++) { const ripple = new THREE.Mesh(new THREE.TorusGeometry(.16, .012, 10, 58), new THREE.MeshBasicMaterial({ color: 0xd9ffff, transparent: true, opacity: 0, depthWrite: false, toneMapped: false })); ripple.rotation.x = Math.PI / 2; ripple.position.y = waterY + .012; ripple.renderOrder = 11; g.add(ripple); rippleEntries.push({ mesh: ripple, phase: index / 5 }) }
+    const indicatorEntries = [];
+    for (let index = 0; index < 18; index++) { const patch = new THREE.Mesh(new THREE.CircleGeometry(.1 + (index % 4) * .035, 24), new THREE.MeshBasicMaterial({ color: 0x8d4baf, transparent: true, opacity: 0, depthWrite: false, toneMapped: false })); patch.rotation.x = -Math.PI / 2; patch.position.y = waterY + .019; patch.renderOrder = 9; g.add(patch); indicatorEntries.push({ mesh: patch, angle: index * 2.399, radius: .1 + (index % 6) * .11, phase: (index * .161) % 1 }) }
+    const flameOuterMat = new THREE.MeshBasicMaterial({ color: 0xffbd3c, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }), flameCoreMat = new THREE.MeshBasicMaterial({ color: 0xffffcf, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }), flameOuter = new THREE.Mesh(new THREE.ConeGeometry(.31, 1.06, 40), flameOuterMat), flameCore = new THREE.Mesh(new THREE.ConeGeometry(.16, .68, 32), flameCoreMat), flameHalo = new THREE.Mesh(new THREE.SphereGeometry(.57, 32, 20), new THREE.MeshBasicMaterial({ color: 0xffad35, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false })); flameOuter.renderOrder = flameCore.renderOrder = flameHalo.renderOrder = 14; flameOuter.visible = flameCore.visible = flameHalo.visible = false; g.add(flameOuter, flameCore, flameHalo); const reactionLight = new THREE.PointLight(0xffbc4c, 0, 3.6, 2); g.add(reactionLight);
+    this.dynamic.push({ kind: 'alkaliMetals', forceps, forcepsRest, forcepsAbove, forcepsDrop, sample, sampleMat, sampleHalo, sampleHaloMat, waterMat, surfaceMat, startWater: new THREE.Color(0x6ecfe1), endWater: new THREE.Color(0x8750ab), bubbleEntries, rippleEntries, indicatorEntries, vialCaps, vialRings, flameOuter, flameCore, flameHalo, flameOuterMat, flameCoreMat, reactionLight, reflection, waterY });
+    g.userData.alkaliMetalRig = true;
+    g.userData.apparatus = 'acrylic water trough, remote forceps, sealed metal vials and three-sided transparent safety screen';
+    return shadowReady(g)
+  }
   thermiteRig(state) {
     const g = new THREE.Group(), steel = metal(0x9aa7aa, .28), darkSteel = metal(0x536168, .42), sandMat = new THREE.MeshStandardMaterial({ color: 0xc6a66d, roughness: .96, metalness: 0 }), ceramic = new THREE.MeshStandardMaterial({ color: 0x5a5550, roughness: .88, metalness: .03 }), chargeMat = new THREE.MeshStandardMaterial({ color: 0x6f2d1d, roughness: .92, metalness: .04 }), glass = new THREE.MeshPhysicalMaterial({ color: 0xcceeff, transparent: true, opacity: .24, transmission: .72, roughness: .055, metalness: 0, ior: 1.46, thickness: .12, clearcoat: .72, clearcoatRoughness: .06, side: THREE.DoubleSide, depthWrite: false }), frame = metal(0x89999e, .2);
     const panel = (geometry, position) => { const mesh = new THREE.Mesh(geometry, glass); mesh.position.copy(position); mesh.renderOrder = 8; mesh.castShadow = false; g.add(mesh); return mesh };
@@ -2851,6 +2910,7 @@ export class LabRenderer3D {
     else if (id === 'electro') { this.root.add(this.electrolysisRig(state)) }
     else if (id === 'flame') { this.root.add(this.flameTestRig(state)) }
     else if (id === 'displacement') { this.root.add(this.displacementRig(state)) }
+    else if (id === 'alkali') { this.root.add(this.alkaliMetalRig(state)) }
     else if (id === 'chrom') { this.add(this.beaker(.16, 0x87cad8), 0, .1, 0, 1.18); this.add(this.chromatographyPaper(), 0, .18, 1.25, 1.05) }
     else if (id === 'water') { this.root.add(this.waterDistillationRig(state)) }
     else if (id === 'thermite') { this.root.add(this.thermiteRig(state)) }
@@ -3350,6 +3410,144 @@ export class LabRenderer3D {
         if (running && t > 2.58 && t < 4.2) { const amp = .055 * (1 - smooth((t - 2.58) / 1.62)); this.camera.position.x += Math.sin(time * .071) * amp; this.camera.position.y += Math.sin(time * .093 + 1) * amp * .42; this.camera.position.z += Math.sin(time * .057 + 2) * amp * .34; this.camera.lookAt(0, 1.05, 0) }
       }
       else if (d.kind === 'magnesiumBurn') { const pulse = 1 + Math.sin(time * .024 + d.seed) * .16 + Math.sin(time * .057 + d.seed) * .06; d.core.scale.set(pulse, .48 * pulse, pulse); d.corona.scale.set(1.05 * pulse, .62 * pulse, 1.05 * pulse); d.light.intensity = 10 + Math.sin(time * .031 + d.seed) * 2.2; for (const spark of d.sparks) { const q = (time * .001 * spark.userData.speed + spark.userData.phase) % 1, r = .06 + q * .28; spark.position.set(Math.cos(spark.userData.angle) * r, .37 + q * .72, Math.sin(spark.userData.angle) * r); spark.material.opacity = .95 * (1 - q); spark.scale.setScalar(.65 + (1 - q) * .8) } }
+    }
+    for (const d of this.dynamic) {
+      if (d.kind !== 'alkaliMetals') continue;
+      const stage = state.alkaliStage || 0;
+      const timer = Math.max(0, state.alkaliTimer || 0);
+      const metalIndex = Math.max(0, Math.min(2, state.alkaliMetal || 0));
+      const reaction = Math.max(0, Math.min(1, state.alkaliReactionProgress || 0));
+      const clamp = value => Math.max(0, Math.min(1, value));
+      const smooth = value => { value = clamp(value); return value * value * (3 - 2 * value) };
+      const profiles = [
+        { sample: 0xe4e7e5, flame: 0xffdb85, speed: .62, wobble: .07 },
+        { sample: 0xe1e5e5, flame: 0xffb52f, speed: 1.42, wobble: .14 },
+        { sample: 0xdddfe7, flame: 0xc48dff, speed: 1.75, wobble: .19 }
+      ];
+      const profile = profiles[metalIndex];
+      d.vialCaps.forEach((cap, index) => {
+        cap.emissive.setHex(index === metalIndex ? profiles[index].flame : 0x000000);
+        cap.emissiveIntensity = index === metalIndex ? .34 + .14 * Math.sin(time * .008) : 0;
+        const ring = d.vialRings[index];
+        ring.material.color.setHex(profiles[index].flame);
+        ring.material.opacity = index === metalIndex ? .68 + .18 * Math.sin(time * .007 + index) : 0;
+        ring.scale.setScalar(index === metalIndex ? 1 + .07 * Math.sin(time * .009) : 1);
+      });
+
+      const reactivePoint = new THREE.Vector3(-.72, d.waterY + .06, .28);
+      let held = false;
+      const clearQ = stage === 5 ? smooth(timer / 1.35) : 0;
+      if (stage === 0) {
+        d.forceps.position.copy(d.forcepsRest);
+        d.forceps.rotation.set(.04, -.15, .14);
+        held = true;
+      } else if (stage === 1) {
+        const approach = smooth(timer / .84);
+        const lower = smooth((timer - .84) / 1.01);
+        d.forceps.position.lerpVectors(d.forcepsRest, d.forcepsAbove, approach);
+        if (timer > .84) d.forceps.position.lerpVectors(d.forcepsAbove, d.forcepsDrop, lower);
+        d.forceps.position.y += Math.sin(Math.PI * Math.min(1, approach)) * .14;
+        d.forceps.rotation.set(.04, THREE.MathUtils.lerp(-.15, .06, approach), THREE.MathUtils.lerp(.14, -.44, Math.max(approach, lower)));
+        held = true;
+      } else if (stage === 5) {
+        d.forceps.position.lerpVectors(d.forcepsDrop, d.forcepsRest, clearQ);
+        d.forceps.position.y += Math.sin(Math.PI * clearQ) * .1;
+        d.forceps.rotation.set(.04, THREE.MathUtils.lerp(.06, -.15, clearQ), THREE.MathUtils.lerp(-.44, .14, clearQ));
+      } else {
+        d.forceps.position.copy(d.forcepsRest);
+        d.forceps.rotation.set(.04, -.15, .14);
+      }
+      d.forceps.updateMatrixWorld(true);
+      if (held) {
+        reactivePoint.copy(d.forceps.localToWorld(new THREE.Vector3(-1.34, -.025, 0)));
+      } else if (stage === 2) {
+        reactivePoint.x = -.78 + profile.speed * reaction;
+        reactivePoint.z = .18 + Math.sin(reaction * Math.PI * (4.4 + metalIndex * 2.3)) * profile.wobble;
+        reactivePoint.y = d.waterY + .065 + Math.sin(time * .012) * .008;
+      } else if (stage === 3 || stage === 4) {
+        reactivePoint.x = -.78 + profile.speed;
+        reactivePoint.z = .18 + Math.sin(4.4 + metalIndex * 2.3) * profile.wobble;
+      }
+
+      d.sampleMat.color.setHex(profile.sample);
+      d.sampleMat.emissive.setHex(metalIndex === 0 ? 0x000000 : profile.flame);
+      d.sampleMat.emissiveIntensity = stage === 2 ? .12 + reaction * .32 : 0;
+      const sampleVisible = held || stage === 2 && reaction < .95;
+      d.sample.visible = sampleVisible;
+      d.sample.position.copy(reactivePoint);
+      if (sampleVisible) {
+        const shrink = held ? 1 : 1 - reaction * .58;
+        const molten = metalIndex === 1 ? .64 + .32 * reaction : 1;
+        d.sample.scale.set(shrink * (metalIndex === 1 ? 1.28 : 1), shrink * molten, shrink * (metalIndex === 1 ? 1.1 : 1));
+        d.sample.rotation.set(time * .0014 * (1 + metalIndex), time * .0011, time * .0009 * (metalIndex + 1));
+      }
+
+      const purple = stage === 2 ? smooth(reaction) : stage === 3 || stage === 4 ? 1 : stage === 5 ? 1 - clearQ : 0;
+      d.waterMat.color.copy(d.startWater).lerp(d.endWater, purple * .78);
+      d.surfaceMat.color.copy(new THREE.Color(0xa5ebef)).lerp(new THREE.Color(0xb27bc6), purple);
+      d.waterMat.opacity = .66 + purple * .1;
+      d.surfaceMat.opacity = .58 + purple * .13;
+      const settledIndicator = stage === 3 || stage === 4;
+      for (const entry of d.indicatorEntries) {
+        const level = Math.max(0, purple - entry.phase * .18);
+        const visible = level > .008;
+        entry.mesh.visible = visible;
+        if (visible) {
+          const spread = .3 + smooth(level / .62) * (settledIndicator ? .78 + entry.radius * .62 : 1.25 + entry.radius);
+          const angle = entry.angle + reaction * .7;
+          entry.mesh.position.set(reactivePoint.x + Math.cos(angle) * spread, d.waterY + .02 + Math.sin(time * .01 + entry.phase * 8) * .004, reactivePoint.z + Math.sin(angle) * spread * .62);
+          entry.mesh.scale.setScalar(.32 + smooth(level / .7) * (settledIndicator ? .78 + entry.phase % .2 : 1.45 + entry.phase % .3));
+          entry.mesh.material.opacity = Math.min(settledIndicator ? .16 : .32, level * (settledIndicator ? .11 : .25));
+        }
+      }
+
+      const activeReaction = stage === 2 && reaction > .015 && reaction < .99;
+      for (const entry of d.bubbleEntries) {
+        const cycle = (time * .001 * (1.18 + metalIndex * .44) + entry.phase) % 1;
+        const visible = activeReaction && cycle < .92;
+        entry.mesh.visible = visible;
+        if (visible) {
+          const radius = .035 + cycle * (.16 + metalIndex * .035);
+          const drift = Math.sin(cycle * 13 + entry.angle) * .028;
+          entry.mesh.position.set(reactivePoint.x + Math.cos(entry.angle) * radius + drift, d.waterY + .03 + cycle * (.42 + metalIndex * .14), reactivePoint.z + Math.sin(entry.angle) * radius * .68);
+          entry.mesh.scale.setScalar(entry.scale * (.66 + cycle * .7));
+          entry.mesh.material.opacity = Math.sin(Math.PI * Math.min(.999, cycle / .92)) * (.46 + metalIndex * .1);
+        }
+      }
+      for (const entry of d.rippleEntries) {
+        const cycle = (time * .001 * (1.05 + metalIndex * .32) + entry.phase) % 1;
+        entry.mesh.visible = activeReaction;
+        if (activeReaction) {
+          entry.mesh.position.set(reactivePoint.x, d.waterY + .015, reactivePoint.z);
+          entry.mesh.scale.setScalar(.38 + cycle * (2.1 + metalIndex * .45));
+          entry.mesh.material.opacity = (1 - cycle) * (.38 + metalIndex * .06);
+        }
+      }
+
+      const burning = activeReaction && metalIndex > 0 && reaction > .18 && reaction < .9;
+      const flameLevel = burning ? Math.sin(Math.PI * clamp((reaction - .18) / .72)) : 0;
+      d.flameOuter.visible = d.flameCore.visible = d.flameHalo.visible = burning;
+      d.flameOuter.position.set(reactivePoint.x, d.waterY + .52, reactivePoint.z);
+      d.flameCore.position.set(reactivePoint.x, d.waterY + .46, reactivePoint.z);
+      d.flameHalo.position.set(reactivePoint.x, d.waterY + .49, reactivePoint.z);
+      d.flameOuterMat.color.setHex(profile.flame);
+      d.flameCoreMat.color.setHex(metalIndex === 1 ? 0xffffb4 : 0xf5d7ff);
+      d.flameOuterMat.opacity = .26 * flameLevel;
+      d.flameCoreMat.opacity = .48 * flameLevel;
+      d.flameHalo.material.color.setHex(profile.flame);
+      d.flameHalo.material.opacity = .1 * flameLevel;
+      const flicker = 1 + Math.sin(time * .031 + metalIndex) * .1 + Math.sin(time * .057) * .05;
+      d.flameOuter.scale.set(flicker * flameLevel, (1.05 + .12 * Math.sin(time * .041)) * flameLevel, flicker * flameLevel);
+      d.flameCore.scale.set((.72 / flicker) * flameLevel, (1 + .08 * Math.sin(time * .052)) * flameLevel, (.72 / flicker) * flameLevel);
+      d.flameHalo.scale.setScalar((.62 + .24 * Math.sin(time * .025)) * flameLevel);
+      d.reactionLight.position.set(reactivePoint.x, d.waterY + .82, reactivePoint.z);
+      d.reactionLight.color.setHex(profile.flame);
+      d.reactionLight.intensity = burning ? 4.3 * flameLevel : 0;
+      d.sampleHalo.position.copy(reactivePoint);
+      d.sampleHaloMat.color.setHex(profile.flame);
+      d.sampleHaloMat.opacity = activeReaction ? (.05 + .12 * Math.sin(reaction * Math.PI)) * (1 + metalIndex * .35) : 0;
+      d.sampleHalo.scale.setScalar(.75 + reaction * (1.1 + metalIndex * .2));
+      d.reflection.material.opacity = .075 + (activeReaction ? .035 * Math.sin(time * .006) : 0);
     }
     this.renderer.render(this.scene, this.camera);
     if (this.pendingCanvasReveal && !this.sceneCompiling) { this.pendingCanvasReveal = false; this.canvas.style.visibility = 'visible' }

@@ -983,7 +983,7 @@ function playSqueakyPop() { if (state.hydrogenAudioPlayed) return; state.hydroge
 function playThermiteBurst() { if (state.thermiteAudioPlayed) return; state.thermiteAudioPlayed = true; primePopAudio(); const ac = popAudioContext; if (!ac) return; try { const now = ac.currentTime + .012, master = ac.createGain(); master.gain.setValueAtTime(.0001, now); master.gain.exponentialRampToValueAtTime(.27, now + .014); master.gain.exponentialRampToValueAtTime(.065, now + .34); master.gain.exponentialRampToValueAtTime(.0001, now + 1.45); master.connect(ac.destination); const boom = ac.createOscillator(), boomGain = ac.createGain(); boom.type = 'sine'; boom.frequency.setValueAtTime(96, now); boom.frequency.exponentialRampToValueAtTime(34, now + .62); boomGain.gain.setValueAtTime(.82, now); boomGain.gain.exponentialRampToValueAtTime(.0001, now + .72); boom.connect(boomGain).connect(master); boom.start(now); boom.stop(now + .75); const frames = Math.floor(ac.sampleRate * 1.35), buffer = ac.createBuffer(1, frames, ac.sampleRate), samples = buffer.getChannelData(0); for (let i = 0; i < frames; i++) { const q = i / frames, crackle = Math.random() > .972 ? 2.8 : 1; samples[i] = (Math.random() * 2 - 1) * Math.pow(1 - q, 1.45) * crackle } const noise = ac.createBufferSource(), low = ac.createBiquadFilter(), high = ac.createBiquadFilter(), noiseGain = ac.createGain(); noise.buffer = buffer; low.type = 'lowpass'; low.frequency.setValueAtTime(4800, now); low.frequency.exponentialRampToValueAtTime(900, now + 1.25); high.type = 'highpass'; high.frequency.value = 80; noiseGain.gain.setValueAtTime(.68, now); noiseGain.gain.exponentialRampToValueAtTime(.0001, now + 1.34); noise.connect(low).connect(high).connect(noiseGain).connect(master); noise.start(now) } catch { } }
 function drawFreeReactionCard(x, w) { const reaction = state.reaction, active = !reaction.complete, q = Math.max(0, Math.min(1, reaction.progress || 0)), y = 143; rr(x + 26, y, w - 52, 60, 8, active ? '#eaf5f3' : '#f1f5f3', active ? C.teal : '#a8c9bf'); text(active ? 'ACTIVE REACTION' : 'REACTION COMPLETE', x + 40, y + 13, 8.5, active ? C.teal : '#2f8067', 800); text(reaction.symbol, x + 40, y + 31, 11, C.ink, 700); wrappedText(reaction.word, x + 40, y + 49, w - 86, 8.8, C.muted, 600, 10, 1); if (active) { ctx.fillStyle = 'rgba(8,127,117,.16)'; ctx.fillRect(x + 40, y + 55, (w - 86) * q, 2) } }
 function main() {
-  const L = 270, R = Math.max(260, Math.min(330, W * .23)), x = L, w = W - L - R, p = practicals[state.selected], free = p.id === 'free', wrappedObjective = ['titration', 'displacement', 'starchleaf', 'lipase', 'osmosis', 'potometer', 'quadrats', 'shoretransect', 'ripple', 'electromagnet', 'convection', 'conduction', 'thermal', 'hooke', 'specificheat', 'wirelength', 'fieldlines'].includes(p.id), equationY = wrappedObjective ? 151 : 143; ctx.fillStyle = '#fff'; ctx.fillRect(x, 64, w, H - 64); text(p.title.toUpperCase(), x + 28, 91, 11, p.color || C.teal, 800); if (wrappedObjective) wrappedText(p.objective, x + 28, 113, Math.min(w - 56, 700), 17, C.ink, 650, 21, 2); else text(p.objective, x + 28, 119, 17, C.ink, 650); if (free) { if (state.reaction) drawFreeReactionCard(x, w); else { rr(x + 26, 143, w - 52, 54, 8, '#f1eefb'); text('QUICK START', x + 40, 158, 9, C.muted, 800); text(p.eq, x + 40, 179, 13, C.ink, 600) } } else { rr(x + 26, equationY, w - 52, 72, 8, '#f2f6f5'); text('SYMBOL EQUATION', x + 40, equationY + 17, 8.5, C.muted, 800); text(p.eq, x + 145, equationY + 17, 12, C.ink, 650); text('WORD EQUATION', x + 40, equationY + 47, 8.5, C.muted, 800); wrappedText(p.word, x + 145, equationY + 47, w - 190, 10.2, C.ink, 600, 12, 2) }
+  const L = 270, R = Math.max(260, Math.min(330, W * .23)), x = L, w = W - L - R, p = practicals[state.selected], free = p.id === 'free', wrappedObjective = ['titration', 'displacement', 'alkali', 'starchleaf', 'lipase', 'osmosis', 'potometer', 'quadrats', 'shoretransect', 'ripple', 'electromagnet', 'convection', 'conduction', 'thermal', 'hooke', 'specificheat', 'wirelength', 'fieldlines'].includes(p.id), equationY = wrappedObjective ? 151 : 143; ctx.fillStyle = '#fff'; ctx.fillRect(x, 64, w, H - 64); text(p.title.toUpperCase(), x + 28, 91, 11, p.color || C.teal, 800); if (wrappedObjective) wrappedText(p.objective, x + 28, 113, Math.min(w - 56, 700), 17, C.ink, 650, 21, 2); else text(p.objective, x + 28, 119, 17, C.ink, 650); if (free) { if (state.reaction) drawFreeReactionCard(x, w); else { rr(x + 26, 143, w - 52, 54, 8, '#f1eefb'); text('QUICK START', x + 40, 158, 9, C.muted, 800); text(p.eq, x + 40, 179, 13, C.ink, 600) } } else { rr(x + 26, equationY, w - 52, 72, 8, '#f2f6f5'); text('SYMBOL EQUATION', x + 40, equationY + 17, 8.5, C.muted, 800); text(p.eq, x + 145, equationY + 17, 12, C.ink, 650); text('WORD EQUATION', x + 40, equationY + 47, 8.5, C.muted, 800); wrappedText(p.word, x + 145, equationY + 47, w - 190, 10.2, C.ink, 600, 12, 2) }
   const benchY = H - 128, arenaTop = free ? 205 : wrappedObjective ? 229 : 221; let wall = ctx.createLinearGradient(x, arenaTop, x, benchY); wall.addColorStop(0, '#f9fbfb'); wall.addColorStop(1, '#e9efef'); ctx.fillStyle = wall; ctx.fillRect(x, arenaTop, w, benchY - arenaTop);
   // glazed laboratory tiles
   ctx.strokeStyle = 'rgba(155,174,179,.24)'; ctx.lineWidth = 1; for (let gx = x; gx < x + w; gx += 42) { ctx.beginPath(); ctx.moveTo(gx, arenaTop); ctx.lineTo(gx, benchY); ctx.stroke() } for (let gy = arenaTop; gy < benchY; gy += 42) { ctx.beginPath(); ctx.moveTo(x, gy); ctx.lineTo(x + w, gy); ctx.stroke() } const glow = ctx.createRadialGradient(x + w * .53, benchY - 115, 0, x + w * .53, benchY - 115, w * .45); glow.addColorStop(0, state.burner ? 'rgba(71,179,255,.15)' : 'rgba(255,255,255,.62)'); glow.addColorStop(1, 'rgba(255,255,255,0)'); ctx.fillStyle = glow; ctx.fillRect(x, arenaTop, w, benchY - arenaTop);
@@ -1010,7 +1010,7 @@ function main() {
   else if (meadowScene) rr(x + 8, benchY + 18, w - 16, 86, 12, 'rgba(12,43,24,.8)', 'rgba(164,224,137,.3)');
   // controls
   if (free) { button('CLEAR BENCH', x + 30, benchY + 46, 112, 38, false); button('UNDO LAST', x + 152, benchY + 46, 105, 38, false); text(`${state.workspace.length} item${state.workspace.length === 1 ? '' : 's'} on bench`, x + 278, benchY + 65, 11, '#d8e8ed', 650) } else if (p.id === 'rates') drawRatesControls(x, benchY); else if (p.id === 'mass') drawMassControls(x, benchY); else if (p.id === 'hydrogen') drawHydrogenControls(x, benchY); else if (p.id === 'titration') drawTitrationControls(x, benchY); else if (p.id === 'salts') drawSaltsControls(x, benchY); else if (p.id === 'water') drawWaterControls(x, benchY); else if (p.id === 'electro') drawElectroControls(x, benchY); else if (p.id === 'flame') drawFlameTestControls(x, benchY); else if (p.id === 'displacement') drawDisplacementControls(x, benchY); else if (p.id === 'thermite') drawThermiteControls(x, benchY); else if (p.id === 'starchleaf') drawStarchControls(x, benchY); else if (p.id === 'lipase') drawLipaseControls(x, benchY); else if (p.id === 'osmosis') drawOsmosisControls(x, benchY); else if (p.id === 'potometer') drawPotometerControls(x, benchY); else if (p.id === 'pondweed') drawPondweedControls(x, benchY, w); else if (p.id === 'quadrats') drawQuadratControls(x, benchY); else if (p.id === 'shoretransect') drawShoreTransectControls(x, benchY); else if (p.id === 'ripple') drawRippleControls(x, benchY); else if (p.id === 'newton2') drawNewton2Controls(x, benchY, w); else if (p.id === 'electromagnet') drawElectromagnetControls(x, benchY); else if (p.id === 'convection') drawConvectionControls(x, benchY); else if (p.id === 'conduction') drawConductionControls(x, benchY); else if (p.id === 'thermal') drawThermalControls(x, benchY); else if (p.id === 'density') drawDensityControls(x, benchY); else if (p.id === 'hooke') drawHookeControls(x, benchY); else if (p.id === 'specificheat') drawSpecificHeatControls(x, benchY); else if (p.id === 'wirelength') drawWireLengthControls(x, benchY); else if (p.id === 'fieldlines') drawFieldLineControls(x, benchY); else { button(state.running ? 'RESET' : 'START', x + 30, benchY + 46, 112, 38, state.running); button('ADD REAGENT', x + 152, benchY + 46, 120, 38, false); button('RECORD', x + 282, benchY + 46, 90, 38, false) }
-  if (p.id === 'alkali') drawAlkaliControls(x, benchY);
+  if (p.id === 'alkali') { hit('alkali-control-guard', x + 20, benchY + 40, 436, 50); drawAlkaliControls(x, benchY); }
   // meters
   rr(x + w - 190, benchY + 35, 164, 58, 8, '#f5f7f6');
   text(p.id === 'thermite' ? 'SIMULATED CORE' : p.id === 'displacement' ? 'SERIES STATUS' : p.id === 'flame' ? 'ACTIVE SAMPLE' : p.id === 'starchleaf' ? 'LEAF TEST' : p.id === 'lipase' ? 'ENZYME TRIAL' : p.id === 'osmosis' ? 'OSMOSIS TRIAL' : p.id === 'potometer' ? 'WATER UPTAKE' : p.id === 'pondweed' ? 'PHOTOSYNTHESIS' : p.id === 'quadrats' ? 'QUADRAT SAMPLE' : p.id === 'shoretransect' ? 'SHORE ZONATION' : p.id === 'ripple' ? 'WAVE SPEED' : p.id === 'newton2' ? 'ACCELERATION' : p.id === 'electromagnet' ? 'MAGNETIC LIFT' : p.id === 'convection' ? 'WATER FLOW' : p.id === 'conduction' ? 'PIN FALL TEST' : p.id === 'thermal' ? 'INFRARED VIEW' : p.id === 'density' ? 'DENSITY MEASURE' : p.id === 'hooke' ? 'FORCE / EXTENSION' : p.id === 'specificheat' ? 'ENERGY / TEMPERATURE' : p.id === 'wirelength' ? 'ELECTRICAL READING' : p.id === 'fieldlines' ? 'FIELD PATTERN' : 'LIVE READINGS', x + w - 177, benchY + 49, 9, C.muted, 800);
@@ -1275,7 +1275,7 @@ function rightbar() {
   ctx.fillStyle = '#f4f6f5';
   ctx.fillRect(x, 64, R, H - 64);
 
-  const resultLabel = p.id === 'flame' ? 'SPECTRA' : p.id === 'starchleaf' ? 'RESULT' : p.id === 'shoretransect' ? 'ZONATION' : ['quadrats', 'ripple'].includes(p.id) ? 'RESULTS' : p.id === 'convection' ? 'OBSERVATION' : p.id === 'thermal' ? 'THERMAL VIEW' : p.id === 'fieldlines' ? 'PATTERNS' : ['mass', 'electro', 'titration', 'displacement', 'conduction'].includes(p.id) ? 'RESULTS' : p.id === 'chrom' ? 'MEASURE' : p.id === 'salts' ? 'VIEW RESULTS' : p.id === 'co2' ? "BIRD'S EYE" : 'GRAPH';
+  const resultLabel = p.id === 'flame' ? 'SPECTRA' : p.id === 'starchleaf' ? 'RESULT' : p.id === 'shoretransect' ? 'ZONATION' : ['quadrats', 'ripple', 'alkali'].includes(p.id) ? 'RESULTS' : p.id === 'convection' ? 'OBSERVATION' : p.id === 'thermal' ? 'THERMAL VIEW' : p.id === 'fieldlines' ? 'PATTERNS' : ['mass', 'electro', 'titration', 'displacement', 'conduction'].includes(p.id) ? 'RESULTS' : p.id === 'chrom' ? 'MEASURE' : p.id === 'salts' ? 'VIEW RESULTS' : p.id === 'co2' ? "BIRD'S EYE" : 'GRAPH';
   if (p.id === 'rates') {
     if (mobileLandscapeLayout && state.tab === 'graph') {
       button('METHOD', x + 10, 82, 60, 32, state.tab === 'bench');
@@ -1295,7 +1295,7 @@ function rightbar() {
   const graphContentY = graphSidebarContentY(p.id);
   if (state.tab === 'bench') {
     const compact = mobileLandscapeLayout || UI_SCALE < .995 || H < 790, contentTop = compact ? 122 : 126, contentBottom = H - (compact ? 9 : 14), cardX = x + 18, cardW = R - 36;
-    const activeStep = state.complete ? p.steps.length - 1 : p.id === 'rates' ? ratesStepIndex() : p.id === 'mass' ? massStepIndex() : p.id === 'hydrogen' ? hydrogenStepIndex() : p.id === 'titration' ? titrationStepIndex() : p.id === 'salts' ? saltsStepIndex() : p.id === 'flame' ? flameTestStepIndex() : p.id === 'displacement' ? displacementStepIndex() : p.id === 'thermite' ? thermiteStepIndex() : p.id === 'starchleaf' ? starchStepIndex() : p.id === 'lipase' ? lipaseStepIndex() : p.id === 'osmosis' ? osmosisStepIndex() : p.id === 'potometer' ? potometerStepIndex() : p.id === 'quadrats' ? quadratStepIndex() : p.id === 'shoretransect' ? transectStepIndex() : p.id === 'ripple' ? rippleStepIndex() : p.id === 'electromagnet' ? electromagnetStepIndex() : p.id === 'convection' ? convectionStepIndex() : p.id === 'conduction' ? conductionStepIndex() : p.id === 'thermal' ? thermalStepIndex() : p.id === 'density' ? densityStepIndex() : p.id === 'hooke' ? hookeStepIndex() : p.id === 'specificheat' ? shcStepIndex() : p.id === 'wirelength' ? wireStepIndex() : p.id === 'fieldlines' ? fieldStepIndex() : Math.floor(state.progress * 3);
+    const activeStep = state.complete ? p.steps.length - 1 : p.id === 'rates' ? ratesStepIndex() : p.id === 'mass' ? massStepIndex() : p.id === 'hydrogen' ? hydrogenStepIndex() : p.id === 'titration' ? titrationStepIndex() : p.id === 'salts' ? saltsStepIndex() : p.id === 'flame' ? flameTestStepIndex() : p.id === 'displacement' ? displacementStepIndex() : p.id === 'alkali' ? alkaliStepIndex() : p.id === 'thermite' ? thermiteStepIndex() : p.id === 'starchleaf' ? starchStepIndex() : p.id === 'lipase' ? lipaseStepIndex() : p.id === 'osmosis' ? osmosisStepIndex() : p.id === 'potometer' ? potometerStepIndex() : p.id === 'quadrats' ? quadratStepIndex() : p.id === 'shoretransect' ? transectStepIndex() : p.id === 'ripple' ? rippleStepIndex() : p.id === 'electromagnet' ? electromagnetStepIndex() : p.id === 'convection' ? convectionStepIndex() : p.id === 'conduction' ? conductionStepIndex() : p.id === 'thermal' ? thermalStepIndex() : p.id === 'density' ? densityStepIndex() : p.id === 'hooke' ? hookeStepIndex() : p.id === 'specificheat' ? shcStepIndex() : p.id === 'wirelength' ? wireStepIndex() : p.id === 'fieldlines' ? fieldStepIndex() : Math.floor(state.progress * 3);
     const headingHeight = compact ? 12 : 15, headingToContentGap = compact ? 3 : 7, baseSectionGap = compact ? 4 : 9, headingSize = compact ? 10.1 : 10.8;
     const methodSize = compact ? 9.2 : 10.6, methodLineHeight = compact ? 11.2 : 13.4, methodTextWidth = cardW - 58, methodCardGap = compact ? 3 : 5;
     const methodCards = p.steps.map(step => { const lines = wrapTextLines(step, methodTextWidth, methodSize, 650); return { step, lines, baseHeight: Math.max(compact ? 28 : 42, lines.length * methodLineHeight + (compact ? 7 : 16)) } });
@@ -2012,8 +2012,9 @@ function drawAlkaliResults(x, y, w) {
     rr(x + 10, rowY, w - 20, 65, 6, recorded ? '#faf8fb' : '#f7f8f8', C.line);
     ctx.fillStyle = metal.color; ctx.beginPath(); ctx.arc(x + 22, rowY + 20, 5, 0, Math.PI * 2); ctx.fill();
     text(metal.name, x + 33, rowY + 18, 10, C.ink, 800);
-    text(recorded ? metal.flame.toUpperCase() : 'PENDING', x + 33, rowY + 40, 8.1, recorded ? metal.color : C.muted, 750);
-    wrappedText(recorded ? metal.observation : 'Complete this protected trial to reveal the observation.', x + 106, rowY + 16, w - 132, 8.3, recorded ? C.ink : C.muted, 600, 10.2, 4);
+    const flameLines = wrapTextLines(recorded ? metal.flame.toUpperCase() : 'PENDING', 66, 6.8, 750);
+    drawTextLines(flameLines, x + 33, rowY + 43, 6.8, recorded ? metal.color : C.muted, 750, 8.2);
+    wrappedText(recorded ? metal.observation : 'Complete this protected trial to reveal the observation.', x + 116, rowY + 16, w - 142, 8.3, recorded ? C.ink : C.muted, 600, 10.2, 4);
   });
   const complete = state.alkaliResults.length === alkaliMetals.length;
   rr(x + 10, y + 318, w - 20, 82, 7, complete ? '#eee9f5' : '#f1f4f3');
@@ -3152,7 +3153,7 @@ function update(dt, skipDraw = false) {
       if (q >= 1) { state.alkaliStage = 2; state.alkaliTimer = 0; state.progress = (state.alkaliResults.length + .14) / alkaliMetals.length; state.toast = `${metal.name} is reacting with water: hydrogen bubbles form and the indicator begins turning purple.`; }
     } else if (state.alkaliStage === 2) {
       const q = Math.min(1, state.alkaliTimer / metal.duration), motion = metal.id === 'lithium' ? 'moves slowly across the water' : metal.id === 'sodium' ? 'has melted and is darting across the water' : 'is skimming rapidly behind the screen';
-      state.alkaliReactionProgress = q; state.progress = (state.alkaliResults.length + .15 + q * .75) / alkaliMetals.length; state.temp = 25 + metal.temperatureRise * Math.sin(q * Math.PI * .72); state.ph = 7 + 6.2 * q;
+      state.alkaliReactionProgress = q; state.progress = (state.alkaliResults.length + .5) / alkaliMetals.length; state.temp = 25 + metal.temperatureRise * Math.sin(q * Math.PI * .72); state.ph = 7 + 6.2 * q;
       state.toast = q < .32 ? `${metal.name} is floating and fizzing as hydrogen forms.` : q < .78 ? `${metal.name} ${motion}${metal.id === 'lithium' ? '.' : ` with a ${metal.flame}.`}` : 'The visible reaction is ending; the alkaline solution remains purple.';
       if (q >= 1) { state.alkaliStage = 3; state.alkaliTimer = 0; state.alkaliReactionProgress = 1; state.running = false; state.temp = 25 + metal.temperatureRise * .38; state.ph = 13.2; state.progress = (state.alkaliResults.length + .94) / alkaliMetals.length; state.toast = `${metal.name} observation complete. Record the bubbles, motion and ${metal.flame}.`; }
     } else if (state.alkaliStage === 5) {
@@ -4639,6 +4640,54 @@ window.render_game_to_text = () => {
     }
   }
   return JSON.stringify(payload)
+};
+const alkaliAwareRenderGameToText = window.render_game_to_text;
+window.render_game_to_text = () => {
+  const payload = JSON.parse(alkaliAwareRenderGameToText());
+  const activeId = practicals[state.selected].id;
+  const sidebar = sidebarMetrics(state.subject || 'chemistry');
+  payload.left_practical_sidebar = {
+    scroll_enabled: sidebar.maxScroll > 0,
+    scrollbar_visible: false,
+    input: 'mouse wheel or trackpad over the clipped practical rail',
+    subject: state.subject || 'chemistry',
+    scroll_offset_px: +(state.sidebarScroll?.[state.subject || 'chemistry'] || 0).toFixed(1),
+    maximum_scroll_offset_px: +sidebar.maxScroll.toFixed(1),
+    visible_card_count: sidebar.visible.length
+  };
+  if (activeId === 'alkali') {
+    const metal = alkaliMetal();
+    const phases = ['screened trough ready', 'forceps lowering sample', 'metal reacting with water', 'observation ready to record', 'observation recorded', 'clearing protected trough'];
+    payload.graph_axes = null;
+    payload.results_columns = ['metal', 'fizzing_and_motion', 'flame_colour', 'relative_reactivity'];
+    payload.results_view = 'protected alkali-metal comparison table';
+    payload.alkali_metals = {
+      stage: state.alkaliStage,
+      phase: phases[state.alkaliStage],
+      timer_s: +state.alkaliTimer.toFixed(2),
+      selected_metal: metal.name,
+      selected_symbol: metal.symbol,
+      trial_number: Math.min(3, state.alkaliResults.length + 1),
+      reaction_progress: +state.alkaliReactionProgress.toFixed(2),
+      apparatus: 'acrylic water trough with universal indicator, sealed sample vials, remote forceps and three-sided transparent safety screen',
+      simulation_only: true,
+      safety_screen_in_place: true,
+      forceps_holding_sample: state.alkaliStage === 0 || state.alkaliStage === 1,
+      metal_floating: state.alkaliStage === 2,
+      sodium_melting_visible: metal.id === 'sodium' && state.alkaliStage === 2,
+      hydrogen_bubbles_visible: state.alkaliStage === 2 && state.alkaliReactionProgress > .02,
+      ripple_rings_visible: state.alkaliStage === 2 && state.alkaliReactionProgress > .02,
+      alkaline_indicator_spreading: state.alkaliStage >= 2 && state.alkaliStage <= 5,
+      indicator_colour: state.alkaliStage >= 3 && state.alkaliStage <= 5 ? 'purple alkaline solution' : state.alkaliStage === 2 ? 'purple spreading from the reaction point' : 'cyan neutral water',
+      flame: metal.id === 'lithium' ? null : state.alkaliStage === 2 && state.alkaliReactionProgress > .18 && state.alkaliReactionProgress < .9 ? metal.flame : null,
+      temperature_c: +state.temp.toFixed(1),
+      ph: +state.ph.toFixed(1),
+      observations: state.alkaliResults.map(result => ({ metal: result.name, symbol: result.symbol, flame: result.flame, observation: result.observation })),
+      reactivity_order: state.complete ? ['Li', 'Na', 'K'] : null
+    };
+    payload.controls = ['LOWER METAL', 'RECORD OBSERVATION', 'NEXT METAL', 'RESET SERIES', 'RESULTS', 'METHOD', 'F fullscreen'];
+  }
+  return JSON.stringify(payload);
 };
 resize(); requestAnimationFrame(loop);
 function drawChromatogramSoakPanel(x, y, w, h) {
