@@ -14,7 +14,7 @@ page.on('pageerror', error => errors.push(`page: ${error.message}`));
 await page.goto(`http://127.0.0.1:4173/?pondweed-qa=${Date.now()}`, { waitUntil: 'networkidle' });
 await page.waitForFunction(() => typeof window.render_game_to_text === 'function');
 await page.mouse.click(320, 32);
-await page.mouse.click(135, 233);
+await page.mouse.click(135, 344);
 await page.waitForTimeout(350);
 
 const state = () => page.evaluate(() => JSON.parse(window.render_game_to_text()));
@@ -62,6 +62,8 @@ const summary = {
   renderer: minimumAgain.renderer,
   lamp_model: minimumAgain.pondweed.lamp,
   ruler_zero_reference: minimumAgain.pondweed.ruler_zero_reference,
+  ruler_appearance: minimumAgain.pondweed.ruler_appearance,
+  ruler_scale_cm: minimumAgain.pondweed.ruler_scale_cm,
   control_layout: minimumAgain.pondweed.control_layout
 };
 fs.writeFileSync(`${out}/summary.json`, JSON.stringify(summary, null, 2));
@@ -70,6 +72,7 @@ if (initial.pondweed.distance_cm !== 20) throw new Error('Initial pondweed dista
 if (minimum.pondweed.distance_cm !== 10 || minimumAgain.pondweed.distance_cm !== 10) throw new Error('10 cm minimum clamp failed.');
 if (maximum.pondweed.distance_cm !== 50) throw new Error('50 cm maximum clamp failed.');
 if (distanceFromGeometry(minimum) !== 10 || distanceFromGeometry(maximum) !== 50) throw new Error('Lamp face and beaker-edge ruler geometry disagree with state.');
+if (!minimumAgain.pondweed.ruler_appearance.includes('potometer ruler') || JSON.stringify(minimumAgain.pondweed.ruler_scale_cm) !== JSON.stringify([0, 50])) throw new Error('Pondweed did not inherit the potometer ruler appearance and retain its 0–50 cm scale.');
 if (!lampOff.pondweed.lamp_on === false) throw new Error('Lamp off control failed.');
 if (JSON.stringify(minimum.controls.slice(0, 2)) !== JSON.stringify(['- 10cm', '+ 10cm'])) throw new Error('Distance button labels are incorrect.');
 if (minimumAgain.pondweed.control_layout.distance_button_width_px >= 125) throw new Error('Distance buttons were not narrowed.');

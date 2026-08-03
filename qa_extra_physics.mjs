@@ -32,9 +32,10 @@ const capture = async name => {
 };
 const primary = () => click(372, 837);
 
-// Physics tab and resistance-versus-length card.
+// Physics tab and resistance-versus-length card. Hooke's law and specific
+// heat capacity now sit between density and resistance in the generated rail.
 await click(435, 32);
-await click(130, 451);
+await click(130, 613);
 const wireInitial = await capture('01-wire-initial');
 await primary();
 await advance(650);
@@ -61,7 +62,7 @@ for (let trial = 1; trial < 5; trial++) {
 const wireComplete = await capture('07-wire-complete-graph');
 
 // Magnetic-field-pattern card.
-await click(130, 505);
+await click(130, 667);
 const fieldInitial = await capture('08-field-single-initial');
 await primary();
 await advance(1600);

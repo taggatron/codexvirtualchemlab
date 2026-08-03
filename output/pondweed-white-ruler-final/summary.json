@@ -1,0 +1,21 @@
+{
+  "errors": [],
+  "practical": "Light intensity & pondweed",
+  "distance_cm": 50,
+  "geometry_cm": 50,
+  "ruler_appearance": "ivory-white rounded scale matching the bubble potometer ruler, with dark blue graduations and labels",
+  "ruler_scale_cm": [
+    0,
+    50
+  ],
+  "renderer": {
+    "enabled": true,
+    "renderer": "WebGL / Three.js",
+    "objects": 1,
+    "context_lost": false,
+    "scene_compiling": false,
+    "scene_warmup_frames": 0,
+    "canvas_visible": true,
+    "legacy_2d_apparatus": false
+  }
+}

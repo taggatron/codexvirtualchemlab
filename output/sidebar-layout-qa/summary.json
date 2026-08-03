@@ -1,0 +1,274 @@
+{
+  "desktop": {
+    "responsive": {
+      "viewport_css_px": {
+        "width": 1440,
+        "height": 819
+      },
+      "logical_canvas_px": {
+        "width": 1440,
+        "height": 819
+      },
+      "scale": 1,
+      "mode": "desktop",
+      "portrait_prompt_visible": false,
+      "three_column_layout_preserved": true,
+      "mobile_landscape_layout": false,
+      "pointer_coordinates_scaled": false,
+      "minimum_touch_target_css_px": null
+    },
+    "sidebar": {
+      "fills_available_vertical_space": true,
+      "adaptive_section_spacing": true,
+      "remaining_height_allocated_to_content_cards": true,
+      "excessive_blank_section_gaps_removed": true,
+      "larger_responsive_typography": true,
+      "explicit_heading_to_content_spacing": true,
+      "method_stage_cards": true,
+      "method_stage_text_wrap": "complete multiline text without clipping or ellipsis",
+      "reactant_text_wrap": "complete multiline text without clipping or ellipsis",
+      "apparatus_text_wrap": "complete multiline text without clipping or ellipsis",
+      "guidance_text_wrap": "complete multiline text",
+      "compact_landscape_supported": true,
+      "content_top_y": 126,
+      "content_bottom_y": 805,
+      "available_bottom_y": 805,
+      "evaluation_button_top_y": 745.18,
+      "evaluation_button_bottom_y": 805,
+      "unused_vertical_space_px": 0,
+      "overflow_vertical_space_px": 0,
+      "method_stage_count": 4,
+      "method_stage_line_counts": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "reactant_rows": [
+        {
+          "name": "0.0–0.8 mol dm⁻³ sucrose",
+          "top_y": 397.51,
+          "bottom_y": 429.33
+        },
+        {
+          "name": "Equal potato cylinders",
+          "top_y": 433.33,
+          "bottom_y": 465.15
+        },
+        {
+          "name": "Distilled water",
+          "top_y": 469.15,
+          "bottom_y": 500.96
+        }
+      ],
+      "heading_to_content_gap_px": 7,
+      "method_font_size_px": 10.6,
+      "reactant_font_size_px": 10.3,
+      "guidance_font_size_px": 10,
+      "all_method_stage_text_visible": true,
+      "all_reactant_text_visible": true,
+      "all_apparatus_text_visible": true,
+      "all_sidebar_components_visible": true,
+      "compact": false
+    },
+    "evaluation_opened": true
+  },
+  "mobile": {
+    "responsive": {
+      "viewport_css_px": {
+        "width": 1206,
+        "height": 584
+      },
+      "logical_canvas_px": {
+        "width": 1239,
+        "height": 600
+      },
+      "scale": 0.973,
+      "mode": "compact landscape",
+      "portrait_prompt_visible": false,
+      "three_column_layout_preserved": true,
+      "mobile_landscape_layout": true,
+      "pointer_coordinates_scaled": true,
+      "minimum_touch_target_css_px": 44
+    },
+    "sidebar": {
+      "fills_available_vertical_space": true,
+      "adaptive_section_spacing": true,
+      "remaining_height_allocated_to_content_cards": true,
+      "excessive_blank_section_gaps_removed": true,
+      "larger_responsive_typography": true,
+      "explicit_heading_to_content_spacing": true,
+      "method_stage_cards": true,
+      "method_stage_text_wrap": "complete multiline text without clipping or ellipsis",
+      "reactant_text_wrap": "complete multiline text without clipping or ellipsis",
+      "apparatus_text_wrap": "complete multiline text without clipping or ellipsis",
+      "guidance_text_wrap": "complete multiline text",
+      "compact_landscape_supported": true,
+      "content_top_y": 122,
+      "content_bottom_y": 591,
+      "available_bottom_y": 591,
+      "evaluation_button_top_y": 543.97,
+      "evaluation_button_bottom_y": 591,
+      "unused_vertical_space_px": 0,
+      "overflow_vertical_space_px": 0,
+      "method_stage_count": 4,
+      "method_stage_line_counts": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "reactant_rows": [
+        {
+          "name": "0.0–0.8 mol dm⁻³ sucrose",
+          "top_y": 305.75,
+          "bottom_y": 328.48
+        },
+        {
+          "name": "Equal potato cylinders",
+          "top_y": 330.48,
+          "bottom_y": 353.22
+        },
+        {
+          "name": "Distilled water",
+          "top_y": 355.22,
+          "bottom_y": 377.95
+        }
+      ],
+      "heading_to_content_gap_px": 3,
+      "method_font_size_px": 9.2,
+      "reactant_font_size_px": 9.4,
+      "guidance_font_size_px": 8.9,
+      "all_method_stage_text_visible": true,
+      "all_reactant_text_visible": true,
+      "all_apparatus_text_visible": true,
+      "all_sidebar_components_visible": true,
+      "compact": true
+    }
+  },
+  "mobile_potometer": {
+    "practical": "Bubble potometer",
+    "sidebar": {
+      "fills_available_vertical_space": true,
+      "adaptive_section_spacing": true,
+      "remaining_height_allocated_to_content_cards": true,
+      "excessive_blank_section_gaps_removed": true,
+      "larger_responsive_typography": true,
+      "explicit_heading_to_content_spacing": true,
+      "method_stage_cards": true,
+      "method_stage_text_wrap": "complete multiline text without clipping or ellipsis",
+      "reactant_text_wrap": "complete multiline text without clipping or ellipsis",
+      "apparatus_text_wrap": "complete multiline text without clipping or ellipsis",
+      "guidance_text_wrap": "complete multiline text",
+      "compact_landscape_supported": true,
+      "content_top_y": 122,
+      "content_bottom_y": 591,
+      "available_bottom_y": 591,
+      "evaluation_button_top_y": 545.82,
+      "evaluation_button_bottom_y": 591,
+      "unused_vertical_space_px": 0,
+      "overflow_vertical_space_px": 0,
+      "method_stage_count": 4,
+      "method_stage_line_counts": [
+        2,
+        2,
+        2,
+        2
+      ],
+      "reactant_rows": [
+        {
+          "name": "Fresh leafy shoot",
+          "top_y": 299.66,
+          "bottom_y": 321.68
+        },
+        {
+          "name": "Water",
+          "top_y": 323.68,
+          "bottom_y": 345.7
+        },
+        {
+          "name": "Petroleum jelly seal",
+          "top_y": 347.7,
+          "bottom_y": 369.71
+        }
+      ],
+      "heading_to_content_gap_px": 3,
+      "method_font_size_px": 9.2,
+      "reactant_font_size_px": 9.4,
+      "guidance_font_size_px": 8.9,
+      "all_method_stage_text_visible": true,
+      "all_reactant_text_visible": true,
+      "all_apparatus_text_visible": true,
+      "all_sidebar_components_visible": true,
+      "compact": true
+    }
+  },
+  "dense_flame_tests": {
+    "practical": "Flame tests",
+    "sidebar": {
+      "fills_available_vertical_space": true,
+      "adaptive_section_spacing": true,
+      "remaining_height_allocated_to_content_cards": true,
+      "excessive_blank_section_gaps_removed": true,
+      "larger_responsive_typography": true,
+      "explicit_heading_to_content_spacing": true,
+      "method_stage_cards": true,
+      "method_stage_text_wrap": "complete multiline text without clipping or ellipsis",
+      "reactant_text_wrap": "complete multiline text without clipping or ellipsis",
+      "apparatus_text_wrap": "complete multiline text without clipping or ellipsis",
+      "guidance_text_wrap": "complete multiline text",
+      "compact_landscape_supported": true,
+      "content_top_y": 122,
+      "content_bottom_y": 711,
+      "available_bottom_y": 711,
+      "evaluation_button_top_y": 654.06,
+      "evaluation_button_bottom_y": 711,
+      "unused_vertical_space_px": 0,
+      "overflow_vertical_space_px": 0,
+      "method_stage_count": 4,
+      "method_stage_line_counts": [
+        1,
+        1,
+        2,
+        2
+      ],
+      "reactant_rows": [
+        {
+          "name": "Lithium chloride",
+          "top_y": 335.57,
+          "bottom_y": 359.53
+        },
+        {
+          "name": "Sodium chloride",
+          "top_y": 361.53,
+          "bottom_y": 385.48
+        },
+        {
+          "name": "Potassium chloride",
+          "top_y": 387.48,
+          "bottom_y": 411.43
+        },
+        {
+          "name": "Calcium chloride",
+          "top_y": 413.43,
+          "bottom_y": 437.39
+        },
+        {
+          "name": "Copper(II) chloride",
+          "top_y": 439.39,
+          "bottom_y": 463.34
+        }
+      ],
+      "heading_to_content_gap_px": 3,
+      "method_font_size_px": 9.2,
+      "reactant_font_size_px": 9.4,
+      "guidance_font_size_px": 8.9,
+      "all_method_stage_text_visible": true,
+      "all_reactant_text_visible": true,
+      "all_apparatus_text_visible": true,
+      "all_sidebar_components_visible": true,
+      "compact": true
+    }
+  },
+  "errors": []
+}

@@ -11,7 +11,30 @@
     "every_branch_meets_its_leaf_petiole_base": true,
     "horizontal_branch_length_scale": 0.72,
     "branches_taper_smoothly_to_petiole_diameter": true,
+    "branch_and_petiole_overlap_for_continuity": true,
+    "leaf_flutter_pivots_at_petiole_base": true,
     "leaf_flutter_in_airflow": false,
     "transpiration_visualised_at_stomata": false
+  },
+  "apparatus": {
+    "glass_chamber_and_capillary_completely_water_filled": true,
+    "single_measurement_bubble": false,
+    "graduated_capillary_mm": true,
+    "graduated_capillary_shifted_right": true,
+    "refiller_with_stopcock_and_plunger": true,
+    "refiller_position": "right of the shoot chamber",
+    "refiller_tube_joins_between_graduated_capillary_and_shoot_chamber": true,
+    "plumbing_order": [
+      "shoot water chamber",
+      "short ungraduated connector",
+      "refiller T-junction",
+      "graduated capillary"
+    ],
+    "airtight_rubber_bung": true,
+    "petroleum_jelly_joint_seals_visible": true,
+    "retort_stand_supports_apparatus": true,
+    "upper_retort_stand_support_clamps_refiller_container": true,
+    "desk_fan": true,
+    "anemometer_confirms_wind_speed": true
   }
 }

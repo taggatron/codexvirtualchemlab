@@ -1,0 +1,481 @@
+{
+  "desktop": [
+    {
+      "subject": "chemistry",
+      "practical": "Free workspace",
+      "drag_enabled": true
+    },
+    {
+      "subject": "chemistry",
+      "practical": "Rates of reaction",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "chemistry",
+      "practical": "Temperature changes",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "chemistry",
+      "practical": "Acid–alkali titration",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "chemistry",
+      "practical": "Preparing a salt",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "chemistry",
+      "practical": "Conservation of mass",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "chemistry",
+      "practical": "Hydrogen squeaky pop test",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "chemistry",
+      "practical": "Carbon dioxide test",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "chemistry",
+      "practical": "Electrolysis",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "chemistry",
+      "practical": "Flame tests",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "chemistry",
+      "practical": "Metal displacement",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "chemistry",
+      "practical": "Chromatography",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "chemistry",
+      "practical": "Water purification",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "chemistry",
+      "practical": "Thermite demonstration",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Test a leaf for starch",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Lipase & milk temperature",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Osmosis in potato tissue",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Bubble potometer",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Light intensity & pondweed",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Random quadrat sampling",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Rocky-shore belt transect",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "physics",
+      "practical": "Wave speed in a ripple tank",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "physics",
+      "practical": "Newton’s 2nd Law",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "physics",
+      "practical": "Electromagnet strength",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "physics",
+      "practical": "Convection currents",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "physics",
+      "practical": "Conduction in metals",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "physics",
+      "practical": "Thermal radiation",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "physics",
+      "practical": "Density of solids",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "physics",
+      "practical": "Resistance of a wire",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "physics",
+      "practical": "Magnetic field patterns",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    }
+  ],
+  "compact": [
+    {
+      "subject": "chemistry",
+      "practical": "Free workspace",
+      "drag_enabled": true
+    },
+    {
+      "subject": "chemistry",
+      "practical": "Rates of reaction",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "chemistry",
+      "practical": "Temperature changes",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "chemistry",
+      "practical": "Acid–alkali titration",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "chemistry",
+      "practical": "Preparing a salt",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "chemistry",
+      "practical": "Conservation of mass",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "chemistry",
+      "practical": "Hydrogen squeaky pop test",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "chemistry",
+      "practical": "Carbon dioxide test",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "chemistry",
+      "practical": "Electrolysis",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "chemistry",
+      "practical": "Flame tests",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "chemistry",
+      "practical": "Metal displacement",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "chemistry",
+      "practical": "Chromatography",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "chemistry",
+      "practical": "Water purification",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "chemistry",
+      "practical": "Thermite demonstration",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Test a leaf for starch",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Lipase & milk temperature",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Osmosis in potato tissue",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Bubble potometer",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Light intensity & pondweed",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Random quadrat sampling",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Rocky-shore belt transect",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "physics",
+      "practical": "Wave speed in a ripple tank",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "physics",
+      "practical": "Newton’s 2nd Law",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "physics",
+      "practical": "Electromagnet strength",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "physics",
+      "practical": "Convection currents",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "physics",
+      "practical": "Conduction in metals",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "physics",
+      "practical": "Thermal radiation",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "physics",
+      "practical": "Density of solids",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "physics",
+      "practical": "Resistance of a wire",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "physics",
+      "practical": "Magnetic field patterns",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    }
+  ],
+  "errors": []
+}

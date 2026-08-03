@@ -1,0 +1,416 @@
+{
+  "pass": true,
+  "browser_errors": [],
+  "chrome_executable": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "quadrat": {
+    "counts": [
+      4,
+      7,
+      5,
+      3,
+      6
+    ],
+    "coordinates_m": [
+      [
+        2,
+        7
+      ],
+      [
+        8,
+        3
+      ],
+      [
+        5,
+        5
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        7,
+        8
+      ]
+    ],
+    "mean_density_daisies_m2": 5,
+    "estimated_population_in_100_m2": 500,
+    "forest_background": true,
+    "turf_grew_and_sways": true,
+    "full_height_meadow_scene": true,
+    "grass_blade_count": 1520,
+    "moss_patch_count": 240
+  },
+  "rocky_shore": {
+    "stations_m": [
+      0,
+      2,
+      4,
+      6,
+      8,
+      10
+    ],
+    "strata": [
+      "upper",
+      "upper",
+      "middle",
+      "middle",
+      "lower",
+      "lower"
+    ],
+    "barnacle_cover_percent": [
+      68,
+      59,
+      43,
+      27,
+      11,
+      3
+    ],
+    "brown_seaweed_cover_percent": [
+      2,
+      5,
+      14,
+      33,
+      58,
+      82
+    ],
+    "tide_progress_initial": 0,
+    "tide_progress_final": 0.203,
+    "detailed_waves": true,
+    "animated_foam_bands": 3,
+    "continuous_cliff_top": true,
+    "grass_topped_cliff": true,
+    "irregular_rock_pools": true,
+    "rock_pool_seaweed_clumps": 12
+  },
+  "drawers": {
+    "hidden_in_quadrat": true,
+    "hidden_in_shore": true,
+    "restored_after_shore": true
+  },
+  "checkpoints": {
+    "01-quadrat-forest-before-turf": {
+      "practical": "Random quadrat sampling",
+      "renderer": {
+        "enabled": true,
+        "renderer": "WebGL / Three.js",
+        "objects": 1,
+        "context_lost": false,
+        "scene_compiling": false,
+        "scene_warmup_frames": 2,
+        "canvas_visible": true,
+        "legacy_2d_apparatus": false
+      },
+      "stage": 0,
+      "environment": {
+        "laboratory_tiles_visible": false,
+        "laboratory_worktop_visible": false,
+        "laboratory_cupboards_visible": false,
+        "full_height_meadow_scene": true,
+        "outdoor_scene_extends_behind_footer": true,
+        "forest_background": true,
+        "detailed_trees": true,
+        "blue_sunny_sky": true,
+        "sun_visible": true,
+        "cloud_count": 3,
+        "grass_growth_fraction": 0,
+        "moss_growth_fraction": 0,
+        "wind_clock_s": 0,
+        "grass_and_daisies_sway_in_wind": true
+      },
+      "bench": {
+        "finish": "replaced by the full-height living meadow scene",
+        "embossed_door_panelling": false,
+        "responsive_panel_count": 0,
+        "blue_resin_worktop_edge_retained": false,
+        "drawers_hidden_for_this_practical_only": true,
+        "outdoor_scene_replaces_worktop_and_cupboards": true
+      }
+    },
+    "02-quadrat-turf-growing": {
+      "stage": 0,
+      "growth": 0.52,
+      "wind_clock_s": 1.45
+    },
+    "03-quadrat-meadow-ready": {
+      "growth": 1,
+      "grass_and_daisies_sway": true
+    },
+    "04-quadrat-random-coordinate": {
+      "stage": 1,
+      "coordinate": {
+        "x": 2,
+        "y": 7
+      },
+      "animation": {
+        "turf_grows_into_full_outdoor_arena": false,
+        "moss_emerges_between_blades": false,
+        "coordinate_generator_spins": true,
+        "quadrat_smooth_throw_arc": false,
+        "quadrat_settle_bounce": false,
+        "counted_daisies_pulse": false
+      }
+    },
+    "05-quadrat-in-flight": {
+      "stage": 3,
+      "coordinate": {
+        "x": 2,
+        "y": 7
+      },
+      "animation": {
+        "turf_grows_into_full_outdoor_arena": false,
+        "moss_emerges_between_blades": false,
+        "coordinate_generator_spins": false,
+        "quadrat_smooth_throw_arc": true,
+        "quadrat_settle_bounce": true,
+        "counted_daisies_pulse": false
+      }
+    },
+    "06-quadrat-counting": {
+      "stage": 5,
+      "current_count": 1,
+      "highlighted": [
+        "sample-1-daisy-1"
+      ],
+      "animation": {
+        "turf_grows_into_full_outdoor_arena": false,
+        "moss_emerges_between_blades": false,
+        "coordinate_generator_spins": false,
+        "quadrat_smooth_throw_arc": false,
+        "quadrat_settle_bounce": false,
+        "counted_daisies_pulse": true
+      }
+    },
+    "07-quadrat-results": {
+      "stage": 7,
+      "complete": true,
+      "results": [
+        {
+          "sample": 1,
+          "xM": 2,
+          "yM": 7,
+          "daisies": 4,
+          "areaM2": 1
+        },
+        {
+          "sample": 2,
+          "xM": 8,
+          "yM": 3,
+          "daisies": 7,
+          "areaM2": 1
+        },
+        {
+          "sample": 3,
+          "xM": 5,
+          "yM": 5,
+          "daisies": 5,
+          "areaM2": 1
+        },
+        {
+          "sample": 4,
+          "xM": 1,
+          "yM": 2,
+          "daisies": 3,
+          "areaM2": 1
+        },
+        {
+          "sample": 5,
+          "xM": 7,
+          "yM": 8,
+          "daisies": 6,
+          "areaM2": 1
+        }
+      ],
+      "mean_density_daisies_m2": 5,
+      "estimated_population_in_100_m2": 500,
+      "tab": "graph"
+    },
+    "08-shore-cliffs-and-incoming-tide": {
+      "practical": "Rocky-shore belt transect",
+      "renderer": {
+        "enabled": true,
+        "renderer": "WebGL / Three.js",
+        "objects": 1,
+        "context_lost": false,
+        "scene_compiling": false,
+        "scene_warmup_frames": 2,
+        "canvas_visible": true,
+        "legacy_2d_apparatus": false
+      },
+      "stage": 0,
+      "landscape": {
+        "laboratory_tiles_visible": false,
+        "realistic_rocky_shore": true,
+        "detailed_cliffs": true,
+        "continuous_cliff_top": true,
+        "grass_topped_cliff": true,
+        "cliff_maximum_world_y": 3.02,
+        "cliff_within_canvas": true,
+        "irregular_rock_pools": true,
+        "rock_pool_count": 3,
+        "rock_pool_seaweed_clumps": 12,
+        "wet_and_dry_rock_zones": true,
+        "organisms": [
+          "limpets",
+          "barnacles",
+          "mussels",
+          "brown seaweed",
+          "lichen"
+        ]
+      },
+      "tide": {
+        "incoming_from_bottom_foreground": true,
+        "progress": 0,
+        "clock_s": 0,
+        "layered_gerstner_style_waves": true,
+        "translucent_shallow_water": true,
+        "animated_foam_bands": 3,
+        "wet_rock_front": true,
+        "safe_working_line_observed": true
+      },
+      "bench": {
+        "finish": "hidden behind the full-height rocky-shore and sea scene",
+        "embossed_door_panelling": false,
+        "responsive_panel_count": 0,
+        "blue_resin_worktop_edge_retained": false,
+        "drawers_hidden_for_this_practical_only": true,
+        "outdoor_scene_replaces_worktop_and_cupboards": true
+      },
+      "canvas": {
+        "webgl_arena_ui_overlay_alpha": 0,
+        "arena_cutout": "fully transparent clearRect",
+        "blend_state_reset_each_frame": true,
+        "wall_tiles_behind_webgl_apparatus": false,
+        "opaque_3d_apparatus_preserved": true
+      }
+    },
+    "09-shore-tape-unrolling": {
+      "stage": 1,
+      "tide": {
+        "incoming_from_bottom_foreground": true,
+        "progress": 0.026,
+        "clock_s": 5.78,
+        "layered_gerstner_style_waves": true,
+        "translucent_shallow_water": true,
+        "animated_foam_bands": 3,
+        "wet_rock_front": true,
+        "safe_working_line_observed": true
+      },
+      "animation": {
+        "tape_unreels_smoothly": true,
+        "quadrat_moves_and_settles": false,
+        "organisms_highlight_during_survey": false,
+        "rock_pool_seaweed_sways": true,
+        "tide_continuously_animated": true
+      }
+    },
+    "10-shore-quadrat-moving": {
+      "stage": 3,
+      "distance_m": 0,
+      "animation": {
+        "tape_unreels_smoothly": false,
+        "quadrat_moves_and_settles": true,
+        "organisms_highlight_during_survey": false,
+        "rock_pool_seaweed_sways": true,
+        "tide_continuously_animated": true
+      }
+    },
+    "11-shore-organism-survey": {
+      "stage": 5,
+      "stratum": "upper",
+      "animation": {
+        "tape_unreels_smoothly": false,
+        "quadrat_moves_and_settles": false,
+        "organisms_highlight_during_survey": true,
+        "rock_pool_seaweed_sways": true,
+        "tide_continuously_animated": true
+      }
+    },
+    "12-shore-zonation-results-and-tide": {
+      "stage": 7,
+      "complete": true,
+      "results": [
+        {
+          "station": 1,
+          "distance_m": 0,
+          "stratum": "upper",
+          "limpets": 8,
+          "barnacle_cover_percent": 68,
+          "brown_seaweed_cover_percent": 2
+        },
+        {
+          "station": 2,
+          "distance_m": 2,
+          "stratum": "upper",
+          "limpets": 10,
+          "barnacle_cover_percent": 59,
+          "brown_seaweed_cover_percent": 5
+        },
+        {
+          "station": 3,
+          "distance_m": 4,
+          "stratum": "middle",
+          "limpets": 13,
+          "barnacle_cover_percent": 43,
+          "brown_seaweed_cover_percent": 14
+        },
+        {
+          "station": 4,
+          "distance_m": 6,
+          "stratum": "middle",
+          "limpets": 11,
+          "barnacle_cover_percent": 27,
+          "brown_seaweed_cover_percent": 33
+        },
+        {
+          "station": 5,
+          "distance_m": 8,
+          "stratum": "lower",
+          "limpets": 6,
+          "barnacle_cover_percent": 11,
+          "brown_seaweed_cover_percent": 58
+        },
+        {
+          "station": 6,
+          "distance_m": 10,
+          "stratum": "lower",
+          "limpets": 2,
+          "barnacle_cover_percent": 3,
+          "brown_seaweed_cover_percent": 82
+        }
+      ],
+      "tide": {
+        "incoming_from_bottom_foreground": true,
+        "progress": 0.203,
+        "clock_s": 35.7,
+        "layered_gerstner_style_waves": true,
+        "translucent_shallow_water": true,
+        "animated_foam_bands": 3,
+        "wet_rock_front": true,
+        "safe_working_line_observed": true
+      },
+      "tab": "graph",
+      "bench": {
+        "finish": "hidden behind the full-height rocky-shore and sea scene",
+        "embossed_door_panelling": false,
+        "responsive_panel_count": 0,
+        "blue_resin_worktop_edge_retained": false,
+        "drawers_hidden_for_this_practical_only": true,
+        "outdoor_scene_replaces_worktop_and_cupboards": true
+      }
+    },
+    "13-drawers-restored-outside-shore": {
+      "practical": "Test a leaf for starch",
+      "bench": {
+        "finish": "dark grey enamel",
+        "embossed_door_panelling": true,
+        "responsive_panel_count": "2 to 4",
+        "blue_resin_worktop_edge_retained": true
+      },
+      "wall_tiles": true
+    }
+  }
+}

@@ -1,0 +1,371 @@
+{
+  "pass": true,
+  "browser_errors": [],
+  "chrome_executable": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+  "desktop_viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "responsive_viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "frequencies_hz": [
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "ten_wavelength_distances_cm": [
+    50,
+    40.2,
+    33,
+    28.8,
+    24.9
+  ],
+  "wavelengths_cm": [
+    5,
+    4.02,
+    3.3,
+    2.88,
+    2.49
+  ],
+  "wave_speeds_m_s": [
+    0.2,
+    0.201,
+    0.198,
+    0.2016,
+    0.1992
+  ],
+  "mean_wave_speed_m_s": 0.2,
+  "normal_drawers_visible": true,
+  "checkpoints": {
+    "01-ripple-ready": {
+      "practical": "Wave speed in a ripple tank",
+      "renderer": {
+        "enabled": true,
+        "renderer": "WebGL / Three.js",
+        "objects": 1,
+        "context_lost": false,
+        "scene_compiling": false,
+        "scene_warmup_frames": 2,
+        "canvas_visible": true,
+        "legacy_2d_apparatus": false
+      },
+      "stage": 0,
+      "tank": {
+        "shallow_water_visible": true,
+        "water_depth_cm": 1.5,
+        "level_fraction": 0,
+        "transparent_base": true,
+        "four_adjustable_feet": true,
+        "spirit_level_visible": true,
+        "foam_absorbing_beach": true
+      },
+      "driver": {
+        "type": "motorised straight bar dipper",
+        "signal_generator_frequency_hz": 4,
+        "amplitude_constant": true,
+        "active": false,
+        "smooth_sinusoidal_vertical_motion": true,
+        "plane_wavefronts": true
+      },
+      "bench": {
+        "finish": "dark grey enamel",
+        "embossed_door_panelling": true,
+        "responsive_panel_count": "2 to 4",
+        "blue_resin_worktop_edge_retained": true
+      },
+      "canvas": {
+        "webgl_arena_ui_overlay_alpha": 0,
+        "arena_cutout": "fully transparent clearRect",
+        "blend_state_reset_each_frame": true,
+        "wall_tiles_behind_webgl_apparatus": true,
+        "opaque_3d_apparatus_preserved": true
+      },
+      "sidebar": {
+        "fills_available_vertical_space": true,
+        "adaptive_section_spacing": true,
+        "remaining_height_allocated_to_content_cards": true,
+        "excessive_blank_section_gaps_removed": true,
+        "larger_responsive_typography": true,
+        "explicit_heading_to_content_spacing": true,
+        "method_stage_cards": true,
+        "method_stage_text_wrap": "complete multiline text without clipping or ellipsis",
+        "reactant_text_wrap": "complete multiline text without clipping or ellipsis",
+        "apparatus_text_wrap": "complete multiline text without clipping or ellipsis",
+        "guidance_text_wrap": "complete multiline text",
+        "compact_landscape_supported": true,
+        "content_top_y": 126,
+        "content_bottom_y": 886,
+        "available_bottom_y": 886,
+        "evaluation_button_top_y": 818,
+        "evaluation_button_bottom_y": 886,
+        "unused_vertical_space_px": 0,
+        "overflow_vertical_space_px": 0,
+        "method_stage_count": 4,
+        "method_stage_line_counts": [
+          2,
+          2,
+          2,
+          2
+        ],
+        "reactant_rows": [
+          {
+            "name": "Shallow water at constant depth",
+            "top_y": 424.45,
+            "bottom_y": 459.45
+          },
+          {
+            "name": "Plane water wavefronts",
+            "top_y": 463.45,
+            "bottom_y": 498.45
+          },
+          {
+            "name": "Foam wave absorber",
+            "top_y": 502.45,
+            "bottom_y": 537.45
+          }
+        ],
+        "heading_to_content_gap_px": 7,
+        "method_font_size_px": 10.6,
+        "reactant_font_size_px": 10.3,
+        "guidance_font_size_px": 10,
+        "all_method_stage_text_visible": true,
+        "all_reactant_text_visible": true,
+        "all_apparatus_text_visible": true,
+        "all_sidebar_components_visible": true,
+        "compact": false
+      }
+    },
+    "02-ripple-waves-forming": {
+      "stage": 3,
+      "driver": {
+        "type": "motorised straight bar dipper",
+        "signal_generator_frequency_hz": 4,
+        "amplitude_constant": true,
+        "active": true,
+        "smooth_sinusoidal_vertical_motion": true,
+        "plane_wavefronts": true
+      },
+      "animation": {
+        "levelling_feet_turn_smoothly": false,
+        "spirit_bubble_centres_smoothly": false,
+        "motor_ramps_without_step_changes": true,
+        "wavefronts_propagate_continuously": true,
+        "strobe_sync_transition_smooth": false,
+        "ruler_glides_and_markers_expand": false
+      },
+      "phase": "straight dipper ramping up and wavefronts forming"
+    },
+    "03-ripple-strobe-and-ruler": {
+      "stage": 5,
+      "strobe": {
+        "overhead_led_visible": true,
+        "synchronising": true,
+        "synchronised_to_frequency": false,
+        "projected_wave_pattern_appears_stationary": false
+      },
+      "measurement": {
+        "crest_to_crest": true,
+        "selected_crest_count": 11,
+        "wavelengths_spanned": 10,
+        "distance_across_10_wavelengths_cm": 25,
+        "wavelength_cm": 2.5,
+        "wavelength_m": null,
+        "calculated_wave_speed_m_s": 0.1,
+        "calculation": null,
+        "transparent_ruler_visible": true,
+        "double_arrow_markers_visible": true
+      },
+      "animation": {
+        "levelling_feet_turn_smoothly": false,
+        "spirit_bubble_centres_smoothly": false,
+        "motor_ramps_without_step_changes": false,
+        "wavefronts_propagate_continuously": true,
+        "strobe_sync_transition_smooth": true,
+        "ruler_glides_and_markers_expand": true
+      }
+    },
+    "04-ripple-measurement": {
+      "stage": 6,
+      "strobe": {
+        "overhead_led_visible": true,
+        "synchronising": false,
+        "synchronised_to_frequency": true,
+        "projected_wave_pattern_appears_stationary": true
+      },
+      "measurement": {
+        "crest_to_crest": true,
+        "selected_crest_count": 11,
+        "wavelengths_spanned": 10,
+        "distance_across_10_wavelengths_cm": 50,
+        "wavelength_cm": 5,
+        "wavelength_m": 0.05,
+        "calculated_wave_speed_m_s": 0.2,
+        "calculation": "4.0 Hz × 0.0500 m = 0.200 m s⁻¹",
+        "transparent_ruler_visible": true,
+        "double_arrow_markers_visible": true
+      }
+    },
+    "05-ripple-results": {
+      "stage": 7,
+      "complete": true,
+      "results": [
+        {
+          "trial": 1,
+          "frequency_hz": 4,
+          "distance_across_10_wavelengths_cm": 50,
+          "wavelength_cm": 5,
+          "wavelength_m": 0.05,
+          "wave_speed_m_s": 0.2
+        },
+        {
+          "trial": 2,
+          "frequency_hz": 5,
+          "distance_across_10_wavelengths_cm": 40.2,
+          "wavelength_cm": 4.02,
+          "wavelength_m": 0.0402,
+          "wave_speed_m_s": 0.201
+        },
+        {
+          "trial": 3,
+          "frequency_hz": 6,
+          "distance_across_10_wavelengths_cm": 33,
+          "wavelength_cm": 3.3,
+          "wavelength_m": 0.033,
+          "wave_speed_m_s": 0.198
+        },
+        {
+          "trial": 4,
+          "frequency_hz": 7,
+          "distance_across_10_wavelengths_cm": 28.8,
+          "wavelength_cm": 2.88,
+          "wavelength_m": 0.0288,
+          "wave_speed_m_s": 0.2016
+        },
+        {
+          "trial": 5,
+          "frequency_hz": 8,
+          "distance_across_10_wavelengths_cm": 24.9,
+          "wavelength_cm": 2.49,
+          "wavelength_m": 0.0249,
+          "wave_speed_m_s": 0.1992
+        }
+      ],
+      "mean_wave_speed_m_s": 0.2,
+      "graph_axes": {
+        "x": "frequency / Hz",
+        "y": "wave speed / m s⁻¹",
+        "chart_type": "compact line graph with raw-data table"
+      },
+      "results_columns": [
+        "frequency_hz",
+        "distance_across_10_wavelengths_cm",
+        "wavelength_cm",
+        "wave_speed_m_s"
+      ],
+      "results_view": "five-frequency raw-data table, speed-versus-frequency graph and mean-speed card",
+      "tab": "graph",
+      "bench": {
+        "finish": "dark grey enamel",
+        "embossed_door_panelling": true,
+        "responsive_panel_count": "2 to 4",
+        "blue_resin_worktop_edge_retained": true
+      }
+    },
+    "06-ripple-responsive-1280x720": {
+      "practical": "Wave speed in a ripple tank",
+      "stage": 0,
+      "responsive_layout": {
+        "viewport_css_px": {
+          "width": 1280,
+          "height": 720
+        },
+        "logical_canvas_px": {
+          "width": 1280,
+          "height": 720
+        },
+        "scale": 1,
+        "mode": "desktop",
+        "portrait_prompt_visible": false,
+        "three_column_layout_preserved": true,
+        "mobile_landscape_layout": false,
+        "pointer_coordinates_scaled": false,
+        "minimum_touch_target_css_px": null
+      },
+      "sidebar": {
+        "fills_available_vertical_space": true,
+        "adaptive_section_spacing": true,
+        "remaining_height_allocated_to_content_cards": true,
+        "excessive_blank_section_gaps_removed": true,
+        "larger_responsive_typography": true,
+        "explicit_heading_to_content_spacing": true,
+        "method_stage_cards": true,
+        "method_stage_text_wrap": "complete multiline text without clipping or ellipsis",
+        "reactant_text_wrap": "complete multiline text without clipping or ellipsis",
+        "apparatus_text_wrap": "complete multiline text without clipping or ellipsis",
+        "guidance_text_wrap": "complete multiline text",
+        "compact_landscape_supported": true,
+        "content_top_y": 122,
+        "content_bottom_y": 711,
+        "available_bottom_y": 711,
+        "evaluation_button_top_y": 652.06,
+        "evaluation_button_bottom_y": 711,
+        "unused_vertical_space_px": 0,
+        "overflow_vertical_space_px": 0,
+        "method_stage_count": 4,
+        "method_stage_line_counts": [
+          3,
+          2,
+          2,
+          2
+        ],
+        "reactant_rows": [
+          {
+            "name": "Shallow water at constant depth",
+            "top_y": 356.13,
+            "bottom_y": 383.5
+          },
+          {
+            "name": "Plane water wavefronts",
+            "top_y": 385.5,
+            "bottom_y": 412.86
+          },
+          {
+            "name": "Foam wave absorber",
+            "top_y": 414.86,
+            "bottom_y": 442.22
+          }
+        ],
+        "heading_to_content_gap_px": 3,
+        "method_font_size_px": 9.2,
+        "reactant_font_size_px": 9.4,
+        "guidance_font_size_px": 8.9,
+        "all_method_stage_text_visible": true,
+        "all_reactant_text_visible": true,
+        "all_apparatus_text_visible": true,
+        "all_sidebar_components_visible": true,
+        "compact": true
+      },
+      "bench": {
+        "finish": "dark grey enamel",
+        "embossed_door_panelling": true,
+        "responsive_panel_count": "2 to 4",
+        "blue_resin_worktop_edge_retained": true
+      },
+      "controls": [
+        "LEVEL TANK",
+        "START VIBRATOR",
+        "MEASURE 10 WAVES",
+        "RECORD SPEED",
+        "NEXT FREQUENCY",
+        "RESET SERIES",
+        "RESULTS",
+        "METHOD",
+        "F fullscreen"
+      ]
+    }
+  }
+}

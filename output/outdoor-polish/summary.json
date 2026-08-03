@@ -1,0 +1,59 @@
+{
+  "pass": true,
+  "errors": [],
+  "meadow": {
+    "bounds": {
+      "top": 229,
+      "bottom": 900,
+      "left": 270,
+      "right": 1110,
+      "width": 840,
+      "height": 671,
+      "visibility": "visible"
+    },
+    "compact_bounds": {
+      "top": 229,
+      "bottom": 720,
+      "left": 270,
+      "right": 985.59375,
+      "width": 715.59375,
+      "height": 491,
+      "visibility": "visible"
+    },
+    "grass_blades": 1520,
+    "moss_patches": 240
+  },
+  "shore": {
+    "bounds": {
+      "top": 229,
+      "bottom": 900,
+      "left": 270,
+      "right": 1110,
+      "width": 840,
+      "height": 671,
+      "visibility": "visible"
+    },
+    "landscape": {
+      "laboratory_tiles_visible": false,
+      "realistic_rocky_shore": true,
+      "detailed_cliffs": true,
+      "continuous_cliff_top": true,
+      "grass_topped_cliff": true,
+      "cliff_maximum_world_y": 3.02,
+      "cliff_within_canvas": true,
+      "irregular_rock_pools": true,
+      "rock_pool_count": 3,
+      "rock_pool_seaweed_clumps": 12,
+      "wet_and_dry_rock_zones": true,
+      "organisms": [
+        "limpets",
+        "barnacles",
+        "mussels",
+        "brown seaweed",
+        "lichen"
+      ]
+    },
+    "first_quadrat_clear": true,
+    "moving_stage": 3
+  }
+}

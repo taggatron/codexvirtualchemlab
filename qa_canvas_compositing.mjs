@@ -1,0 +1,30 @@
+import { chromium } from 'playwright';
+import fs from 'node:fs';
+
+const out = 'output/canvas-compositing-qa';
+fs.mkdirSync(out, { recursive: true });
+const browser = await chromium.launch({ headless: true, args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
+const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
+const errors = [];
+page.on('console', message => { if (message.type() === 'error') errors.push(`console: ${message.text()}`); });
+page.on('pageerror', error => errors.push(`page: ${error.message}`));
+await page.goto(`http://127.0.0.1:4173/?canvas-compositing=${Date.now()}`, { waitUntil: 'networkidle' });
+await page.waitForFunction(() => typeof window.render_game_to_text === 'function');
+await page.mouse.click(135, 610);
+await page.waitForTimeout(350);
+const diagnostics = await page.evaluate(() => {
+  const lab = document.querySelector('#lab'), webgl = document.querySelector('#webgl'), ctx = lab.getContext('2d'), rect = lab.getBoundingClientRect(), sx = lab.width / rect.width, sy = lab.height / rect.height;
+  const sample = (x, y) => { const data = ctx.getImageData(Math.round(x * sx), Math.round(y * sy), 1, 1).data; return { x, y, rgba: [...data] } };
+  return { state: JSON.parse(window.render_game_to_text()), lab_css: getComputedStyle(lab).cssText, webgl_css: { opacity: getComputedStyle(webgl).opacity, visibility: getComputedStyle(webgl).visibility, z_index: getComputedStyle(webgl).zIndex }, lab_alpha_samples: [sample(600, 300), sample(900, 350), sample(880, 690)] };
+});
+await page.screenshot({ path: `${out}/01-composited-flame-tests.png`, fullPage: true });
+await page.locator('#webgl').screenshot({ path: `${out}/02-webgl-layer.png` });
+await page.locator('#lab').screenshot({ path: `${out}/03-ui-layer.png`, omitBackground: true });
+fs.writeFileSync(`${out}/diagnostics.json`, JSON.stringify({ diagnostics, errors }, null, 2));
+console.log(JSON.stringify({ practical: diagnostics.state.practical, lab_alpha_samples: diagnostics.lab_alpha_samples, webgl_css: diagnostics.webgl_css, errors }, null, 2));
+if (diagnostics.state.practical !== 'Flame tests') throw new Error('Flame Tests was not selected.');
+if (diagnostics.lab_alpha_samples.some(sample => sample.rgba[3] !== 0)) throw new Error('The 2D UI layer still covers the WebGL arena.');
+if (diagnostics.state.canvas_compositing?.webgl_arena_ui_overlay_alpha !== 0 || !diagnostics.state.canvas_compositing?.opaque_3d_apparatus_preserved) throw new Error('Canvas compositing state is incomplete.');
+if (diagnostics.webgl_css.opacity !== '1' || diagnostics.webgl_css.visibility !== 'visible') throw new Error('WebGL canvas is not fully visible.');
+if (errors.length) throw new Error(errors.join('\n'));
+await browser.close();

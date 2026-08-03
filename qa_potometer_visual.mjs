@@ -3,7 +3,7 @@ import fs from 'node:fs';
 
 const out = 'output/potometer-visual-final';
 fs.mkdirSync(out, { recursive: true });
-const browser = await chromium.launch({ headless: true, args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
+const browser = await chromium.launch({ headless: true, executablePath: process.env.POTOMETER_QA_CHROMIUM || undefined, args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
 const page = await browser.newPage({ viewport: { width: 1280, height: 720 }, deviceScaleFactor: 1 });
 const errors = [];
 page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
