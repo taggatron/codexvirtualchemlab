@@ -1486,96 +1486,133 @@ function rightbar() {
 function drawEvaluationModal() {
   const p = practicals[state.selected];
   const evalData = practicalEvaluations[p.id] || practicalEvaluations.free;
-  ctx.fillStyle = 'rgba(9, 23, 32, 0.62)';
+  ctx.fillStyle = 'rgba(9, 23, 32, 0.68)';
   ctx.fillRect(0, 0, W, H);
   hit('close-evaluation-modal', 0, 0, W, H);
 
-  const w = Math.min(740, W - 40);
-  const h = Math.min(570, H - 40);
+  // Expanded modal dimensions occupying ~85% width and ~82% height of screen
+  const w = Math.min(1160, Math.max(760, Math.round(W * 0.85)));
+  const h = Math.min(840, Math.max(580, Math.round(H * 0.82)));
   const x = (W - w) / 2;
   const y = (H - h) / 2;
 
   ctx.save();
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.38)';
-  ctx.shadowBlur = 24;
-  ctx.shadowOffsetY = 8;
-  rr(x, y, w, h, 16, '#ffffff', '#cbd6d8');
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+  ctx.shadowBlur = 32;
+  ctx.shadowOffsetY = 12;
+  rr(x, y, w, h, 18, '#ffffff', '#cbd6d8');
   ctx.restore();
 
   const pColor = p.color || C.teal;
+  const headerH = 76;
   ctx.save();
   ctx.beginPath();
-  ctx.roundRect(x, y, w, 68, [16, 16, 0, 0]);
+  ctx.roundRect(x, y, w, headerH, [18, 18, 0, 0]);
   ctx.clip();
   ctx.fillStyle = pColor;
-  ctx.fillRect(x, y, w, 68);
+  ctx.fillRect(x, y, w, headerH);
   ctx.restore();
 
+  // Header icon
   ctx.fillStyle = 'rgba(255, 255, 255, 0.22)';
   ctx.beginPath();
-  ctx.arc(x + 36, y + 34, 18, 0, Math.PI * 2);
+  ctx.arc(x + 42, y + headerH / 2, 21, 0, Math.PI * 2);
   ctx.fill();
-  text(p.icon, x + 36, y + 34, 14, '#ffffff', 800, 'center');
+  text(p.icon, x + 42, y + headerH / 2, 16, '#ffffff', 800, 'center');
 
-  text('PRACTICAL EVALUATION & GCSE VARIABLES', x + 64, y + 25, 9.5, 'rgba(255, 255, 255, 0.85)', 800);
-  text(p.title, x + 64, y + 46, 17, '#ffffff', 800);
+  // Header Titles
+  text('PRACTICAL EVALUATION & GCSE VARIABLES', x + 76, y + 27, 10.5, 'rgba(255, 255, 255, 0.85)', 800);
+  text(p.title, x + 76, y + 52, 20, '#ffffff', 800);
 
-  rr(x + w - 48, y + 18, 32, 32, 16, 'rgba(255, 255, 255, 0.25)', null);
-  text('✕', x + w - 32, y + 34, 14, '#ffffff', 800, 'center');
-  hit('close-evaluation-modal', x + w - 48, y + 18, 32, 32);
+  // Close '✕' button
+  rr(x + w - 52, y + 20, 36, 36, 18, 'rgba(255, 255, 255, 0.25)', null);
+  text('✕', x + w - 34, y + 38, 15, '#ffffff', 800, 'center');
+  hit('close-evaluation-modal', x + w - 52, y + 20, 36, 36);
 
-  let curY = y + 84;
+  const padX = 32;
+  const contentW = w - padX * 2;
+  const bottomBtnH = 44;
+  const bottomMargin = 24;
+  const btnY = y + h - bottomMargin - bottomBtnH;
+  
+  // Available body height between header and bottom button
+  const bodyTop = y + headerH + 20;
+  const bodyH = btnY - 18 - bodyTop;
 
-  text('EXPERIMENTAL VARIABLES', x + 24, curY, 9.5, C.muted, 800);
-  curY += 14;
+  let curY = bodyTop;
 
-  const varBoxW = (w - 48 - 24) / 3;
-  const varBoxH = 100;
+  // SECTION 1: EXPERIMENTAL VARIABLES
+  text('EXPERIMENTAL VARIABLES', x + padX, curY, 10.5, C.muted, 800);
+  curY += 18;
 
-  // IV
-  rr(x + 24, curY, varBoxW, varBoxH, 10, '#f0f7f6', C.teal);
-  rr(x + 34, curY + 12, varBoxW - 20, 20, 5, C.teal);
-  text('INDEPENDENT (IV)', x + 34 + (varBoxW - 20) / 2, curY + 22, 8.5, '#ffffff', 800, 'center');
-  wrappedText(evalData.iv, x + 34, curY + 44, varBoxW - 20, 9.6, C.ink, 650, 13, 3);
+  // Dynamic height for variable boxes: ~36% of available body height
+  const varBoxH = Math.max(120, Math.min(220, Math.round(bodyH * 0.36)));
+  const varGap = 16;
+  const varBoxW = (contentW - varGap * 2) / 3;
 
-  // DV
-  rr(x + 24 + varBoxW + 12, curY, varBoxW, varBoxH, 10, '#fff8f2', C.orange);
-  rr(x + 34 + varBoxW + 12, curY + 12, varBoxW - 20, 20, 5, C.orange);
-  text('DEPENDENT (DV)', x + 34 + varBoxW + 12 + (varBoxW - 20) / 2, curY + 22, 8.5, '#ffffff', 800, 'center');
-  wrappedText(evalData.dv, x + 34 + varBoxW + 12, curY + 44, varBoxW - 20, 9.6, C.ink, 650, 13, 3);
+  // IV Box
+  const ivX = x + padX;
+  rr(ivX, curY, varBoxW, varBoxH, 12, '#f0f7f6', C.teal);
+  rr(ivX + 12, curY + 12, varBoxW - 24, 24, 6, C.teal);
+  text('INDEPENDENT (IV)', ivX + varBoxW / 2, curY + 24, 9.5, '#ffffff', 800, 'center');
+  wrappedText(evalData.iv, ivX + 14, curY + 48, varBoxW - 28, 11, C.ink, 650, 16, 8);
 
-  // CVs
-  rr(x + 24 + (varBoxW + 12) * 2, curY, varBoxW, varBoxH, 10, '#f5f3f9', '#7c62b8');
-  rr(x + 34 + (varBoxW + 12) * 2, curY + 12, varBoxW - 20, 20, 5, '#7c62b8');
-  text('CONTROL (CVs)', x + 34 + (varBoxW + 12) * 2 + (varBoxW - 20) / 2, curY + 22, 8.5, '#ffffff', 800, 'center');
-  wrappedText(evalData.cvs, x + 34 + (varBoxW + 12) * 2, curY + 44, varBoxW - 20, 9.4, C.ink, 650, 12, 3);
+  // DV Box
+  const dvX = ivX + varBoxW + varGap;
+  rr(dvX, curY, varBoxW, varBoxH, 12, '#fff8f2', C.orange);
+  rr(dvX + 12, curY + 12, varBoxW - 24, 24, 6, C.orange);
+  text('DEPENDENT (DV)', dvX + varBoxW / 2, curY + 24, 9.5, '#ffffff', 800, 'center');
+  wrappedText(evalData.dv, dvX + 14, curY + 48, varBoxW - 28, 11, C.ink, 650, 16, 8);
 
-  curY += varBoxH + 20;
+  // CVs Box
+  const cvsX = dvX + varBoxW + varGap;
+  rr(cvsX, curY, varBoxW, varBoxH, 12, '#f5f3f9', '#7c62b8');
+  rr(cvsX + 12, curY + 12, varBoxW - 24, 24, 6, '#7c62b8');
+  text('CONTROL (CVs)', cvsX + varBoxW / 2, curY + 24, 9.5, '#ffffff', 800, 'center');
+  wrappedText(evalData.cvs, cvsX + 14, curY + 48, varBoxW - 28, 10.8, C.ink, 650, 15.5, 9);
 
-  text('PROCEDURAL IMPROVEMENTS & GCSE EXAM ANSWERS', x + 24, curY, 9.5, C.muted, 800);
-  curY += 14;
+  curY += varBoxH + 24;
 
-  const impBoxW = w - 48;
-  evalData.improvements.forEach((impText, idx) => {
-    const impH = 54;
-    rr(x + 24, curY, impBoxW, impH, 8, '#f8faf9', C.line);
+  // SECTION 2: PROCEDURAL IMPROVEMENTS & GCSE EXAM ANSWERS
+  text('PROCEDURAL IMPROVEMENTS & GCSE EXAM ANSWERS', x + padX, curY, 10.5, C.muted, 800);
+  curY += 18;
+
+  // Dynamically calculate improvement box height so they stretch to fill all remaining space up to the bottom button
+  const count = (evalData.improvements && evalData.improvements.length) || 3;
+  const impAreaH = btnY - 20 - curY;
+  const impGap = 12;
+  const impH = Math.max(54, Math.floor((impAreaH - (count - 1) * impGap) / count));
+
+  evalData.improvements.forEach((impText) => {
+    rr(x + padX, curY, contentW, impH, 10, '#f8faf9', C.line);
     
+    // Checkmark circle badge
+    const checkX = x + padX + 24;
+    const checkY = curY + impH / 2;
     ctx.fillStyle = C.teal;
     ctx.beginPath();
-    ctx.arc(x + 44, curY + impH / 2, 11, 0, Math.PI * 2);
+    ctx.arc(checkX, checkY, 13, 0, Math.PI * 2);
     ctx.fill();
-    text('✓', x + 44, curY + impH / 2, 10, '#ffffff', 800, 'center');
+    text('✓', checkX, checkY, 11, '#ffffff', 800, 'center');
 
-    wrappedText(impText, x + 64, curY + 18, impBoxW - 52, 10.2, C.ink, 650, 14, 2);
-    curY += impH + 10;
+    // Wrapped improvement text centered vertically inside impH
+    const lines = wrapTextLines(impText, contentW - 64, 11.5, 650);
+    const lineHeight = 17;
+    const totalTextH = lines.length * lineHeight;
+    const textStartY = curY + Math.max(14, (impH - totalTextH) / 2 + lineHeight / 2);
+    lines.slice(0, 4).forEach((line, i) => {
+      text(line, x + padX + 48, textStartY + i * lineHeight, 11.5, C.ink, 650);
+    });
+
+    curY += impH + impGap;
   });
 
-  const btnW = 180, btnH = 38;
+  // Bottom CLOSE EVALUATION button
+  const btnW = 240;
   const btnX = x + (w - btnW) / 2;
-  const btnY = y + h - 50;
-  rr(btnX, btnY, btnW, btnH, 8, C.teal, C.teal);
-  text('CLOSE EVALUATION', btnX + btnW / 2, btnY + btnH / 2, 11, '#ffffff', 800, 'center');
-  hit('close-evaluation-modal', btnX, btnY, btnW, btnH);
+  rr(btnX, btnY, btnW, bottomBtnH, 10, C.teal, C.teal);
+  text('CLOSE EVALUATION', btnX + btnW / 2, btnY + bottomBtnH / 2, 12, '#ffffff', 800, 'center');
+  hit('close-evaluation-modal', btnX, btnY, btnW, bottomBtnH);
 }
 function drawReactantSafetyModal() {
   const safety = state.reactantSafety;

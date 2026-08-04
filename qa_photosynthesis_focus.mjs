@@ -8,7 +8,7 @@ const browser = await chromium.launch({
   headless: true,
   args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader']
 });
-const page = await browser.newPage({ viewport: { width: 1280, height: 800 }, deviceScaleFactor: 1 });
+const page = await browser.newPage({ viewport: { width: 1575, height: 1024 }, deviceScaleFactor: 1 });
 const errors = [];
 page.on('console', message => { if (message.type() === 'error') errors.push(`console: ${message.text()}`); });
 page.on('pageerror', error => errors.push(`page: ${error.message}`));
