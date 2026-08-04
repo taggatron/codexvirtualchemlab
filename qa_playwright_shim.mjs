@@ -1,4 +1,4 @@
-import { chromium as installedChromium } from './node_modules/playwright/index.mjs';
+import { chromium as installedChromium } from '../pptpresentationtowebagent/node_modules/playwright/index.mjs';
 
 const chromeExecutable = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
