@@ -3802,6 +3802,111 @@ function update(dt, skipDraw = false) {
   if (state.progress >= 1) { state.complete = true; state.running = false; state.toast = id === 'water' ? 'Distillation complete — pure liquid water has condensed in the receiver. Switch off the heater, then the cooling water.' : id === 'electro' ? 'Electrolysis complete — select RECORD MASSES to remove and weigh the copper-coated cathode.' : id === 'co2' ? 'Limewater is milky: carbon dioxide confirmed. Review the bird’s-eye observation.' : 'Complete — review your plotted results.' }
   if (!skipDraw) draw()
 }
+
+function parseExternalBoolean(value, fallback = false) {
+  if (value == null) return fallback;
+  if (typeof value === 'boolean') return value;
+  const normalized = String(value).trim().toLowerCase();
+  if (!normalized.length) return fallback;
+  if (['1', 'true', 'yes', 'on', 'focus', 'focused'].includes(normalized)) return true;
+  if (['0', 'false', 'no', 'off', 'unfocus', 'exit'].includes(normalized)) return false;
+  return fallback;
+}
+
+function isPhotosynthesisInvestigation(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  return ['pondweed', 'photosynthesis', 'light-intensity-pondweed', 'light_intensity_pondweed'].includes(normalized);
+}
+
+function openPondweedInvestigation(options = {}) {
+  const requestedFocus = options.focusMode;
+  const selectedIndex = practicals.findIndex(p => p.id === 'pondweed');
+  if (selectedIndex < 0) return false;
+
+  state.subject = 'biology';
+  state.selected = selectedIndex;
+  state.running = false;
+  state.complete = false;
+  state.progress = 0;
+  state.points = [];
+  state.temp = 25;
+  state.volume = 0;
+  state.ph = 7;
+  state.burner = false;
+  state.coolingWater = false;
+  state.transferred = 0;
+  state.pour = null;
+  state.drag = null;
+  state.dose = null;
+  state.graphModal = false;
+  state.evaluationModal = false;
+  state.reactantSafety = null;
+  state.hookeFocusModal = false;
+  state.hookeFocusProgress = 0;
+  state.methodDropdown = false;
+  state.tab = 'bench';
+
+  activatePondweed('RESET PRACTICAL');
+  state.focusMode = typeof requestedFocus === 'boolean' ? requestedFocus : true;
+  if (state.focusMode) {
+    state.toast = 'Photosynthesis investigation loaded in focus mode.';
+  }
+  draw();
+  return true;
+}
+
+function applyPhotosynthesisFocusFromUrl() {
+  const params = new URLSearchParams(window.location.search || '');
+  if (!params.toString()) return;
+
+  const pondweedFocusRaw = params.get('pondweed-focus');
+  if (pondweedFocusRaw != null) {
+    const enabled = parseExternalBoolean(pondweedFocusRaw, true);
+    openPondweedInvestigation({ focusMode: enabled });
+    return;
+  }
+
+  const investigation = params.get('investigation') || params.get('practical') || params.get('experiment') || params.get('lab');
+  if (!isPhotosynthesisInvestigation(investigation)) return;
+
+  const focusRaw = params.get('focus') ?? params.get('focusMode') ?? params.get('mode');
+  const enabled = parseExternalBoolean(focusRaw, true);
+  openPondweedInvestigation({ focusMode: enabled });
+}
+
+function installPhotosynthesisMessageApi() {
+  window.addEventListener('message', event => {
+    const data = event?.data;
+    if (!data || typeof data !== 'object') return;
+
+    const type = typeof data.type === 'string' ? data.type : '';
+    const action = typeof data.action === 'string' ? data.action : '';
+    const cmd = typeof data.cmd === 'string' ? data.cmd : '';
+
+    const isDirectOpen = type === 'cvl:photosynthesis-focus' || action === 'photosynthesis-focus' || cmd === 'photosynthesis-focus';
+    const isInvestigationOpen = type === 'cvl:open-investigation' || action === 'open-investigation' || cmd === 'open-investigation';
+    if (!isDirectOpen && !isInvestigationOpen) return;
+
+    const requestedInvestigation = data.investigation || data.practical || data.experiment || 'pondweed';
+    if (isInvestigationOpen && !isPhotosynthesisInvestigation(requestedInvestigation)) return;
+
+    const enabled = parseExternalBoolean(data.focusMode ?? data.focus ?? data.enabled, true);
+    const ok = openPondweedInvestigation({ focusMode: enabled });
+
+    if (event.source && typeof event.source.postMessage === 'function') {
+      event.source.postMessage(
+        {
+          type: 'cvl:photosynthesis-focus:ack',
+          ok,
+          practical: ok ? 'pondweed' : null,
+          focusMode: ok ? state.focusMode : null
+        },
+        event.origin || '*'
+      );
+    }
+  });
+}
+
 let last = performance.now(); function loop(now) { let dt = Math.min(.05, (now - last) / 1000); last = now; if (!window.__manualSimulationTime) update(dt); requestAnimationFrame(loop) }
 window.advanceTime = ms => { for (let t = 0; t < ms; t += 16.67)update(1 / 60, true); draw() };
 window.render_game_to_text = () => {
@@ -4857,6 +4962,8 @@ window.render_game_to_text = () => {
   }
   return JSON.stringify(payload);
 };
+installPhotosynthesisMessageApi();
+applyPhotosynthesisFocusFromUrl();
 resize(); requestAnimationFrame(loop);
 function drawChromatogramSoakPanel(x, y, w, h) {
   const q = Math.max(0, Math.min(1, state.progress)), splitQ = Math.max(0, Math.min(1, (q - .03) / .2)), selected = state.chromSelectedDye, measurements = chromMeasurementData(), frontFinished = q >= .94;
