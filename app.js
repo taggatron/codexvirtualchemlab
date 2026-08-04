@@ -476,7 +476,7 @@ const freeReactionRules = [
   { id: 'h2so4-lime', reactants: ['h2so4', 'lime'], symbol: 'H₂SO₄(aq) + Ca(OH)₂(aq) → CaSO₄(s) + 2H₂O(l)', word: 'sulfuric acid + limewater → calcium sulfate + water', kind: 'precipitate', precipitate: true, product: 'calcium sulfate precipitate', productColor: 0xd9d4bd, heat: 6, duration: 3 },
   { id: 'lime-co2', reactants: ['lime', 'CO₂'], symbol: 'Ca(OH)₂(aq) + CO₂(g) → CaCO₃(s) + H₂O(l)', word: 'limewater + carbon dioxide → calcium carbonate + water', kind: 'precipitate', precipitate: true, product: 'milky calcium carbonate', productColor: 0xe8e6d9, duration: 3 }
 ];
-const state = { selected: 0, subject: 'chemistry', subjectTabX: 149, subjectTabW: 114, sidebarScroll: { chemistry: 0, biology: 0, physics: 0 }, running: false, complete: false, temp: 20, ph: 7, time: 0, volume: 0, progress: 0, tab: 'equipment', graphModal: false, evaluationModal: false, reactantSafety: null, points: [], hover: null, toast: 'Click equipment to add it, or drag it onto the bench.', drag: null, pour: null, burner: false, coolingWater: false, particles: [], layout: null, flamePhase: 0, transferred: 0, workspace: [], nextItem: 1, dose: null, reaction: null, massStage: 0, massLidOn: true, massTransfer: null, massBefore: 4.01, massAfter: null, hydrogenStage: 0, hydrogenTimer: 0, hydrogenAudioPlayed: false, hydrogenGas: 0, saltsStage: 0, saltsTimer: 0, chromSelectedDye: null, electroRecorded: false, electroWeighing: false, electroWeighTimer: 0, titrationStage: 0, titrationVolume: 0, titrationDropTimer: 0, titrationDrops: 0, titrationIndicator: false, titrationIndicatorTimer: 0, titrationRecorded: false, ratesStage: 0, ratesStageTimer: 0, ratesTrialIndex: 0, ratesTargetTemp: 20, ratesBathTemp: 20, ratesConditioning: false, ratesResults: [], thermiteTimer: 0, thermiteAudioPlayed: false, displacementStage: 0, displacementTimer: 0, displacementRecorded: false, flameTestStage: 0, flameTestTimer: 0, flameTestSalt: 0, flameTestTested: [], starchStage: 0, starchTimer: 0, lipaseStage: 0, lipaseTimer: 0, lipaseTrialIndex: 0, lipaseTargetTemp: 20, lipaseBathTemp: 20, lipaseConditioning: false, lipaseResults: [], osmosisStage: 0, osmosisTimer: 0, osmosisTrialIndex: 0, osmosisConcentration: 0, osmosisResults: [], potometerStage: 0, potometerTimer: 0, potometerTrialIndex: 0, potometerWindSpeed: 0, potometerBubbleMm: 0, potometerResults: [], pondweedDistance: 20, pondweedLampOn: true, pondweedTimer: 0, pondweedBubbles: 0, pondweedResults: [], quadratStage: 0, quadratTimer: 0, quadratSampleIndex: 0, quadratCurrentCount: 0, quadratResults: [], meadowWindClock: 0, transectStage: 0, transectTimer: 0, transectStationIndex: 0, transectDistanceM: 0, transectCurrentObservation: null, transectResults: [], shoreTideClock: 0, shoreTideProgress: 0, rippleStage: 0, rippleTimer: 0, rippleTrialIndex: 0, rippleFrequencyHz: 4, rippleTenWavelengthCm: 0, rippleWavelengthCm: 0, rippleSpeedMs: 0, rippleResults: [], rippleWaveClock: 0, newtonForce: 0.2, newtonMass: 1.0, newtonPos: 0, newtonVel: 0, newtonAcc: 0.2, newtonTimer: 0, newtonRunning: false, newtonGate1Time: null, newtonGate2Time: null, newtonResults: [], electromagnetStage: 0, electromagnetTimer: 0, electromagnetTrialIndex: 0, electromagnetTurns: 10, electromagnetClips: 0, electromagnetResults: [], convectionStage: 0, convectionTimer: 0, conductionStage: 0, conductionTimer: 0, thermalStage: 0, thermalTimer: 0, thermalCaptured: false, densityStage: 0, densitySample: 0, densityTimer: 0, densityRecorded: false, densityResults: [], hookeStage: 0, hookeTimer: 0, hookeTrialIndex: 0, hookeForceN: 0, hookeResults: [], shcStage: 0, shcTimer: 0, shcEnergyJ: 0, shcTemperatureC: 20, shcResults: [], wireStage: 0, wireTimer: 0, wireTrialIndex: 0, wireLengthCm: 20, wireVoltageV: 1.5, wireResults: [], fieldStage: 0, fieldTimer: 0, fieldConfigIndex: 0, fieldResults: [] };
+const state = { selected: 0, subject: 'chemistry', subjectTabX: 149, subjectTabW: 114, sidebarScroll: { chemistry: 0, biology: 0, physics: 0 }, running: false, complete: false, temp: 20, ph: 7, time: 0, volume: 0, progress: 0, tab: 'equipment', graphModal: false, evaluationModal: false, focusMode: false, methodDropdown: false, reactantSafety: null, points: [], hover: null, toast: 'Click equipment to add it, or drag it onto the bench.', drag: null, pour: null, burner: false, coolingWater: false, particles: [], layout: null, flamePhase: 0, transferred: 0, workspace: [], nextItem: 1, dose: null, reaction: null, massStage: 0, massLidOn: true, massTransfer: null, massBefore: 4.01, massAfter: null, hydrogenStage: 0, hydrogenTimer: 0, hydrogenAudioPlayed: false, hydrogenGas: 0, saltsStage: 0, saltsTimer: 0, chromSelectedDye: null, electroRecorded: false, electroWeighing: false, electroWeighTimer: 0, titrationStage: 0, titrationVolume: 0, titrationDropTimer: 0, titrationDrops: 0, titrationIndicator: false, titrationIndicatorTimer: 0, titrationRecorded: false, ratesStage: 0, ratesStageTimer: 0, ratesTrialIndex: 0, ratesTargetTemp: 20, ratesBathTemp: 20, ratesConditioning: false, ratesResults: [], thermiteTimer: 0, thermiteAudioPlayed: false, displacementStage: 0, displacementTimer: 0, displacementRecorded: false, flameTestStage: 0, flameTestTimer: 0, flameTestSalt: 0, flameTestTested: [], starchStage: 0, starchTimer: 0, lipaseStage: 0, lipaseTimer: 0, lipaseTrialIndex: 0, lipaseTargetTemp: 20, lipaseBathTemp: 20, lipaseConditioning: false, lipaseResults: [], osmosisStage: 0, osmosisTimer: 0, osmosisTrialIndex: 0, osmosisConcentration: 0, osmosisResults: [], potometerStage: 0, potometerTimer: 0, potometerTrialIndex: 0, potometerWindSpeed: 0, potometerBubbleMm: 0, potometerResults: [], pondweedDistance: 20, pondweedLampOn: true, pondweedTimer: 0, pondweedBubbles: 0, pondweedResults: [], quadratStage: 0, quadratTimer: 0, quadratSampleIndex: 0, quadratCurrentCount: 0, quadratResults: [], meadowWindClock: 0, transectStage: 0, transectTimer: 0, transectStationIndex: 0, transectDistanceM: 0, transectCurrentObservation: null, transectResults: [], shoreTideClock: 0, shoreTideProgress: 0, rippleStage: 0, rippleTimer: 0, rippleTrialIndex: 0, rippleFrequencyHz: 4, rippleTenWavelengthCm: 0, rippleWavelengthCm: 0, rippleSpeedMs: 0, rippleResults: [], rippleWaveClock: 0, newtonForce: 0.2, newtonMass: 1.0, newtonPos: 0, newtonVel: 0, newtonAcc: 0.2, newtonTimer: 0, newtonRunning: false, newtonGate1Time: null, newtonGate2Time: null, newtonResults: [], electromagnetStage: 0, electromagnetTimer: 0, electromagnetTrialIndex: 0, electromagnetTurns: 10, electromagnetClips: 0, electromagnetResults: [], convectionStage: 0, convectionTimer: 0, conductionStage: 0, conductionTimer: 0, thermalStage: 0, thermalTimer: 0, thermalCaptured: false, densityStage: 0, densitySample: 0, densityTimer: 0, densityRecorded: false, densityResults: [], hookeStage: 0, hookeTimer: 0, hookeTrialIndex: 0, hookeForceN: 0, hookeResults: [], shcStage: 0, shcTimer: 0, shcEnergyJ: 0, shcTemperatureC: 20, shcResults: [], wireStage: 0, wireTimer: 0, wireTrialIndex: 0, wireLengthCm: 20, wireVoltageV: 1.5, wireResults: [], fieldStage: 0, fieldTimer: 0, fieldConfigIndex: 0, fieldResults: [] };
 state.hookeFocusModal = false;
 state.hookeFocusProgress = 0;
 const alkaliMetals = [
@@ -819,6 +819,7 @@ function drawWorkspaceItem(it, ghost = false) { if (!lab3d.available || ghost) {
 function drawWorkspace(x, w, benchY) { if (!state.workspace.length && !lab3d.available) { ctx.strokeStyle = 'rgba(74,130,137,.38)'; ctx.lineWidth = 2; ctx.setLineDash([7, 7]); rr(x + w * .18, benchY - 235, w * .64, 145, 18, null, 'rgba(74,130,137,.38)'); ctx.setLineDash([]); text('YOUR BENCH IS READY', x + w / 2, benchY - 174, 14, C.teal, 800, 'center'); text('Click an item in the equipment library', x + w / 2, benchY - 146, 13, C.muted, 600, 'center'); text('or drag it anywhere into this area', x + w / 2, benchY - 124, 11, C.muted, 500, 'center') } state.workspace.forEach(it => drawWorkspaceItem(it)); if (state.drag?.kind === 'palette') drawWorkspaceItem({ type: state.drag.type, x: state.drag.x, y: state.drag.y }, true); if (state.drag?.kind === 'workspace') { const it = state.workspace.find(a => a.uid === state.drag.uid); if (it) drawWorkspaceItem({ ...it, x: state.drag.x - state.drag.dx, y: state.drag.y - state.drag.dy }, true) } }
 function registerWebGLInteractions(id, cx, cy) { const fallback = { target: { x: cx + 72, y: cy - 1 }, source: { x: cx - 155, y: cy - 1 } }; if (id === 'free') { const priority = { tripod: 0, bunsen: 1, beaker: 3, tube: 3, phmeter: 4 };[...state.workspace].sort((a, b) => (priority[a.type] ?? 2) - (priority[b.type] ?? 2)).forEach(workspaceHitRegions); state.layout = fallback; return } if (id === 'rates' || id === 'temp') { const sourceGround = lab3d.projectToScreen(-2.1, 0, .1), receiver = id === 'rates' ? ratesReceiverWorld() : { x: 1.25, y: 0, z: .05 }, targetGround = lab3d.projectToScreen(receiver.x, receiver.y, receiver.z); state.layout = { source: sourceGround ? { x: sourceGround.x, y: sourceGround.y - 62 } : fallback.source, target: targetGround ? { x: targetGround.x, y: targetGround.y - 62 } : fallback.target }; if (!state.pour && (id === 'temp' || state.ratesStage === 2)) hit('reagent', state.layout.source.x - 72, state.layout.source.y - 96, 144, 174, 'HCl(aq)') } else if (id === 'mass' && state.massStage === 2 && state.massLidOn) { const lid = lab3d.projectToScreen(1.3, 2.58, .05); if (lid) { hit('crucible-lid', lid.x - 62, lid.y - 38, 124, 76); state.layout = { ...fallback, lid } } else state.layout = fallback } else state.layout = fallback }
 function header() {
+  if (state.focusMode) return;
   ctx.fillStyle = C.navy;
   ctx.fillRect(0, 0, W, 64);
   text('PRACTICAL', 26, 25, 12, '#71d5c8', 800);
@@ -848,7 +849,10 @@ function header() {
     hit('subject-tab', tx, tabY + 4, tabW, tabH - 8, s.id);
   });
 
-  text('OCR GCSE Combined Science', W - 28, 33, 12, '#9fb2b8', 600, 'right')
+  text('OCR GCSE Combined Science', W - 245, 33, 12, '#9fb2b8', 600, 'right');
+  rr(W - 225, 16, 110, 32, 16, state.focusMode ? C.teal : '#122b3b', '#2e4e63');
+  text('FOCUS MODE ⛶', W - 170, 32, 10, '#ffffff', 800, 'center');
+  hit('toggle-focus-mode', W - 225, 16, 110, 32);
 }
 function sidebarMetrics(subject = state.subject || 'chemistry') {
   const visible = practicals.map((p, i) => ({ ...p, originalIndex: i })).filter(p => (p.subject || 'chemistry') === subject);
@@ -863,6 +867,7 @@ function sidebarScrollBy(delta) {
   return true;
 }
 function sidebar() {
+  if (state.focusMode) return;
   const x = 0, y = 64, w = 270, currentSubject = state.subject || 'chemistry', metrics = sidebarMetrics(currentSubject), scroll = Math.max(0, Math.min(metrics.maxScroll, state.sidebarScroll?.[currentSubject] || 0));
   state.sidebarScroll ??= {};
   state.sidebarScroll[currentSubject] = scroll;
@@ -980,9 +985,91 @@ function primePopAudio() { try { const AudioCtor = window.AudioContext || window
 function playSqueakyPop() { if (state.hydrogenAudioPlayed) return; state.hydrogenAudioPlayed = true; primePopAudio(); const ac = popAudioContext; if (!ac) return; try { const now = ac.currentTime + .015, master = ac.createGain(); master.gain.setValueAtTime(.0001, now); master.gain.exponentialRampToValueAtTime(.46, now + .008); master.gain.exponentialRampToValueAtTime(.0001, now + .24); master.connect(ac.destination); const squeak = ac.createOscillator(), squeakGain = ac.createGain(); squeak.type = 'square'; squeak.frequency.setValueAtTime(1480, now); squeak.frequency.exponentialRampToValueAtTime(620, now + .17); squeakGain.gain.setValueAtTime(.18, now); squeakGain.gain.exponentialRampToValueAtTime(.0001, now + .2); squeak.connect(squeakGain).connect(master); squeak.start(now); squeak.stop(now + .22); const pop = ac.createOscillator(), popGain = ac.createGain(); pop.type = 'sine'; pop.frequency.setValueAtTime(230, now); pop.frequency.exponentialRampToValueAtTime(72, now + .08); popGain.gain.setValueAtTime(.8, now); popGain.gain.exponentialRampToValueAtTime(.0001, now + .11); pop.connect(popGain).connect(master); pop.start(now); pop.stop(now + .13); const frames = Math.floor(ac.sampleRate * .13), buffer = ac.createBuffer(1, frames, ac.sampleRate), samples = buffer.getChannelData(0); for (let i = 0; i < frames; i++)samples[i] = (Math.random() * 2 - 1) * (1 - i / frames); const noise = ac.createBufferSource(), filter = ac.createBiquadFilter(), noiseGain = ac.createGain(); noise.buffer = buffer; filter.type = 'bandpass'; filter.frequency.value = 1250; filter.Q.value = .8; noiseGain.gain.setValueAtTime(.35, now); noiseGain.gain.exponentialRampToValueAtTime(.0001, now + .13); noise.connect(filter).connect(noiseGain).connect(master); noise.start(now) } catch { } }
 function playThermiteBurst() { if (state.thermiteAudioPlayed) return; state.thermiteAudioPlayed = true; primePopAudio(); const ac = popAudioContext; if (!ac) return; try { const now = ac.currentTime + .012, master = ac.createGain(); master.gain.setValueAtTime(.0001, now); master.gain.exponentialRampToValueAtTime(.27, now + .014); master.gain.exponentialRampToValueAtTime(.065, now + .34); master.gain.exponentialRampToValueAtTime(.0001, now + 1.45); master.connect(ac.destination); const boom = ac.createOscillator(), boomGain = ac.createGain(); boom.type = 'sine'; boom.frequency.setValueAtTime(96, now); boom.frequency.exponentialRampToValueAtTime(34, now + .62); boomGain.gain.setValueAtTime(.82, now); boomGain.gain.exponentialRampToValueAtTime(.0001, now + .72); boom.connect(boomGain).connect(master); boom.start(now); boom.stop(now + .75); const frames = Math.floor(ac.sampleRate * 1.35), buffer = ac.createBuffer(1, frames, ac.sampleRate), samples = buffer.getChannelData(0); for (let i = 0; i < frames; i++) { const q = i / frames, crackle = Math.random() > .972 ? 2.8 : 1; samples[i] = (Math.random() * 2 - 1) * Math.pow(1 - q, 1.45) * crackle } const noise = ac.createBufferSource(), low = ac.createBiquadFilter(), high = ac.createBiquadFilter(), noiseGain = ac.createGain(); noise.buffer = buffer; low.type = 'lowpass'; low.frequency.setValueAtTime(4800, now); low.frequency.exponentialRampToValueAtTime(900, now + 1.25); high.type = 'highpass'; high.frequency.value = 80; noiseGain.gain.setValueAtTime(.68, now); noiseGain.gain.exponentialRampToValueAtTime(.0001, now + 1.34); noise.connect(low).connect(high).connect(noiseGain).connect(master); noise.start(now) } catch { } }
 function drawFreeReactionCard(x, w) { const reaction = state.reaction, active = !reaction.complete, q = Math.max(0, Math.min(1, reaction.progress || 0)), y = 143; rr(x + 26, y, w - 52, 60, 8, active ? '#eaf5f3' : '#f1f5f3', active ? C.teal : '#a8c9bf'); text(active ? 'ACTIVE REACTION' : 'REACTION COMPLETE', x + 40, y + 13, 8.5, active ? C.teal : '#2f8067', 800); text(reaction.symbol, x + 40, y + 31, 11, C.ink, 700); wrappedText(reaction.word, x + 40, y + 49, w - 86, 8.8, C.muted, 600, 10, 1); if (active) { ctx.fillStyle = 'rgba(8,127,117,.16)'; ctx.fillRect(x + 40, y + 55, (w - 86) * q, 2) } }
+function drawFocusModeTopBar(p) {
+  const btnY = 14, btnH = 34;
+
+  // 1. Graph modal popup button
+  rr(16, btnY, 96, btnH, 17, state.graphModal ? C.teal : 'rgba(10, 28, 38, .85)', 'rgba(255,255,255,.2)');
+  text('📊 Graph', 64, btnY + 17, 11, '#ffffff', 800, 'center');
+  hit('open-graph-modal', 16, btnY, 96, btnH);
+
+  // 2. Method dropdown button
+  rr(120, btnY, 104, btnH, 17, state.methodDropdown ? C.teal : 'rgba(10, 28, 38, .85)', 'rgba(255,255,255,.2)');
+  text('📋 Method', 172, btnY + 17, 11, '#ffffff', 800, 'center');
+  hit('toggle-method-dropdown', 120, btnY, 104, btnH);
+
+  // 3. Evaluation modal popup button
+  rr(232, btnY, 120, btnH, 17, state.evaluationModal ? C.teal : 'rgba(10, 28, 38, .85)', 'rgba(255,255,255,.2)');
+  text('⚖️ Evaluation', 292, btnY + 17, 11, '#ffffff', 800, 'center');
+  hit('practical-evaluation', 232, btnY, 120, btnH);
+
+  // Exit Focus button on top right
+  rr(W - 136, btnY, 120, btnH, 17, 'rgba(10, 28, 38, .85)', 'rgba(255,255,255,.2)');
+  text('↙️ Exit Focus', W - 76, btnY + 17, 11, '#ffffff', 800, 'center');
+  hit('toggle-focus-mode', W - 136, btnY, 120, btnH);
+}
+
+function drawMethodDropdownPanel() {
+  if (!state.methodDropdown) return;
+  const p = practicals[state.selected];
+  const steps = p.steps || [];
+  const x = 120, y = 54, w = 440;
+  const activeStep = state.complete ? steps.length - 1 : Math.min(steps.length - 1, Math.floor((state.progress || 0) * steps.length));
+  
+  ctx.save();
+  ctx.font = '650 11px Inter, sans-serif';
+  const lineHeights = steps.map(s => {
+    const lines = wrapTextLines(s, w - 60, 11, 650);
+    const h = Math.max(32, lines.length * 16 + 12);
+    return { lines, h };
+  });
+  const totalH = 48 + lineHeights.reduce((sum, item) => sum + item.h + 6, 0) + 8;
+
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
+  ctx.shadowBlur = 18;
+  ctx.shadowOffsetY = 6;
+  rr(x, y, w, totalH, 12, '#ffffff', '#b4c7cd');
+  ctx.restore();
+
+  hit('method-dropdown-body', x, y, w, totalH);
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.roundRect(x, y, w, 38, [12, 12, 0, 0]);
+  ctx.clip();
+  ctx.fillStyle = p.color || C.teal;
+  ctx.fillRect(x, y, w, 38);
+  ctx.restore();
+
+  text('PRACTICAL METHOD STEPS', x + 16, y + 19, 10, '#ffffff', 800);
+  rr(x + w - 30, y + 8, 22, 22, 11, 'rgba(255,255,255,.25)');
+  text('✕', x + w - 19, y + 19, 11, '#ffffff', 800, 'center');
+  hit('toggle-method-dropdown', x + w - 30, y + 8, 22, 22);
+
+  let curY = y + 48;
+  steps.forEach((step, idx) => {
+    const { lines, h } = lineHeights[idx];
+    const isActive = idx === activeStep;
+    
+    rr(x + 12, curY, w - 24, h, 6, isActive ? 'rgba(8, 127, 117, .08)' : '#f6f9f8', isActive ? C.teal : '#e0e8e7');
+    
+    rr(x + 18, curY + 6, 20, 20, 10, isActive ? C.teal : '#7a8f96');
+    text(String(idx + 1), x + 28, curY + 16, 9.5, '#ffffff', 800, 'center');
+
+    lines.forEach((line, li) => {
+      text(line, x + 46, curY + 16 + li * 16, 11, isActive ? C.ink : '#39484d', isActive ? 750 : 600);
+    });
+
+    curY += h + 6;
+  });
+}
+
 function main() {
-  const L = 270, R = Math.max(260, Math.min(330, W * .23)), x = L, w = W - L - R, p = practicals[state.selected], free = p.id === 'free', wrappedObjective = ['titration', 'displacement', 'alkali', 'starchleaf', 'lipase', 'osmosis', 'potometer', 'quadrats', 'shoretransect', 'ripple', 'electromagnet', 'convection', 'conduction', 'thermal', 'hooke', 'specificheat', 'wirelength', 'fieldlines'].includes(p.id), equationY = wrappedObjective ? 151 : 143; ctx.fillStyle = '#fff'; ctx.fillRect(x, 64, w, H - 64); text(p.title.toUpperCase(), x + 28, 91, 11, p.color || C.teal, 800); if (wrappedObjective) wrappedText(p.objective, x + 28, 113, Math.min(w - 56, 700), 17, C.ink, 650, 21, 2); else text(p.objective, x + 28, 119, 17, C.ink, 650); if (free) { if (state.reaction) drawFreeReactionCard(x, w); else { rr(x + 26, 143, w - 52, 54, 8, '#f1eefb'); text('QUICK START', x + 40, 158, 9, C.muted, 800); text(p.eq, x + 40, 179, 13, C.ink, 600) } } else { rr(x + 26, equationY, w - 52, 72, 8, '#f2f6f5'); text('SYMBOL EQUATION', x + 40, equationY + 17, 8.5, C.muted, 800); text(p.eq, x + 145, equationY + 17, 12, C.ink, 650); text('WORD EQUATION', x + 40, equationY + 47, 8.5, C.muted, 800); wrappedText(p.word, x + 145, equationY + 47, w - 190, 10.2, C.ink, 600, 12, 2) }
-  const benchY = H - 128, arenaTop = free ? 205 : wrappedObjective ? 229 : 221; let wall = ctx.createLinearGradient(x, arenaTop, x, benchY); wall.addColorStop(0, '#f9fbfb'); wall.addColorStop(1, '#e9efef'); ctx.fillStyle = wall; ctx.fillRect(x, arenaTop, w, benchY - arenaTop);
+  const L = state.focusMode ? 0 : 270, R = state.focusMode ? 0 : Math.max(260, Math.min(330, W * .23)), x = L, w = W - L - R, p = practicals[state.selected], free = p.id === 'free', wrappedObjective = ['titration', 'displacement', 'alkali', 'starchleaf', 'lipase', 'osmosis', 'potometer', 'quadrats', 'shoretransect', 'ripple', 'electromagnet', 'convection', 'conduction', 'thermal', 'hooke', 'specificheat', 'wirelength', 'fieldlines'].includes(p.id), equationY = wrappedObjective ? 151 : 143;
+  if (!state.focusMode) {
+    ctx.fillStyle = '#fff'; ctx.fillRect(x, 64, w, H - 64); text(p.title.toUpperCase(), x + 28, 91, 11, p.color || C.teal, 800); if (wrappedObjective) wrappedText(p.objective, x + 28, 113, Math.min(w - 56, 700), 17, C.ink, 650, 21, 2); else text(p.objective, x + 28, 119, 17, C.ink, 650); if (free) { if (state.reaction) drawFreeReactionCard(x, w); else { rr(x + 26, 143, w - 52, 54, 8, '#f1eefb'); text('QUICK START', x + 40, 158, 9, C.muted, 800); text(p.eq, x + 40, 179, 13, C.ink, 600) } } else { rr(x + 26, equationY, w - 52, 72, 8, '#f2f6f5'); text('SYMBOL EQUATION', x + 40, equationY + 17, 8.5, C.muted, 800); text(p.eq, x + 145, equationY + 17, 12, C.ink, 650); text('WORD EQUATION', x + 40, equationY + 47, 8.5, C.muted, 800); wrappedText(p.word, x + 145, equationY + 47, w - 190, 10.2, C.ink, 600, 12, 2) }
+  }
+  const benchY = H - 128, arenaTop = state.focusMode ? 0 : (free ? 205 : wrappedObjective ? 229 : 221); let wall = ctx.createLinearGradient(x, arenaTop, x, benchY); wall.addColorStop(0, '#f9fbfb'); wall.addColorStop(1, '#e9efef'); ctx.fillStyle = wall; ctx.fillRect(x, arenaTop, w, benchY - arenaTop);
   // glazed laboratory tiles
   ctx.strokeStyle = 'rgba(155,174,179,.24)'; ctx.lineWidth = 1; for (let gx = x; gx < x + w; gx += 42) { ctx.beginPath(); ctx.moveTo(gx, arenaTop); ctx.lineTo(gx, benchY); ctx.stroke() } for (let gy = arenaTop; gy < benchY; gy += 42) { ctx.beginPath(); ctx.moveTo(x, gy); ctx.lineTo(x + w, gy); ctx.stroke() } const glow = ctx.createRadialGradient(x + w * .53, benchY - 115, 0, x + w * .53, benchY - 115, w * .45); glow.addColorStop(0, state.burner ? 'rgba(71,179,255,.15)' : 'rgba(255,255,255,.62)'); glow.addColorStop(1, 'rgba(255,255,255,0)'); ctx.fillStyle = glow; ctx.fillRect(x, arenaTop, w, benchY - arenaTop);
   // blue resin worktop edge over a dark enamel cabinet frontage
@@ -1004,6 +1091,7 @@ function main() {
   const sceneBottom = immersiveOutdoor ? H : benchY;
   if (lab3d.available) ctx.clearRect(x, arenaTop, w, sceneBottom - arenaTop);
   const cx = x + w * .52, cy = benchY - 57; if (lab3d.available) { lab3d.resize(x, arenaTop, w, Math.max(180, sceneBottom - arenaTop), UI_SCALE); registerWebGLInteractions(p.id, cx, cy); ctx.save(); ctx.globalCompositeOperation = 'destination-out'; ctx.fillRect(x, arenaTop, w, sceneBottom - arenaTop); ctx.restore(); if (!free) drawChemicalTags(p.id); if (p.id === 'mass' && state.massStage === 2 && state.massLidOn && state.layout?.lid) { const lp = state.layout.lid; rr(lp.x - 76, lp.y - 64, 152, 27, 8, 'rgba(255,255,255,.96)', 'rgba(124,98,184,.6)'); text('CLICK LID TO REMOVE', lp.x, lp.y - 50, 9.5, '#6b52a6', 800, 'center') } if (p.id === 'hydrogen' && ((state.hydrogenStage === 4 && state.hydrogenTimer > .36) || state.hydrogenStage === 5)) { const active = state.hydrogenStage === 4, hp = lab3d.projectToScreen(.65, active ? 3.35 : 2.85, .02); if (hp) { rr(hp.x - 72, hp.y - 14, 144, 30, 9, active ? 'rgba(255,245,224,.97)' : 'rgba(232,247,241,.97)', active ? 'rgba(228,93,79,.72)' : 'rgba(8,127,117,.55)'); text(active ? 'SQUEAKY POP!' : 'HYDROGEN CONFIRMED', hp.x, hp.y + 1, 10, active ? '#c94b3f' : C.teal, 850, 'center') } } } else drawApparatus(p.id, cx, cy, w, benchY, x);
+  if (state.focusMode) drawFocusModeTopBar(p);
   if (shoreScene) rr(x + 8, benchY + 18, w - 16, 86, 12, 'rgba(5,31,45,.78)', 'rgba(116,221,226,.28)');
   else if (meadowScene) rr(x + 8, benchY + 18, w - 16, 86, 12, 'rgba(12,43,24,.8)', 'rgba(164,224,137,.3)');
   // controls
@@ -1269,6 +1357,7 @@ function drawGraphExpandButton(panelX, panelWidth) {
   hit('open-graph-modal', x, y, w, h);
 }
 function rightbar() {
+  if (state.focusMode) return;
   const R = Math.max(260, Math.min(330, W * .23)), x = W - R, p = practicals[state.selected], dragLab = p.id === 'rates' || p.id === 'temp';
   rightSidebarLayoutSnapshot = null;
   hookeGuidanceHitbox = null;
@@ -2266,6 +2355,7 @@ function draw(skipWebGL = false) {
   if (!portraitPromptVisible) {
     if (state.selected !== lastSelectedPractical) { state.reaction = null; lastSelectedPractical = state.selected }
     header(); sidebar(); main(); rightbar();
+    if (state.focusMode && state.methodDropdown) drawMethodDropdownPanel();
     if (state.dose) drawDosePanel();
     if (state.evaluationModal) drawEvaluationModal();
     if (state.graphModal) drawGraphModal();
@@ -3064,6 +3154,9 @@ canvas.addEventListener('pointerdown', e => {
   else if (r.id === 'reactant-safety-modal-body') return;
   else if (r.id === 'close-hooke-focus-modal') { state.hookeFocusModal = false; state.hookeFocusProgress = 0; draw(); }
   else if (r.id === 'hooke-focus-modal-body') return;
+  else if (r.id === 'toggle-focus-mode') { state.focusMode = !state.focusMode; state.methodDropdown = false; draw(); }
+  else if (r.id === 'toggle-method-dropdown') { state.methodDropdown = !state.methodDropdown; draw(); }
+  else if (r.id === 'method-dropdown-body') return;
   else if (r.id === 'reagent' && !state.pour) { state.drag = { kind: 'HCl(aq)', x: point.x, y: point.y, startX: point.x, startY: point.y }; canvas.setPointerCapture?.(e.pointerId); state.toast = 'Move the flask close to the receiver, then release.'; draw() }
 });
 canvas.addEventListener('pointerdown', e => { const r = regionAtPoint(pointerPosition(e)); if (r?.id === 'practical' && practicals[r.data]?.id === 'flame') { resetFlameTestPractical(); draw() } else if (r?.id === 'flame-spectrum' && practicals[state.selected].id === 'flame' && !state.running) { state.flameTestSalt = r.data; state.flameTestStage = 0; state.flameTestTimer = 0; state.tab = 'bench'; state.toast = `${flameTestSalts[r.data].salt} selected from the spectrum. Scoop it with the clean spatula.`; draw() } });
@@ -3101,15 +3194,29 @@ canvas.addEventListener('pointerup', e => {
 });
 canvas.addEventListener('pointercancel', () => { if (!state.drag) return; if (state.drag.kind === 'workspace') { const it = state.workspace.find(a => a.uid === state.drag.uid); if (it && state.drag.origin) Object.assign(it, state.drag.origin) } state.toast = 'Interaction cancelled.'; state.drag = null; draw() });
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && (state.graphModal || state.evaluationModal || state.reactantSafety || state.hookeFocusModal)) {
-    state.graphModal = false;
-    state.evaluationModal = false;
-    state.reactantSafety = null;
-    state.hookeFocusModal = false;
-    state.hookeFocusProgress = 0;
-    e.preventDefault();
-    draw();
-    return;
+  if (e.key === 'Escape') {
+    if (state.graphModal || state.evaluationModal || state.reactantSafety || state.hookeFocusModal) {
+      state.graphModal = false;
+      state.evaluationModal = false;
+      state.reactantSafety = null;
+      state.hookeFocusModal = false;
+      state.hookeFocusProgress = 0;
+      e.preventDefault();
+      draw();
+      return;
+    }
+    if (state.methodDropdown) {
+      state.methodDropdown = false;
+      e.preventDefault();
+      draw();
+      return;
+    }
+    if (state.focusMode) {
+      state.focusMode = false;
+      e.preventDefault();
+      draw();
+      return;
+    }
   }
   if (e.key.toLowerCase() === 'f') document.fullscreenElement ? document.exitFullscreen() : document.querySelector('main')?.requestFullscreen();
   if (e.key === 'Escape' && document.fullscreenElement) document.exitFullscreen();

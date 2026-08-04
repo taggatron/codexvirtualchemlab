@@ -1126,32 +1126,33 @@ export class LabRenderer3D {
     const rulerUnitsPerCm = .05, rulerLength = 50 * rulerUnitsPerCm;
 
     // The zero end of the ruler physically touches the nearest outside edge of
-    // the beaker. The numbered scale then runs away from the beaker.
+    // the beaker. The scale backing sits in front of the lamp (closer to the camera)
+    // and stands upright, matching the potometer practical scale board layout.
     const rulerGroup = new THREE.Group();
+    const rulerZ = -0.05;
     const rulerMat = new THREE.MeshStandardMaterial({ color: 0xf6f2df, roughness: .86, metalness: 0 });
-    const ruler = new THREE.Mesh(roundedBox(rulerLength, .055, .38, .025, 5), rulerMat);
-    ruler.position.set(beakerEdgeX - rulerLength / 2, .1125, beakerZ);
-    rulerGroup.add(ruler);
-    const rulerEdge = new THREE.Mesh(new THREE.BoxGeometry(rulerLength - .025, .008, .018), new THREE.MeshBasicMaterial({ color: 0x17323c, toneMapped: false }));
-    rulerEdge.position.set(beakerEdgeX - rulerLength / 2, .145, beakerZ - .165);
-    rulerGroup.add(rulerEdge);
-    const tickMat = new THREE.MeshBasicMaterial({ color: 0x17323c, toneMapped: false });
+    const scaleBacking = new THREE.Mesh(roundedBox(rulerLength + .12, .27, .025, .018), rulerMat);
+    scaleBacking.position.set(beakerEdgeX - rulerLength / 2, .18, rulerZ);
+    rulerGroup.add(scaleBacking);
+
+    const tickMat = new THREE.MeshBasicMaterial({ color: 0x17323c, toneMapped: false, depthTest: false });
     for (let cm = 0; cm <= 50; cm += 1) {
       const isMajor = cm % 10 === 0, isMid = cm % 5 === 0;
       const tickX = beakerEdgeX - cm * rulerUnitsPerCm;
-      const tickDepth = isMajor ? .24 : isMid ? .17 : .105;
-      const tick = new THREE.Mesh(new THREE.BoxGeometry(isMajor ? .014 : .008, .012, tickDepth), tickMat);
-      tick.position.set(tickX, .145, beakerZ - .19 + tickDepth / 2);
+      const tickH = isMajor ? .16 : isMid ? .12 : .075;
+      const tick = new THREE.Mesh(new THREE.BoxGeometry(isMajor ? .014 : .008, tickH, .015), tickMat);
+      tick.position.set(tickX, .135 + (isMajor ? .015 : 0), rulerZ + .016);
+      tick.renderOrder = 10;
       rulerGroup.add(tick);
     }
     const rulerLabel = (value, x) => {
-      const canvas = document.createElement('canvas'), dc = canvas.getContext('2d'); canvas.width = 128; canvas.height = 64; dc.fillStyle = '#18333d'; dc.font = '800 42px Inter, sans-serif'; dc.textAlign = 'center'; dc.textBaseline = 'middle'; dc.fillText(String(value), 64, 32); const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace; const label = new THREE.Mesh(new THREE.PlaneGeometry(.25, .125), new THREE.MeshBasicMaterial({ map: texture, transparent: true, toneMapped: false, depthTest: false })); label.rotation.x = -Math.PI / 2; label.position.set(x, .153, beakerZ + .105); label.renderOrder = 12; rulerGroup.add(label)
+      const canvas = document.createElement('canvas'), dc = canvas.getContext('2d'); canvas.width = 128; canvas.height = 64; dc.fillStyle = '#18333d'; dc.font = '800 42px Inter, sans-serif'; dc.textAlign = 'center'; dc.textBaseline = 'middle'; dc.fillText(String(value), 64, 32); const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace; const label = new THREE.Mesh(new THREE.PlaneGeometry(.25, .125), new THREE.MeshBasicMaterial({ map: texture, transparent: true, toneMapped: false, depthTest: false })); label.position.set(x, .285, rulerZ + .018); label.renderOrder = 12; rulerGroup.add(label)
     };
     for (let cm = 0; cm <= 50; cm += 10)rulerLabel(cm, beakerEdgeX - cm * rulerUnitsPerCm);
-    const zeroStop = new THREE.Mesh(new THREE.BoxGeometry(.035, .075, .38), new THREE.MeshBasicMaterial({ color: 0x138d80 }));
-    zeroStop.position.set(beakerEdgeX, .15, beakerZ); rulerGroup.add(zeroStop);
-    const activeMark = new THREE.Mesh(new THREE.BoxGeometry(.024, .068, .36), new THREE.MeshBasicMaterial({ color: lampOn ? 0xffd072 : 0x6d7b7f }));
-    activeMark.position.set(beakerEdgeX - dist * rulerUnitsPerCm, .151, beakerZ); rulerGroup.add(activeMark);
+    const zeroStop = new THREE.Mesh(roundedBox(.035, .28, .035, .008), new THREE.MeshBasicMaterial({ color: 0x138d80 }));
+    zeroStop.position.set(beakerEdgeX, .18, rulerZ); rulerGroup.add(zeroStop);
+    const activeMark = new THREE.Mesh(roundedBox(.024, .275, .035, .006), new THREE.MeshBasicMaterial({ color: lampOn ? 0xffd072 : 0x6d7b7f, toneMapped: false }));
+    activeMark.position.set(beakerEdgeX - dist * rulerUnitsPerCm, .181, rulerZ); activeMark.renderOrder = 11; rulerGroup.add(activeMark);
     Object.assign(rulerGroup.userData, { style: 'potometer ivory-white scale', rangeCm: [0, 50], numberedEveryCm: 10, zeroAtBeakerEdge: true });
     g.add(rulerGroup);
 
