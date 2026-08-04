@@ -1,5 +1,5 @@
-import { LabRenderer3D } from './lab3d.js?v=20260803-99';
-import { drawThermalBenchScene } from './thermalview.js?v=20260728-1';
+import { LabRenderer3D } from './lab3d.js';
+import { drawThermalBenchScene } from './thermalview.js';
 const canvas = document.getElementById('lab'), visibleCtx = canvas.getContext('2d'), buffer = document.createElement('canvas'), webglCanvas = document.getElementById('webgl'), lab3d = new LabRenderer3D(webglCanvas); let ctx = buffer.getContext('2d');
 webglCanvas.addEventListener('lab3dneedsredraw',()=>requestAnimationFrame(()=>draw()));
 const C = { navy: '#102a3a', ink: '#17313e', muted: '#657881', teal: '#087f75', cyan: '#4fc3b5', paper: '#f7f8f6', line: '#d8e0e2', orange: '#e48b35', red: '#b94b44', blue: '#3c78a8' };

@@ -1,5 +1,5 @@
 import * as THREE from './vendor/three.module.js';
-import { drawThermalBenchScene } from './thermalview.js?v=20260728-1';
+import { drawThermalBenchScene } from './thermalview.js';
 
 const GLASS = () => new THREE.MeshPhysicalMaterial({ color: 0xccefff, transparent: true, opacity: .43, transmission: .6, roughness: .045, metalness: 0, ior: 1.46, thickness: .08, clearcoat: .35, clearcoatRoughness: .08, side: THREE.DoubleSide, depthWrite: false });
 const metal = (color = 0x687b82, roughness = .26) => new THREE.MeshStandardMaterial({ color, metalness: .82, roughness });
