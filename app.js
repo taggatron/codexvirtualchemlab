@@ -804,7 +804,7 @@ function progressButton(label, x, y, w, h, progress = 0, active = false) {
     ctx.fillRect(x, y, w * q, h);
     ctx.restore();
   }
-  text(label, x + w / 2, y + h / 2, 12, q > .56 ? '#fff' : C.ink, 700, 'center');
+  text(label, x + w / 2, y + h / 2, 12, '#000', 700, 'center');
   hit('button', x, y, w, h, label);
 }
 function flaskPath() { ctx.beginPath(); ctx.moveTo(-14, -76); ctx.lineTo(-14, -43); ctx.lineTo(-48, 20); ctx.quadraticCurveTo(-57, 42, -32, 48); ctx.quadraticCurveTo(0, 54, 32, 48); ctx.quadraticCurveTo(57, 42, 48, 20); ctx.lineTo(14, -43); ctx.lineTo(14, -76) }
