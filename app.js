@@ -479,6 +479,8 @@ const freeReactionRules = [
 const state = { selected: 0, subject: 'chemistry', subjectTabX: 149, subjectTabW: 114, sidebarScroll: { chemistry: 0, biology: 0, physics: 0 }, running: false, complete: false, temp: 20, ph: 7, time: 0, volume: 0, progress: 0, tab: 'equipment', graphModal: false, evaluationModal: false, focusMode: false, methodDropdown: false, reactantSafety: null, points: [], hover: null, toast: 'Click equipment to add it, or drag it onto the bench.', drag: null, pour: null, burner: false, coolingWater: false, particles: [], layout: null, flamePhase: 0, transferred: 0, workspace: [], nextItem: 1, dose: null, reaction: null, massStage: 0, massLidOn: true, massTransfer: null, massBefore: 4.01, massAfter: null, hydrogenStage: 0, hydrogenTimer: 0, hydrogenAudioPlayed: false, hydrogenGas: 0, saltsStage: 0, saltsTimer: 0, chromSelectedDye: null, electroRecorded: false, electroWeighing: false, electroWeighTimer: 0, titrationStage: 0, titrationVolume: 0, titrationDropTimer: 0, titrationDrops: 0, titrationIndicator: false, titrationIndicatorTimer: 0, titrationRecorded: false, ratesStage: 0, ratesStageTimer: 0, ratesTrialIndex: 0, ratesTargetTemp: 20, ratesBathTemp: 20, ratesConditioning: false, ratesResults: [], thermiteTimer: 0, thermiteAudioPlayed: false, displacementStage: 0, displacementTimer: 0, displacementRecorded: false, flameTestStage: 0, flameTestTimer: 0, flameTestSalt: 0, flameTestTested: [], starchStage: 0, starchTimer: 0, lipaseStage: 0, lipaseTimer: 0, lipaseTrialIndex: 0, lipaseTargetTemp: 20, lipaseBathTemp: 20, lipaseConditioning: false, lipaseResults: [], osmosisStage: 0, osmosisTimer: 0, osmosisTrialIndex: 0, osmosisConcentration: 0, osmosisResults: [], potometerStage: 0, potometerTimer: 0, potometerTrialIndex: 0, potometerWindSpeed: 0, potometerBubbleMm: 0, potometerResults: [], pondweedDistance: 20, pondweedLampOn: true, pondweedTimer: 0, pondweedBubbles: 0, pondweedResults: [], quadratStage: 0, quadratTimer: 0, quadratSampleIndex: 0, quadratCurrentCount: 0, quadratResults: [], meadowWindClock: 0, transectStage: 0, transectTimer: 0, transectStationIndex: 0, transectDistanceM: 0, transectCurrentObservation: null, transectResults: [], shoreTideClock: 0, shoreTideProgress: 0, rippleStage: 0, rippleTimer: 0, rippleTrialIndex: 0, rippleFrequencyHz: 4, rippleTenWavelengthCm: 0, rippleWavelengthCm: 0, rippleSpeedMs: 0, rippleResults: [], rippleWaveClock: 0, newtonForce: 0.2, newtonMass: 1.0, newtonPos: 0, newtonVel: 0, newtonAcc: 0.2, newtonTimer: 0, newtonRunning: false, newtonGate1Time: null, newtonGate2Time: null, newtonResults: [], electromagnetStage: 0, electromagnetTimer: 0, electromagnetTrialIndex: 0, electromagnetTurns: 10, electromagnetClips: 0, electromagnetResults: [], convectionStage: 0, convectionTimer: 0, conductionStage: 0, conductionTimer: 0, thermalStage: 0, thermalTimer: 0, thermalCaptured: false, densityStage: 0, densitySample: 0, densityTimer: 0, densityRecorded: false, densityResults: [], hookeStage: 0, hookeTimer: 0, hookeTrialIndex: 0, hookeForceN: 0, hookeResults: [], shcStage: 0, shcTimer: 0, shcEnergyJ: 0, shcTemperatureC: 20, shcResults: [], wireStage: 0, wireTimer: 0, wireTrialIndex: 0, wireLengthCm: 20, wireVoltageV: 1.5, wireResults: [], fieldStage: 0, fieldTimer: 0, fieldConfigIndex: 0, fieldResults: [] };
 state.hookeFocusModal = false;
 state.hookeFocusProgress = 0;
+Object.assign(state, { pondweedCountAnimating: false, pondweedCountTimer: 0, pondweedPendingBpm: null });
+const pondweedCountAnimationDuration = 2;
 const alkaliMetals = [
   { id: 'lithium', name: 'Lithium', symbol: 'Li', color: '#bf5961', flame: 'no visible flame', observation: 'Floats, fizzes gently and moves slowly across the water surface.', duration: 3.4, temperatureRise: 18 },
   { id: 'sodium', name: 'Sodium', symbol: 'Na', color: '#d89235', flame: 'yellow-orange flame', observation: 'Melts into a silvery ball, darts rapidly and burns with a yellow-orange flame.', duration: 2.75, temperatureRise: 42 },
@@ -787,6 +789,24 @@ function guidedReactantSafety(name, practicalId = practicals[state.selected]?.id
 }
 function hit(id, x, y, w, h, data) { regions.push({ id, x, y, w, h, data }) }
 function button(label, x, y, w, h, active = false) { rr(x, y, w, h, 8, active ? C.teal : '#fff', active ? C.teal : C.line); text(label, x + w / 2, y + h / 2, 12, active ? '#fff' : C.ink, 700, 'center'); hit('button', x, y, w, h, label) }
+function progressButton(label, x, y, w, h, progress = 0, active = false) {
+  const q = Math.max(0, Math.min(1, progress));
+  rr(x, y, w, h, 8, active ? '#e7f7f4' : '#fff', active ? C.teal : C.line);
+  if (q > 0) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, h, 8);
+    ctx.clip();
+    const fill = ctx.createLinearGradient(x, y, x, y + h);
+    fill.addColorStop(0, '#4fc3b5');
+    fill.addColorStop(1, '#087f75');
+    ctx.fillStyle = fill;
+    ctx.fillRect(x, y, w * q, h);
+    ctx.restore();
+  }
+  text(label, x + w / 2, y + h / 2, 12, q > .56 ? '#fff' : C.ink, 700, 'center');
+  hit('button', x, y, w, h, label);
+}
 function flaskPath() { ctx.beginPath(); ctx.moveTo(-14, -76); ctx.lineTo(-14, -43); ctx.lineTo(-48, 20); ctx.quadraticCurveTo(-57, 42, -32, 48); ctx.quadraticCurveTo(0, 54, 32, 48); ctx.quadraticCurveTo(57, 42, 48, 20); ctx.lineTo(14, -43); ctx.lineTo(14, -76) }
 function drawFlask(x, y, scale = 1, opt = {}) {
   const angle = opt.angle || 0, liquid = opt.liquid ?? .55, color = opt.color || '79,195,181'; ctx.save(); ctx.translate(x, y); ctx.rotate(angle); ctx.scale(scale, scale);
@@ -1228,7 +1248,7 @@ function drawPondweedControls(x, benchY, w) {
   button('- 10cm', layout.minusX, benchY + 46, layout.distanceWidth, 38, false);
   button('+ 10cm', layout.plusX, benchY + 46, layout.distanceWidth, 38, false);
   button(state.pondweedLampOn ? 'LAMP OFF' : 'LAMP ON', layout.lampX, benchY + 46, layout.lampWidth, 38, state.pondweedLampOn);
-  button('COUNT 1 MIN', layout.countX, benchY + 46, layout.countWidth, 38, state.running);
+  progressButton('COUNT 1 MIN', layout.countX, benchY + 46, layout.countWidth, 38, state.pondweedCountAnimating ? state.pondweedCountTimer / pondweedCountAnimationDuration : 0, state.pondweedCountAnimating);
 }
 function newton2ControlLayout(x, w) {
   const rowLeft = x + 20, readingLeft = x + w - 190, minimumReadingGap = 16, buttonGap = 10;
@@ -2647,24 +2667,28 @@ function activatePondweed(label) {
     state.pondweedLampOn = false;
     state.toast = 'Filament desk lamp switched OFF. Photosynthesis stops in darkness.';
   } else if (label === 'COUNT 1 MIN') {
+    if (state.pondweedCountAnimating) {
+      state.toast = 'Count already in progress — wait for the 1-minute simulation to finish.';
+      return;
+    }
     if (!state.pondweedLampOn) {
       state.toast = 'Lamp is OFF — turn on lamp before counting bubbles.';
       return;
     }
-    const bpm = Math.round(52 / Math.pow(state.pondweedDistance / 10, 1.8) + 4);
-    state.pondweedBubbles = bpm;
+    state.pondweedPendingBpm = Math.round(52 / Math.pow(state.pondweedDistance / 10, 1.8) + 4);
+    state.pondweedCountAnimating = true;
+    state.pondweedCountTimer = 0;
     state.running = true;
-    state.complete = true;
-    state.points.push({ x: (state.pondweedDistance - 10) / 40, y: bpm / 60, xValue: state.pondweedDistance, yValue: bpm });
-    if (!state.pondweedResults.some(r => r.distance === state.pondweedDistance)) {
-      state.pondweedResults.push({ distance: state.pondweedDistance, bubbles: bpm });
-    }
-    state.toast = `1 min count complete: ${bpm} oxygen bubbles at ${state.pondweedDistance} cm from the beaker edge. Automatically added to graph!`;
+    state.complete = false;
+    state.toast = 'Counting oxygen bubbles over 1 minute...';
   } else if (label === 'RESET PRACTICAL') {
     state.pondweedDistance = 20;
     state.pondweedLampOn = true;
     state.pondweedTimer = 0;
     state.pondweedBubbles = 0;
+    state.pondweedCountAnimating = false;
+    state.pondweedCountTimer = 0;
+    state.pondweedPendingBpm = null;
     state.pondweedResults = [];
     state.points = [];
     state.running = false;
@@ -3551,10 +3575,27 @@ function update(dt, skipDraw = false) {
     return;
   }
   if (id === 'pondweed') {
-    if (state.pondweedLampOn) {
+    if (state.pondweedLampOn || state.pondweedCountAnimating) {
       state.pondweedTimer += dt;
     }
-    if (!skipDraw && state.pondweedLampOn) draw();
+    if (state.pondweedCountAnimating) {
+      state.pondweedCountTimer = Math.min(pondweedCountAnimationDuration, state.pondweedCountTimer + dt);
+      if (state.pondweedCountTimer >= pondweedCountAnimationDuration) {
+        const bpm = state.pondweedPendingBpm ?? Math.round(52 / Math.pow((state.pondweedDistance || 10) / 10, 1.8) + 4);
+        state.pondweedBubbles = bpm;
+        state.points.push({ x: (state.pondweedDistance - 10) / 40, y: bpm / 60, xValue: state.pondweedDistance, yValue: bpm });
+        if (!state.pondweedResults.some(r => r.distance === state.pondweedDistance)) {
+          state.pondweedResults.push({ distance: state.pondweedDistance, bubbles: bpm });
+        }
+        state.pondweedCountAnimating = false;
+        state.pondweedCountTimer = 0;
+        state.pondweedPendingBpm = null;
+        state.running = false;
+        state.complete = true;
+        state.toast = `1 min count complete: ${bpm} oxygen bubbles at ${state.pondweedDistance} cm from the beaker edge. Automatically added to graph!`;
+      }
+    }
+    if (!skipDraw && (state.pondweedLampOn || state.pondweedCountAnimating)) draw();
     return;
   }
   if (id === 'newton2') {
