@@ -37,6 +37,7 @@ const snapshot = JSON.parse(await page.evaluate(() => window.render_game_to_text
 const rotationSnapshots = [lowerEarly, transfer, blotEarly, blotTransfer].map(entry => entry.potato_osmosis_practical.animation.synchronized_forceps_and_potato_rotation);
 for (const rotation of rotationSnapshots) {
   if (!rotation?.same_rate_and_direction || !rotation.remain_parallel || rotation.relative_angle_degrees !== 0 || rotation.potato_angle_degrees !== rotation.forceps_angle_degrees) throw new Error(`Forceps/potato rotation lost synchronization: ${JSON.stringify(rotation)}`);
+  if (!rotation.grip_offset_rotates_with_shared_angle || !rotation.grip_aligned_to_potato_midpoint || rotation.grip_point_offset_from_potato_midpoint_scene_units !== 0) throw new Error(`Forceps grip left the potato midpoint: ${JSON.stringify(rotation)}`);
 }
 for (const [from, to] of [[rotationSnapshots[0], rotationSnapshots[1]], [rotationSnapshots[2], rotationSnapshots[3]]]) {
   const potatoDelta = +(to.potato_angle_degrees - from.potato_angle_degrees).toFixed(3), forcepsDelta = +(to.forceps_angle_degrees - from.forceps_angle_degrees).toFixed(3);

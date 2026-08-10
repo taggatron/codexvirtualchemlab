@@ -1,6 +1,6 @@
 {
   "errors": [],
-  "stage": 7,
+  "stage": 4,
   "animation": {
     "smooth_forceps_transfer": true,
     "potato_held_between_forceps_jaws": true,
@@ -12,12 +12,15 @@
       "shared_rotation_source": true,
       "same_rate_and_direction": true,
       "remain_parallel": true,
+      "grip_offset_rotates_with_shared_angle": true,
+      "grip_point_offset_from_potato_midpoint_scene_units": 0,
+      "grip_aligned_to_potato_midpoint": true,
       "forceps_visible": false
     },
     "water_molecules_visible": false,
     "water_molecule_direction": "into the potato cells",
-    "surface_drain_droplets": false,
-    "two_sheet_blotting_press": false,
+    "surface_drain_droplets": true,
+    "two_sheet_blotting_press": true,
     "balance_reading_settles": false
   },
   "rotation_snapshots": [
@@ -29,6 +32,9 @@
       "shared_rotation_source": true,
       "same_rate_and_direction": true,
       "remain_parallel": true,
+      "grip_offset_rotates_with_shared_angle": true,
+      "grip_point_offset_from_potato_midpoint_scene_units": 0,
+      "grip_aligned_to_potato_midpoint": true,
       "forceps_visible": true
     },
     {
@@ -39,6 +45,9 @@
       "shared_rotation_source": true,
       "same_rate_and_direction": true,
       "remain_parallel": true,
+      "grip_offset_rotates_with_shared_angle": true,
+      "grip_point_offset_from_potato_midpoint_scene_units": 0,
+      "grip_aligned_to_potato_midpoint": true,
       "forceps_visible": true
     },
     {
@@ -49,6 +58,9 @@
       "shared_rotation_source": true,
       "same_rate_and_direction": true,
       "remain_parallel": true,
+      "grip_offset_rotates_with_shared_angle": true,
+      "grip_point_offset_from_potato_midpoint_scene_units": 0,
+      "grip_aligned_to_potato_midpoint": true,
       "forceps_visible": true
     },
     {
@@ -59,16 +71,9 @@
       "shared_rotation_source": true,
       "same_rate_and_direction": true,
       "remain_parallel": true,
-      "forceps_visible": true
-    },
-    {
-      "shared_angle_degrees": -90,
-      "potato_angle_degrees": -90,
-      "forceps_angle_degrees": -90,
-      "relative_angle_degrees": 0,
-      "shared_rotation_source": true,
-      "same_rate_and_direction": true,
-      "remain_parallel": true,
+      "grip_offset_rotates_with_shared_angle": true,
+      "grip_point_offset_from_potato_midpoint_scene_units": 0,
+      "grip_aligned_to_potato_midpoint": true,
       "forceps_visible": true
     }
   ]

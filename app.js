@@ -1,4 +1,4 @@
-import { LabRenderer3D } from './lab3d.js?v=20260810-102';
+import { LabRenderer3D } from './lab3d.js?v=20260810-103';
 import { drawThermalBenchScene } from './thermalview.js';
 const canvas = document.getElementById('lab'), visibleCtx = canvas.getContext('2d'), buffer = document.createElement('canvas'), webglCanvas = document.getElementById('webgl'), lab3d = new LabRenderer3D(webglCanvas); let ctx = buffer.getContext('2d');
 webglCanvas.addEventListener('lab3dneedsredraw',()=>requestAnimationFrame(()=>draw()));
