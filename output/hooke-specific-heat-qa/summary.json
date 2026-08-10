@@ -35,11 +35,13 @@
         "origin": "top of vertical ruler",
         "scale_cm": [
           0,
-          33.2
+          36.4
         ],
-        "unloaded_pointer_reading_cm": 17.1,
-        "pointer_reading_cm": 17.1
+        "unloaded_pointer_reading_cm": 20,
+        "pointer_reading_cm": 20
       },
+      "ruler_smallest_graduation_mm": 1,
+      "safety_catch_tray_directly_below_hanger": true,
       "guidance_focus": {
         "available": true,
         "trigger_bounds": {
@@ -93,11 +95,13 @@
         "origin": "top of vertical ruler",
         "scale_cm": [
           0,
-          33.2
+          36.4
         ],
-        "unloaded_pointer_reading_cm": 17.1,
-        "pointer_reading_cm": 17.1
+        "unloaded_pointer_reading_cm": 20,
+        "pointer_reading_cm": 20
       },
+      "ruler_smallest_graduation_mm": 1,
+      "safety_catch_tray_directly_below_hanger": true,
       "guidance_focus": {
         "available": true,
         "trigger_bounds": {
@@ -151,11 +155,13 @@
         "origin": "top of vertical ruler",
         "scale_cm": [
           0,
-          33.2
+          36.4
         ],
-        "unloaded_pointer_reading_cm": 17.1,
-        "pointer_reading_cm": 17.1
+        "unloaded_pointer_reading_cm": 20,
+        "pointer_reading_cm": 20
       },
+      "ruler_smallest_graduation_mm": 1,
+      "safety_catch_tray_directly_below_hanger": true,
       "guidance_focus": {
         "available": true,
         "trigger_bounds": {
@@ -209,11 +215,13 @@
         "origin": "top of vertical ruler",
         "scale_cm": [
           0,
-          33.2
+          36.4
         ],
-        "unloaded_pointer_reading_cm": 17.1,
-        "pointer_reading_cm": 17.1
+        "unloaded_pointer_reading_cm": 20,
+        "pointer_reading_cm": 20
       },
+      "ruler_smallest_graduation_mm": 1,
+      "safety_catch_tray_directly_below_hanger": true,
       "guidance_focus": {
         "available": true,
         "trigger_bounds": {
@@ -276,11 +284,13 @@
         "origin": "top of vertical ruler",
         "scale_cm": [
           0,
-          33.2
+          36.4
         ],
-        "unloaded_pointer_reading_cm": 17.1,
-        "pointer_reading_cm": 23.1
+        "unloaded_pointer_reading_cm": 20,
+        "pointer_reading_cm": 26
       },
+      "ruler_smallest_graduation_mm": 1,
+      "safety_catch_tray_directly_below_hanger": true,
       "guidance_focus": {
         "available": true,
         "trigger_bounds": {
@@ -359,11 +369,13 @@
         "origin": "top of vertical ruler",
         "scale_cm": [
           0,
-          33.2
+          36.4
         ],
-        "unloaded_pointer_reading_cm": 17.1,
-        "pointer_reading_cm": 30.1
+        "unloaded_pointer_reading_cm": 20,
+        "pointer_reading_cm": 33
       },
+      "ruler_smallest_graduation_mm": 1,
+      "safety_catch_tray_directly_below_hanger": true,
       "guidance_focus": {
         "available": true,
         "trigger_bounds": null,
@@ -442,7 +454,7 @@
       ],
       "proportional_limit_n": 5,
       "final_6n_point_beyond_proportionality": true,
-      "conclusion": "force is proportional to extension from 0 to 5 N; the 6 N point lies above the straight-line prediction",
+      "conclusion": "force is proportional to extension from 0 to 5 N; at 6 N the extension is greater than the straight-line prediction, so the point lies below the extrapolated force line",
       "smooth_stage_animation": true
     },
     "complete": true,
@@ -483,7 +495,7 @@
         "12 V cartridge heater",
         "digital temperature probe",
         "thermal paste collars",
-        "close-fitting foam insulation",
+        "close-fitting foam jacket with bored lid",
         "low-voltage supply",
         "ammeter and joulemeter"
       ],
@@ -491,7 +503,13 @@
         "thermal_paste_applied": false,
         "heater_fully_inserted": false,
         "probe_fully_inserted": false,
-        "insulation_closed": false
+        "insulation_closed": false,
+        "bored_insulating_lid_closed": false
+      },
+      "electrical_circuit": {
+        "complete": true,
+        "route": "supply positive → ammeter → joulemeter → heater → supply negative",
+        "thermometer_probe_has_separate_data_lead": true
       },
       "mass_kg": 1,
       "supply_voltage_v": 0,
@@ -521,7 +539,7 @@
         "12 V cartridge heater",
         "digital temperature probe",
         "thermal paste collars",
-        "close-fitting foam insulation",
+        "close-fitting foam jacket with bored lid",
         "low-voltage supply",
         "ammeter and joulemeter"
       ],
@@ -529,7 +547,13 @@
         "thermal_paste_applied": true,
         "heater_fully_inserted": true,
         "probe_fully_inserted": true,
-        "insulation_closed": true
+        "insulation_closed": true,
+        "bored_insulating_lid_closed": true
+      },
+      "electrical_circuit": {
+        "complete": true,
+        "route": "supply positive → ammeter → joulemeter → heater → supply negative",
+        "thermometer_probe_has_separate_data_lead": true
       },
       "mass_kg": 1,
       "supply_voltage_v": 0,
@@ -559,7 +583,7 @@
         "12 V cartridge heater",
         "digital temperature probe",
         "thermal paste collars",
-        "close-fitting foam insulation",
+        "close-fitting foam jacket with bored lid",
         "low-voltage supply",
         "ammeter and joulemeter"
       ],
@@ -567,7 +591,13 @@
         "thermal_paste_applied": true,
         "heater_fully_inserted": true,
         "probe_fully_inserted": true,
-        "insulation_closed": true
+        "insulation_closed": true,
+        "bored_insulating_lid_closed": true
+      },
+      "electrical_circuit": {
+        "complete": true,
+        "route": "supply positive → ammeter → joulemeter → heater → supply negative",
+        "thermometer_probe_has_separate_data_lead": true
       },
       "mass_kg": 1,
       "supply_voltage_v": 12,
@@ -616,7 +646,7 @@
         "12 V cartridge heater",
         "digital temperature probe",
         "thermal paste collars",
-        "close-fitting foam insulation",
+        "close-fitting foam jacket with bored lid",
         "low-voltage supply",
         "ammeter and joulemeter"
       ],
@@ -624,7 +654,13 @@
         "thermal_paste_applied": true,
         "heater_fully_inserted": true,
         "probe_fully_inserted": true,
-        "insulation_closed": true
+        "insulation_closed": true,
+        "bored_insulating_lid_closed": true
+      },
+      "electrical_circuit": {
+        "complete": true,
+        "route": "supply positive → ammeter → joulemeter → heater → supply negative",
+        "thermometer_probe_has_separate_data_lead": true
       },
       "mass_kg": 1,
       "supply_voltage_v": 0,
@@ -691,7 +727,7 @@
         "12 V cartridge heater",
         "digital temperature probe",
         "thermal paste collars",
-        "close-fitting foam insulation",
+        "close-fitting foam jacket with bored lid",
         "low-voltage supply",
         "ammeter and joulemeter"
       ],
@@ -699,7 +735,13 @@
         "thermal_paste_applied": true,
         "heater_fully_inserted": true,
         "probe_fully_inserted": true,
-        "insulation_closed": true
+        "insulation_closed": true,
+        "bored_insulating_lid_closed": true
+      },
+      "electrical_circuit": {
+        "complete": true,
+        "route": "supply positive → ammeter → joulemeter → heater → supply negative",
+        "thermometer_probe_has_separate_data_lead": true
       },
       "mass_kg": 1,
       "supply_voltage_v": 0,

@@ -21,7 +21,9 @@
       "visibility": "visible"
     },
     "grass_blades": 1520,
-    "moss_patches": 240
+    "moss_patches": 240,
+    "tree_depth_rows": 3,
+    "canopy_lobes_per_tree": 11
   },
   "shore": {
     "bounds": {
@@ -33,14 +35,73 @@
       "height": 671,
       "visibility": "visible"
     },
+    "compact_bounds": {
+      "top": 229,
+      "bottom": 720,
+      "left": 270,
+      "right": 985.59375,
+      "width": 715.59375,
+      "height": 491,
+      "visibility": "visible"
+    },
+    "touch_bounds": {
+      "top": 222.890625,
+      "bottom": 583.984375,
+      "left": 262.796875,
+      "right": 928.609375,
+      "width": 665.8125,
+      "height": 361.09375,
+      "visibility": "visible"
+    },
+    "phone_landscape_bounds": {
+      "top": 148.84375,
+      "bottom": 389.984375,
+      "left": 175.5,
+      "right": 649.875,
+      "width": 474.375,
+      "height": 241.140625,
+      "visibility": "visible"
+    },
     "landscape": {
       "laboratory_tiles_visible": false,
       "realistic_rocky_shore": true,
+      "realistic_eroded_cliff": true,
       "detailed_cliffs": true,
+      "cliff_face_grid": [
+        75,
+        12
+      ],
       "continuous_cliff_top": true,
       "grass_topped_cliff": true,
+      "broken_projecting_rock_ledges": 19,
+      "recessed_branched_fissures": true,
+      "exposed_peat_soil_edge": true,
+      "cliff_lichen_patches": 48,
+      "cliff_top_grass_blades": 390,
       "cliff_maximum_world_y": 3.02,
       "cliff_within_canvas": true,
+      "cliff_bounds_world": {
+        "x": [
+          -12.2,
+          12.2
+        ],
+        "maximum_y": 3.02
+      },
+      "supported_max_scene_aspect": 2.17,
+      "rock_beach_floor_bounds_world": {
+        "x": [
+          -13.5,
+          13.5
+        ],
+        "z": [
+          -4.6,
+          7.4
+        ]
+      },
+      "rock_beach_floor_extends_beyond_visible_view": true,
+      "minimum_compact_lateral_overdraw_world": 1.7,
+      "foreground_depth_overdraw_world": 2.5,
+      "shore_gravel_count": 300,
       "irregular_rock_pools": true,
       "rock_pool_count": 3,
       "rock_pool_seaweed_clumps": 12,

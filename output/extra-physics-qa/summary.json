@@ -24,6 +24,15 @@
         "uniform_diameter": true,
         "straight_against_metre_ruler": true
       },
+      "circuit_layout": {
+        "series_path": "supply positive → switch → ammeter → fixed contact → nichrome test length → sliding contact → supply negative",
+        "voltmeter_parallel_path": "voltmeter connected directly across the fixed and sliding contacts",
+        "cable_lanes_separated": true,
+        "measured_segment_highlighted": true,
+        "switch_aligned_with_instrument_row": true,
+        "ammeter_label": "A · SERIES",
+        "voltmeter_label": "V · PARALLEL"
+      },
       "switch_closed": false,
       "supply_voltage_v": 0,
       "ammeter_current_a": 0,
@@ -38,6 +47,18 @@
       },
       "smooth_stage_animation": true
     },
+    "focus_layout": {
+      "focus_mode": true,
+      "circuit_layout": {
+        "series_path": "supply positive → switch → ammeter → fixed contact → nichrome test length → sliding contact → supply negative",
+        "voltmeter_parallel_path": "voltmeter connected directly across the fixed and sliding contacts",
+        "cable_lanes_separated": true,
+        "measured_segment_highlighted": true,
+        "switch_aligned_with_instrument_row": true,
+        "ammeter_label": "A · SERIES",
+        "voltmeter_label": "V · PARALLEL"
+      }
+    },
     "settling": {
       "stage": 1,
       "phase": "switch closing and meters settling",
@@ -50,6 +71,15 @@
         "material": "nichrome",
         "uniform_diameter": true,
         "straight_against_metre_ruler": true
+      },
+      "circuit_layout": {
+        "series_path": "supply positive → switch → ammeter → fixed contact → nichrome test length → sliding contact → supply negative",
+        "voltmeter_parallel_path": "voltmeter connected directly across the fixed and sliding contacts",
+        "cable_lanes_separated": true,
+        "measured_segment_highlighted": true,
+        "switch_aligned_with_instrument_row": true,
+        "ammeter_label": "A · SERIES",
+        "voltmeter_label": "V · PARALLEL"
       },
       "switch_closed": true,
       "supply_voltage_v": 1.5,
@@ -77,6 +107,15 @@
         "material": "nichrome",
         "uniform_diameter": true,
         "straight_against_metre_ruler": true
+      },
+      "circuit_layout": {
+        "series_path": "supply positive → switch → ammeter → fixed contact → nichrome test length → sliding contact → supply negative",
+        "voltmeter_parallel_path": "voltmeter connected directly across the fixed and sliding contacts",
+        "cable_lanes_separated": true,
+        "measured_segment_highlighted": true,
+        "switch_aligned_with_instrument_row": true,
+        "ammeter_label": "A · SERIES",
+        "voltmeter_label": "V · PARALLEL"
       },
       "switch_closed": true,
       "supply_voltage_v": 1.5,
@@ -112,6 +151,15 @@
         "material": "nichrome",
         "uniform_diameter": true,
         "straight_against_metre_ruler": true
+      },
+      "circuit_layout": {
+        "series_path": "supply positive → switch → ammeter → fixed contact → nichrome test length → sliding contact → supply negative",
+        "voltmeter_parallel_path": "voltmeter connected directly across the fixed and sliding contacts",
+        "cable_lanes_separated": true,
+        "measured_segment_highlighted": true,
+        "switch_aligned_with_instrument_row": true,
+        "ammeter_label": "A · SERIES",
+        "voltmeter_label": "V · PARALLEL"
       },
       "switch_closed": false,
       "supply_voltage_v": 0,

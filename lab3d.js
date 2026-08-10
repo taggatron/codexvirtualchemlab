@@ -82,6 +82,7 @@ export class LabRenderer3D {
     this.scene.background.setHex(background); this.renderer.setClearColor(background, 1);
     this.scene.fog.color.setHex(background); this.scene.fog.near = outdoor ? 16 : 13; this.scene.fog.far = outdoor ? 30 : 24;
     this.room.hemi.intensity = outdoor ? 2.75 : 2.25; this.room.key.intensity = outdoor ? 3.75 : 3.1; this.room.rim.intensity = outdoor ? 9 : 16;
+    this.room.key.shadow.camera.left = shore ? -14.5 : -9; this.room.key.shadow.camera.right = shore ? 14.5 : 9; this.room.key.shadow.camera.updateProjectionMatrix();
   }
   applyCameraForPractical(id, hookeFocusProgress = 0) {
     if (id === 'quadrats') { this.camera.fov = 40; this.camera.position.set(0, 5.35, 9.45); this.camera.lookAt(0, .55, .42) }
@@ -99,7 +100,21 @@ export class LabRenderer3D {
   resize(left, top, width, height, displayScale = 1) { width = Math.max(1, width); height = Math.max(1, height); displayScale = Math.max(.01, displayScale || 1); const unchanged = this.left === left && this.top === top && this.width === width && this.height === height && this.displayScale === displayScale; this.left = left; this.top = top; this.width = width; this.height = height; this.displayScale = displayScale; const displayLeft = left * displayScale, displayTop = top * displayScale, displayWidth = width * displayScale, displayHeight = height * displayScale; Object.assign(this.canvas.style, { left: `${displayLeft}px`, top: `${displayTop}px`, width: `${displayWidth}px`, height: `${displayHeight}px` }); if (!this.available || unchanged) return; this.renderer.setSize(displayWidth, displayHeight, false); this.camera.aspect = width / height; this.camera.updateProjectionMatrix() }
   projectToScreen(x, y, z) { if (!this.available) return null; const p = new THREE.Vector3(x, y, z).project(this.camera); return { x: this.left + (p.x + 1) * this.width / 2, y: this.top + (1 - p.y) * this.height / 2 } }
   posFromScreen(x, y) { const ndc = new THREE.Vector2(((x - this.left) / this.width) * 2 - 1, -(((y - this.top) / this.height) * 2 - 1)), raycaster = new THREE.Raycaster(); raycaster.setFromCamera(ndc, this.camera); const ray = raycaster.ray, t = Math.abs(ray.direction.y) > .0001 ? -ray.origin.y / ray.direction.y : 0, point = ray.at(Math.max(0, t), new THREE.Vector3()); point.y = 0; return point }
-  clear() { while (this.root.children.length) { const o = this.root.children.pop(); o.traverse?.(n => { n.geometry?.dispose?.(); if (Array.isArray(n.material)) n.material.forEach(m => m.dispose?.()); else n.material?.dispose?.() }) } this.flames = []; this.dynamic = []; this.pourAlignment = null; this.thermiteAfterglowUntil = 0; this.thermiteGlowFraction = 0 }
+  clear() {
+    const disposeMaterial = material => {
+      if (!material) return;
+      for (const key of ['map', 'alphaMap', 'aoMap', 'bumpMap', 'emissiveMap', 'envMap', 'lightMap', 'metalnessMap', 'normalMap', 'roughnessMap']) material[key]?.dispose?.();
+      material.dispose?.();
+    };
+    while (this.root.children.length) {
+      const o = this.root.children.pop();
+      o.traverse?.(n => {
+        n.geometry?.dispose?.();
+        if (Array.isArray(n.material)) n.material.forEach(disposeMaterial); else disposeMaterial(n.material);
+      });
+    }
+    this.flames = []; this.dynamic = []; this.pourAlignment = null; this.thermiteAfterglowUntil = 0; this.thermiteGlowFraction = 0;
+  }
   beaker(level = .42, color = 0x3ca9d4) { const g = new THREE.Group(), glassMat = new THREE.MeshPhysicalMaterial({ color: 0xd9f4ff, transparent: true, opacity: .48, transmission: .72, roughness: .025, metalness: 0, ior: 1.46, thickness: .11, clearcoat: 1, clearcoatRoughness: .025, side: THREE.DoubleSide, depthWrite: false }), profile = [[0, .035], [.4, .035], [.54, .045], [.61, .085], [.655, .16], [.675, .31], [.69, 1.22], [.7, 1.34]].map(([x, y]) => new THREE.Vector2(x, y)); const body = new THREE.Mesh(new THREE.LatheGeometry(profile, 96), glassMat); body.geometry.computeVertexNormals(); g.add(body); const rim = new THREE.Mesh(new THREE.TorusGeometry(.7, .03, 16, 80), glassMat); rim.rotation.x = Math.PI / 2; rim.position.y = 1.35; g.add(rim); const bottomCurve = new THREE.Mesh(new THREE.TorusGeometry(.61, .032, 14, 72), glassMat); bottomCurve.rotation.x = Math.PI / 2; bottomCurve.position.y = .095; g.add(bottomCurve); const liquidHeight = Math.max(.08, level * 1.08), liqMat = new THREE.MeshPhysicalMaterial({ color, transparent: true, opacity: .74, roughness: .13, transmission: .14, clearcoat: .35 }); const liq = cylinder(.615, liquidHeight, liqMat, 72); liq.position.y = .085 + liquidHeight / 2; g.add(liq); const meniscus = cylinder(.618, .018, new THREE.MeshPhysicalMaterial({ color, transparent: true, opacity: .56, roughness: .08, transmission: .2 }), 72); meniscus.position.y = .085 + liquidHeight; g.add(meniscus); const shineMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .34, depthWrite: false }); const shine = new THREE.Mesh(new THREE.PlaneGeometry(.065, 1.03), shineMat); shine.position.set(-.36, .75, .575); shine.renderOrder = 7; g.add(shine); const shineFine = new THREE.Mesh(new THREE.PlaneGeometry(.022, .72), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .48, depthWrite: false })); shineFine.position.set(-.28, .79, .62); shineFine.renderOrder = 7; g.add(shineFine); const marks = new THREE.Group(), markMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .95, depthWrite: false, depthTest: false, side: THREE.DoubleSide });[[.3, .29], [.48, .16], [.66, .29], [.84, .16], [1.02, .29], [1.2, .16]].forEach(([y, w]) => { const r = Math.hypot(.4, .57) + .002, arc = w / r; const mark = new THREE.Mesh(new THREE.CylinderGeometry(r, r, .019, 32, 1, true, -arc / 2, arc), markMat); mark.position.set(0, y, 0); mark.rotation.y = Math.atan2(.4, .57); mark.renderOrder = 9; marks.add(mark) }); g.add(marks); Object.assign(g.userData, { container: true, liquidVolume: liq, liquidMeniscus: meniscus, liquidMaxHeight: liquidHeight }); return shadowReady(g) }
   flask(level = .42, color = 0x55b9d0) {
     const g = new THREE.Group(), pts = [];
@@ -475,7 +490,98 @@ export class LabRenderer3D {
   }
   tripod() { const g = new THREE.Group(), frameMat = metal(0x596b71, .3), gauzeMat = metal(0xb9c4c7, .44), y = 1.82; for (const z of [-.7, .7]) { const rail = new THREE.Mesh(new THREE.BoxGeometry(1.92, .06, .06), frameMat); rail.position.set(0, y, z); g.add(rail) } for (const x of [-.94, .94]) { const rail = new THREE.Mesh(new THREE.BoxGeometry(.06, .06, 1.45), frameMat); rail.position.set(x, y, 0); g.add(rail) } for (let i = -7; i <= 7; i++) { const gx = new THREE.Mesh(new THREE.BoxGeometry(1.82, .014, .018), gauzeMat); gx.position.set(0, y + .038, i * .09); g.add(gx); const gz = new THREE.Mesh(new THREE.BoxGeometry(.018, .014, 1.34), gauzeMat); gz.position.set(i * .12, y + .04, 0); g.add(gz) } const centre = new THREE.Mesh(new THREE.PlaneGeometry(1.55, 1.13), new THREE.MeshStandardMaterial({ color: 0xbac3c4, roughness: .82, metalness: .2, transparent: true, opacity: .18, side: THREE.DoubleSide })); centre.rotation.x = -Math.PI / 2; centre.position.y = y + .025; g.add(centre); const legMat = metal(0x43545a, .26), pairs = [[new THREE.Vector3(-.72, y, -.48), new THREE.Vector3(-1.16, .05, -.88)], [new THREE.Vector3(.72, y, -.48), new THREE.Vector3(1.16, .05, -.88)], [new THREE.Vector3(-.72, y, .48), new THREE.Vector3(-1.16, .05, .88)], [new THREE.Vector3(.72, y, .48), new THREE.Vector3(1.16, .05, .88)]]; for (const [a, b] of pairs) { g.add(this.tubeBetween(a, b, .05, legMat)); const foot = cylinder(.13, .05, legMat, 32); foot.position.copy(b); foot.position.y = .025; g.add(foot) } return shadowReady(g) }
   crucible({ burning = false, lidOn = true, product = false, empty = false, productColor = 0xf6f5ec, productScale = 1 } = {}) { const g = new THREE.Group(), ceramic = new THREE.MeshPhysicalMaterial({ color: 0xf0ead8, roughness: .5, metalness: 0, clearcoat: .18, clearcoatRoughness: .45 }), innerMat = solid(0x85847d, .94); const bowl = new THREE.Mesh(new THREE.CylinderGeometry(.47, .32, .34, 80, 2, true), ceramic); bowl.position.y = .2; g.add(bowl); const base = cylinder(.32, .07, ceramic, 64); base.position.y = .035; g.add(base); const interior = cylinder(.385, .035, innerMat, 72); interior.position.y = .38; g.add(interior); const rim = new THREE.Mesh(new THREE.TorusGeometry(.47, .043, 18, 80), ceramic); rim.rotation.x = Math.PI / 2; rim.position.y = .39; g.add(rim); if (product && productScale > 0) { const oxideMat = solid(productColor, .9); for (let i = 0; i < 34; i++) { const a = i * 2.399, r = (.055 + (i % 7) * .043) * productScale, flake = new THREE.Mesh(new THREE.DodecahedronGeometry((.026 + (i % 4) * .009) * productScale, 0), oxideMat); flake.position.set(Math.cos(a) * r, .39 + (.017 + (i % 5) * .009) * productScale, Math.sin(a) * r); flake.scale.set(1.7, .42, .95); flake.rotation.set(i * .71, i * .38, i * .53); g.add(flake) } } else if (!empty && !product) { const vertices = [], indices = [], turns = 1.7, segments = 96; for (let i = 0; i <= segments; i++) { const t = i / segments, a = .2 + t * Math.PI * 2 * turns, r = .055 + t * .27, width = .027; for (const edge of [-1, 1]) { vertices.push(Math.cos(a) * (r + edge * width), .426 + t * .007, Math.sin(a) * (r + edge * width)) } } for (let i = 0; i < segments; i++) { const k = i * 2; indices.push(k, k + 1, k + 2, k + 1, k + 3, k + 2) } const ribbonGeometry = new THREE.BufferGeometry(); ribbonGeometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3)); ribbonGeometry.setIndex(indices); ribbonGeometry.computeVertexNormals(); const ribbonMat = new THREE.MeshStandardMaterial({ color: 0xe8edef, metalness: .96, roughness: .13, side: THREE.DoubleSide }); const ribbon = new THREE.Mesh(ribbonGeometry, ribbonMat); g.add(ribbon); const end = new THREE.Mesh(new THREE.BoxGeometry(.13, .016, .055), ribbonMat); const a = .2 + Math.PI * 2 * turns; end.position.set(Math.cos(a) * .34, .44, Math.sin(a) * .34); end.rotation.y = -a + .08; g.add(end) } const lid = new THREE.Group(), cap = cylinder(.49, .075, ceramic, 80); cap.position.y = .035; lid.add(cap); const dome = new THREE.Mesh(new THREE.SphereGeometry(.49, 80, 32), ceramic); dome.scale.y = .13; dome.position.y = .07; lid.add(dome); const underRim = new THREE.Mesh(new THREE.TorusGeometry(.405, .025, 14, 72), ceramic); underRim.rotation.x = Math.PI / 2; underRim.position.y = -.002; lid.add(underRim); const knob = cylinder(.095, .075, ceramic, 48); knob.position.y = .155; lid.add(knob); const knobTop = new THREE.Mesh(new THREE.SphereGeometry(.098, 40, 20), ceramic); knobTop.scale.y = .35; knobTop.position.y = .195; lid.add(knobTop); if (lidOn) lid.position.set(0, .43, 0); else { lid.position.set(.75, .115, .16); lid.rotation.z = -.1; lid.rotation.y = .24 } g.add(lid); if (burning && !lidOn) { const addMat = (color, opacity) => new THREE.MeshBasicMaterial({ color, transparent: true, opacity, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }); const core = new THREE.Mesh(new THREE.SphereGeometry(.28, 40, 24), addMat(0xffffff, 1)); core.position.y = .44; core.scale.y = .48; const corona = new THREE.Mesh(new THREE.SphereGeometry(.52, 40, 24), addMat(0xeaf7ff, .5)); corona.position.y = .47; corona.scale.y = .68; const light = new THREE.PointLight(0xffffff, 16, 6.5, 1.25); light.position.y = .62; const sparks = []; for (let i = 0; i < 18; i++) { const spark = new THREE.Mesh(new THREE.SphereGeometry(.017 + (i % 3) * .006, 12, 8), addMat(i % 3 === 0 ? 0xcfeaff : 0xffffff, .95)); spark.userData = { phase: i / 18, angle: i * 2.399, speed: .72 + (i % 4) * .12 }; g.add(spark); sparks.push(spark) } g.add(core, corona, light); this.dynamic.push({ kind: 'magnesiumBurn', core, corona, light, sparks, seed: 3.2 }) } return shadowReady(g) }
-  balance(mass = 0) { const g = new THREE.Group(), dark = solid(0x172a33, .28), body = solid(0x334952, .24), trim = metal(0x9eacb0, .18), steel = metal(0xd7e0e2, .12); const plinth = new THREE.Mesh(new THREE.BoxGeometry(1.92, .16, 1.18), dark); plinth.position.y = .08; g.add(plinth); const lower = new THREE.Mesh(new THREE.BoxGeometry(1.78, .42, 1.08), body); lower.position.y = .35; g.add(lower); const shoulder = new THREE.Mesh(new THREE.BoxGeometry(1.63, .13, .94), solid(0x53676f, .22)); shoulder.position.y = .625; g.add(shoulder); const pedestal = cylinder(.45, .14, trim, 64); pedestal.position.y = .74; g.add(pedestal); const tray = cylinder(.62, .075, steel, 80); tray.position.y = .845; g.add(tray); const trayRim = new THREE.Mesh(new THREE.TorusGeometry(.62, .027, 14, 80), steel); trayRim.rotation.x = Math.PI / 2; trayRim.position.y = .89; g.add(trayRim); const bezel = new THREE.Mesh(new THREE.BoxGeometry(1.12, .3, .055), dark); bezel.position.set(0, .39, .57); g.add(bezel); const displayCanvas = document.createElement('canvas'), dc = displayCanvas.getContext('2d'); displayCanvas.width = 512; displayCanvas.height = 128; dc.fillStyle = '#071d20'; dc.fillRect(0, 0, 512, 128); dc.shadowColor = '#77ffe1'; dc.shadowBlur = 18; dc.fillStyle = '#83f7df'; dc.font = '700 70px ui-monospace, SFMono-Regular, Menlo, monospace'; dc.textAlign = 'right'; dc.textBaseline = 'middle'; dc.fillText(`${Number(mass || 0).toFixed(2)} g`, 476, 67); const displayTexture = new THREE.CanvasTexture(displayCanvas); displayTexture.colorSpace = THREE.SRGBColorSpace; const screen = new THREE.Mesh(new THREE.PlaneGeometry(.94, .205), new THREE.MeshBasicMaterial({ map: displayTexture, toneMapped: false })); screen.position.set(0, .405, .601); g.add(screen); for (const x of [-.66, .66]) { const button = cylinder(.105, .035, metal(x < 0 ? 0xc2c9ca : 0x79b6aa, .22), 32); button.rotation.x = Math.PI / 2; button.position.set(x, .24, .574); g.add(button) } for (const x of [-.72, .72]) for (const z of [-.42, .42]) { const foot = cylinder(.09, .055, dark, 28); foot.position.set(x, .03, z); g.add(foot) } const brandMat = new THREE.MeshBasicMaterial({ color: 0xd6e1e2 }); const brand = new THREE.Mesh(new THREE.PlaneGeometry(.42, .035), brandMat); brand.position.set(0, .575, .574); g.add(brand); return shadowReady(g) }
+  balance(mass = 0) {
+    const g = new THREE.Group();
+    const dark = solid(0x172a33, .28), body = solid(0x334952, .24), shoulderMaterial = solid(0x53676f, .22);
+    const trim = metal(0x9eacb0, .18), steel = metal(0xd7e0e2, .12), dialCollarMaterial = metal(0x34474d, .3);
+
+    const plinth = new THREE.Mesh(roundedBox(1.92, .16, 1.18, .055, 5), dark);
+    plinth.position.y = .08;
+    g.add(plinth);
+    const lower = new THREE.Mesh(roundedBox(1.78, .42, 1.08, .085, 6), body);
+    lower.position.y = .35;
+    g.add(lower);
+    const shoulder = new THREE.Mesh(roundedBox(1.63, .13, .94, .04, 5), shoulderMaterial);
+    shoulder.position.y = .625;
+    g.add(shoulder);
+
+    const pedestal = cylinder(.45, .14, trim, 64);
+    pedestal.position.y = .74;
+    g.add(pedestal);
+    const tray = cylinder(.62, .075, steel, 80);
+    tray.position.y = .845;
+    g.add(tray);
+    const trayRim = new THREE.Mesh(new THREE.TorusGeometry(.62, .027, 14, 80), steel);
+    trayRim.rotation.x = Math.PI / 2;
+    trayRim.position.y = .89;
+    g.add(trayRim);
+
+    const bezel = new THREE.Mesh(roundedBox(.94, .285, .055, .025, 5), dark);
+    bezel.position.set(0, .43, .57);
+    g.add(bezel);
+    const displayCanvas = document.createElement('canvas'), dc = displayCanvas.getContext('2d');
+    displayCanvas.width = 512;
+    displayCanvas.height = 128;
+    dc.fillStyle = '#071d20';
+    dc.fillRect(0, 0, 512, 128);
+    dc.shadowColor = '#77ffe1';
+    dc.shadowBlur = 18;
+    dc.fillStyle = '#83f7df';
+    dc.font = '700 70px ui-monospace, SFMono-Regular, Menlo, monospace';
+    dc.textAlign = 'right';
+    dc.textBaseline = 'middle';
+    dc.fillText(`${Number(mass || 0).toFixed(2)} g`, 476, 67);
+    const displayTexture = new THREE.CanvasTexture(displayCanvas);
+    displayTexture.colorSpace = THREE.SRGBColorSpace;
+    const screen = new THREE.Mesh(new THREE.PlaneGeometry(.78, .19), new THREE.MeshBasicMaterial({ map: displayTexture, toneMapped: false }));
+    screen.position.set(0, .43, .607);
+    g.add(screen);
+
+    const addDial = (x, faceColour, indicatorColour, pointerAngle) => {
+      const dial = new THREE.Group();
+      dial.position.set(x, .35, .586);
+      const recess = new THREE.Mesh(new THREE.TorusGeometry(.101, .014, 10, 48), dialCollarMaterial);
+      recess.position.z = .002;
+      dial.add(recess);
+      const grip = new THREE.Mesh(new THREE.CylinderGeometry(.088, .097, .052, 32), new THREE.MeshPhysicalMaterial({ color: faceColour, roughness: .28, metalness: .48, clearcoat: .55, clearcoatRoughness: .24 }));
+      grip.rotation.x = Math.PI / 2;
+      grip.position.z = .03;
+      dial.add(grip);
+      const face = new THREE.Mesh(new THREE.CylinderGeometry(.074, .074, .012, 48), new THREE.MeshPhysicalMaterial({ color: faceColour, roughness: .2, metalness: .34, clearcoat: .72, clearcoatRoughness: .18 }));
+      face.rotation.x = Math.PI / 2;
+      face.position.z = .062;
+      dial.add(face);
+      const indicatorPivot = new THREE.Group();
+      indicatorPivot.rotation.z = pointerAngle;
+      const indicator = new THREE.Mesh(roundedBox(.012, .052, .009, .004, 2), new THREE.MeshBasicMaterial({ color: indicatorColour, toneMapped: false }));
+      indicator.position.set(0, .032, .071);
+      indicatorPivot.add(indicator);
+      dial.add(indicatorPivot);
+      const centre = new THREE.Mesh(new THREE.SphereGeometry(.015, 18, 10), new THREE.MeshPhysicalMaterial({ color: 0xcbd5d7, roughness: .22, metalness: .82, clearcoat: .38 }));
+      centre.scale.z = .35;
+      centre.position.z = .072;
+      dial.add(centre);
+      g.add(dial);
+    };
+    addDial(-.69, 0xaeb9bb, 0x263b42, -.42);
+    addDial(.69, 0x34786e, 0xa8fff0, .48);
+
+    for (const x of [-.72, .72]) for (const z of [-.42, .42]) {
+      const foot = cylinder(.09, .055, dark, 28);
+      foot.position.set(x, .03, z);
+      g.add(foot)
+    }
+    const brand = new THREE.Mesh(roundedBox(.42, .035, .012, .009, 3), new THREE.MeshBasicMaterial({ color: 0xd6e1e2 }));
+    brand.position.set(0, .605, .574);
+    g.add(brand);
+    Object.assign(g.userData, {
+      electronicBalance: true,
+      housing: { cornerProfile: 'rounded', plinthRadius: .055, bodyRadius: .085, shoulderRadius: .04 },
+      display: { width: .78, height: .19, boundsX: [-.39, .39], isolatedFromDials: true },
+      controls: { type: 'recessed layered rotary dials with tapered grips and pointer marks', centresX: [-.69, .69], centreY: .35, alignedToSecondLayerVerticalMiddle: true, outerRadius: .115, minimumDisplayClearance: .185, overlap: false }
+    });
+    return shadowReady(g)
+  }
   measuringCylinder(level = .22) { const g = new THREE.Group(), plastic = new THREE.MeshPhysicalMaterial({ color: 0xe7f6f8, transparent: true, opacity: .58, transmission: .42, roughness: .18, ior: 1.47, thickness: .08, side: THREE.DoubleSide, depthWrite: false }), baseMat = new THREE.MeshPhysicalMaterial({ color: 0xdcebed, transparent: true, opacity: .82, roughness: .24, transmission: .18 }); const body = new THREE.Mesh(new THREE.CylinderGeometry(.31, .29, 1.62, 64, 1, true), plastic); body.position.y = .86; g.add(body); const bottom = cylinder(.3, .055, baseMat, 64); bottom.position.y = .05; g.add(bottom); const foot = cylinder(.43, .07, baseMat, 64); foot.position.y = .035; g.add(foot); const rim = new THREE.Mesh(new THREE.TorusGeometry(.315, .025, 14, 64), plastic); rim.rotation.x = Math.PI / 2; rim.position.y = 1.68; g.add(rim); const liquidH = Math.max(.025, level * .78), acid = new THREE.Mesh(new THREE.CylinderGeometry(.255, .265, liquidH, 64), new THREE.MeshPhysicalMaterial({ color: 0xc6eef3, transparent: true, opacity: .78, roughness: .09, transmission: .18 })); acid.position.y = .1 + liquidH / 2; g.add(acid); const meniscus = cylinder(.258, .018, new THREE.MeshPhysicalMaterial({ color: 0xe7fbff, transparent: true, opacity: .72, roughness: .08 }), 64); meniscus.position.y = .1 + liquidH; g.add(meniscus); const marks = new THREE.Group(), markMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .95, depthWrite: false, depthTest: false, side: THREE.DoubleSide }); for (let i = 1; i <= 9; i++) { const width = i % 2 === 0 ? .2 : .12; const r = Math.hypot(.16, .255) + .002, arc = width / r; const mark = new THREE.Mesh(new THREE.CylinderGeometry(r, r, .018, 32, 1, true, -arc / 2, arc), markMat); mark.position.set(0, .16 + i * .15, 0); mark.rotation.y = Math.atan2(.16, .255); mark.renderOrder = 9; marks.add(mark) } g.add(marks); const shine = new THREE.Mesh(new THREE.PlaneGeometry(.035, 1.26), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .42, depthWrite: false })); shine.position.set(-.13, .87, .27); shine.renderOrder = 8; g.add(shine); return shadowReady(g) }
   articulatedHydrogenHand(state) {
     const hand = new THREE.Group(), skin = new THREE.MeshPhysicalMaterial({ color: 0xd8a47e, roughness: .52, metalness: 0, clearcoat: .12, clearcoatRoughness: .4, sheen: .28, sheenColor: 0xffd4ba }), skinLight = new THREE.MeshPhysicalMaterial({ color: 0xe1ad87, roughness: .49, metalness: 0, clearcoat: .14, clearcoatRoughness: .36, sheen: .3, sheenColor: 0xffdcc5 }), creaseMat = new THREE.MeshBasicMaterial({ color: 0x9b604d, transparent: true, opacity: .28, depthWrite: false });
@@ -1274,18 +1380,33 @@ export class LabRenderer3D {
     g.position.copy(position); Object.assign(g.userData, { sampleIndex, localIndex, head, discMat, highlight, baseScale: scale }); return shadowReady(g)
   }
   randomSamplingRig(state) {
-    const g = new THREE.Group(), skyCanvas = document.createElement('canvas'), sc = skyCanvas.getContext('2d'); skyCanvas.width = 1024; skyCanvas.height = 512; const skyGrad = sc.createLinearGradient(0, 0, 0, 512); skyGrad.addColorStop(0, '#36a9e8'); skyGrad.addColorStop(.58, '#8bd6f2'); skyGrad.addColorStop(1, '#d9f0dc'); sc.fillStyle = skyGrad; sc.fillRect(0, 0, 1024, 512); const skyTexture = new THREE.CanvasTexture(skyCanvas); skyTexture.colorSpace = THREE.SRGBColorSpace; const sky = new THREE.Mesh(new THREE.PlaneGeometry(16, 7.6), new THREE.MeshBasicMaterial({ map: skyTexture, toneMapped: false })); sky.position.set(0, 3.6, -2.93); g.add(sky);
-    const sunHalo = new THREE.Mesh(new THREE.CircleGeometry(.68, 64), new THREE.MeshBasicMaterial({ color: 0xfff1a6, transparent: true, opacity: .24, depthWrite: false, toneMapped: false })); sunHalo.position.set(3.65, 5.35, -2.79); g.add(sunHalo); const sun = new THREE.Mesh(new THREE.CircleGeometry(.32, 64), new THREE.MeshBasicMaterial({ color: 0xfff6bd, toneMapped: false })); sun.position.set(3.65, 5.35, -2.77); g.add(sun);
+    const g = new THREE.Group(), skyCanvas = document.createElement('canvas'), sc = skyCanvas.getContext('2d'); skyCanvas.width = 1024; skyCanvas.height = 512; const skyGrad = sc.createLinearGradient(0, 0, 0, 512); skyGrad.addColorStop(0, '#36a9e8'); skyGrad.addColorStop(.58, '#8bd6f2'); skyGrad.addColorStop(1, '#d9f0dc'); sc.fillStyle = skyGrad; sc.fillRect(0, 0, 1024, 512); const skyTexture = new THREE.CanvasTexture(skyCanvas); skyTexture.colorSpace = THREE.SRGBColorSpace; const sky = new THREE.Mesh(new THREE.PlaneGeometry(22, 8.2), new THREE.MeshBasicMaterial({ map: skyTexture, toneMapped: false })); sky.position.set(0, 3.75, -4.95); g.add(sky);
+    const sunHalo = new THREE.Mesh(new THREE.CircleGeometry(.68, 64), new THREE.MeshBasicMaterial({ color: 0xfff1a6, transparent: true, opacity: .24, depthWrite: false, toneMapped: false })); sunHalo.position.set(3.65, 5.35, -4.78); g.add(sunHalo); const sun = new THREE.Mesh(new THREE.CircleGeometry(.32, 64), new THREE.MeshBasicMaterial({ color: 0xfff6bd, toneMapped: false })); sun.position.set(3.65, 5.35, -4.76); g.add(sun);
     const clouds = [], cloudMat = new THREE.MeshLambertMaterial({ color: 0xffffff, transparent: true, opacity: .88, depthWrite: false });
-    [[-3.7, 5.2, .92], [-.45, 4.9, .7], [3.05, 4.55, .78]].forEach(([x, y, scale], ci) => { const cloud = new THREE.Group(); for (let i = 0; i < 7; i++) { const puff = new THREE.Mesh(new THREE.SphereGeometry(.38 + (i % 3) * .08, 24, 14), cloudMat); puff.scale.set(1.35, .58 + (i % 2) * .18, .35); puff.position.set((i - 3) * .26, Math.sin(i * 1.7) * .1 + (i % 3 === 1 ? .13 : 0), 0); cloud.add(puff) } cloud.position.set(x, y, -2.66 + ci * .025); cloud.scale.setScalar(scale); g.add(cloud); clouds.push({ group: cloud, baseX: x, phase: ci * 1.7 }) });
-    const trees = [], trunkMat = new THREE.MeshStandardMaterial({ color: 0x6c4a2f, roughness: .93 }), foliageColours = [0x285f32, 0x36783b, 0x4a8a42, 0x1f5130];
-    for (let i = 0; i < 11; i++) { const tree = new THREE.Group(), x = -5.4 + i * 1.08 + Math.sin(i * 4.2) * .18, treeScale = .72 + (i % 4) * .12, trunk = new THREE.Mesh(new THREE.CylinderGeometry(.09, .16, 2.25, 12), trunkMat); trunk.position.y = 1.12; tree.add(trunk); for (let b = 0; b < 3; b++) { const side = b % 2 ? -1 : 1, branch = this.tubeBetween(new THREE.Vector3(0, 1.18 + b * .3, 0), new THREE.Vector3(side * (.34 + b * .07), 1.58 + b * .27, .02), .045 - b * .006, trunkMat); tree.add(branch) } for (let j = 0; j < 6; j++) { const crown = new THREE.Mesh(new THREE.IcosahedronGeometry(.56 + (j % 2) * .13, 1), new THREE.MeshStandardMaterial({ color: foliageColours[(i + j) % foliageColours.length], roughness: .88, flatShading: true })); crown.scale.set(1.12, .95, .72); crown.position.set(Math.cos(j * 2.2) * .42, 2.05 + (j % 3) * .34, Math.sin(j * 2.2) * .13); tree.add(crown) } tree.position.set(x, .08, -2.52 + (i % 2) * .11); tree.scale.setScalar(treeScale); g.add(tree); trees.push({ group: tree, phase: i * .53 }) }
+    [[-3.7, 5.2, .92], [-.45, 4.9, .7], [3.05, 4.55, .78]].forEach(([x, y, scale], ci) => { const cloud = new THREE.Group(); for (let i = 0; i < 7; i++) { const puff = new THREE.Mesh(new THREE.SphereGeometry(.38 + (i % 3) * .08, 24, 14), cloudMat); puff.scale.set(1.35, .58 + (i % 2) * .18, .35); puff.position.set((i - 3) * .26, Math.sin(i * 1.7) * .1 + (i % 3 === 1 ? .13 : 0), 0); cloud.add(puff) } cloud.position.set(x, y, -4.62 + ci * .025); cloud.scale.setScalar(scale); g.add(cloud); clouds.push({ group: cloud, baseX: x, phase: ci * 1.7 }) });
+    // Curved tapered trunks, radial connected branches and deep asymmetric
+    // crowns replace the former row of straight poles and repeated leaf balls.
+    const barkCanvas = document.createElement('canvas'), bc = barkCanvas.getContext('2d'); barkCanvas.width = 96; barkCanvas.height = 256; bc.fillStyle = '#765038'; bc.fillRect(0, 0, 96, 256); let barkSeed = 98231; const barkRnd = () => ((barkSeed = Math.imul(barkSeed, 1664525) + 1013904223 >>> 0) / 4294967296); for (let i = 0; i < 150; i++) { const x = barkRnd() * 96, y = barkRnd() * 256, length = 12 + barkRnd() * 62; bc.strokeStyle = barkRnd() > .48 ? `rgba(42,24,15,${.18 + barkRnd() * .28})` : `rgba(211,160,106,${.1 + barkRnd() * .18})`; bc.lineWidth = .5 + barkRnd() * 2.1; bc.beginPath(); bc.moveTo(x, y); bc.bezierCurveTo(x + (barkRnd() - .5) * 5, y + length * .3, x + (barkRnd() - .5) * 4, y + length * .7, x + (barkRnd() - .5) * 3, y + length); bc.stroke() } const barkTexture = new THREE.CanvasTexture(barkCanvas); barkTexture.wrapS = barkTexture.wrapT = THREE.RepeatWrapping; barkTexture.repeat.set(1.15, 2.7); barkTexture.colorSpace = THREE.SRGBColorSpace;
+    const meadowHeight=(x,z)=>.3+Math.sin(x*.72+z*.31)*.016+Math.sin(z*1.18-x*.28)*.011,trees=[],trunkMat=new THREE.MeshStandardMaterial({color:0x8a684b,map:barkTexture,bumpMap:barkTexture,bumpScale:.045,roughness:.96}),foliageGeometry=new THREE.IcosahedronGeometry(1,2),foliageMats=[0x183f28,0x245b32,0x34743b,0x438443,0x568f49].map(color=>new THREE.MeshStandardMaterial({color,roughness:.94,flatShading:false})),treeTubeBetween=(a,b,startRadius,endRadius,mat)=>{const d=b.clone().sub(a),mesh=new THREE.Mesh(new THREE.CylinderGeometry(endRadius,startRadius,d.length(),12,2,false),mat);mesh.position.copy(a).add(b).multiplyScalar(.5);mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.clone().normalize());return mesh};foliageGeometry.computeVertexNormals();let treeSeed=26813;const treeRnd=()=>((treeSeed=Math.imul(treeSeed,1664525)+1013904223>>>0)/4294967296);
+    for (let i = 0; i < 11; i++) {
+      const tree=new THREE.Group(),depthRow=i%3,x=-5.65+i*1.13+(treeRnd()-.5)*.55,z=-2.28-depthRow*.31+(treeRnd()-.5)*.18,treeScale=.82-depthRow*.06+treeRnd()*.28,leanX=(treeRnd()-.5)*.26,leanZ=(treeRnd()-.5)*.18,p0=new THREE.Vector3(0,0,0),p1=new THREE.Vector3(leanX*.18,.68,leanZ*.12),p2=new THREE.Vector3(leanX*.43,1.16,leanZ*.32),p3=new THREE.Vector3(leanX*.72,1.68,leanZ*.62),p4=new THREE.Vector3(leanX,2.17,leanZ);
+      tree.add(treeTubeBetween(p0,p1,.18,.15,trunkMat),treeTubeBetween(p1,p2,.15,.12,trunkMat));
+      for(let r=0;r<3;r++){const a=r/3*Math.PI*2+i*.71,rootStart=new THREE.Vector3(Math.cos(a)*.035,.08,Math.sin(a)*.035),rootEnd=new THREE.Vector3(Math.cos(a)*(.22+treeRnd()*.08),.012,Math.sin(a)*(.22+treeRnd()*.08));tree.add(treeTubeBetween(rootStart,rootEnd,.075,.018,trunkMat))}
+      const swayPivot=new THREE.Group();swayPivot.position.copy(p2);tree.add(swayPivot);const rel3=p3.clone().sub(p2),rel4=p4.clone().sub(p2),knuckle=new THREE.Mesh(new THREE.IcosahedronGeometry(.125,1),trunkMat);knuckle.scale.set(1.04,.82,1.04);swayPivot.add(knuckle,treeTubeBetween(new THREE.Vector3(0,-.018,0),rel3,.12,.086,trunkMat),treeTubeBetween(rel3,rel4,.086,.052,trunkMat));
+      const branchTips = [];
+      for(let b=0;b<6;b++){const fraction=.12+b*.135,azimuth=b*2.399+i*.47,base=rel4.clone().multiplyScalar(fraction),reach=.43+treeRnd()*.24,mid=base.clone().add(new THREE.Vector3(Math.cos(azimuth)*reach*.58,.2+treeRnd()*.13,Math.sin(azimuth)*reach*.5)),tip=mid.clone().add(new THREE.Vector3(Math.cos(azimuth+(treeRnd()-.5)*.38)*reach*.42,.13+treeRnd()*.14,Math.sin(azimuth+(treeRnd()-.5)*.38)*reach*.36));swayPivot.add(treeTubeBetween(base,mid,.057-b*.003,.03,trunkMat),treeTubeBetween(mid,tip,.03,.012,trunkMat));branchTips.push(tip)}
+      const archetype=Math.floor(treeRnd()*3),coreCentres=[rel4.clone().multiplyScalar(.62).add(new THREE.Vector3(-.2,.12,.05)),rel4.clone().multiplyScalar(.76).add(new THREE.Vector3(.2,.08,-.08)),rel4.clone().multiplyScalar(.9).add(new THREE.Vector3(0,.12,.12)),rel4.clone().multiplyScalar(.66).add(new THREE.Vector3(.02,-.08,-.22)),rel4.clone().multiplyScalar(.82).add(new THREE.Vector3(-.08,.04,.24))],lobeCentres=[...branchTips,...coreCentres],outerLobes=[];
+      lobeCentres.forEach((centre,li)=>{const materialIndex=li<6?2+(i+li)%3:Math.min(2,(i+li)%3),lobe=new THREE.Mesh(foliageGeometry,foliageMats[materialIndex]),broad=archetype===0?1.13:archetype===1?.88:.72,upright=archetype===1?1.2:archetype===2?1.12:.86,base=.34+treeRnd()*.17;lobe.position.copy(centre).add(new THREE.Vector3((treeRnd()-.5)*.18,(treeRnd()-.5)*.12,(treeRnd()-.5)*.2));lobe.scale.set(base*broad*(1+treeRnd()*.22),base*upright*(1+treeRnd()*.2),base*(.88+treeRnd()*.34));lobe.rotation.set(treeRnd()*.7,treeRnd()*Math.PI,treeRnd()*.55);swayPivot.add(lobe);if(li<6||li>8)outerLobes.push({mesh:lobe,base:lobe.rotation.clone(),phase:i*.73+li*.61})});
+      tree.position.set(x,meadowHeight(x,z)-.008,z);tree.scale.setScalar(treeScale);g.add(tree);trees.push({group:tree,swayPivot,outerLobes,phase:i*.53,depthRow})
+    }
+    const shrubGeometry=new THREE.IcosahedronGeometry(1,1),shrubMats=[foliageMats[0],foliageMats[1],foliageMats[3]],shrubs=[];
+    for(let i=0;i<28;i++){const shrub=new THREE.Mesh(shrubGeometry,shrubMats[i%shrubMats.length]),x=-6.1+i/27*12.2+(treeRnd()-.5)*.42,z=-2.03-treeRnd()*.72;shrub.position.set(x,meadowHeight(x,z)+.08+(i%3)*.012,z);shrub.scale.set(.22+treeRnd()*.17,.15+treeRnd()*.1,.18+treeRnd()*.16);shrub.rotation.set(treeRnd()*.24,treeRnd()*Math.PI*2,treeRnd()*.18);g.add(shrub);shrubs.push(shrub)}
     // The habitat is a broad field surface rather than a turf block placed on
     // the laboratory bench.  It extends beyond the near camera frustum so the
     // former worktop and cupboard frontage are completely replaced by meadow.
     const meadowGeo = new THREE.PlaneGeometry(12.4, 9.2, 30, 24), meadowPos = meadowGeo.getAttribute('position'), meadowColours = [], meadowColour = new THREE.Color();
     for (let i = 0; i < meadowPos.count; i++) {
-      const lx = meadowPos.getX(i), ly = meadowPos.getY(i), wz = 1.55 - ly, rise = Math.sin(lx * .72 + wz * .31) * .016 + Math.sin(wz * 1.18 - lx * .28) * .011;
+      const lx = meadowPos.getX(i), ly = meadowPos.getY(i), wz = 1.55 - ly, rise = meadowHeight(lx,wz)-.3;
       meadowPos.setZ(i, rise); meadowColour.setHSL(.29 + Math.sin(lx * .47 + wz) * .012, .48 + Math.sin(wz * .63) * .04, .31 + Math.sin(lx * .8 - wz * .45) * .025); meadowColours.push(meadowColour.r, meadowColour.g, meadowColour.b)
     }
     meadowGeo.setAttribute('color', new THREE.Float32BufferAttribute(meadowColours, 3)); meadowGeo.computeVertexNormals();
@@ -1305,34 +1426,31 @@ export class LabRenderer3D {
     const quadrat = this.samplingQuadratFrame(1.08); g.add(quadrat);
     const displayCanvas = document.createElement('canvas'), dc = displayCanvas.getContext('2d'); displayCanvas.width = 512; displayCanvas.height = 220; const displayTexture = new THREE.CanvasTexture(displayCanvas); displayTexture.colorSpace = THREE.SRGBColorSpace; const generator = new THREE.Group(), generatorBody = new THREE.Mesh(roundedBox(1.2, .74, .2, .08), new THREE.MeshPhysicalMaterial({ color: 0x213d43, roughness: .38, metalness: .18, clearcoat: .45 })); generatorBody.position.y = .4; generator.add(generatorBody); const screen = new THREE.Mesh(new THREE.PlaneGeometry(.98, .42), new THREE.MeshBasicMaterial({ map: displayTexture, toneMapped: false })); screen.position.set(0, .43, .111); generator.add(screen); generator.position.set(-3.15, .36, -1.45); generator.rotation.y = .08; g.add(generator);
     this.dynamic.push({ kind: 'randomSampling', grassUniforms, grassMaterial: bladeMaterial, mossMaterial, clouds, trees, daisies, quadrat, display: { canvas: displayCanvas, context: dc, texture: displayTexture }, targets: sampleTargets });
-    Object.assign(g.userData, { randomQuadratHabitat: true, grassBladeCount: bladeCount, mossPatchCount: mossCount, daisyCount: daisies.length, treeCount: trees.length, cloudCount: clouds.length, laboratoryTilesHidden: true, laboratoryBenchAndCupboardsReplaced: true, foregroundMeadowFillsArena: true, windAffectedTurf: true, mossBetweenGrassBlades: true, detailedDaisies: true }); const ready = shadowReady(g); grass.castShadow = false; grass.receiveShadow = false; moss.castShadow = false; meadowSurface.castShadow = false; return ready
+    Object.assign(g.userData, { randomQuadratHabitat: true, grassBladeCount: bladeCount, mossPatchCount: mossCount, daisyCount: daisies.length, treeCount: trees.length, cloudCount: clouds.length, realisticLayeredTrees: true, treeDepthRows: 3, curvedTaperedTrunks: true, radialConnectedBranching: true, canopyLobesPerTree: 11, upperCanopyWindFlex: true, forestShrubCount: shrubs.length, visibleRootFlares: true, lowPolygonBackgroundBranches: true, laboratoryTilesHidden: true, laboratoryBenchAndCupboardsReplaced: true, foregroundMeadowFillsArena: true, windAffectedTurf: true, mossBetweenGrassBlades: true, detailedDaisies: true }); const ready = shadowReady(g); trees.forEach(tree=>tree.group.traverse(node=>{if(node.isMesh)node.castShadow=false})); shrubs.forEach(shrub=>shrub.castShadow=false); grass.castShadow = false; grass.receiveShadow = false; moss.castShadow = false; meadowSurface.castShadow = false; return ready
   }
   shoreHeight(x, z) { return .14 + Math.max(0, 3.4 - z) * .115 + Math.sin(x * 1.8 + z * .7) * .055 + Math.sin(z * 2.35 - x * .54) * .035 }
   rockyShoreRig(state) {
-    const g = new THREE.Group(), skyCanvas = document.createElement('canvas'), sc = skyCanvas.getContext('2d'); skyCanvas.width = 1024; skyCanvas.height = 512; const grad = sc.createLinearGradient(0,0,0,512); grad.addColorStop(0,'#4fafe0'); grad.addColorStop(.62,'#b9e3f2'); grad.addColorStop(1,'#eef2dd'); sc.fillStyle = grad; sc.fillRect(0,0,1024,512); const skyTexture = new THREE.CanvasTexture(skyCanvas); skyTexture.colorSpace = THREE.SRGBColorSpace; const sky = new THREE.Mesh(new THREE.PlaneGeometry(16,8), new THREE.MeshBasicMaterial({ map: skyTexture, toneMapped:false })); sky.position.set(0,3.7,-3.12); g.add(sky);
-    // One bounded, continuous cliff strip replaces the former stack of tall
-    // boulders.  A shared ridge function keeps the grassy skyline unbroken.
-    const cliff = new THREE.Group(), ridgeY = x => THREE.MathUtils.clamp(2.78 + Math.sin(x * .72) * .12 + Math.sin(x * 1.93 + .5) * .07, 2.62, 3.02), ridgeZ = x => -2.65 + Math.sin(x * .64 + .9) * .055, cliffCols = 31, cliffRows = 6, cliffPositions = [], cliffColours = [], cliffIndices = [], facetColour = new THREE.Color();
-    for (let ix = 0; ix < cliffCols; ix++) {
-      const x = -6.3 + ix / (cliffCols - 1) * 12.6, top = ridgeY(x), base = .42 + Math.sin(x * .86) * .06;
-      for (let iy = 0; iy < cliffRows; iy++) {
-        const t = iy / (cliffRows - 1), y = THREE.MathUtils.lerp(base, top, t) + (iy > 0 && iy < cliffRows - 1 ? Math.sin(ix * 2.07 + iy * 1.31) * .055 : 0), z = THREE.MathUtils.lerp(-2.13 + Math.sin(x * 1.12) * .045, ridgeZ(x), t) + (iy > 0 && iy < cliffRows - 1 ? Math.sin(ix * .91 - iy * 2.4) * .05 : 0);
-        cliffPositions.push(x, y, z); facetColour.setHSL(.1 + Math.sin(ix * .73 + iy) * .012, .13 + (iy % 2) * .035, .39 + iy * .016 + Math.sin(ix * 1.37 - iy) * .055); cliffColours.push(facetColour.r, facetColour.g, facetColour.b)
-      }
-    }
-    for (let ix = 0; ix < cliffCols - 1; ix++) for (let iy = 0; iy < cliffRows - 1; iy++) { const a = ix * cliffRows + iy, b = a + cliffRows, c = a + 1, d = b + 1; if ((ix + iy) % 2) cliffIndices.push(a, b, c, c, b, d); else cliffIndices.push(a, b, d, a, d, c) }
-    const cliffGeo = new THREE.BufferGeometry(); cliffGeo.setAttribute('position', new THREE.Float32BufferAttribute(cliffPositions, 3)); cliffGeo.setAttribute('color', new THREE.Float32BufferAttribute(cliffColours, 3)); cliffGeo.setIndex(cliffIndices); cliffGeo.computeVertexNormals(); const cliffFace = new THREE.Mesh(cliffGeo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: .97, flatShading: true })); cliff.add(cliffFace);
-    const capPositions = [], capColours = [], capIndices = [], capColour = new THREE.Color();
-    for (let ix = 0; ix < cliffCols; ix++) { const x = -6.3 + ix / (cliffCols - 1) * 12.6, top = ridgeY(x); capPositions.push(x, top + .018, ridgeZ(x), x, top + .052 + Math.sin(x * 1.4) * .018, -3.22); capColour.setHSL(.29 + Math.sin(x) * .015, .55, .29 + Math.sin(x * .48) * .035); capColours.push(capColour.r, capColour.g, capColour.b, capColour.r * .82, capColour.g * .94, capColour.b * .8) }
-    for (let ix = 0; ix < cliffCols - 1; ix++) { const a = ix * 2, b = a + 2; capIndices.push(a, b, a + 1, a + 1, b, b + 1) } const capGeo = new THREE.BufferGeometry(); capGeo.setAttribute('position', new THREE.Float32BufferAttribute(capPositions, 3)); capGeo.setAttribute('color', new THREE.Float32BufferAttribute(capColours, 3)); capGeo.setIndex(capIndices); capGeo.computeVertexNormals(); const grassCap = new THREE.Mesh(capGeo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: .98, side: THREE.DoubleSide })); cliff.add(grassCap);
-    const cliffGrassCount = 150, cliffGrassGeo = new THREE.PlaneGeometry(.025, .22, 1, 2); cliffGrassGeo.translate(0, .11, 0); const cliffGrass = new THREE.InstancedMesh(cliffGrassGeo, new THREE.MeshStandardMaterial({ color: 0x73ad54, roughness: .9, side: THREE.DoubleSide }), cliffGrassCount), cliffDummy = new THREE.Object3D(); let cliffSeed = 7319; const cliffRnd = () => ((cliffSeed = Math.imul(cliffSeed, 1664525) + 1013904223 >>> 0) / 4294967296);
-    for (let i = 0; i < cliffGrassCount; i++) { const x = -6.18 + cliffRnd() * 12.36, z = ridgeZ(x) - .05 - cliffRnd() * .46; cliffDummy.position.set(x, ridgeY(x) + .02 + cliffRnd() * .035, z); cliffDummy.rotation.set(0, cliffRnd() * Math.PI, (cliffRnd() - .5) * .15); cliffDummy.scale.set(.72 + cliffRnd() * .6, .65 + cliffRnd() * .72, 1); cliffDummy.updateMatrix(); cliffGrass.setMatrixAt(i, cliffDummy.matrix) } cliffGrass.instanceMatrix.needsUpdate = true; cliffGrass.castShadow = false; cliff.add(cliffGrass);
-    for (let i = 0; i < 18; i++) { const x = -5.85 + i * .69 + Math.sin(i * 2.7) * .16, r = .26 + (i % 4) * .055, boulder = new THREE.Mesh(new THREE.DodecahedronGeometry(r, 1), new THREE.MeshStandardMaterial({ color: i % 3 ? 0x716959 : 0x5d5e57, roughness: .98, flatShading: true })); boulder.scale.set(1.25 + (i % 2) * .35, .72 + (i % 3) * .12, .8); boulder.rotation.set(i * .37, i * .83, i * .21); boulder.position.set(x, .45 + r * .28, -2.08 + Math.sin(i) * .06); cliff.add(boulder) }
-    for (let i = 0; i < 8; i++) { const x = -5.2 + i * 1.48 + Math.sin(i * 1.9) * .18, top = ridgeY(x), crackCurve = new THREE.CatmullRomCurve3([new THREE.Vector3(x, top - .34, ridgeZ(x) + .025), new THREE.Vector3(x + .07, top - .78, -2.47), new THREE.Vector3(x - .11, top - 1.22, -2.32), new THREE.Vector3(x + .04, top - 1.62, -2.2)], false, 'centripetal'), crack = new THREE.Mesh(new THREE.TubeGeometry(crackCurve, 18, .012, 6, false), new THREE.MeshStandardMaterial({ color: 0x3d3c36, roughness: 1 })); cliff.add(crack) }
-    g.add(cliff);
-    const shoreGeo = new THREE.BufferGeometry(), positions=[], colours=[], indices=[], cols=34, rows=28, colour=new THREE.Color();
-    for(let rz=0;rz<rows;rz++){ const z=-2.3+rz/(rows-1)*6.5; for(let ix=0;ix<cols;ix++){ const x=-5.3+ix/(cols-1)*10.6, y=this.shoreHeight(x,z); positions.push(x,y,z); const wet=Math.max(0,Math.min(1,(z-.2)/3.4)); colour.setHex(wet>.62?0x35484a:wet>.25?0x596057:0x807563); colour.offsetHSL((Math.sin(x*2+z)*.015),0,(Math.sin(x*1.7-z*2.1))*.035); colours.push(colour.r,colour.g,colour.b) }}
-    for(let r=0;r<rows-1;r++)for(let c=0;c<cols-1;c++){const a=r*cols+c,b=a+1,d=(r+1)*cols+c,e=d+1;indices.push(a,d,b,b,d,e)} shoreGeo.setAttribute('position',new THREE.Float32BufferAttribute(positions,3)); shoreGeo.setAttribute('color',new THREE.Float32BufferAttribute(colours,3)); shoreGeo.setIndex(indices); shoreGeo.computeVertexNormals(); const shore=new THREE.Mesh(shoreGeo,new THREE.MeshStandardMaterial({vertexColors:true,roughness:.94,metalness:.02})); shore.receiveShadow=true; g.add(shore);
+    const g = new THREE.Group(), skyCanvas = document.createElement('canvas'), sc = skyCanvas.getContext('2d'); skyCanvas.width = 1024; skyCanvas.height = 512; const grad = sc.createLinearGradient(0,0,0,512); grad.addColorStop(0,'#4fafe0'); grad.addColorStop(.62,'#b9e3f2'); grad.addColorStop(1,'#eef2dd'); sc.fillStyle = grad; sc.fillRect(0,0,1024,512); const skyTexture = new THREE.CanvasTexture(skyCanvas); skyTexture.colorSpace = THREE.SRGBColorSpace; const sky = new THREE.Mesh(new THREE.PlaneGeometry(28,8.6), new THREE.MeshBasicMaterial({ map: skyTexture, toneMapped:false })); sky.position.set(0,3.8,-5.15); g.add(sky);
+    // A high-resolution, coherently eroded face replaces the pale six-row wall.
+    // Rock strata, broken ledges, recessed branching fissures, a damp toe and
+    // a real peat edge all share one continuous, height-bounded ridge.
+    const cliff = new THREE.Group(), cliffMinX=-12.2, cliffMaxX=12.2, ridgeY=x=>THREE.MathUtils.clamp(2.62+Math.sin(x*.66)*.1+Math.sin(x*1.73+.45)*.055,2.46,2.78), ridgeZ=x=>-2.72+Math.sin(x*.58+.9)*.075+Math.sin(x*1.61)*.025,toeZ=x=>-2.04+Math.sin(x*1.08)*.065,baseY=x=>this.shoreHeight(x,toeZ(x))-.035,cliffFrontZ=(x,t)=>{const fade=Math.sin(Math.PI*t),naturalRelief=(Math.sin(x*.79+t*4.1)*.055+Math.sin(x*2.31-t*6.7)*.027)*fade,ledge1=Math.exp(-Math.pow((t-(.23+Math.sin(x*.37)*.014))/.052,2))*(.045+.075*(.5+.5*Math.sin(x*.83+1.1))),ledge2=Math.exp(-Math.pow((t-(.51+Math.sin(x*.29+2)*.018))/.058,2))*(.035+.06*(.5+.5*Math.sin(x*.61-.7))),ledge3=Math.exp(-Math.pow((t-(.75+Math.sin(x*.42-.5)*.012))/.048,2))*(.028+.052*(.5+.5*Math.sin(x*.94+2.2)));return THREE.MathUtils.lerp(toeZ(x),ridgeZ(x),t)+naturalRelief+(ledge1+ledge2+ledge3)*fade},cliffCols=75,cliffRows=12,cliffPositions=[],cliffColours=[],cliffIndices=[],facetColour=new THREE.Color(),rockBands=[0x50534f,0x66645e,0x756d62,0x5d5a55,0x817769,0x68645d];
+    for(let ix=0;ix<cliffCols;ix++){const rawX=THREE.MathUtils.lerp(cliffMinX,cliffMaxX,ix/(cliffCols-1)),top=ridgeY(rawX),base=baseY(rawX);for(let iy=0;iy<cliffRows;iy++){const t=iy/(cliffRows-1),x=rawX+(iy>0&&iy<cliffRows-1?Math.sin(ix*1.91+iy*2.37)*.032:0),y=THREE.MathUtils.lerp(base,top,t)+(iy>0&&iy<cliffRows-1?Math.sin(ix*1.37-iy*.84)*.035+Math.sin(ix*.47+iy*2.2)*.018:0),z=cliffFrontZ(x,t),band=Math.max(0,Math.min(rockBands.length-1,Math.floor(t*rockBands.length+Math.sin(x*.72)*.42)));cliffPositions.push(x,y,z);facetColour.setHex(rockBands[band]);facetColour.offsetHSL(Math.sin(ix*.59+iy)*.008,Math.sin(iy*1.7)*.015,(Math.sin(ix*1.19-iy*.73)*.055)+(t<.13?-.075:0)+(t>.88?.018:0));cliffColours.push(facetColour.r,facetColour.g,facetColour.b)}}
+    for(let ix=0;ix<cliffCols-1;ix++)for(let iy=0;iy<cliffRows-1;iy++){const a=ix*cliffRows+iy,b=a+cliffRows,c=a+1,d=b+1;(ix+iy)%2?cliffIndices.push(a,b,c,c,b,d):cliffIndices.push(a,b,d,a,d,c)}const cliffGeo=new THREE.BufferGeometry();cliffGeo.setAttribute('position',new THREE.Float32BufferAttribute(cliffPositions,3));cliffGeo.setAttribute('color',new THREE.Float32BufferAttribute(cliffColours,3));cliffGeo.setIndex(cliffIndices);cliffGeo.computeVertexNormals();const cliffFace=new THREE.Mesh(cliffGeo,new THREE.MeshStandardMaterial({vertexColors:true,roughness:.97,flatShading:true}));cliff.add(cliffFace);
+    const ledgePositions=[],ledgeColours=[],ledgeIndices=[],ledgeColour=new THREE.Color(),appendLedge=(t,x0,x1,phase)=>{const start=ledgePositions.length/3,steps=9;for(let i=0;i<=steps;i++){const q=i/steps,x=THREE.MathUtils.lerp(x0,x1,q),localT=t+Math.sin(x*.73+phase)*.017+Math.sin(x*2.8-phase)*.006,y=THREE.MathUtils.lerp(baseY(x),ridgeY(x),localT)+Math.sin(x*1.4+phase)*.026+Math.sin(x*4.2-phase)*.008,z=cliffFrontZ(x,localT),edgeFade=Math.pow(Math.sin(Math.PI*q),.55),depth=(.032+.045*(.5+.5*Math.sin(x*1.6+phase)))*edgeFade,thickness=.026+.018*(.5+.5*Math.sin(x*2.2-phase));ledgePositions.push(x,y+.008,z+.006,x,y+.008,z+depth,x,y-thickness,z+depth*.74);ledgeColour.setHex(0x777064);const shade=.94+Math.sin(x*1.9+phase)*.035;ledgeColours.push(ledgeColour.r*.86,ledgeColour.g*.86,ledgeColour.b*.84,ledgeColour.r*shade,ledgeColour.g*shade,ledgeColour.b*shade,ledgeColour.r*.58,ledgeColour.g*.58,ledgeColour.b*.57)}for(let i=0;i<steps;i++){const a=start+i*3,b=a+3;ledgeIndices.push(a,b,a+1,a+1,b,b+1,a+1,b+1,a+2,a+2,b+1,b+2)}};const ledgeRuns=[{t:.23,r:[[-11.85,-9.35],[-7.95,-5.45],[-3.95,-1.35],[.35,2.65],[4.35,6.85],[8.25,11.75]]},{t:.51,r:[[-11.3,-8.85],[-6.95,-4.35],[-2.45,.05],[1.95,4.55],[6.35,8.75],[10.05,11.9]]},{t:.75,r:[[-11.9,-10.05],[-8.65,-6.25],[-4.65,-2.15],[-.55,1.8],[3.55,5.8],[7.45,9.6],[10.75,12.0]]}];let brokenRockLedges=0;ledgeRuns.forEach((band,bi)=>band.r.forEach(([x0,x1],ri)=>{appendLedge(band.t,x0,x1,bi*3+ri);brokenRockLedges++}));const ledgeGeo=new THREE.BufferGeometry();ledgeGeo.setAttribute('position',new THREE.Float32BufferAttribute(ledgePositions,3));ledgeGeo.setAttribute('color',new THREE.Float32BufferAttribute(ledgeColours,3));ledgeGeo.setIndex(ledgeIndices);ledgeGeo.computeVertexNormals();cliff.add(new THREE.Mesh(ledgeGeo,new THREE.MeshStandardMaterial({vertexColors:true,roughness:.98,flatShading:true,side:THREE.DoubleSide})));
+    const crackPositions=[],crackIndices=[],appendCrack=(points,width=.012)=>{const start=crackPositions.length/3,last=Math.max(1,points.length-1);for(let i=0;i<points.length;i++){const [x,t]=points[i],w=width*Math.pow(Math.max(0,1-i/last),.72),y=THREE.MathUtils.lerp(baseY(x),ridgeY(x),t),z=cliffFrontZ(x,t)+.024;crackPositions.push(x-w,y,z,x+w,y,z)}for(let i=0;i<points.length-1;i++){const a=start+i*2,b=a+2;crackIndices.push(a,b,a+1,a+1,b,b+1)}};const crackDefs=[[-11.32,.9,.47,-1],[-9.56,.74,.37,1],[-7.88,.87,.52,-1],[-5.35,.8,.42,1],[-3.82,.93,.58,-1],[-1.27,.71,.35,1],[.42,.86,.49,-1],[2.93,.76,.39,1],[5.14,.91,.55,-1],[7.62,.72,.36,1],[9.15,.84,.45,-1],[11.27,.92,.51,1]];crackDefs.forEach(([x,t0,t1,dir],i)=>{const main=[[x,t0],[x+dir*(.035+(i%3)*.018),t0-.13],[x-dir*(.07+(i%2)*.028),t0-.29],[x+dir*.045,t0-.43],[x+dir*.13,t1]];appendCrack(main,.008+(i%4)*.0014);if(i%3!==1)appendCrack([[main[2][0],main[2][1]],[main[2][0]-dir*(.12+(i%2)*.04),main[2][1]-.075],[main[2][0]-dir*(.25+(i%3)*.035),main[2][1]-.13]],.0055)});const crackGeo=new THREE.BufferGeometry();crackGeo.setAttribute('position',new THREE.Float32BufferAttribute(crackPositions,3));crackGeo.setIndex(crackIndices);const crackMat=new THREE.MeshStandardMaterial({color:0x2d302d,roughness:1,transparent:true,opacity:.74,depthWrite:false,side:THREE.DoubleSide,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-3}),cracks=new THREE.Mesh(crackGeo,crackMat);cracks.renderOrder=4;cliff.add(cracks);
+    const soilPositions=[],soilColours=[],soilIndices=[],soilColour=new THREE.Color();for(let ix=0;ix<cliffCols;ix++){const x=THREE.MathUtils.lerp(cliffMinX,cliffMaxX,ix/(cliffCols-1)),top=ridgeY(x),z=ridgeZ(x);soilPositions.push(x,top-.105,z+.012,x,top+.012,z-.006);soilColour.setHex(ix%3===0?0x493a28:ix%3===1?0x59452e:0x3f3528);soilColours.push(soilColour.r,soilColour.g,soilColour.b,soilColour.r*.88,soilColour.g*.9,soilColour.b*.8)}for(let ix=0;ix<cliffCols-1;ix++){const a=ix*2,b=a+2;soilIndices.push(a,b,a+1,a+1,b,b+1)}const soilGeo=new THREE.BufferGeometry();soilGeo.setAttribute('position',new THREE.Float32BufferAttribute(soilPositions,3));soilGeo.setAttribute('color',new THREE.Float32BufferAttribute(soilColours,3));soilGeo.setIndex(soilIndices);soilGeo.computeVertexNormals();cliff.add(new THREE.Mesh(soilGeo,new THREE.MeshStandardMaterial({vertexColors:true,roughness:1,flatShading:true})));
+    const capPositions=[],capColours=[],capIndices=[],capColour=new THREE.Color();for(let ix=0;ix<cliffCols;ix++){const x=THREE.MathUtils.lerp(cliffMinX,cliffMaxX,ix/(cliffCols-1)),top=ridgeY(x);capPositions.push(x,top+.014,ridgeZ(x)-.008,x,top+.045+Math.sin(x*1.31)*.014,-4.18);capColour.setHSL(.27+Math.sin(x)*.012,.5,.25+Math.sin(x*.48)*.028);capColours.push(capColour.r,capColour.g,capColour.b,capColour.r*.72,capColour.g*.84,capColour.b*.67)}for(let ix=0;ix<cliffCols-1;ix++){const a=ix*2,b=a+2;capIndices.push(a,b,a+1,a+1,b,b+1)}const capGeo=new THREE.BufferGeometry();capGeo.setAttribute('position',new THREE.Float32BufferAttribute(capPositions,3));capGeo.setAttribute('color',new THREE.Float32BufferAttribute(capColours,3));capGeo.setIndex(capIndices);capGeo.computeVertexNormals();const grassCap=new THREE.Mesh(capGeo,new THREE.MeshStandardMaterial({vertexColors:true,roughness:.98,side:THREE.DoubleSide}));cliff.add(grassCap);
+    const cliffGrassCount=390,cliffGrassGeo=new THREE.PlaneGeometry(.022,.18,1,3);cliffGrassGeo.translate(0,.09,0);const cliffGrass=new THREE.InstancedMesh(cliffGrassGeo,new THREE.MeshStandardMaterial({color:0x668f42,roughness:.92,side:THREE.DoubleSide,vertexColors:true}),cliffGrassCount),cliffDummy=new THREE.Object3D();let cliffSeed=7319;const cliffRnd=()=>((cliffSeed=Math.imul(cliffSeed,1664525)+1013904223>>>0)/4294967296);for(let i=0;i<cliffGrassCount;i++){const x=cliffMinX+.1+cliffRnd()*(cliffMaxX-cliffMinX-.2),z=ridgeZ(x)-.04-cliffRnd()*1.15,scaleY=.62+cliffRnd()*.43;cliffDummy.position.set(x,ridgeY(x)+.018+cliffRnd()*.018,z);cliffDummy.rotation.set(0,cliffRnd()*Math.PI,(cliffRnd()-.5)*.13);cliffDummy.scale.set(.65+cliffRnd()*.55,scaleY,1);cliffDummy.updateMatrix();cliffGrass.setMatrixAt(i,cliffDummy.matrix);cliffGrass.setColorAt(i,new THREE.Color().setHSL(.23+cliffRnd()*.08,.48+cliffRnd()*.18,.31+cliffRnd()*.12))}cliffGrass.instanceMatrix.needsUpdate=true;cliffGrass.castShadow=false;cliff.add(cliffGrass);
+    const lichenMeshes=[],cliffLichenPatches=48,lichenMats=[new THREE.MeshBasicMaterial({color:0x778553,transparent:true,opacity:.36,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2}),new THREE.MeshBasicMaterial({color:0xaa8d55,transparent:true,opacity:.3,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2}),new THREE.MeshBasicMaterial({color:0x9ba08c,transparent:true,opacity:.28,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2})];for(let i=0;i<cliffLichenPatches;i++){const x=cliffMinX+.45+((i*43)%149)/148*(cliffMaxX-cliffMinX-.9),t=.1+((i*67)%97)/96*.8,y=THREE.MathUtils.lerp(baseY(x),ridgeY(x),t),patch=new THREE.Mesh(new THREE.CircleGeometry(.065+(i%5)*.012,8),lichenMats[i%lichenMats.length]);patch.position.set(x,y,cliffFrontZ(x,t)+.029);patch.rotation.z=i*.91;patch.scale.set(.7+(i%4)*.32,.42+(i%3)*.24,1);patch.renderOrder=3;cliff.add(patch);lichenMeshes.push(patch)}
+    const toeMats=[0x4f5552,0x67645b,0x756c5f,0x5c5e58].map(color=>new THREE.MeshStandardMaterial({color,roughness:.98,flatShading:true})),toeBoulderCount=35;for(let i=0;i<toeBoulderCount;i++){const x=cliffMinX+.38+i*(cliffMaxX-cliffMinX-.76)/(toeBoulderCount-1)+Math.sin(i*2.7)*.15,r=.2+(i%5)*.045,sy=.62+(i%4)*.1,z=toeZ(x)+.03+Math.sin(i)*.045,boulder=new THREE.Mesh(new THREE.DodecahedronGeometry(r,1),toeMats[i%toeMats.length]);boulder.scale.set(1.2+(i%3)*.28,sy,.75+(i%2)*.18);boulder.rotation.set(i*.37,i*.83,i*.21);boulder.position.set(x,this.shoreHeight(x,z)+r*sy*.58,z);cliff.add(boulder)}
+    cliff.updateMatrixWorld(true);const cliffBounds=new THREE.Box3().setFromObject(cliff);g.add(cliff);
+    // Overscan the complete camera frustum in every direction.  The previous
+    // 10.6 x 6.5 m rectangle exposed blue triangular wedges at compact widths.
+    const shoreMinX=-13.5,shoreMaxX=13.5,shoreMinZ=-4.6,shoreMaxZ=7.4,shoreGeo=new THREE.BufferGeometry(),positions=[],colours=[],indices=[],cols=85,rows=51,colour=new THREE.Color();
+    for(let rz=0;rz<rows;rz++){const z=THREE.MathUtils.lerp(shoreMinZ,shoreMaxZ,rz/(rows-1));for(let ix=0;ix<cols;ix++){const x=THREE.MathUtils.lerp(shoreMinX,shoreMaxX,ix/(cols-1)),y=this.shoreHeight(x,z),shoreward=Math.max(0,Math.min(1,(z+.2)/4.1)),dry=Math.max(0,Math.min(1,(1.9-z)/3.9)),mottle=Math.sin(x*1.71-z*2.13)*.027+Math.sin(x*.48+z*3.07)*.018;positions.push(x,y,z);colour.setHex(shoreward>.73?0x394b4c:shoreward>.36?0x5c625a:0x807565);colour.offsetHSL(Math.sin(x*.81+z*.34)*.008,-.015+dry*.018,mottle+dry*.014);colours.push(colour.r,colour.g,colour.b)}}
+    for(let r=0;r<rows-1;r++)for(let c=0;c<cols-1;c++){const a=r*cols+c,b=a+1,d=(r+1)*cols+c,e=d+1;(r+c)%2?indices.push(a,d,b,b,d,e):indices.push(a,d,e,a,e,b)}shoreGeo.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));shoreGeo.setAttribute('color',new THREE.Float32BufferAttribute(colours,3));shoreGeo.setIndex(indices);shoreGeo.computeVertexNormals();const shore=new THREE.Mesh(shoreGeo,new THREE.MeshStandardMaterial({vertexColors:true,roughness:.97,metalness:.01,flatShading:true}));shore.receiveShadow=true;g.add(shore);
+    const shoreGravelCount=300,shoreGravelGeo=new THREE.DodecahedronGeometry(.038,0),shoreGravelMat=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.99,flatShading:true}),shoreGravel=new THREE.InstancedMesh(shoreGravelGeo,shoreGravelMat,shoreGravelCount),gravelDummy=new THREE.Object3D();let gravelSeed=91367;const gravelRnd=()=>((gravelSeed=Math.imul(gravelSeed,1664525)+1013904223>>>0)/4294967296);for(let i=0;i<shoreGravelCount;i++){let x,z;do{x=THREE.MathUtils.lerp(shoreMinX+.25,shoreMaxX-.25,gravelRnd());z=THREE.MathUtils.lerp(-3.75,6.7,gravelRnd())}while(Math.abs(x)<.88&&z>-1.35&&z<3.3);const scale=.52+gravelRnd()*1.28;gravelDummy.position.set(x,this.shoreHeight(x,z)+.014+scale*.006,z);gravelDummy.rotation.set(gravelRnd()*Math.PI,gravelRnd()*Math.PI,gravelRnd()*Math.PI);gravelDummy.scale.set(scale*(.8+gravelRnd()*.55),scale*(.34+gravelRnd()*.32),scale*(.7+gravelRnd()*.48));gravelDummy.updateMatrix();shoreGravel.setMatrixAt(i,gravelDummy.matrix);shoreGravel.setColorAt(i,new THREE.Color().setHSL(.09+gravelRnd()*.08,.05+gravelRnd()*.12,.3+gravelRnd()*.22))}shoreGravel.instanceMatrix.needsUpdate=true;shoreGravel.castShadow=false;shoreGravel.receiveShadow=true;g.add(shoreGravel);
     const poolDefs=[[-2.82,1.3,.76,.42,.4],[2.55,.86,.66,.36,1.7],[-1.72,2.52,.58,.32,2.8]], scatteredRocks=[]; for(let i=0;i<70&&scatteredRocks.length<54;i++){ const x=-4.7+((i*37)%101)/100*9.4,z=-1.65+((i*61)%103)/102*5.25;if(poolDefs.some(([px,pz,rx,rz])=>Math.pow((x-px)/(rx*1.18),2)+Math.pow((z-pz)/(rz*1.25),2)<1))continue;const y=this.shoreHeight(x,z),r=.09+(i%7)*.026,mesh=new THREE.Mesh(new THREE.DodecahedronGeometry(r,0),new THREE.MeshStandardMaterial({color:i%3===0?0x4b5552:i%3===1?0x68665c:0x777064,roughness:.96,flatShading:true})); mesh.scale.set(1+(i%4)*.22,.65+(i%3)*.16,.8+(i%5)*.12);mesh.rotation.set(i*.73,i*1.11,i*.29);mesh.position.set(x,y+r*.3,z);g.add(mesh);scatteredRocks.push(mesh)}
     const pools=[],poolSeaweed=[]; poolDefs.forEach(([x,z,rx,rz,phase],pi)=>{const baseY=this.shoreHeight(x,z)+.035,outline=[];for(let j=0;j<44;j++){const a=j/44*Math.PI*2,noise=1+Math.sin(a*3+phase)*.13+Math.sin(a*7-phase*.7)*.065+Math.sin(a*11+phase)*.025;outline.push(new THREE.Vector2(Math.cos(a)*rx*noise,-Math.sin(a)*rz*noise))}const basinShape=new THREE.Shape(outline.map(p=>p.clone().multiplyScalar(1.08))),basin=new THREE.Mesh(new THREE.ShapeGeometry(basinShape),new THREE.MeshStandardMaterial({color:0x2d4441,roughness:.86,side:THREE.DoubleSide}));basin.rotation.x=-Math.PI/2;basin.position.set(x,baseY-.012,z);g.add(basin);const waterShape=new THREE.Shape(outline.map(p=>p.clone().multiplyScalar(.91))),pool=new THREE.Mesh(new THREE.ShapeGeometry(waterShape),new THREE.MeshPhysicalMaterial({color:0x3d9bb0,transparent:true,opacity:.64,roughness:.1,transmission:.2,clearcoat:.78,side:THREE.DoubleSide,depthWrite:false}));pool.rotation.x=-Math.PI/2;pool.position.set(x,baseY+.008,z);pool.renderOrder=4;g.add(pool);pools.push(pool);const rimPoints=outline.map(p=>new THREE.Vector3(p.x,0,-p.y)),rim=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(rimPoints,true,'centripetal'),88,.028,8,true),new THREE.MeshStandardMaterial({color:0x3f514b,roughness:.94}));rim.position.set(x,baseY,z);g.add(rim);for(let s=0;s<10;s++){const a=s/10*Math.PI*2+phase*.17,p=outline[Math.floor((s/10)*outline.length)],stone=new THREE.Mesh(new THREE.DodecahedronGeometry(.045+(s%3)*.012,0),new THREE.MeshStandardMaterial({color:s%2?0x58645d:0x6d6b60,roughness:.98,flatShading:true}));stone.scale.set(1.25,.62,.82);stone.position.set(x+p.x,baseY+.022,z-p.y);stone.rotation.y=a;g.add(stone)}for(let c=0;c<4;c++){const clump=new THREE.Group(),cx=(c-1.5)*rx*.18+Math.sin(c+phase)*rx*.12,cz=Math.cos(c*1.8+phase)*rz*.22;for(let f=0;f<3;f++){const h=.13+(f+c%2)*.035,curve=new THREE.CatmullRomCurve3([new THREE.Vector3(cx,0,cz),new THREE.Vector3(cx+(f-1)*.018,h*.34,cz+.012),new THREE.Vector3(cx-(f-1)*.025,h*.7,cz+.025),new THREE.Vector3(cx+(f-1)*.016,h,cz+.04)],false,'centripetal'),frond=new THREE.Mesh(new THREE.TubeGeometry(curve,14,.009+f*.002,6,false),new THREE.MeshStandardMaterial({color:(f+c)%2?0x657431:0x806028,roughness:.82}));clump.add(frond)}const holdfast=new THREE.Mesh(new THREE.SphereGeometry(.035,10,6),new THREE.MeshStandardMaterial({color:0x55472b,roughness:.95}));holdfast.scale.y=.42;holdfast.position.set(cx,.012,cz);clump.add(holdfast);clump.position.set(x,baseY+.014,z);g.add(clump);poolSeaweed.push(clump)}});
     const stationZ=[-1.05,-.25,.55,1.35,2.15,2.95], organisms=[];
@@ -1341,10 +1459,10 @@ export class LabRenderer3D {
     const tapeMat=new THREE.MeshPhysicalMaterial({color:0xffd63d,roughness:.32,metalness:.08,clearcoat:.5}), tapeSegments=[],tapeStart=stationZ[0]-.13,tapeEnd=stationZ[stationZ.length-1]+.13; for(const x of[-.62,.62])for(let i=0;i<40;i++){const z0=THREE.MathUtils.lerp(tapeStart,tapeEnd,i/40),z1=THREE.MathUtils.lerp(tapeStart,tapeEnd,(i+1)/40),a=new THREE.Vector3(x,this.shoreHeight(x,z0)+.08,z0),b=new THREE.Vector3(x,this.shoreHeight(x,z1)+.08,z1),seg=this.tubeBetween(a,b,.018,tapeMat);seg.visible=false;g.add(seg);tapeSegments.push({mesh:seg,fraction:(i+1)/40})}
     const reel=new THREE.Group(),reelRing=new THREE.Mesh(new THREE.TorusGeometry(.22,.035,12,48),new THREE.MeshPhysicalMaterial({color:0xf3c42f,metalness:.28,roughness:.28,clearcoat:.55}));reelRing.rotation.x=Math.PI/2;reel.add(reelRing);const reelHub=new THREE.Mesh(new THREE.CylinderGeometry(.07,.07,.16,24),metal(0x4e6064,.22));reel.add(reelHub);reel.position.set(-.86,this.shoreHeight(-.86,-1.18)+.33,-1.18);g.add(reel);
     const quadrat=this.samplingQuadratFrame(1.02,0xcbd9db);g.add(quadrat);
-    const waterUniforms={uTime:{value:0},uAlpha:{value:.72}},waterMat=new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,uniforms:waterUniforms,vertexShader:'uniform float uTime; varying float vWave; varying vec3 vPos; void main(){ vec3 p=position; float w=sin(p.x*1.45+uTime*2.4)*0.055+sin(p.z*2.2-uTime*1.65)*0.035+sin((p.x+p.z)*.72+uTime*.9)*0.028; p.y+=w; vWave=w; vPos=p; gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.0); }',fragmentShader:'uniform float uAlpha; varying float vWave; varying vec3 vPos; void main(){ float streak=.5+.5*sin(vPos.x*5.2+vPos.z*2.8+vWave*22.0); vec3 deep=vec3(.025,.29,.38); vec3 shallow=vec3(.12,.65,.72); vec3 c=mix(deep,shallow,.48+vWave*3.2)+pow(streak,18.0)*.24; gl_FragColor=vec4(c,uAlpha); }'}),water=new THREE.Mesh(new THREE.PlaneGeometry(12,6,48,32),waterMat);water.rotation.x=-Math.PI/2;water.renderOrder=5;g.add(water);
-    const foamBands=[];for(let bi=0;bi<3;bi++){const pts=[];for(let i=0;i<=42;i++){const x=-5.6+i/42*11.2;pts.push(new THREE.Vector3(x,.24+bi*.008,Math.sin(x*1.7+bi)*.045))}const foam=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),84,.025-bi*.004,8,false),new THREE.MeshBasicMaterial({color:0xf4ffff,transparent:true,opacity:.68-bi*.12,depthWrite:false,toneMapped:false}));foam.renderOrder=7;g.add(foam);foamBands.push(foam)}
-    const clouds=[];[[-3.4,5.25],[2.6,4.85]].forEach(([x,y],ci)=>{const cloud=new THREE.Group();for(let i=0;i<6;i++){const puff=new THREE.Mesh(new THREE.SphereGeometry(.34+(i%2)*.08,20,12),new THREE.MeshLambertMaterial({color:0xffffff,transparent:true,opacity:.82,depthWrite:false}));puff.scale.set(1.35,.56,.3);puff.position.set((i-2.5)*.27,Math.sin(i*2)*.08,0);cloud.add(puff)}cloud.position.set(x,y,-2.78);g.add(cloud);clouds.push({group:cloud,baseX:x,phase:ci*2})});
-    this.dynamic.push({kind:'rockyShoreSampling',tapeSegments,reel,quadrat,stationZ,organisms,poolSeaweed,water,waterUniforms,foamBands,clouds}); Object.assign(g.userData,{rockyShore:true,cliffBackdrop:true,continuousCliffRidge:true,cliffTopGrass:true,cliffMaximumY:3.02,cliffWithinCameraFrame:true,irregularRockPools:true,rockPools:pools.length,rockPoolSeaweedClumps:poolSeaweed.length,firstQuadratClearOfCliff:true,rockCount:scatteredRocks.length,organismModels:organisms.length,beltLengthM:10,beltWidthM:1,incomingDetailedTide:true,laboratoryRoomHidden:true});const ready=shadowReady(g);cliffGrass.castShadow=false;water.castShadow=false;pools.forEach(pool=>pool.castShadow=false);return ready
+    const waterDepth=12,waterUniforms={uTime:{value:0},uAlpha:{value:.72}},waterMat=new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,uniforms:waterUniforms,vertexShader:'uniform float uTime; varying float vWave; varying vec3 vPos; void main(){ vec3 p=position; float w=sin(p.x*1.45+uTime*2.4)*0.055+sin(p.z*2.2-uTime*1.65)*0.035+sin((p.x+p.z)*.72+uTime*.9)*0.028; p.y+=w; vWave=w; vPos=p; gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.0); }',fragmentShader:'uniform float uAlpha; varying float vWave; varying vec3 vPos; void main(){ float streak=.5+.5*sin(vPos.x*5.2+vPos.z*2.8+vWave*22.0); vec3 deep=vec3(.025,.29,.38); vec3 shallow=vec3(.12,.65,.72); vec3 c=mix(deep,shallow,.48+vWave*3.2)+pow(streak,18.0)*.24; gl_FragColor=vec4(c,uAlpha); }'}),water=new THREE.Mesh(new THREE.PlaneGeometry(22,waterDepth,88,56),waterMat);water.rotation.x=-Math.PI/2;water.renderOrder=5;g.add(water);
+    const foamBands=[];for(let bi=0;bi<3;bi++){const pts=[];for(let i=0;i<=72;i++){const x=-11.2+i/72*22.4;pts.push(new THREE.Vector3(x,.24+bi*.008,Math.sin(x*1.7+bi)*.045+Math.sin(x*.53-bi)*.018))}const foam=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),144,.025-bi*.004,8,false),new THREE.MeshBasicMaterial({color:0xf4ffff,transparent:true,opacity:.68-bi*.12,depthWrite:false,toneMapped:false}));foam.renderOrder=7;g.add(foam);foamBands.push(foam)}
+    const clouds=[];[[-3.4,4.05],[2.6,3.92]].forEach(([x,y],ci)=>{const cloud=new THREE.Group();for(let i=0;i<6;i++){const puff=new THREE.Mesh(new THREE.SphereGeometry(.34+(i%2)*.08,20,12),new THREE.MeshLambertMaterial({color:0xffffff,transparent:true,opacity:.82,depthWrite:false}));puff.scale.set(1.35,.56,.3);puff.position.set((i-2.5)*.27,Math.sin(i*2)*.08,0);cloud.add(puff)}cloud.position.set(x,y,-4.82+ci*.025);g.add(cloud);clouds.push({group:cloud,baseX:x,phase:ci*2})});
+    this.dynamic.push({kind:'rockyShoreSampling',tapeSegments,reel,quadrat,stationZ,organisms,poolSeaweed,water,waterDepth,waterUniforms,foamBands,clouds});Object.assign(g.userData,{rockyShore:true,cliffBackdrop:true,continuousCliffRidge:true,cliffTopGrass:true,realisticErodedCliff:true,cliffFaceGrid:[cliffCols,cliffRows],brokenRockLedges,recessedBranchedFissures:true,peatSoilEdge:true,cliffLichenPatches,cliffTopGrassBlades:cliffGrassCount,cliffMaximumY:+cliffBounds.max.y.toFixed(2),cliffWithinCameraFrame:cliffBounds.max.y<=3.02,cliffBoundsWorld:{x:[cliffMinX,cliffMaxX],maxY:+cliffBounds.max.y.toFixed(2)},supportedMaxSceneAspect:2.17,irregularRockPools:true,rockPools:pools.length,rockPoolSeaweedClumps:poolSeaweed.length,firstQuadratClearOfCliff:true,rockCount:scatteredRocks.length,shoreGravelCount,rockBeachFloorBoundsWorld:{x:[shoreMinX,shoreMaxX],z:[shoreMinZ,shoreMaxZ]},rockBeachFloorExtendsBeyondView:true,minimumCompactLateralOverdrawWorld:1.7,foregroundDepthOverdrawWorld:2.5,waterWorldDimensions:[22,waterDepth],foamWorldSpan:22.4,organismModels:organisms.length,beltLengthM:10,beltWidthM:1,incomingDetailedTide:true,laboratoryRoomHidden:true});const ready=shadowReady(g);cliffGrass.castShadow=false;shoreGravel.castShadow=false;water.castShadow=false;cracks.castShadow=false;cracks.receiveShadow=false;lichenMeshes.forEach(patch=>{patch.castShadow=false;patch.receiveShadow=false});pools.forEach(pool=>pool.castShadow=false);return ready
   }
   rippleTankRig(state) {
     const g = new THREE.Group(), tank = new THREE.Group(), aluminium = metal(0x9caeb4, .18), darkMetal = metal(0x344b54, .24), black = solid(0x142a33, .32), rubber = solid(0x17252a, .82), acrylic = new THREE.MeshPhysicalMaterial({ color: 0xd8f4fb, transparent: true, opacity: .34, transmission: .7, roughness: .035, ior: 1.48, thickness: .09, clearcoat: .7, clearcoatRoughness: .03, side: THREE.DoubleSide, depthWrite: false });
@@ -1508,43 +1626,135 @@ export class LabRenderer3D {
 
     g.add(pulleyGroup);
 
-    // 4. Red IR Photogates
-    const gateMat = new THREE.MeshStandardMaterial({ color: 0xd32f2f, roughness: 0.4 });
-    [-0.6, 1.0].forEach(gx => {
+    // 4. Two proper U-shaped IR light gates, both wired to one two-channel logger.
+    const gateXs = [-0.6, 1.0], gateProgress = gateXs.map(gx => (gx + 1.8) / 3.5);
+    const gateMat = new THREE.MeshPhysicalMaterial({ color: 0xe63d45, roughness: 0.28, clearcoat: 0.72, clearcoatRoughness: 0.16 });
+    const gateDark = new THREE.MeshStandardMaterial({ color: 0x641820, roughness: 0.46 });
+    const gateFootMat = new THREE.MeshPhysicalMaterial({ color: 0x34474f, metalness: 0.48, roughness: 0.34, clearcoat: 0.28 });
+    const beamMat = new THREE.MeshBasicMaterial({ color: 0xff685f, transparent: true, opacity: 0.24, depthWrite: false, toneMapped: false });
+    const gateConnectors = [];
+    gateXs.forEach((gx, index) => {
       const gate = new THREE.Group();
-      const arch = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.45, 0.44), gateMat);
-      arch.position.set(gx, 1.22, 0);
-      gate.add(arch);
-      const sensorMat = new THREE.MeshBasicMaterial({ color: 0x00e676 });
-      const sensor = new THREE.Mesh(new THREE.SphereGeometry(0.03, 8, 8), sensorMat);
-      sensor.position.set(gx, 1.38, 0);
-      gate.add(sensor);
+      const foot = new THREE.Mesh(roundedBox(0.22, 0.055, 0.74, 0.025, 4), gateFootMat);
+      foot.position.set(gx, 1.075, 0);
+      gate.add(foot);
+      for (const z of [-0.29, 0.29]) {
+        const upright = new THREE.Mesh(roundedBox(0.095, 0.48, 0.105, 0.026, 5), gateMat);
+        upright.position.set(gx, 1.32, z);
+        gate.add(upright);
+      }
+      const bridge = new THREE.Mesh(roundedBox(0.105, 0.105, 0.68, 0.03, 5), gateMat);
+      bridge.position.set(gx, 1.56, 0);
+      gate.add(bridge);
+      const emitter = cylinder(0.034, 0.045, new THREE.MeshBasicMaterial({ color: 0xffd15c, emissive: 0xff4a38, emissiveIntensity: 1.1, toneMapped: false }), 24);
+      emitter.rotation.x = Math.PI / 2;
+      emitter.position.set(gx, 1.35, 0.226);
+      gate.add(emitter);
+      const receiver = cylinder(0.039, 0.045, gateDark, 24);
+      receiver.rotation.x = Math.PI / 2;
+      receiver.position.set(gx, 1.35, -0.226);
+      gate.add(receiver);
+      const beam = cylinder(0.008, 0.43, beamMat, 12);
+      beam.rotation.x = Math.PI / 2;
+      beam.position.set(gx, 1.35, 0);
+      beam.renderOrder = 8;
+      gate.add(beam);
+      const socket = cylinder(0.045, 0.052, gateDark, 24);
+      socket.rotation.x = Math.PI / 2;
+      socket.position.set(gx, 1.18, 0.365);
+      gate.add(socket);
+      gateConnectors.push(new THREE.Vector3(gx, 1.18, 0.395));
+
+      const numberCanvas = document.createElement('canvas'), numberContext = numberCanvas.getContext('2d');
+      numberCanvas.width = 128; numberCanvas.height = 128;
+      numberContext.fillStyle = '#fffaf2'; numberContext.beginPath(); numberContext.arc(64, 64, 52, 0, Math.PI * 2); numberContext.fill();
+      numberContext.fillStyle = '#7b1d25'; numberContext.font = '800 72px Inter, system-ui, sans-serif'; numberContext.textAlign = 'center'; numberContext.textBaseline = 'middle'; numberContext.fillText(String(index + 1), 64, 68);
+      const numberTexture = new THREE.CanvasTexture(numberCanvas); numberTexture.colorSpace = THREE.SRGBColorSpace;
+      const numberBadge = new THREE.Mesh(new THREE.PlaneGeometry(0.105, 0.105), new THREE.MeshBasicMaterial({ map: numberTexture, transparent: true, depthWrite: false, toneMapped: false }));
+      numberBadge.position.set(gx, 1.56, 0.346); numberBadge.renderOrder = 9; gate.add(numberBadge);
       g.add(gate);
     });
 
-    // 5. Dynamics Trolley with 4 Wheels & Stacked Steel Weights
+    const v1 = Number.isFinite(state.newtonGate1Velocity) ? state.newtonGate1Velocity : null;
+    const v2 = Number.isFinite(state.newtonGate2Velocity) ? state.newtonGate2Velocity : null;
+    const loggerCanvas = document.createElement('canvas'), loggerContext = loggerCanvas.getContext('2d');
+    loggerCanvas.width = 768; loggerCanvas.height = 360;
+    const screenGradient = loggerContext.createLinearGradient(0, 0, 0, loggerCanvas.height);
+    screenGradient.addColorStop(0, '#102f38'); screenGradient.addColorStop(1, '#071a22');
+    loggerContext.fillStyle = screenGradient; loggerContext.fillRect(0, 0, loggerCanvas.width, loggerCanvas.height);
+    loggerContext.fillStyle = '#8aa9b0'; loggerContext.font = '700 34px Inter, system-ui, sans-serif'; loggerContext.textAlign = 'left'; loggerContext.textBaseline = 'middle';
+    loggerContext.fillText('DUAL LIGHT GATE  •  VELOCITY', 40, 42);
+    loggerContext.strokeStyle = '#315660'; loggerContext.lineWidth = 3; loggerContext.beginPath(); loggerContext.moveTo(38, 73); loggerContext.lineTo(730, 73); loggerContext.stroke();
+    const drawLoggerRow = (label, value, y, active) => {
+      loggerContext.fillStyle = active ? '#78ffe0' : '#527078'; loggerContext.beginPath(); loggerContext.arc(56, y, 10, 0, Math.PI * 2); loggerContext.fill();
+      loggerContext.fillStyle = '#dffcff'; loggerContext.font = '800 78px ui-monospace, SFMono-Regular, Menlo, monospace'; loggerContext.fillText(label, 92, y + 2);
+      loggerContext.fillStyle = active ? '#8dffe5' : '#67838a'; loggerContext.textAlign = 'right'; loggerContext.fillText(active ? value.toFixed(2) : '—.——', 588, y + 2);
+      loggerContext.fillStyle = '#9fc1c7'; loggerContext.font = '700 34px Inter, system-ui, sans-serif'; loggerContext.fillText('m s⁻¹', 716, y + 4);
+      loggerContext.textAlign = 'left';
+    };
+    drawLoggerRow('v₁', v1, 158, v1 !== null);
+    drawLoggerRow('v₂', v2, 282, v2 !== null);
+    const loggerTexture = new THREE.CanvasTexture(loggerCanvas); loggerTexture.colorSpace = THREE.SRGBColorSpace; loggerTexture.anisotropy = Math.min(8, this.renderer.capabilities.getMaxAnisotropy()); loggerTexture.needsUpdate = true;
+    const logger = new THREE.Group(), loggerBodyMat = new THREE.MeshPhysicalMaterial({ color: 0xe4e9e8, roughness: 0.34, metalness: 0.08, clearcoat: 0.62, clearcoatRoughness: 0.18 });
+    const loggerBody = new THREE.Mesh(roundedBox(1.54, 0.82, 0.48, 0.11, 7), loggerBodyMat); loggerBody.position.y = 0.43; logger.add(loggerBody);
+    const loggerBezel = new THREE.Mesh(roundedBox(1.30, 0.61, 0.045, 0.055, 5), new THREE.MeshStandardMaterial({ color: 0x12272e, roughness: 0.42 })); loggerBezel.position.set(0, 0.49, 0.263); logger.add(loggerBezel);
+    const loggerScreen = new THREE.Mesh(new THREE.PlaneGeometry(1.18, 0.51), new THREE.MeshBasicMaterial({ map: loggerTexture, toneMapped: false, depthTest: true, depthWrite: false })); loggerScreen.position.set(0, 0.49, 0.318); loggerScreen.renderOrder = 10; logger.add(loggerScreen);
+    const loggerFeetMat = new THREE.MeshStandardMaterial({ color: 0x26373d, roughness: 0.76 });
+    for (const x of [-0.55, 0.55]) { const foot = new THREE.Mesh(roundedBox(0.23, 0.06, 0.28, 0.025, 3), loggerFeetMat); foot.position.set(x, 0.035, -0.02); logger.add(foot) }
+    const loggerPosition = new THREE.Vector3(0, 0.05, 0.92); logger.position.copy(loggerPosition); g.add(logger);
+
+    const loggerPorts = [new THREE.Vector3(-0.42, 0.18, 1.235), new THREE.Vector3(0.42, 0.18, 1.235)];
+    const cableColours = [0x26343a, 0x31576b];
+    loggerPorts.forEach((port, index) => {
+      const portRing = cylinder(0.057, 0.044, new THREE.MeshStandardMaterial({ color: index ? 0x3b7188 : 0x26363d, metalness: 0.35, roughness: 0.4 }), 28);
+      portRing.rotation.x = Math.PI / 2; portRing.position.copy(port); g.add(portRing);
+      const start = gateConnectors[index];
+      const cableCurve = new THREE.CatmullRomCurve3([
+        start,
+        new THREE.Vector3(start.x + (index ? 0.2 : -0.2), 0.82, 0.58),
+        new THREE.Vector3(index ? 0.88 : -0.88, 0.16, 1.08),
+        new THREE.Vector3(port.x, 0.14, 1.22),
+        port
+      ], false, 'centripetal');
+      const cable = new THREE.Mesh(new THREE.TubeGeometry(cableCurve, 72, 0.022, 10, false), new THREE.MeshStandardMaterial({ color: cableColours[index], roughness: 0.86, metalness: 0.02 }));
+      cable.castShadow = true; cable.receiveShadow = true; cable.userData.connectsGateToSharedLogger = index + 1; g.add(cable);
+    });
+
+    // 5. Rounded dynamics trolley with four rubber wheels, bumpers and a timing card.
     const trolleyX = -1.8 + pos * 3.5;
     const trolleyGroup = new THREE.Group();
-    const chassisMat = new THREE.MeshStandardMaterial({ color: 0x0288d1, roughness: 0.3 });
-    const chassis = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.12, 0.28), chassisMat);
-    chassis.position.y = 1.12;
+    const chassisMat = new THREE.MeshPhysicalMaterial({ color: 0x168fc2, roughness: 0.24, metalness: 0.12, clearcoat: 0.88, clearcoatRoughness: 0.12 });
+    const chassis = new THREE.Mesh(roundedBox(0.62, 0.16, 0.33, 0.065, 7), chassisMat);
+    chassis.position.y = 1.15;
     trolleyGroup.add(chassis);
 
+    const deck = new THREE.Mesh(roundedBox(0.47, 0.04, 0.26, 0.026, 5), new THREE.MeshPhysicalMaterial({ color: 0x78d6eb, roughness: 0.22, clearcoat: 0.78 }));
+    deck.position.y = 1.25; trolleyGroup.add(deck);
+    const bumperMat = new THREE.MeshStandardMaterial({ color: 0x26373e, roughness: 0.76 });
+    for (const x of [-0.33, 0.33]) { const bumper = new THREE.Mesh(roundedBox(0.075, 0.095, 0.30, 0.031, 4), bumperMat); bumper.position.set(x, 1.135, 0); trolleyGroup.add(bumper) }
+
     const wheelMat = new THREE.MeshStandardMaterial({ color: 0x212121, roughness: 0.5 });
-    [[-0.18, -0.15], [-0.18, 0.15], [0.18, -0.15], [0.18, 0.15]].forEach(([wx, wz]) => {
-      const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.03, 16), wheelMat);
+    const hubMat = new THREE.MeshStandardMaterial({ color: 0xc7d0d3, metalness: 0.88, roughness: 0.2 });
+    [[-0.20, -0.178], [-0.20, 0.178], [0.20, -0.178], [0.20, 0.178]].forEach(([wx, wz]) => {
+      const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.058, 0.058, 0.04, 28), wheelMat);
       wheel.rotation.x = Math.PI / 2;
-      wheel.position.set(wx, 1.06, wz);
+      wheel.position.set(wx, 1.075, wz);
       trolleyGroup.add(wheel);
+      const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 0.045, 20), hubMat);
+      hub.rotation.x = Math.PI / 2; hub.position.set(wx, 1.075, wz); trolleyGroup.add(hub);
     });
 
     // 2 Stacked Mass Disks for Constant 1.0 kg Mass
     const weightMat = new THREE.MeshStandardMaterial({ color: 0x78909c, metalness: 0.7, roughness: 0.3 });
     for (let w = 0; w < 2; w++) {
-      const weight = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.06, 20), weightMat);
-      weight.position.set(0, 1.21 + w * 0.065, 0);
+      const weight = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.046, 36), weightMat);
+      weight.position.set(0.14, 1.295 + w * 0.05, 0);
       trolleyGroup.add(weight);
     }
+    const card = new THREE.Mesh(roundedBox(0.19, 0.27, 0.022, 0.016, 4), new THREE.MeshPhysicalMaterial({ color: 0xf8faf4, roughness: 0.5, clearcoat: 0.22, side: THREE.DoubleSide }));
+    card.position.set(-0.12, 1.405, 0); trolleyGroup.add(card);
+    const cardStripe = new THREE.Mesh(new THREE.PlaneGeometry(0.14, 0.04), new THREE.MeshBasicMaterial({ color: 0x263b45, toneMapped: false }));
+    cardStripe.position.set(-0.12, 1.415, 0.013); cardStripe.renderOrder = 8; trolleyGroup.add(cardStripe);
     trolleyGroup.position.x = trolleyX;
     g.add(trolleyGroup);
 
@@ -1559,7 +1769,7 @@ export class LabRenderer3D {
 
     const stringMat = new THREE.LineBasicMaterial({ color: 0xffffff, linewidth: 2 });
     const stringGeo = new THREE.BufferGeometry().setFromPoints([
-      new THREE.Vector3(trolleyX + 0.28, 1.12, 0),
+      new THREE.Vector3(trolleyX + 0.33, 1.12, 0),
       new THREE.Vector3(wheelCenter.x, stringTopY, 0),
       new THREE.Vector3(stringDropX, stringDropY, 0),
       new THREE.Vector3(stringDropX, hookY, 0)
@@ -1615,7 +1825,13 @@ export class LabRenderer3D {
     }
     hangerGroup.userData.massHolder = { holderMassGrams: 10, slottedMassGrams: 10, slottedMassCount };
     g.add(hangerGroup);
-    return shadowReady(g);
+    Object.assign(g.userData, {
+      newtonSecondLawRig: true,
+      lightGateSystem: { gateCount: 2, gateWorldX: gateXs, gateProgress, oneSharedDataLogger: true, cableCount: 2, displayedChannels: ['v₁', 'v₂'] },
+      trolley: { roundedBody: true, wheelCount: 4, rubberBumpers: 2, interruptCard: true, relativeSizeFromPrevious: 0.86 }
+    });
+    const prepared = shadowReady(g); loggerScreen.castShadow = false; loggerScreen.receiveShadow = false; beamMat.depthWrite = false;
+    return prepared;
   }
   electromagnetRig(state) {
     const g = new THREE.Group(), turns = Math.max(10, Math.min(50, state.electromagnetTurns || 10));
@@ -2353,9 +2569,10 @@ export class LabRenderer3D {
     return shadowReady(g);
   }
   wireResistanceRig(state) {
-    const g = new THREE.Group(), rulerStartX = -2.65, rulerLength = 5.3, rulerZ = .58, rulerTopY = .205;
+    const g = new THREE.Group(), rulerStartX = -2.65, rulerLength = 5.3, rulerZ = .78, rulerTopY = .205;
     const dark = solid(0x1b2b32, .3), steel = metal(0xb8c2c5, .12), brass = metal(0xd0a249, .16);
     const red = new THREE.MeshStandardMaterial({ color: 0xc83d42, roughness: .5 }), black = new THREE.MeshStandardMaterial({ color: 0x1b2429, roughness: .58 });
+    const voltageRed = new THREE.MeshStandardMaterial({ color: 0xa84f94, roughness: .48 }), voltageBlack = new THREE.MeshStandardMaterial({ color: 0x6e55a4, roughness: .52 });
     const wireMaterial = new THREE.MeshPhysicalMaterial({ color: 0x71777b, metalness: .94, roughness: .23, clearcoat: .25, emissive: 0x2f0d05, emissiveIntensity: 0 });
 
     // A full wooden metre ruler with engraved millimetre, centimetre and
@@ -2381,6 +2598,16 @@ export class LabRenderer3D {
     const wire = this.tubeBetween(new THREE.Vector3(rulerStartX, rulerTopY + .045, rulerZ), new THREE.Vector3(rulerStartX + rulerLength, rulerTopY + .045, rulerZ), .018, wireMaterial);
     g.add(wire);
 
+    // A subtle cyan overlay makes the exact test length legible without
+    // hiding the physical nichrome wire or the ruler graduations beneath it.
+    const measuredSegment = cylinder(.031, 1, new THREE.MeshBasicMaterial({ color: 0x26aebc, transparent: true, opacity: .54, depthWrite: false, toneMapped: false }), 24);
+    measuredSegment.rotation.z = Math.PI / 2;
+    measuredSegment.position.set(rulerStartX, rulerTopY + .047, rulerZ);
+    measuredSegment.renderOrder = 8;
+    measuredSegment.castShadow = false;
+    measuredSegment.receiveShadow = false;
+    g.add(measuredSegment);
+
     const makeCrocodile = (colourMaterial, fixed = false) => {
       const clip = new THREE.Group(), lowerJaw = new THREE.Group(), upperJaw = new THREE.Group();
       const lower = new THREE.Mesh(new THREE.BoxGeometry(.28, .045, .48), steel); lower.position.z = .04; lowerJaw.add(lower);
@@ -2403,6 +2630,9 @@ export class LabRenderer3D {
       return shadowReady(clip);
     };
     const contactX = rulerStartX + rulerLength * Math.max(20, Math.min(100, state.wireLengthCm || 20)) / 100;
+    const initialMeasuredLength = contactX - rulerStartX;
+    measuredSegment.position.x = rulerStartX + initialMeasuredLength / 2;
+    measuredSegment.scale.set(1, initialMeasuredLength, 1);
     const fixedClip = makeCrocodile(red, true); fixedClip.position.set(rulerStartX, .34, rulerZ + .02); g.add(fixedClip);
     const sliderClip = makeCrocodile(black); sliderClip.position.set(contactX, .34, rulerZ + .02); g.add(sliderClip);
 
@@ -2418,15 +2648,15 @@ export class LabRenderer3D {
         const terminal = cylinder(.075, .11, solid(c, .25), 28); terminal.rotation.x = Math.PI / 2; terminal.position.set(x, .18, .37); meter.add(terminal);
       }
       const badgeCanvas = document.createElement('canvas'), bc = badgeCanvas.getContext('2d'); badgeCanvas.width = 256; badgeCanvas.height = 64;
-      bc.fillStyle = `#${accent.toString(16).padStart(6, '0')}`; bc.fillRect(0, 0, 256, 64); bc.fillStyle = '#ffffff'; bc.font = '800 32px Inter, sans-serif'; bc.textAlign = 'center'; bc.textBaseline = 'middle'; bc.fillText(label, 128, 32);
+      bc.fillStyle = `#${accent.toString(16).padStart(6, '0')}`; bc.fillRect(0, 0, 256, 64); bc.fillStyle = '#ffffff'; bc.font = '800 25px Inter, sans-serif'; bc.textAlign = 'center'; bc.textBaseline = 'middle'; bc.fillText(label, 128, 32);
       const badgeTexture = new THREE.CanvasTexture(badgeCanvas); badgeTexture.colorSpace = THREE.SRGBColorSpace;
-      const badge = new THREE.Mesh(new THREE.PlaneGeometry(.65, .16), new THREE.MeshBasicMaterial({ map: badgeTexture, toneMapped: false }));
+      const badge = new THREE.Mesh(new THREE.PlaneGeometry(.88, .16), new THREE.MeshBasicMaterial({ map: badgeTexture, toneMapped: false }));
       badge.position.set(0, .74, .34); meter.add(badge);
       Object.assign(meter.userData, { display: { canvas, context: dc, texture }, meterLabel: label });
       return shadowReady(meter);
     };
-    const ammeter = makeDisplay('AMMETER · A', 0xd45757); ammeter.position.set(.35, 0, -.88); g.add(ammeter);
-    const voltmeter = makeDisplay('VOLTMETER · V', 0x7a4eb0); voltmeter.position.set(1.92, 0, -.88); g.add(voltmeter);
+    const ammeter = makeDisplay('A · SERIES', 0xd45757); ammeter.position.set(.28, 0, -1.04); g.add(ammeter);
+    const voltmeter = makeDisplay('V · PARALLEL', 0x9b54a1); voltmeter.position.set(1.9, 0, -1.04); g.add(voltmeter);
 
     // Regulated low-voltage supply with a live indicator.
     const supply = new THREE.Group(), supplyBody = new THREE.Mesh(roundedBox(1.55, .88, .75, .1, 6), new THREE.MeshPhysicalMaterial({ color: 0x385a99, roughness: .24, metalness: .16, clearcoat: .8 }));
@@ -2438,19 +2668,23 @@ export class LabRenderer3D {
     const powerLed = new THREE.Mesh(new THREE.SphereGeometry(.055, 24, 16), new THREE.MeshStandardMaterial({ color: 0x40575d, emissive: 0x26ffaf, emissiveIntensity: 0 }));
     powerLed.position.set(.52, .58, .44); supply.add(powerLed);
     for (const [x, c] of [[-.45, 0x171c22], [.45, 0xd83e43]]) { const terminal = cylinder(.075, .12, solid(c, .24), 28); terminal.rotation.x = Math.PI / 2; terminal.position.set(x, .22, .43); supply.add(terminal) }
-    supply.position.set(-2.3, 0, -.82); g.add(supply);
+    supply.position.set(-2.35, 0, -1.02); g.add(supply);
 
-    // Real knife switch with brass posts and an animated insulated handle.
+    // The switch now occupies the instrument row between the supply and
+    // ammeter, so the series path reads naturally from left to right.
+    const switchCenterX = -1.02, switchZ = -.72;
     const switchBase = new THREE.Mesh(roundedBox(.92, .11, .55, .055, 4), new THREE.MeshPhysicalMaterial({ color: 0xf2f0e7, roughness: .32, clearcoat: .5 }));
-    switchBase.position.set(-.95, .075, -.05); g.add(switchBase);
-    for (const x of [-1.18, -.72]) { const post = cylinder(.065, .15, brass, 28); post.position.set(x, .2, -.05); g.add(post) }
-    const switchPivot = new THREE.Group(); switchPivot.position.set(-1.18, .29, -.05);
+    switchBase.position.set(switchCenterX, .075, switchZ); g.add(switchBase);
+    const switchInputX = switchCenterX - .23, switchOutputX = switchCenterX + .23;
+    for (const x of [switchInputX, switchOutputX]) { const post = cylinder(.065, .15, brass, 28); post.position.set(x, .2, switchZ); g.add(post) }
+    const switchPivot = new THREE.Group(); switchPivot.position.set(switchInputX, .29, switchZ);
     const switchArm = new THREE.Mesh(new THREE.BoxGeometry(.54, .045, .11), brass); switchArm.position.x = .27; switchPivot.add(switchArm);
     const switchGrip = new THREE.Mesh(new THREE.SphereGeometry(.085, 24, 16), red); switchGrip.position.x = .54; switchPivot.add(switchGrip);
     switchPivot.rotation.z = .42; g.add(switchPivot);
 
-    // Flexible leads are articulated from short cylindrical segments so the
-    // black voltmeter lead can follow the moving crocodile contact.
+    // Flexible leads are routed in separated cable lanes. The thick red/black
+    // leads form the series loop; the thinner violet pair connects only across
+    // the two test-length endpoints, making the voltmeter branch unmistakable.
     const makeFlexibleLead = (points, material, radius = .023) => {
       const lead = new THREE.Group(), segments = [], joints = [];
       for (let i = 0; i < points.length - 1; i++) {
@@ -2469,12 +2703,17 @@ export class LabRenderer3D {
       }
       for (let i = 0; i < lead.joints.length; i++) lead.joints[i].position.copy(lead.points[i + 1]);
     };
-    const fixedLead = makeFlexibleLead([new THREE.Vector3(rulerStartX, .36, rulerZ + .58), new THREE.Vector3(-2.9, .16, .98), new THREE.Vector3(-2.75, .22, -.38), new THREE.Vector3(-2.75, .22, -.39)], red);
-    const sliderLead = makeFlexibleLead([new THREE.Vector3(contactX, .36, rulerZ + .58), new THREE.Vector3(contactX + .18, .13, 1.22), new THREE.Vector3(.75, .17, .72), new THREE.Vector3(.75, .18, -.49)], black);
-    const voltFixedLead = makeFlexibleLead([new THREE.Vector3(rulerStartX, .32, rulerZ + .46), new THREE.Vector3(-1.85, .12, 1.38), new THREE.Vector3(1.5, .12, 1.35), new THREE.Vector3(1.52, .18, -.49)], red, .018);
-    const voltSliderLead = makeFlexibleLead([new THREE.Vector3(contactX, .32, rulerZ + .46), new THREE.Vector3(contactX + .12, .11, 1.5), new THREE.Vector3(2.32, .12, 1.15), new THREE.Vector3(2.32, .18, -.49)], black, .018);
-    const circuitLeadA = makeFlexibleLead([new THREE.Vector3(-1.85, .22, -.39), new THREE.Vector3(-1.78, .12, -.05), new THREE.Vector3(-1.18, .2, -.05)], red);
-    const circuitLeadB = makeFlexibleLead([new THREE.Vector3(-.72, .2, -.05), new THREE.Vector3(-.35, .12, -.42), new THREE.Vector3(-.05, .18, -.49)], black);
+    const clipAnchorZ = rulerZ - .59;
+    const fixedAnchor = new THREE.Vector3(rulerStartX, .36, clipAnchorZ), sliderAnchor = new THREE.Vector3(contactX, .36, clipAnchorZ);
+    const supplyNegative = new THREE.Vector3(-2.8, .22, -.59), supplyPositive = new THREE.Vector3(-1.9, .22, -.59);
+    const ammeterNegative = new THREE.Vector3(-.12, .18, -.67), ammeterPositive = new THREE.Vector3(.68, .18, -.67);
+    const voltmeterNegative = new THREE.Vector3(1.5, .18, -.67), voltmeterPositive = new THREE.Vector3(2.3, .18, -.67);
+    const fixedLead = makeFlexibleLead([fixedAnchor, new THREE.Vector3(rulerStartX, .12, -.14), new THREE.Vector3(-.12, .12, -.14), ammeterNegative], black);
+    const sliderLead = makeFlexibleLead([sliderAnchor, new THREE.Vector3(contactX + .16, .1, 1.48), new THREE.Vector3(-3.02, .1, 1.48), new THREE.Vector3(-3.02, .14, -.59), supplyNegative], black);
+    const voltFixedLead = makeFlexibleLead([fixedAnchor.clone().add(new THREE.Vector3(0, .035, .045)), new THREE.Vector3(rulerStartX, .115, 1.2), new THREE.Vector3(2.3, .115, 1.2), voltmeterPositive], voltageRed, .017);
+    const voltSliderLead = makeFlexibleLead([sliderAnchor.clone().add(new THREE.Vector3(0, .035, -.045)), new THREE.Vector3(contactX + .12, .105, 1.02), new THREE.Vector3(1.5, .105, 1.02), voltmeterNegative], voltageBlack, .017);
+    const circuitLeadA = makeFlexibleLead([supplyPositive, new THREE.Vector3(-1.72, .12, -.76), new THREE.Vector3(switchInputX, .2, switchZ)], red);
+    const circuitLeadB = makeFlexibleLead([new THREE.Vector3(switchOutputX, .2, switchZ), new THREE.Vector3(-.42, .12, -.76), ammeterPositive], red);
     [fixedLead, sliderLead, voltFixedLead, voltSliderLead, circuitLeadA, circuitLeadB].forEach(updateFlexibleLead);
 
     const chargeParticles = [];
@@ -2485,12 +2724,24 @@ export class LabRenderer3D {
     }
     this.dynamic.push({
       kind: 'wireResistance',
-      rulerStartX, rulerLength, sliderClip, sliderUpperJaw: sliderClip.userData.upperJaw, sliderLowerJaw: sliderClip.userData.lowerJaw,
+      rulerStartX, rulerLength, rulerZ, clipAnchorZ, measuredSegment, sliderClip, sliderUpperJaw: sliderClip.userData.upperJaw, sliderLowerJaw: sliderClip.userData.lowerJaw,
       sliderLead, voltSliderLead, fixedLead, voltFixedLead, circuitLeadA, circuitLeadB, updateFlexibleLead,
       ammeterDisplay: ammeter.userData.display, voltmeterDisplay: voltmeter.userData.display,
       supplyDisplay: { canvas: supplyCanvas, context: sc, texture: supplyTexture }, powerLed, switchPivot, wireMaterial, chargeParticles
     });
-    Object.assign(g.userData, { wireResistanceRig: true, rulerRangeCm: [0, 100], slidingCrocodileContact: true, uniformNichromeWire: true });
+    Object.assign(g.userData, {
+      wireResistanceRig: true,
+      rulerRangeCm: [0, 100],
+      slidingCrocodileContact: true,
+      uniformNichromeWire: true,
+      circuitLayout: {
+        seriesPath: 'supply positive → switch → ammeter → fixed contact → nichrome test length → sliding contact → supply negative',
+        parallelPath: 'voltmeter connected directly across fixed and sliding contacts',
+        separatedCableLanes: true,
+        ammeterRoleLabel: 'series',
+        voltmeterRoleLabel: 'parallel'
+      }
+    });
     return shadowReady(g);
   }
   magneticFieldRig(state) {
@@ -2613,7 +2864,7 @@ export class LabRenderer3D {
     const massMaterial = new THREE.MeshPhysicalMaterial({ color: 0x8d969a, metalness: .9, roughness: .19, clearcoat: .36 });
     const springMaterial = new THREE.MeshPhysicalMaterial({ color: 0xd6dfe1, metalness: .96, roughness: .095, clearcoat: .62, clearcoatRoughness: .08 });
     const springX = -.3, springZ = .14, springTopY = 2.92, baseSpringLength = 1.03, scenePerCm = .075;
-    const zeroPointerY = springTopY - baseSpringLength - .16, rulerX = .72, rulerTopY = 3.08, rulerBottomY = .43;
+    const zeroPointerY = springTopY - baseSpringLength - .16, rulerX = .72, rulerTopY = 3.3, rulerBottomY = .43;
 
     // Heavy retort stand, boss and a proper two-jaw spring clamp.
     const base = new THREE.Mesh(roundedBox(1.62, .17, 1.18, .085, 6), new THREE.MeshPhysicalMaterial({ color: 0x263a43, metalness: .78, roughness: .24, clearcoat: .4 }));
@@ -2637,18 +2888,27 @@ export class LabRenderer3D {
     const rulerEdge = new THREE.Mesh(new THREE.BoxGeometry(.035, rulerTopY - rulerBottomY - .08, .105), metal(0x929fa4, .24)); rulerEdge.position.set(rulerX + .25, (rulerTopY + rulerBottomY) / 2, .03); g.add(rulerEdge);
     const rulerScaleTopY = rulerTopY - .07, rulerScaleBottomY = rulerBottomY + .07;
     const rulerScaleMaxMm = Math.floor((rulerScaleTopY - rulerScaleBottomY) / scenePerCm * 5) * 2;
-    const tickMaterial = new THREE.MeshBasicMaterial({ color: 0x27383e, toneMapped: false });
+    const tickMaterial = new THREE.MeshBasicMaterial({ color: 0x27383e, toneMapped: false }), rulerLabels = [], rulerTickMeshes = [];
     const makeLabel = (label, width = .28, height = .12, colour = '#26383e', fontSize = 34) => {
       const canvas = document.createElement('canvas'), dc = canvas.getContext('2d'); canvas.width = 256; canvas.height = 96;
       dc.clearRect(0, 0, canvas.width, canvas.height); dc.fillStyle = colour; dc.font = `800 ${fontSize}px ui-monospace, Menlo, monospace`; dc.textAlign = 'center'; dc.textBaseline = 'middle'; dc.fillText(label, 128, 48);
       const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace;
-      const mesh = new THREE.Mesh(new THREE.PlaneGeometry(width, height), new THREE.MeshBasicMaterial({ map: texture, transparent: true, toneMapped: false, depthWrite: false })); mesh.renderOrder = 11; return mesh;
+      const mesh = new THREE.Mesh(new THREE.PlaneGeometry(width, height), new THREE.MeshBasicMaterial({ map: texture, transparent: true, toneMapped: false, depthWrite: false })); mesh.renderOrder = 11; rulerLabels.push(mesh); return mesh;
     };
-    for (let mm = 0; mm <= rulerScaleMaxMm; mm += 2) {
+    const tickDefinitions = [
+      { length: .22, values: [] },
+      { length: .16, values: [] },
+      { length: .1, values: [] }
+    ];
+    for (let mm = 0; mm <= rulerScaleMaxMm; mm++) {
       const rulerReadingCm = mm / 10, y = rulerScaleTopY - rulerReadingCm * scenePerCm, centimetre = mm % 10 === 0, fiveMm = mm % 5 === 0;
-      const length = centimetre ? .22 : fiveMm ? .16 : .1;
-      const tick = new THREE.Mesh(new THREE.BoxGeometry(length, .009, .012), tickMaterial); tick.position.set(rulerX - .235 + length / 2, y, .087); g.add(tick);
+      tickDefinitions[centimetre ? 0 : fiveMm ? 1 : 2].values.push(y);
       if (centimetre && mm % 20 === 0) { const label = makeLabel(String(Math.round(rulerReadingCm))); label.position.set(rulerX + .08, y, .088); g.add(label) }
+    }
+    for (const definition of tickDefinitions) {
+      const geometry = new THREE.BoxGeometry(definition.length, .0075, .012), ticks = new THREE.InstancedMesh(geometry, tickMaterial, definition.values.length), matrix = new THREE.Matrix4();
+      definition.values.forEach((y, index) => { matrix.makeTranslation(rulerX - .235 + definition.length / 2, y, .087); ticks.setMatrixAt(index, matrix) });
+      ticks.instanceMatrix.needsUpdate = true; ticks.castShadow = false; ticks.receiveShadow = false; rulerTickMeshes.push(ticks); g.add(ticks);
     }
     const limitY = zeroPointerY - 10 * scenePerCm;
     const limitLine = new THREE.Mesh(new THREE.BoxGeometry(.5, .014, .018), new THREE.MeshBasicMaterial({ color: 0xc74f52, toneMapped: false })); limitLine.position.set(rulerX, limitY, .095); g.add(limitLine);
@@ -2685,11 +2945,19 @@ export class LabRenderer3D {
     for (let i = 0; i < attachedDiscCount; i++) { const disc = new THREE.Mesh(discGeometry, massMaterial); disc.position.y = -.49 + i * .052; disc.rotation.y = -.12; hanger.add(disc); attachedDiscs.push(disc) }
     g.add(hanger);
 
+    // A catch tray sits directly below the suspended load; a separate storage
+    // tray keeps the remaining discs organised to the right.
+    const catchTray = new THREE.Mesh(roundedBox(.94, .075, .72, .045, 4), new THREE.MeshPhysicalMaterial({ color: 0xd8e1e3, metalness: .58, roughness: .3, clearcoat: .28 })); catchTray.position.set(-.2, .045, .16); g.add(catchTray);
+    const catchWell = new THREE.Mesh(roundedBox(.78, .018, .57, .035, 3), new THREE.MeshStandardMaterial({ color: 0x6f7f84, metalness: .42, roughness: .5 })); catchWell.position.set(-.2, .088, .16); g.add(catchWell);
+    const catchStripe = new THREE.Mesh(new THREE.BoxGeometry(.82, .012, .045), new THREE.MeshBasicMaterial({ color: 0xe5a840, toneMapped: false })); catchStripe.position.set(-.2, .102, .47); g.add(catchStripe);
     const tray = new THREE.Mesh(roundedBox(1.72, .13, 1.03, .065, 5), new THREE.MeshPhysicalMaterial({ color: 0xdfe5e6, metalness: .65, roughness: .3, clearcoat: .3 })); tray.position.set(2.05, .075, .48); g.add(tray);
     const trayWell = new THREE.Mesh(roundedBox(1.48, .025, .8, .045, 4), new THREE.MeshStandardMaterial({ color: 0x66767b, metalness: .4, roughness: .48 })); trayWell.position.set(2.05, .15, .48); g.add(trayWell);
     const trayLabel = makeLabel('6 × 100 g', .75, .16, '#f4fbfb', 30); trayLabel.rotation.x = -Math.PI / 2; trayLabel.position.set(2.05, .175, .79); g.add(trayLabel);
     const trayPositions = [];
-    for (let i = 0; i < 6; i++) trayPositions.push(new THREE.Vector3(1.55 + (i % 3) * .5, .205 + Math.floor(i / 3) * .056, .35 + Math.floor(i / 3) * .2));
+    for (let i = 0; i < 6; i++) {
+      const row = Math.floor(i / 3), column = i % 3;
+      trayPositions.push(new THREE.Vector3(1.48 + column * .48 + row * .16, .205 + row * .058, .3 + row * .34));
+    }
     const movingDiscIndex = stage === 1 ? visualForce - 1 : -1, spareDiscs = [];
     for (let i = 0; i < 6; i++) {
       const disc = new THREE.Mesh(discGeometry, massMaterial); disc.position.copy(trayPositions[i]); disc.rotation.y = -.12 + i * .18;
@@ -2712,12 +2980,15 @@ export class LabRenderer3D {
     });
     Object.assign(g.userData, {
       hookeLawRig: true,
-      apparatus: { clampStand: 'heavy metal base, rod, boss and two-jaw clamp', ruler: 'vertical white 0–14 cm extension scale with fiducial pointer', massHanger: 'tared steel hanger' },
+      apparatus: { clampStand: 'heavy metal base, rod, boss and two-jaw clamp', ruler: 'vertical white 0–36.4 cm length scale with fiducial pointer', massHanger: 'tared steel hanger' },
       spring: { material: 'polished steel', helicalTurns: helixTurns, terminalHooks: 2, unloadedLengthSceneUnits: baseSpringLength, extensionSeriesCm, proportionalFitSpringConstantNPerM: 50, limitOfProportionalityN: 5 },
-      slottedMasses: { individuallyModelled: 6, eachMassG: 100, appliedForcePerDiscN: 1, attached: attachedDiscCount, spareTray: true },
+      slottedMasses: { individuallyModelled: 6, eachMassG: 100, appliedForcePerDiscN: 1, attached: attachedDiscCount, spareTray: true, staggeredForVisibility: true },
+      safetyCatchTray: { directlyBelowHanger: true, centre: catchTray.position.toArray(), raisedRim: true },
       animation: { durationS: 3.4, movingDiscFromTray: stage === 1, dampedSpringSettling: stage === 1, coupledParts: ['coil pitch', 'lower hook', 'hanger', 'pointer'] }
     });
-    return shadowReady(g);
+    const rig = shadowReady(g);
+    for (const mesh of [...rulerTickMeshes, ...rulerLabels]) { mesh.castShadow = false; mesh.receiveShadow = false }
+    return rig;
   }
   specificHeatRig(state) {
     const g = new THREE.Group(), clamp = value => Math.max(0, Math.min(1, value));
@@ -2733,22 +3004,27 @@ export class LabRenderer3D {
     const lowerPlate = new THREE.Mesh(roundedBox(blockW + .09, .08, blockD + .09, .035, 4), new THREE.MeshStandardMaterial({ color: 0x7f9096, metalness: .84, roughness: .26 })); lowerPlate.position.set(blockX, blockBottomY + .02, blockZ); g.add(lowerPlate);
     const boreMaterial = new THREE.MeshStandardMaterial({ color: 0x28373d, metalness: .58, roughness: .5, side: THREE.DoubleSide });
     for (const bore of [heaterBore, thermometerBore]) {
-      const well = cylinder(.085, .55, boreMaterial, 40); well.position.set(bore.x, blockTopY - .27, bore.z); g.add(well);
+      const well = cylinder(.085, .94, boreMaterial, 40); well.position.set(bore.x, blockTopY - .47, bore.z); g.add(well);
       const opening = new THREE.Mesh(new THREE.TorusGeometry(.088, .014, 10, 42), steel); opening.rotation.x = Math.PI / 2; opening.position.set(bore.x, blockTopY + .018, bore.z); g.add(opening);
       const darkness = new THREE.Mesh(new THREE.CircleGeometry(.074, 36), new THREE.MeshBasicMaterial({ color: 0x17252b, toneMapped: false })); darkness.rotation.x = -Math.PI / 2; darkness.position.set(bore.x, blockTopY + .021, bore.z); g.add(darkness);
     }
     const massStamp = (() => { const canvas = document.createElement('canvas'), dc = canvas.getContext('2d'); canvas.width = 512; canvas.height = 128; dc.clearRect(0, 0, 512, 128); dc.fillStyle = '#3f535a'; dc.font = '800 58px Inter, sans-serif'; dc.textAlign = 'center'; dc.textBaseline = 'middle'; dc.fillText('ALUMINIUM · 1.00 kg', 256, 64); const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace; const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1.18, .26), new THREE.MeshBasicMaterial({ map: texture, transparent: true, toneMapped: false, depthWrite: false })); mesh.position.set(blockX, .67, blockZ + blockD / 2 + .031); mesh.renderOrder = 8; return mesh })(); g.add(massStamp);
 
-    // Four foam jacket panels start opened out and close around the block late
-    // in preparation while leaving the two top bores visible.
+    // Four side panels and a bored lid start opened out, then close snugly
+    // around the block while leaving both probe collars accessible.
     const jacketPanels = [];
     const addJacketPanel = (geometry, closed, open, closedRotation, openRotation) => {
       const panel = new THREE.Mesh(geometry, foam); panel.position.copy(stage >= 2 ? closed : open); panel.rotation.copy(stage >= 2 ? closedRotation : openRotation); g.add(panel); jacketPanels.push({ mesh: panel, closed, open, closedRotation, openRotation }); return panel;
     };
-    addJacketPanel(new THREE.BoxGeometry(.15, .82, blockD + .18), new THREE.Vector3(blockX - blockW / 2 - .105, .57, blockZ), new THREE.Vector3(blockX - 1.55, .16, blockZ + .12), new THREE.Euler(0, 0, 0), new THREE.Euler(0, 0, -1.45));
-    addJacketPanel(new THREE.BoxGeometry(.15, .82, blockD + .18), new THREE.Vector3(blockX + blockW / 2 + .105, .57, blockZ), new THREE.Vector3(blockX + 1.55, .16, blockZ + .12), new THREE.Euler(0, 0, 0), new THREE.Euler(0, 0, 1.45));
-    addJacketPanel(new THREE.BoxGeometry(blockW + .16, .82, .14), new THREE.Vector3(blockX, .57, blockZ - blockD / 2 - .1), new THREE.Vector3(blockX, .13, blockZ - 1.38), new THREE.Euler(0, 0, 0), new THREE.Euler(1.42, 0, 0));
-    addJacketPanel(new THREE.BoxGeometry(blockW + .16, .56, .14), new THREE.Vector3(blockX, .46, blockZ + blockD / 2 + .1), new THREE.Vector3(blockX, .13, blockZ + 1.42), new THREE.Euler(0, 0, 0), new THREE.Euler(-1.42, 0, 0));
+    addJacketPanel(new THREE.BoxGeometry(.15, 1.03, blockD + .18), new THREE.Vector3(blockX - blockW / 2 - .105, .665, blockZ), new THREE.Vector3(blockX - 1.55, .16, blockZ + .12), new THREE.Euler(0, 0, 0), new THREE.Euler(0, 0, -1.45));
+    addJacketPanel(new THREE.BoxGeometry(.15, 1.03, blockD + .18), new THREE.Vector3(blockX + blockW / 2 + .105, .665, blockZ), new THREE.Vector3(blockX + 1.55, .16, blockZ + .12), new THREE.Euler(0, 0, 0), new THREE.Euler(0, 0, 1.45));
+    addJacketPanel(new THREE.BoxGeometry(blockW + .16, 1.03, .14), new THREE.Vector3(blockX, .665, blockZ - blockD / 2 - .1), new THREE.Vector3(blockX, .13, blockZ - 1.38), new THREE.Euler(0, 0, 0), new THREE.Euler(1.42, 0, 0));
+    addJacketPanel(new THREE.BoxGeometry(blockW + .16, .76, .14), new THREE.Vector3(blockX, .53, blockZ + blockD / 2 + .1), new THREE.Vector3(blockX, .13, blockZ + 1.42), new THREE.Euler(0, 0, 0), new THREE.Euler(-1.42, 0, 0));
+    const lidShape = new THREE.Shape();
+    lidShape.moveTo(-blockW / 2 - .08, -blockD / 2 - .08); lidShape.lineTo(blockW / 2 + .08, -blockD / 2 - .08); lidShape.lineTo(blockW / 2 + .08, blockD / 2 + .08); lidShape.lineTo(-blockW / 2 - .08, blockD / 2 + .08); lidShape.closePath();
+    for (const bore of [heaterBore, thermometerBore]) { const hole = new THREE.Path(); hole.absarc(bore.x - blockX, bore.z - blockZ, .135, 0, Math.PI * 2, true); lidShape.holes.push(hole) }
+    const lidGeometry = new THREE.ExtrudeGeometry(lidShape, { depth: .12, bevelEnabled: true, bevelSegments: 2, bevelSize: .018, bevelThickness: .012, curveSegments: 28 }); lidGeometry.center(); lidGeometry.rotateX(Math.PI / 2);
+    addJacketPanel(lidGeometry, new THREE.Vector3(blockX, blockTopY + .075, blockZ), new THREE.Vector3(blockX + 2.15, .2, blockZ + .28), new THREE.Euler(0, 0, 0), new THREE.Euler(0, 0, 1.36));
 
     const makeProbe = (type, colour) => {
       const probe = new THREE.Group(), sheath = cylinder(type === 'heater' ? .062 : .042, 1.12, steel, 36); sheath.position.y = -.45; probe.add(sheath);
@@ -2756,10 +3032,10 @@ export class LabRenderer3D {
       const collar = cylinder(type === 'heater' ? .12 : .09, .18, new THREE.MeshPhysicalMaterial({ color: colour, roughness: .28, clearcoat: .58 }), 34); collar.position.y = .18; probe.add(collar);
       const grip = new THREE.Mesh(roundedBox(type === 'heater' ? .25 : .18, .33, type === 'heater' ? .25 : .18, .055, 4), new THREE.MeshPhysicalMaterial({ color: colour, roughness: .3, clearcoat: .66 })); grip.position.y = .42; probe.add(grip);
       const connector = cylinder(type === 'heater' ? .055 : .04, .18, dark, 24); connector.position.y = .68; probe.add(connector);
-      Object.assign(probe.userData, { type, connectorLocal: new THREE.Vector3(0, .76, 0), insertionDepth: .82 }); return shadowReady(probe);
+      Object.assign(probe.userData, { type, connectorLocal: new THREE.Vector3(0, .76, 0), insertionDepth: .95 }); return shadowReady(probe);
     };
     const heaterProbe = makeProbe('heater', 0xd64b43), thermometerProbe = makeProbe('thermometer', 0x2d879e);
-    const heaterStart = new THREE.Vector3(-1.58, .31, .72), thermometerStart = new THREE.Vector3(-1.5, .24, 1.22), heaterInserted = new THREE.Vector3(heaterBore.x, blockTopY + .83, heaterBore.z), thermometerInserted = new THREE.Vector3(thermometerBore.x, blockTopY + .83, thermometerBore.z);
+    const heaterStart = new THREE.Vector3(-1.58, .31, .72), thermometerStart = new THREE.Vector3(-1.5, .24, 1.22), heaterInserted = new THREE.Vector3(heaterBore.x, blockTopY + .14, heaterBore.z), thermometerInserted = new THREE.Vector3(thermometerBore.x, blockTopY + .14, thermometerBore.z);
     if (stage >= 2) { heaterProbe.position.copy(heaterInserted); thermometerProbe.position.copy(thermometerInserted) } else { heaterProbe.position.copy(heaterStart); heaterProbe.rotation.z = Math.PI / 2; thermometerProbe.position.copy(thermometerStart); thermometerProbe.rotation.z = Math.PI / 2 }
     g.add(heaterProbe, thermometerProbe);
 
@@ -2800,10 +3076,15 @@ export class LabRenderer3D {
       for (let i = 0; i < lead.segments.length; i++) { const a = lead.points[i], b = lead.points[i + 1], delta = b.clone().sub(a), length = delta.length(), segment = lead.segments[i]; segment.position.copy(a).add(b).multiplyScalar(.5); segment.scale.set(1, length, 1); segment.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), delta.normalize()) }
       for (let i = 0; i < lead.joints.length; i++) lead.joints[i].position.copy(lead.points[i + 1]);
     };
-    const heaterRedLead = makeFlexibleLead([new THREE.Vector3(-2.0, .16, -.47), new THREE.Vector3(-1.84, .12, .03), new THREE.Vector3(-.78, .16, .2), heaterStart.clone()], red, .026);
-    const heaterBlackLead = makeFlexibleLead([new THREE.Vector3(-.68, .16, -.47), new THREE.Vector3(-.52, .11, .05), new THREE.Vector3(-.18, .13, .28), heaterStart.clone().add(new THREE.Vector3(.04, 0, .05))], black, .026);
+    // Complete series circuit: supply (+) → ammeter → joulemeter → heater →
+    // supply (−). The two short front links make every instrument connection
+    // explicit instead of leaving the live displays on an open circuit.
+    const supplyToAmmeterLead = makeFlexibleLead([new THREE.Vector3(-1.98, .16, -.47), new THREE.Vector3(-1.72, .085, -.28), new THREE.Vector3(-1.42, .16, -.47)], red, .024);
+    const ammeterToJoulemeterLead = makeFlexibleLead([new THREE.Vector3(-.68, .16, -.47), new THREE.Vector3(-.18, .075, -.25), new THREE.Vector3(.41, .16, -.47)], red, .024);
+    const heaterRedLead = makeFlexibleLead([new THREE.Vector3(1.15, .16, -.47), new THREE.Vector3(1.34, .11, -.02), new THREE.Vector3(.82, .15, .32), heaterStart.clone()], red, .026);
+    const heaterBlackLead = makeFlexibleLead([new THREE.Vector3(-2.72, .16, -.47), new THREE.Vector3(-2.86, .09, .12), new THREE.Vector3(-1.12, .12, .42), heaterStart.clone().add(new THREE.Vector3(.04, 0, .05))], black, .026);
     const thermometerLead = makeFlexibleLead([new THREE.Vector3(2.1, .16, -.47), new THREE.Vector3(2.0, .12, .12), new THREE.Vector3(1.26, .14, .36), thermometerStart.clone()], new THREE.MeshStandardMaterial({ color: 0x2b7388, roughness: .6 }), .021);
-    updateFlexibleLead(heaterRedLead); updateFlexibleLead(heaterBlackLead); updateFlexibleLead(thermometerLead);
+    updateFlexibleLead(supplyToAmmeterLead); updateFlexibleLead(ammeterToJoulemeterLead); updateFlexibleLead(heaterRedLead); updateFlexibleLead(heaterBlackLead); updateFlexibleLead(thermometerLead);
 
     const heaterCoreMaterial = heaterProbe.children[0].material.clone(); heaterCoreMaterial.emissive = new THREE.Color(0xff3d18); heaterCoreMaterial.emissiveIntensity = 0; heaterProbe.children[0].material = heaterCoreMaterial;
     const heatLight = new THREE.PointLight(0xff632c, 0, 3.2, 1.9); heatLight.position.set(heaterBore.x, blockTopY - .25, heaterBore.z); g.add(heatLight);
@@ -2826,8 +3107,8 @@ export class LabRenderer3D {
     Object.assign(g.userData, {
       specificHeatCapacityRig: true,
       block: { material: 'aluminium', massKg: 1, boreHoles: 2, heaterBorePosition: heaterBore.toArray(), thermometerBorePosition: thermometerBore.toArray() },
-      preparation: { thermalPasteSyringe: true, pasteDrops: 2, probesInserted: stage >= 2, foamInsulationClosed: stage >= 2, durationS: 3.8 },
-      electrical: { supplyVoltageV: 12, currentA: 2, powerW: 24, instruments: ['12 V supply', 'ammeter', 'joulemeter', 'digital thermometer'], flexibleInsulatedCables: true },
+      preparation: { thermalPasteSyringe: true, pasteDrops: 2, probesInserted: stage >= 2, probeInsertionDepthSceneUnits: .95, foamInsulationPanels: 5, boredInsulatingLid: true, foamInsulationClosed: stage >= 2, durationS: 3.8 },
+      electrical: { supplyVoltageV: 12, currentA: 2, powerW: 24, instruments: ['12 V supply', 'ammeter', 'joulemeter', 'digital thermometer'], flexibleInsulatedCables: true, completeSeriesCircuit: true, route: 'supply positive → ammeter → joulemeter → heater → supply negative' },
       measurement: { energyRangeJ: [0, 18000], temperatureRangeC: [20, 40], heatingDurationS: 8, targetSpecificHeatCapacityJPerKgC: 900 },
       animation: { preparationSequence: ['apply paste', 'insert heater', 'insert thermometer', 'close foam jacket'], liveHeaterGlow: stage === 3, energyParticles: energyParticles.length }
     });
@@ -2968,7 +3249,7 @@ export class LabRenderer3D {
     const visualDrag = state.drag && ['palette', 'free-reactant', 'workspace'].includes(state.drag.kind) ? { kind: state.drag.kind, type: state.drag.type, uid: state.drag.uid, targetUid: state.drag.targetUid, snapUid: state.drag.snapUid } : state.drag ? { kind: state.drag.kind } : null;
     const visualWorkspace = state.workspace.map(({ temperature, reaction, ph, ...it }) => { const frozen = dragUid === it.uid && state.drag?.origin; const view = frozen ? { ...it, x: state.drag.origin.x, y: state.drag.origin.y, attachedTo: state.drag.origin.attachedTo } : it; return { ...view, temperatureBand: Math.floor((temperature || 20) / 10), reaction: reaction && { ruleId: reaction.ruleId, progress: Math.round((reaction.progress || 0) * 20), complete: !!reaction.complete } } });
     const temperatureKey = p.id === 'temp' ? Math.round((state.temp || 20) * 10) : p.id === 'rates' ? Math.round((state.ratesBathTemp || 20) * 10) : p.id === 'lipase' ? Math.round((state.lipaseBathTemp || 20) * 10) : 0;
-    const signature = JSON.stringify({ id: p.id, workspace: visualWorkspace, drag: visualDrag, running: p.id === 'titration' || p.id === 'thermite' || p.id === 'displacement' || p.id === 'density' || p.id === 'starchleaf' || p.id === 'lipase' || p.id === 'osmosis' || p.id === 'potometer' || p.id === 'ripple' || p.id === 'hooke' || p.id === 'specificheat' || p.id === 'wirelength' || p.id === 'fieldlines' ? false : state.running, burner: state.burner, coolingWater: state.coolingWater, pour: !!state.pour, pourTick: state.pour && Math.round(state.pour.t * 24), lastReactant: state.lastReactant, transferred: Math.round((state.transferred || 0) * 20), temperature: temperatureKey, ratesStage: state.ratesStage, ratesTick: p.id === 'rates' ? Math.round((state.ratesStageTimer || 0) * 18) : 0, ratesTarget: state.ratesTargetTemp, ratesConditioning: !!state.ratesConditioning, massStage: state.massStage, massLidOn: state.massLidOn, massTransfer: state.massTransfer && { direction: state.massTransfer.direction, tick: Math.round(state.massTransfer.t * 12) }, massProgress: ['water', 'electro', 'titration', 'thermite', 'displacement', 'starchleaf', 'lipase', 'osmosis', 'potometer', 'ripple', 'electromagnet', 'convection', 'conduction', 'thermal', 'hooke', 'specificheat', 'wirelength', 'fieldlines'].includes(p.id) ? 0 : Math.round((state.progress || 0) * 20), electroWeighing: !!state.electroWeighing, electroRecorded: !!state.electroRecorded, hydrogenStage: state.hydrogenStage, hydrogenTick: Math.round((state.hydrogenTimer || 0) * 6), hydrogenGas: Math.round((state.hydrogenGas || 0) / 2), saltsStage: state.saltsStage, saltsTick: Math.round((state.saltsTimer || 0) * 10), flameTestStage: state.flameTestStage, flameTestSalt: state.flameTestSalt, flameTestTested: state.flameTestTested, titrationStage: state.titrationStage, titrationIndicator: state.titrationIndicator, titrationIndicatorAdding: (state.titrationIndicatorTimer || 0) > 0, titrationComplete: p.id === 'titration' && !!state.complete, titrationDropping: (state.titrationDropTimer || 0) > 0, titrationReading: p.id === 'titration' && !state.running ? Math.round((state.titrationVolume || 0) * 20) : 0, displacementStage: state.displacementStage, thermiteComplete: p.id === 'thermite' && !!state.complete, starchStage: state.starchStage, lipaseStage: state.lipaseStage, lipaseTarget: state.lipaseTargetTemp, lipaseConditioning: !!state.lipaseConditioning, osmosisStage: state.osmosisStage, osmosisConcentration: state.osmosisConcentration, potometerStage: state.potometerStage, potometerWindSpeed: state.potometerWindSpeed, pondweedDistance: state.pondweedDistance, pondweedLampOn: state.pondweedLampOn, newtonForce: state.newtonForce, newtonMass: state.newtonMass, newtonPos: Math.round((state.newtonPos || 0) * 50), electromagnetStage: state.electromagnetStage, electromagnetTurns: state.electromagnetTurns, convectionStage: state.convectionStage, conductionStage: state.conductionStage, thermalStage: state.thermalStage, densityStage: state.densityStage, densitySample: state.densitySample, densityTick: 0, hookeStage: state.hookeStage, hookeTrialIndex: state.hookeTrialIndex, hookeForceN: state.hookeForceN, shcStage: state.shcStage, wireStage: state.wireStage, wireLengthCm: state.wireLengthCm, wireTrialIndex: state.wireTrialIndex, fieldStage: state.fieldStage, fieldConfigIndex: state.fieldConfigIndex });
+    const signature = JSON.stringify({ id: p.id, workspace: visualWorkspace, drag: visualDrag, running: p.id === 'titration' || p.id === 'thermite' || p.id === 'displacement' || p.id === 'density' || p.id === 'starchleaf' || p.id === 'lipase' || p.id === 'osmosis' || p.id === 'potometer' || p.id === 'ripple' || p.id === 'hooke' || p.id === 'specificheat' || p.id === 'wirelength' || p.id === 'fieldlines' ? false : state.running, burner: state.burner, coolingWater: state.coolingWater, pour: !!state.pour, pourTick: state.pour && Math.round(state.pour.t * 24), lastReactant: state.lastReactant, transferred: Math.round((state.transferred || 0) * 20), temperature: temperatureKey, ratesStage: state.ratesStage, ratesTick: p.id === 'rates' ? Math.round((state.ratesStageTimer || 0) * 18) : 0, ratesTarget: state.ratesTargetTemp, ratesConditioning: !!state.ratesConditioning, massStage: state.massStage, massLidOn: state.massLidOn, massTransfer: state.massTransfer && { direction: state.massTransfer.direction, tick: Math.round(state.massTransfer.t * 12) }, massProgress: ['water', 'electro', 'titration', 'thermite', 'displacement', 'starchleaf', 'lipase', 'osmosis', 'potometer', 'ripple', 'electromagnet', 'convection', 'conduction', 'thermal', 'hooke', 'specificheat', 'wirelength', 'fieldlines'].includes(p.id) ? 0 : Math.round((state.progress || 0) * 20), electroWeighing: !!state.electroWeighing, electroRecorded: !!state.electroRecorded, hydrogenStage: state.hydrogenStage, hydrogenTick: Math.round((state.hydrogenTimer || 0) * 6), hydrogenGas: Math.round((state.hydrogenGas || 0) / 2), saltsStage: state.saltsStage, saltsTick: Math.round((state.saltsTimer || 0) * 10), flameTestStage: state.flameTestStage, flameTestSalt: state.flameTestSalt, flameTestTested: state.flameTestTested, titrationStage: state.titrationStage, titrationIndicator: state.titrationIndicator, titrationIndicatorAdding: (state.titrationIndicatorTimer || 0) > 0, titrationComplete: p.id === 'titration' && !!state.complete, titrationDropping: (state.titrationDropTimer || 0) > 0, titrationReading: p.id === 'titration' && !state.running ? Math.round((state.titrationVolume || 0) * 20) : 0, displacementStage: state.displacementStage, thermiteComplete: p.id === 'thermite' && !!state.complete, starchStage: state.starchStage, lipaseStage: state.lipaseStage, lipaseTarget: state.lipaseTargetTemp, lipaseConditioning: !!state.lipaseConditioning, osmosisStage: state.osmosisStage, osmosisConcentration: state.osmosisConcentration, potometerStage: state.potometerStage, potometerWindSpeed: state.potometerWindSpeed, pondweedDistance: state.pondweedDistance, pondweedLampOn: state.pondweedLampOn, newtonForce: state.newtonForce, newtonMass: state.newtonMass, newtonPos: Math.round((state.newtonPos || 0) * 50), newtonGate1Velocity: state.newtonGate1Velocity, newtonGate2Velocity: state.newtonGate2Velocity, electromagnetStage: state.electromagnetStage, electromagnetTurns: state.electromagnetTurns, convectionStage: state.convectionStage, conductionStage: state.conductionStage, thermalStage: state.thermalStage, densityStage: state.densityStage, densitySample: state.densitySample, densityTick: 0, hookeStage: state.hookeStage, hookeTrialIndex: state.hookeTrialIndex, hookeForceN: state.hookeForceN, shcStage: state.shcStage, wireStage: state.wireStage, wireLengthCm: state.wireLengthCm, wireTrialIndex: state.wireTrialIndex, fieldStage: state.fieldStage, fieldConfigIndex: state.fieldConfigIndex });
     if (signature !== this.signature) { this.signature = signature; this.rebuild(state, p); this.sceneNeedsCompile = true; this.sceneWarmupFrames = 3 }
   }
   render(time, state, p) {
@@ -3062,7 +3343,7 @@ export class LabRenderer3D {
         d.movingDisc.visible = discInFlight;
         if (discInFlight) {
           const hover = new THREE.Vector3(d.springX, bodyBottomY + .22, d.springZ), target = new THREE.Vector3(d.springX, bodyBottomY - .65 + (d.visualForce - 1) * .052, d.springZ);
-          const travelQ = smooth(t / .72), lowerQ = smooth((t - .65) / .5);
+          const travelQ = smooth(t / .72), lowerQ = smooth((t - .72) / .5);
           d.movingDisc.position.lerpVectors(d.movingDiscStart, hover, travelQ);
           d.movingDisc.position.y += Math.sin(Math.PI * travelQ) * .38;
           if (lowerQ > 0) d.movingDisc.position.lerpVectors(hover, target, lowerQ);
@@ -3204,9 +3485,12 @@ export class LabRenderer3D {
           openQ = smooth(t / .36) * (1 - smooth((t - 2.05) / .4));
           const moveQ = smooth((t - .28) / 1.78); clipX = THREE.MathUtils.lerp(currentX, nextX, moveQ); clipY = .34 + Math.sin(Math.PI * moveQ) * .42;
         }
-        d.sliderClip.position.set(clipX, clipY, .6);
+        d.sliderClip.position.set(clipX, clipY, d.rulerZ + .02);
         d.sliderUpperJaw.rotation.x = -.34 * openQ; d.sliderLowerJaw.rotation.x = .16 * openQ;
         for (const lead of [d.sliderLead, d.voltSliderLead]) { lead.points[0].x = clipX; lead.points[0].y = clipY + .02; lead.points[1].x = clipX + .18; lead.points[1].y = .13 + Math.sin(Math.PI * clamp((t - .28) / 1.78)) * .1; d.updateFlexibleLead(lead) }
+        const measuredLength = Math.max(.02, clipX - d.rulerStartX);
+        d.measuredSegment.position.set(d.rulerStartX + measuredLength / 2, .252, d.rulerZ);
+        d.measuredSegment.scale.set(1, measuredLength, 1);
         const targetResistance = ({ 20: 1.8, 40: 3.6, 60: 5.4, 80: 7.2, 100: 9 })[currentLength] || 1.8, targetCurrent = 1.5 / targetResistance;
         const settle = stage === 1 ? smooth(t / 1.45) : stage === 2 ? 1 : 0, wobble = stage === 1 ? (1 - settle) * Math.sin(t * 18) * .12 : 0, displayVoltage = switchQ * (1.5 * settle + wobble), displayCurrent = switchQ * (targetCurrent * settle + wobble * .18);
         const paintDisplay = (display, value, unit, accent, label) => {
@@ -3214,7 +3498,7 @@ export class LabRenderer3D {
         };
         paintDisplay(d.ammeterDisplay, displayCurrent, 'A', '#ff8c90', 'CURRENT THROUGH WIRE'); paintDisplay(d.voltmeterDisplay, displayVoltage, 'V', '#c59cff', 'P.D. ACROSS TEST LENGTH');
         { const { canvas, context: dc, texture } = d.supplyDisplay; dc.clearRect(0, 0, canvas.width, canvas.height); dc.fillStyle = '#071c22'; dc.fillRect(0, 0, canvas.width, canvas.height); dc.shadowColor = switchQ > .02 ? '#75ffe0' : '#6f8589'; dc.shadowBlur = 18; dc.fillStyle = switchQ > .02 ? '#8affdf' : '#9badaf'; dc.font = '800 70px ui-monospace, Menlo, monospace'; dc.textAlign = 'center'; dc.textBaseline = 'middle'; dc.fillText(switchQ > .02 ? '1.50 V' : '0.00 V', 256, 72); dc.shadowBlur = 0; dc.fillStyle = '#b4c3c5'; dc.font = '700 26px Inter, sans-serif'; dc.fillText(switchQ > .02 ? 'OUTPUT ON' : 'OUTPUT ISOLATED', 256, 136); texture.needsUpdate = true }
-        for (const particle of d.chargeParticles) { particle.mesh.visible = switchQ > .05; if (particle.mesh.visible) { const phase = (particle.phase + time * .00018 * (.5 + targetCurrent)) % 1; particle.mesh.position.set(THREE.MathUtils.lerp(d.rulerStartX, clipX, phase), .286, .58); particle.mesh.material.opacity = .36 + .58 * Math.sin(Math.PI * phase); particle.mesh.scale.setScalar(.72 + .25 * Math.sin(time * .01 + particle.phase * 12)) } }
+        for (const particle of d.chargeParticles) { particle.mesh.visible = switchQ > .05; if (particle.mesh.visible) { const phase = (particle.phase + time * .00018 * (.5 + targetCurrent)) % 1; particle.mesh.position.set(THREE.MathUtils.lerp(d.rulerStartX, clipX, phase), .286, d.rulerZ); particle.mesh.material.opacity = .36 + .58 * Math.sin(Math.PI * phase); particle.mesh.scale.setScalar(.72 + .25 * Math.sin(time * .01 + particle.phase * 12)) } }
       }
       else if (d.kind === 'magneticField') {
         const stage = state.fieldStage || 0, t = Math.max(0, state.fieldTimer || 0), clamp = q => Math.max(0, Math.min(1, q)), smooth = q => { q = clamp(q); return q * q * (3 - 2 * q) };
@@ -3322,7 +3606,7 @@ export class LabRenderer3D {
         const clock = Math.max(0, state.meadowWindClock || 0), stage = state.quadratStage || 0, timer = Math.max(0, state.quadratTimer || 0), sampleIndex = Math.max(0, Math.min(d.targets.length - 1, state.quadratSampleIndex || 0)), clamp = q => Math.max(0, Math.min(1, q)), smooth = q => { q = clamp(q); return q * q * (3 - 2 * q) }, grow = smooth(clock / 2.8), wind = .72 + .28 * Math.sin(clock * .41);
         d.grassUniforms.uTime.value = clock; d.grassUniforms.uWind.value = wind; d.grassUniforms.uGrow.value = grow; d.mossMaterial.opacity = smooth((clock - .28) / 1.9) * .96;
         for (const cloud of d.clouds) cloud.group.position.x = cloud.baseX + Math.sin(clock * (.055 + cloud.phase * .006) + cloud.phase) * .7;
-        for (const tree of d.trees) { tree.group.rotation.z = Math.sin(clock * .72 + tree.phase) * .009; tree.group.rotation.x = Math.sin(clock * .48 + tree.phase * .7) * .003 }
+        for (const tree of d.trees) { const gust = Math.sin(clock * .55 + tree.phase) * (.012 + tree.depthRow * .002) + Math.sin(clock * 1.35 + tree.phase * 1.7) * .004; tree.swayPivot.rotation.z = gust; tree.swayPivot.rotation.x = Math.sin(clock * .48 + tree.phase * .7) * Math.abs(gust) * .35; tree.outerLobes.forEach(lobe => { lobe.mesh.rotation.z = lobe.base.z + Math.sin(clock * 1.18 + lobe.phase) * .005; lobe.mesh.rotation.x = lobe.base.x + Math.sin(clock * .93 + lobe.phase * .74) * .003 }) }
         const count = stage >= 6 ? [4, 7, 5, 3, 6][sampleIndex] : Math.max(0, state.quadratCurrentCount || 0), highlighting = stage === 5 || stage === 6;
         for (let i = 0; i < d.daisies.length; i++) { const plant = d.daisies[i], delay = .18 + (i % 17) * .035, flowerGrow = smooth((clock - delay) / 2.25), gust = Math.sin(clock * 1.8 + i * .61) * (.022 + .018 * wind) + Math.sin(clock * .63 + i) * .012; plant.scale.set(1, Math.max(.001, flowerGrow), 1); plant.rotation.z = gust; plant.rotation.x = Math.sin(clock * 1.27 + i * .43) * .018; const included = plant.userData.sampleIndex === sampleIndex && plant.userData.localIndex < count && highlighting; plant.userData.highlight.visible = included; plant.userData.discMat.emissiveIntensity = included ? .75 + .25 * Math.sin(clock * 5 + i) : .08; plant.userData.head.scale.setScalar(included ? 1.08 + .08 * Math.sin(clock * 5 + i) : 1) }
         const [tx, tz] = d.targets[sampleIndex], start = new THREE.Vector3(-3.02, .43, 1.5), target = new THREE.Vector3(tx, .39, tz), q = stage === 3 ? clamp(timer / 2.35) : stage > 3 ? 1 : 0, eased = smooth(q), rotations = [-.18, .14, -.08, .2, -.12];
@@ -3337,7 +3621,7 @@ export class LabRenderer3D {
         if (stage < 3) d.quadrat.position.copy(start); else d.quadrat.position.lerpVectors(start, target, q); if (stage === 3) { d.quadrat.position.y += Math.sin(Math.PI * q) * .56 + (q > .78 ? Math.abs(Math.sin((q - .78) * Math.PI * 7)) * (1 - q) * .13 : 0); d.quadrat.rotation.set(Math.sin(Math.PI * q) * .1, (1 - q) * .34, Math.sin(Math.PI * q * 2) * .06) } else d.quadrat.rotation.set(0, 0, 0);
         const highlight = stage === 5 || stage === 6; for (let i = 0; i < d.organisms.length; i++) { const organism = d.organisms[i], active = highlight && organism.userData.station === index; if (organism.material?.emissive) { organism.material.emissive.setHex(active ? 0x2b9f8b : 0x000000); organism.material.emissiveIntensity = active ? .42 : 0 } if (organism.userData.species === 'seaweed') organism.rotation.z = Math.sin(clock * 1.7 + i * .61) * (.025 + .045 * tide) }
         d.poolSeaweed?.forEach((clump, i) => { clump.rotation.z = Math.sin(clock * 1.18 + i * .83) * (.018 + .028 * tide); clump.rotation.x = Math.sin(clock * .86 + i * .47) * .012 });
-        const edgeZ = THREE.MathUtils.lerp(3.95, .62, tide); d.water.position.set(0, .16, edgeZ + 3); d.waterUniforms.uTime.value = clock; d.waterUniforms.uAlpha.value = .66 + Math.sin(clock * .53) * .035;
+        const edgeZ = THREE.MathUtils.lerp(3.95, .62, tide); d.water.position.set(0, .16, edgeZ + d.waterDepth / 2); d.waterUniforms.uTime.value = clock; d.waterUniforms.uAlpha.value = .66 + Math.sin(clock * .53) * .035;
         d.foamBands.forEach((foam, i) => { foam.position.z = edgeZ + .03 + i * .16 + Math.sin(clock * (1.25 + i * .14) + i) * .08; foam.position.y = .02 + Math.sin(clock * 2.1 + i) * .012; foam.scale.x = 1 + Math.sin(clock * .37 + i) * .025; foam.material.opacity = (.7 - i * .14) * (.76 + .24 * Math.sin(clock * 1.7 + i)) });
         d.clouds.forEach(cloud => cloud.group.position.x = cloud.baseX + Math.sin(clock * .035 + cloud.phase) * .65);
       }

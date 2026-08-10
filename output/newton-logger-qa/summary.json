@@ -1,0 +1,342 @@
+{
+  "errors": [],
+  "renderer": {
+    "enabled": true,
+    "renderer": "WebGL / Three.js",
+    "objects": 1,
+    "context_lost": false,
+    "scene_compiling": false,
+    "scene_warmup_frames": 2,
+    "canvas_visible": true,
+    "legacy_2d_apparatus": false
+  },
+  "initial": {
+    "accelerating_force_n": 0.2,
+    "hanging_mass_set": {
+      "type": "school laboratory slotted mass holder",
+      "holder_mass_g": 10,
+      "slotted_mass_each_g": 10,
+      "slotted_mass_count": 1,
+      "total_hanging_mass_g": 20,
+      "masses_slot_onto_central_stem": true
+    },
+    "trolley_mass_kg": 1,
+    "acceleration_m_per_s2": 0.2,
+    "trolley_running": false,
+    "trolley_progress": 0,
+    "light_gate_system": {
+      "gate_count": 2,
+      "connected_to_same_data_logger": true,
+      "cable_count": 2,
+      "logger_display_channels": [
+        "v₁",
+        "v₂"
+      ],
+      "gate_1": {
+        "time_s": null,
+        "velocity_m_per_s": null
+      },
+      "gate_2": {
+        "time_s": null,
+        "velocity_m_per_s": null
+      }
+    },
+    "trolley_appearance": {
+      "rounded_chassis": true,
+      "rubber_wheels": 4,
+      "rounded_bumpers": 2,
+      "interrupt_card": true,
+      "relative_size_from_previous": 0.86
+    },
+    "recorded_results": [],
+    "control_layout": {
+      "minus_x_px": 290,
+      "plus_x_px": 390,
+      "release_x_px": 490,
+      "force_button_width_px": 90,
+      "release_button_width_px": 140,
+      "release_to_reading_gap_px": 165.6,
+      "overlaps_reading": false
+    }
+  },
+  "force_controls": {
+    "increased_force_n": 0.3,
+    "restored_force_n": 0.2
+  },
+  "after_gate_1": {
+    "accelerating_force_n": 0.2,
+    "hanging_mass_set": {
+      "type": "school laboratory slotted mass holder",
+      "holder_mass_g": 10,
+      "slotted_mass_each_g": 10,
+      "slotted_mass_count": 1,
+      "total_hanging_mass_g": 20,
+      "masses_slot_onto_central_stem": true
+    },
+    "trolley_mass_kg": 1,
+    "acceleration_m_per_s2": 0.2,
+    "trolley_running": true,
+    "trolley_progress": 0.44,
+    "light_gate_system": {
+      "gate_count": 2,
+      "connected_to_same_data_logger": true,
+      "cable_count": 2,
+      "logger_display_channels": [
+        "v₁",
+        "v₂"
+      ],
+      "gate_1": {
+        "time_s": 1.843,
+        "velocity_m_per_s": 0.37
+      },
+      "gate_2": {
+        "time_s": null,
+        "velocity_m_per_s": null
+      }
+    },
+    "trolley_appearance": {
+      "rounded_chassis": true,
+      "rubber_wheels": 4,
+      "rounded_bumpers": 2,
+      "interrupt_card": true,
+      "relative_size_from_previous": 0.86
+    },
+    "recorded_results": [],
+    "control_layout": {
+      "minus_x_px": 290,
+      "plus_x_px": 390,
+      "release_x_px": 490,
+      "force_button_width_px": 90,
+      "release_button_width_px": 140,
+      "release_to_reading_gap_px": 165.6,
+      "overlaps_reading": false
+    }
+  },
+  "after_gate_2": {
+    "accelerating_force_n": 0.2,
+    "hanging_mass_set": {
+      "type": "school laboratory slotted mass holder",
+      "holder_mass_g": 10,
+      "slotted_mass_each_g": 10,
+      "slotted_mass_count": 1,
+      "total_hanging_mass_g": 20,
+      "masses_slot_onto_central_stem": true
+    },
+    "trolley_mass_kg": 1,
+    "acceleration_m_per_s2": 0.2,
+    "trolley_running": true,
+    "trolley_progress": 0.91,
+    "light_gate_system": {
+      "gate_count": 2,
+      "connected_to_same_data_logger": true,
+      "cable_count": 2,
+      "logger_display_channels": [
+        "v₁",
+        "v₂"
+      ],
+      "gate_1": {
+        "time_s": 1.843,
+        "velocity_m_per_s": 0.37
+      },
+      "gate_2": {
+        "time_s": 2.82,
+        "velocity_m_per_s": 0.56
+      }
+    },
+    "trolley_appearance": {
+      "rounded_chassis": true,
+      "rubber_wheels": 4,
+      "rounded_bumpers": 2,
+      "interrupt_card": true,
+      "relative_size_from_previous": 0.86
+    },
+    "recorded_results": [],
+    "control_layout": {
+      "minus_x_px": 290,
+      "plus_x_px": 390,
+      "release_x_px": 490,
+      "force_button_width_px": 90,
+      "release_button_width_px": 140,
+      "release_to_reading_gap_px": 165.6,
+      "overlaps_reading": false
+    }
+  },
+  "complete": {
+    "accelerating_force_n": 0.2,
+    "hanging_mass_set": {
+      "type": "school laboratory slotted mass holder",
+      "holder_mass_g": 10,
+      "slotted_mass_each_g": 10,
+      "slotted_mass_count": 1,
+      "total_hanging_mass_g": 20,
+      "masses_slot_onto_central_stem": true
+    },
+    "trolley_mass_kg": 1,
+    "acceleration_m_per_s2": 0.2,
+    "trolley_running": false,
+    "trolley_progress": 1,
+    "light_gate_system": {
+      "gate_count": 2,
+      "connected_to_same_data_logger": true,
+      "cable_count": 2,
+      "logger_display_channels": [
+        "v₁",
+        "v₂"
+      ],
+      "gate_1": {
+        "time_s": 1.843,
+        "velocity_m_per_s": 0.37
+      },
+      "gate_2": {
+        "time_s": 2.82,
+        "velocity_m_per_s": 0.56
+      }
+    },
+    "trolley_appearance": {
+      "rounded_chassis": true,
+      "rubber_wheels": 4,
+      "rounded_bumpers": 2,
+      "interrupt_card": true,
+      "relative_size_from_previous": 0.86
+    },
+    "recorded_results": [
+      {
+        "force": 0.2,
+        "mass": 1,
+        "acceleration": 0.2
+      }
+    ],
+    "control_layout": {
+      "minus_x_px": 290,
+      "plus_x_px": 390,
+      "release_x_px": 490,
+      "force_button_width_px": 90,
+      "release_button_width_px": 140,
+      "release_to_reading_gap_px": 165.6,
+      "overlaps_reading": false
+    }
+  },
+  "compact": {
+    "responsive": {
+      "viewport_css_px": {
+        "width": 844,
+        "height": 390
+      },
+      "logical_canvas_px": {
+        "width": 1298,
+        "height": 600
+      },
+      "scale": 0.65,
+      "mode": "compact landscape",
+      "portrait_prompt_visible": false,
+      "three_column_layout_preserved": true,
+      "mobile_landscape_layout": true,
+      "pointer_coordinates_scaled": true,
+      "minimum_touch_target_css_px": 44
+    },
+    "newton2": {
+      "accelerating_force_n": 0.2,
+      "hanging_mass_set": {
+        "type": "school laboratory slotted mass holder",
+        "holder_mass_g": 10,
+        "slotted_mass_each_g": 10,
+        "slotted_mass_count": 1,
+        "total_hanging_mass_g": 20,
+        "masses_slot_onto_central_stem": true
+      },
+      "trolley_mass_kg": 1,
+      "acceleration_m_per_s2": 0.2,
+      "trolley_running": false,
+      "trolley_progress": 1,
+      "light_gate_system": {
+        "gate_count": 2,
+        "connected_to_same_data_logger": true,
+        "cable_count": 2,
+        "logger_display_channels": [
+          "v₁",
+          "v₂"
+        ],
+        "gate_1": {
+          "time_s": 1.843,
+          "velocity_m_per_s": 0.37
+        },
+        "gate_2": {
+          "time_s": 2.82,
+          "velocity_m_per_s": 0.56
+        }
+      },
+      "trolley_appearance": {
+        "rounded_chassis": true,
+        "rubber_wheels": 4,
+        "rounded_bumpers": 2,
+        "interrupt_card": true,
+        "relative_size_from_previous": 0.86
+      },
+      "recorded_results": [
+        {
+          "force": 0.2,
+          "mass": 1,
+          "acceleration": 0.2
+        }
+      ],
+      "control_layout": {
+        "minus_x_px": 290,
+        "plus_x_px": 390,
+        "release_x_px": 490,
+        "force_button_width_px": 90,
+        "release_button_width_px": 140,
+        "release_to_reading_gap_px": 179.8,
+        "overlaps_reading": false
+      }
+    }
+  },
+  "reset": {
+    "accelerating_force_n": 0.2,
+    "hanging_mass_set": {
+      "type": "school laboratory slotted mass holder",
+      "holder_mass_g": 10,
+      "slotted_mass_each_g": 10,
+      "slotted_mass_count": 1,
+      "total_hanging_mass_g": 20,
+      "masses_slot_onto_central_stem": true
+    },
+    "trolley_mass_kg": 1,
+    "acceleration_m_per_s2": 0.2,
+    "trolley_running": false,
+    "trolley_progress": 0,
+    "light_gate_system": {
+      "gate_count": 2,
+      "connected_to_same_data_logger": true,
+      "cable_count": 2,
+      "logger_display_channels": [
+        "v₁",
+        "v₂"
+      ],
+      "gate_1": {
+        "time_s": null,
+        "velocity_m_per_s": null
+      },
+      "gate_2": {
+        "time_s": null,
+        "velocity_m_per_s": null
+      }
+    },
+    "trolley_appearance": {
+      "rounded_chassis": true,
+      "rubber_wheels": 4,
+      "rounded_bumpers": 2,
+      "interrupt_card": true,
+      "relative_size_from_previous": 0.86
+    },
+    "recorded_results": [],
+    "control_layout": {
+      "minus_x_px": 290,
+      "plus_x_px": 390,
+      "release_x_px": 490,
+      "force_button_width_px": 90,
+      "release_button_width_px": 140,
+      "release_to_reading_gap_px": 165.6,
+      "overlaps_reading": false
+    }
+  }
+}

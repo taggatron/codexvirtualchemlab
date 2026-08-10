@@ -113,6 +113,14 @@
         "outdoor_scene_extends_behind_footer": true,
         "forest_background": true,
         "detailed_trees": true,
+        "realistic_layered_trees": true,
+        "tree_depth_rows": 3,
+        "curved_tapered_trunks": true,
+        "radial_connected_branches": true,
+        "canopy_lobes_per_tree": 11,
+        "visible_root_flares": true,
+        "low_polygon_background_branches": true,
+        "forest_shrub_count": 28,
         "blue_sunny_sky": true,
         "sun_visible": true,
         "cloud_count": 3,
@@ -148,6 +156,8 @@
       "animation": {
         "turf_grows_into_full_outdoor_arena": false,
         "moss_emerges_between_blades": false,
+        "upper_tree_canopies_sway_from_fixed_lower_trunks": true,
+        "subtle_leaf_mass_flutter": true,
         "coordinate_generator_spins": true,
         "quadrat_smooth_throw_arc": false,
         "quadrat_settle_bounce": false,
@@ -163,6 +173,8 @@
       "animation": {
         "turf_grows_into_full_outdoor_arena": false,
         "moss_emerges_between_blades": false,
+        "upper_tree_canopies_sway_from_fixed_lower_trunks": true,
+        "subtle_leaf_mass_flutter": true,
         "coordinate_generator_spins": false,
         "quadrat_smooth_throw_arc": true,
         "quadrat_settle_bounce": true,
@@ -178,6 +190,8 @@
       "animation": {
         "turf_grows_into_full_outdoor_arena": false,
         "moss_emerges_between_blades": false,
+        "upper_tree_canopies_sway_from_fixed_lower_trunks": true,
+        "subtle_leaf_mass_flutter": true,
         "coordinate_generator_spins": false,
         "quadrat_smooth_throw_arc": false,
         "quadrat_settle_bounce": false,
@@ -244,11 +258,43 @@
       "landscape": {
         "laboratory_tiles_visible": false,
         "realistic_rocky_shore": true,
+        "realistic_eroded_cliff": true,
         "detailed_cliffs": true,
+        "cliff_face_grid": [
+          75,
+          12
+        ],
         "continuous_cliff_top": true,
         "grass_topped_cliff": true,
+        "broken_projecting_rock_ledges": 19,
+        "recessed_branched_fissures": true,
+        "exposed_peat_soil_edge": true,
+        "cliff_lichen_patches": 48,
+        "cliff_top_grass_blades": 390,
         "cliff_maximum_world_y": 3.02,
         "cliff_within_canvas": true,
+        "cliff_bounds_world": {
+          "x": [
+            -12.2,
+            12.2
+          ],
+          "maximum_y": 3.02
+        },
+        "supported_max_scene_aspect": 2.17,
+        "rock_beach_floor_bounds_world": {
+          "x": [
+            -13.5,
+            13.5
+          ],
+          "z": [
+            -4.6,
+            7.4
+          ]
+        },
+        "rock_beach_floor_extends_beyond_visible_view": true,
+        "minimum_compact_lateral_overdraw_world": 1.7,
+        "foreground_depth_overdraw_world": 2.5,
+        "shore_gravel_count": 300,
         "irregular_rock_pools": true,
         "rock_pool_count": 3,
         "rock_pool_seaweed_clumps": 12,
@@ -267,7 +313,12 @@
         "clock_s": 0,
         "layered_gerstner_style_waves": true,
         "translucent_shallow_water": true,
+        "water_world_dimensions": [
+          22,
+          12
+        ],
         "animated_foam_bands": 3,
+        "foam_world_span": 22.4,
         "wet_rock_front": true,
         "safe_working_line_observed": true
       },
@@ -295,7 +346,12 @@
         "clock_s": 5.78,
         "layered_gerstner_style_waves": true,
         "translucent_shallow_water": true,
+        "water_world_dimensions": [
+          22,
+          12
+        ],
         "animated_foam_bands": 3,
+        "foam_world_span": 22.4,
         "wet_rock_front": true,
         "safe_working_line_observed": true
       },
@@ -388,7 +444,12 @@
         "clock_s": 35.7,
         "layered_gerstner_style_waves": true,
         "translucent_shallow_water": true,
+        "water_world_dimensions": [
+          22,
+          12
+        ],
         "animated_foam_bands": 3,
+        "foam_world_span": 22.4,
         "wet_rock_front": true,
         "safe_working_line_observed": true
       },

@@ -262,6 +262,8 @@ check((deepFindByKeys(hookeZeroSection, ['measured_results']) || []).length === 
 check(hookeMidSection?.stage === 1 && hookeMidSection?.spring_moving === true, 'Hooke mid-stage capture did not show the third mass being added and the spring moving.');
 check(JSON.stringify(hookeForces) === JSON.stringify([0, 1, 2, 3, 4, 5, 6]), `Hooke forces are incorrect: ${JSON.stringify(hookeForces)}.`);
 check(JSON.stringify(hookeExtensions) === JSON.stringify([0, 2, 4, 6, 8, 10, 13]), `Hooke extensions are incorrect: ${JSON.stringify(hookeExtensions)}.`);
+check(hookeInitialSection?.ruler?.unloaded_pointer_reading_cm === 20 && hookeLoadedSection?.ruler?.pointer_reading_cm === 33, 'Hooke ruler readings do not match the recorded 20.0–33.0 cm total lengths.');
+check(hookeInitialSection?.ruler_smallest_graduation_mm === 1 && hookeInitialSection?.safety_catch_tray_directly_below_hanger === true, 'Hooke ruler resolution or catch-tray safety contract is missing.');
 check(Math.abs(springConstant - 50) <= 1e-6, `Hooke spring constant should be 50 N/m, received ${springConstant}.`);
 check(finalPointMarkedBeyond, 'The 6 N Hooke point is not marked as beyond the limit of proportionality.');
 check(hookeFinal.complete, 'Hooke practical did not complete after seven readings.');
@@ -270,12 +272,16 @@ check(hookeFinal.graph_readings === 7, `Hooke graph should contain seven reading
 check(graphLooksLike(hookeFinal, 'force', 'extension'), `Hooke graph axes are incorrect: ${JSON.stringify(hookeFinal.graph_axes)}.`);
 check(!!specific, 'Specific-heat render_game_to_text payload is missing.');
 check(specificPreparedSection?.stage === 2 && specificPreparedSection?.preparation?.thermal_paste_applied && specificPreparedSection?.preparation?.insulation_closed, 'PREPARE BLOCK did not finish with paste, probes and insulation in place.');
+check(specificPreparedSection?.preparation?.bored_insulating_lid_closed && specificPreparedSection?.electrical_circuit?.complete, 'Specific-heat lid or complete electrical circuit contract is missing.');
 check(specificHeatingSection?.stage === 3 && specificHeatingSection.energy_j > 0 && specificHeatingSection.energy_j < 18000, 'Specific-heat mid-stage capture did not show live heating and an intermediate energy reading.');
 check(specificHeatedSection?.stage === 4, `Specific-heat run did not finish ready to calculate (stage=${specificHeatedSection?.stage}).`);
 check(specificCalculatedSection?.stage === 5, `CALCULATE c did not reach the calculated stage (stage=${specificCalculatedSection?.stage}).`);
 check(Math.abs(electricalEnergyJ - 18000) <= 1e-6, `Specific-heat energy should be 18000 J, received ${electricalEnergyJ}.`);
 check(Math.abs(temperatureRiseC - 20) <= 1e-6, `Specific-heat temperature rise should be 20 °C, received ${temperatureRiseC}.`);
 check(Math.abs(specificHeatCapacity - 900) <= 1e-6, `Specific heat capacity should be 900 J kg⁻¹ K⁻¹, received ${specificHeatCapacity}.`);
+const shcRows = deepFindByKeys(specificCalculatedSection, ['measured_results']) || [];
+check(JSON.stringify(shcRows.map(row => row.energy_j)) === JSON.stringify([0, 3600, 7200, 10800, 14400, 18000]), `Specific-heat energy rows are incorrect: ${JSON.stringify(shcRows)}.`);
+check(JSON.stringify(shcRows.map(row => row.temperature_c)) === JSON.stringify([20, 24, 28, 32, 36, 40]), `Specific-heat temperature rows are incorrect: ${JSON.stringify(shcRows)}.`);
 check(specificFinal.complete, 'Specific-heat practical did not complete after calculating c.');
 check(specificFinal.tab === 'graph', `Specific-heat VIEW GRAPH did not select the graph tab (tab=${specificFinal.tab}).`);
 check((specificFinal.graph_readings || 0) > 0, 'Specific-heat graph contains no readings.');

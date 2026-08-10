@@ -87,6 +87,14 @@
     },
     {
       "subject": "chemistry",
+      "practical": "Alkali metals in water",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "chemistry",
       "practical": "Chromatography",
       "overflow": 0,
       "unused": 0,
@@ -216,6 +224,22 @@
     {
       "subject": "physics",
       "practical": "Density of solids",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "physics",
+      "practical": "Force and extension of a spring",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "physics",
+      "practical": "Specific heat capacity",
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
@@ -326,6 +350,14 @@
     },
     {
       "subject": "chemistry",
+      "practical": "Alkali metals in water",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "chemistry",
       "practical": "Chromatography",
       "overflow": 0,
       "unused": 0,
@@ -455,6 +487,22 @@
     {
       "subject": "physics",
       "practical": "Density of solids",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "physics",
+      "practical": "Force and extension of a spring",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "drag_enabled": false
+    },
+    {
+      "subject": "physics",
+      "practical": "Specific heat capacity",
       "overflow": 0,
       "unused": 0,
       "all_visible": true,

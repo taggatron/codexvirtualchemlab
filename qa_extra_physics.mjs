@@ -37,6 +37,9 @@ const primary = () => click(372, 837);
 await click(435, 32);
 await click(130, 613);
 const wireInitial = await capture('01-wire-initial');
+await click(1270, 32);
+const wireFocusLayout = await capture('01a-wire-focus-layout');
+await click(1360, 32);
 await primary();
 await advance(650);
 const wireSettling = await capture('02-wire-switch-closing');
@@ -102,6 +105,7 @@ const summary = {
   renderer: wireInitial.renderer,
   wire: {
     initial: wireInitial.wire_resistance_practical,
+    focus_layout: { focus_mode: wireFocusLayout.focus_mode, circuit_layout: wireFocusLayout.wire_resistance_practical.circuit_layout },
     settling: wireSettling.wire_resistance_practical,
     steady: wireSteady.wire_resistance_practical,
     first_recorded: wireFirstRecorded.wire_resistance_practical.measured_results,
@@ -129,6 +133,13 @@ const summary = {
 fs.writeFileSync(`${out}/summary.json`, JSON.stringify(summary, null, 2));
 
 if (!wireInitial.renderer.enabled || wireInitial.renderer.legacy_2d_apparatus) throw new Error('WebGL renderer is not enabled.');
+if (!wireFocusLayout.focus_mode) throw new Error('Wire focus-layout capture did not enter focus mode.');
+if (!wireInitial.wire_resistance_practical.circuit_layout?.cable_lanes_separated ||
+    !wireInitial.wire_resistance_practical.circuit_layout?.measured_segment_highlighted ||
+    wireInitial.wire_resistance_practical.circuit_layout?.ammeter_label !== 'A · SERIES' ||
+    wireInitial.wire_resistance_practical.circuit_layout?.voltmeter_label !== 'V · PARALLEL') {
+  throw new Error('The decluttered wire-circuit layout contract is incomplete.');
+}
 if (wireSteady.wire_resistance_practical.stage !== 2 || wireSteady.wire_resistance_practical.ammeter_current_a <= 0) {
   throw new Error('Wire meters did not settle to a live reading.');
 }
