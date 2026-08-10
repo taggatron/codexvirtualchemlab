@@ -50,7 +50,7 @@ function radialPortTunnel(theta, y, outerRadius, innerRadius, outerHoleRadius, i
 
 export class LabRenderer3D {
   constructor(canvas) {
-    this.canvas = canvas; this.available = false; this.signature = ''; this.flames = []; this.dynamic = []; this.width = 1; this.height = 1; this.left = 0; this.top = 0; this.coolantVisualLevel = 0; this.coolantTransitionTarget = 0; this.lastRenderTime = 0; this.thermiteAfterglowUntil = 0; this.thermiteGlowFraction = 0; this.lastPracticalId = null; this.bunsenLoadDuration = 3.4; this.bunsenLoadElapsed = this.bunsenLoadDuration; this.bunsenTransitionActive = false; this.sceneWarmupFrames = 0; this.sceneNeedsCompile = false; this.sceneCompiling = false; this.sceneCompileGeneration = 0; this.contextLost = false; this.pendingCanvasReveal = true; canvas.style.visibility = 'hidden';
+    this.canvas = canvas; this.available = false; this.signature = ''; this.flames = []; this.dynamic = []; this.width = 1; this.height = 1; this.left = 0; this.top = 0; this.coolantVisualLevel = 0; this.coolantTransitionTarget = 0; this.lastRenderTime = 0; this.thermiteAfterglowUntil = 0; this.thermiteGlowFraction = 0; this.osmosisRotationState = null; this.lastPracticalId = null; this.bunsenLoadDuration = 3.4; this.bunsenLoadElapsed = this.bunsenLoadDuration; this.bunsenTransitionActive = false; this.sceneWarmupFrames = 0; this.sceneNeedsCompile = false; this.sceneCompiling = false; this.sceneCompileGeneration = 0; this.contextLost = false; this.pendingCanvasReveal = true; canvas.style.visibility = 'hidden';
     try {
       this.renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'high-performance', preserveDrawingBuffer: true });
       this.renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2)); this.renderer.setClearColor(0xeaf1f2, 1); this.renderer.shadowMap.enabled = true; this.renderer.shadowMap.type = THREE.PCFSoftShadowMap; this.renderer.outputColorSpace = THREE.SRGBColorSpace; this.renderer.toneMapping = THREE.ACESFilmicToneMapping; this.renderer.toneMappingExposure = 1.12;
@@ -113,7 +113,7 @@ export class LabRenderer3D {
         if (Array.isArray(n.material)) n.material.forEach(disposeMaterial); else disposeMaterial(n.material);
       });
     }
-    this.flames = []; this.dynamic = []; this.pourAlignment = null; this.thermiteAfterglowUntil = 0; this.thermiteGlowFraction = 0;
+    this.flames = []; this.dynamic = []; this.pourAlignment = null; this.thermiteAfterglowUntil = 0; this.thermiteGlowFraction = 0; this.osmosisRotationState = null;
   }
   beaker(level = .42, color = 0x3ca9d4) { const g = new THREE.Group(), glassMat = new THREE.MeshPhysicalMaterial({ color: 0xd9f4ff, transparent: true, opacity: .48, transmission: .72, roughness: .025, metalness: 0, ior: 1.46, thickness: .11, clearcoat: 1, clearcoatRoughness: .025, side: THREE.DoubleSide, depthWrite: false }), profile = [[0, .035], [.4, .035], [.54, .045], [.61, .085], [.655, .16], [.675, .31], [.69, 1.22], [.7, 1.34]].map(([x, y]) => new THREE.Vector2(x, y)); const body = new THREE.Mesh(new THREE.LatheGeometry(profile, 96), glassMat); body.geometry.computeVertexNormals(); g.add(body); const rim = new THREE.Mesh(new THREE.TorusGeometry(.7, .03, 16, 80), glassMat); rim.rotation.x = Math.PI / 2; rim.position.y = 1.35; g.add(rim); const bottomCurve = new THREE.Mesh(new THREE.TorusGeometry(.61, .032, 14, 72), glassMat); bottomCurve.rotation.x = Math.PI / 2; bottomCurve.position.y = .095; g.add(bottomCurve); const liquidHeight = Math.max(.08, level * 1.08), liqMat = new THREE.MeshPhysicalMaterial({ color, transparent: true, opacity: .74, roughness: .13, transmission: .14, clearcoat: .35 }); const liq = cylinder(.615, liquidHeight, liqMat, 72); liq.position.y = .085 + liquidHeight / 2; g.add(liq); const meniscus = cylinder(.618, .018, new THREE.MeshPhysicalMaterial({ color, transparent: true, opacity: .56, roughness: .08, transmission: .2 }), 72); meniscus.position.y = .085 + liquidHeight; g.add(meniscus); const shineMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .34, depthWrite: false }); const shine = new THREE.Mesh(new THREE.PlaneGeometry(.065, 1.03), shineMat); shine.position.set(-.36, .75, .575); shine.renderOrder = 7; g.add(shine); const shineFine = new THREE.Mesh(new THREE.PlaneGeometry(.022, .72), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .48, depthWrite: false })); shineFine.position.set(-.28, .79, .62); shineFine.renderOrder = 7; g.add(shineFine); const marks = new THREE.Group(), markMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .95, depthWrite: false, depthTest: false, side: THREE.DoubleSide });[[.3, .29], [.48, .16], [.66, .29], [.84, .16], [1.02, .29], [1.2, .16]].forEach(([y, w]) => { const r = Math.hypot(.4, .57) + .002, arc = w / r; const mark = new THREE.Mesh(new THREE.CylinderGeometry(r, r, .019, 32, 1, true, -arc / 2, arc), markMat); mark.position.set(0, y, 0); mark.rotation.y = Math.atan2(.4, .57); mark.renderOrder = 9; marks.add(mark) }); g.add(marks); Object.assign(g.userData, { container: true, liquidVolume: liq, liquidMeniscus: meniscus, liquidMaxHeight: liquidHeight }); return shadowReady(g) }
   flask(level = .42, color = 0x55b9d0) {
@@ -1701,9 +1701,9 @@ export class LabRenderer3D {
     const loggerScreen = new THREE.Mesh(new THREE.PlaneGeometry(1.18, 0.51), new THREE.MeshBasicMaterial({ map: loggerTexture, toneMapped: false, depthTest: true, depthWrite: false })); loggerScreen.position.set(0, 0.49, 0.318); loggerScreen.renderOrder = 10; logger.add(loggerScreen);
     const loggerFeetMat = new THREE.MeshStandardMaterial({ color: 0x26373d, roughness: 0.76 });
     for (const x of [-0.55, 0.55]) { const foot = new THREE.Mesh(roundedBox(0.23, 0.06, 0.28, 0.025, 3), loggerFeetMat); foot.position.set(x, 0.035, -0.02); logger.add(foot) }
-    const loggerPosition = new THREE.Vector3(0, 0.05, 0.92); logger.position.copy(loggerPosition); g.add(logger);
+    const loggerPosition = new THREE.Vector3(-0.28, 0.05, 1.14); logger.position.copy(loggerPosition); g.add(logger);
 
-    const loggerPorts = [new THREE.Vector3(-0.42, 0.18, 1.235), new THREE.Vector3(0.42, 0.18, 1.235)];
+    const loggerPorts = [-0.42, 0.42].map(x => new THREE.Vector3(loggerPosition.x + x, loggerPosition.y + 0.13, loggerPosition.z + 0.315));
     const cableColours = [0x26343a, 0x31576b];
     loggerPorts.forEach((port, index) => {
       const portRing = cylinder(0.057, 0.044, new THREE.MeshStandardMaterial({ color: index ? 0x3b7188 : 0x26363d, metalness: 0.35, roughness: 0.4 }), 28);
@@ -1712,8 +1712,8 @@ export class LabRenderer3D {
       const cableCurve = new THREE.CatmullRomCurve3([
         start,
         new THREE.Vector3(start.x + (index ? 0.2 : -0.2), 0.82, 0.58),
-        new THREE.Vector3(index ? 0.88 : -0.88, 0.16, 1.08),
-        new THREE.Vector3(port.x, 0.14, 1.22),
+        new THREE.Vector3(index ? 0.72 : -1.02, 0.16, 1.22),
+        new THREE.Vector3(port.x, 0.14, port.z - 0.03),
         port
       ], false, 'centripetal');
       const cable = new THREE.Mesh(new THREE.TubeGeometry(cableCurve, 72, 0.022, 10, false), new THREE.MeshStandardMaterial({ color: cableColours[index], roughness: 0.86, metalness: 0.02 }));
@@ -1828,7 +1828,8 @@ export class LabRenderer3D {
     Object.assign(g.userData, {
       newtonSecondLawRig: true,
       lightGateSystem: { gateCount: 2, gateWorldX: gateXs, gateProgress, oneSharedDataLogger: true, cableCount: 2, displayedChannels: ['v₁', 'v₂'] },
-      trolley: { roundedBody: true, wheelCount: 4, rubberBumpers: 2, interruptCard: true, relativeSizeFromPrevious: 0.86 }
+      trolley: { roundedBody: true, wheelCount: 4, rubberBumpers: 2, interruptCard: true, relativeSizeFromPrevious: 0.86 },
+      logger: { position: { x: loggerPosition.x, y: loggerPosition.y, z: loggerPosition.z }, closerToCamera: true, shiftedLeft: true }
     });
     const prepared = shadowReady(g); loggerScreen.castShadow = false; loggerScreen.receiveShadow = false; beamMat.depthWrite = false;
     return prepared;
@@ -3647,10 +3648,12 @@ export class LabRenderer3D {
           else if (q < .72) { const move = smooth((q - .18) / .54); pos.lerpVectors(blotPos, new THREE.Vector3(d.balanceX, 1.78, .04), move); pos.y += Math.sin(Math.PI * move) * .7; horizontal = 1 }
           else { pos.lerpVectors(new THREE.Vector3(d.balanceX, 1.78, .04), balancePos, smooth((q - .72) / .28)); horizontal = 1 }
         }
-        d.potato.position.copy(pos); d.potato.rotation.set(0, .08 * Math.sin(time * .0014), horizontal * Math.PI / 2);
+        const sharedYaw = .04, sharedTilt = -horizontal * Math.PI / 2;
+        d.potato.position.copy(pos); d.potato.rotation.set(0, sharedYaw, sharedTilt);
         const radialScale = 1 + d.change / 100 * .55 * finalQ, lengthScale = 1 + d.change / 100 * .35 * finalQ; d.potato.scale.set(radialScale, lengthScale, radialScale);
         const wrinkleQ = d.change < 0 ? clamp(-d.change / 17) * finalQ : 0; for (let i = 0; i < d.wrinkles.length; i++) { const wrinkle = d.wrinkles[i]; wrinkle.visible = wrinkleQ > .04; wrinkle.material.opacity = wrinkleQ * (.28 + (i % 2) * .12); wrinkle.scale.set(1 - .025 * wrinkleQ, 1, 1 - .025 * wrinkleQ) }
-        const holding = stage === 0 || stage === 1 || stage === 4 && q < .83 || stage === 6, forcepsTilt = horizontal * -Math.PI / 2, offset = new THREE.Vector3(horizontal ? .21 : 0, horizontal ? .02 : .47, 0); d.forceps.visible = holding; d.forceps.position.copy(pos).add(offset); d.forceps.rotation.set(0, .04, forcepsTilt); d.forceps.scale.setScalar(.58);
+        const holding = stage === 0 || stage === 1 || stage === 4 && q < .83 || stage === 6, offset = new THREE.Vector3(horizontal ? .21 : 0, horizontal ? .02 : .47, 0); d.forceps.visible = holding; d.forceps.position.copy(pos).add(offset); d.forceps.rotation.copy(d.potato.rotation); d.forceps.scale.setScalar(.58);
+        const sharedAngleDegrees = +THREE.MathUtils.radToDeg(sharedTilt).toFixed(2), relativeAngleDegrees = +THREE.MathUtils.radToDeg(d.potato.rotation.z - d.forceps.rotation.z).toFixed(3); this.osmosisRotationState = { shared_angle_degrees: sharedAngleDegrees, potato_angle_degrees: sharedAngleDegrees, forceps_angle_degrees: +THREE.MathUtils.radToDeg(d.forceps.rotation.z).toFixed(2), relative_angle_degrees: relativeAngleDegrees, shared_rotation_source: true, same_rate_and_direction: true, remain_parallel: Math.abs(relativeAngleDegrees) < .001, forceps_visible: holding };
         for (let i = 0; i < d.waterMolecules.length; i++) { const molecule = d.waterMolecules[i], active = stage === 2, cycle = (time * .00046 * (.86 + (i % 5) * .07) + i * .137) % 1, localDirection = Math.abs(d.change) < 2 ? (i % 2 ? 1 : -1) : d.change > 0 ? 1 : -1, r = localDirection > 0 ? THREE.MathUtils.lerp(.62, .17, smooth(cycle)) : THREE.MathUtils.lerp(.17, .62, smooth(cycle)), angle = i * 2.399 + time * .00018 * (i % 2 ? 1 : -1); molecule.visible = active; if (active) { molecule.position.set(d.beakerX + Math.cos(angle) * r, .24 + (i % 9) * .082 + Math.sin(cycle * Math.PI) * .05, d.beakerZ + Math.sin(angle) * r * .72); const envelope = Math.sin(Math.PI * Math.min(.999, cycle)); molecule.scale.setScalar(.68 + envelope * .38); molecule.children.forEach(child => { child.material.opacity = (child === molecule.children[0] ? .86 : .92) * (.35 + .65 * envelope) }) } }
         for (let i = 0; i < d.movementArrows.length; i++) { const arrow = d.movementArrows[i], active = stage === 2, pulse = .86 + .2 * Math.sin(time * .006 + i), side = i % 2 ? -1 : 1, inward = Math.abs(d.change) < 2 ? i % 2 === 0 : d.change > 0; arrow.visible = active; arrow.position.set(d.beakerX + side * .36, .43 + Math.floor(i / 2) * .27, d.beakerZ + .62); arrow.rotation.y = (inward ? (side < 0 ? 0 : Math.PI) : (side < 0 ? Math.PI : 0)); arrow.scale.setScalar(pulse) }
         for (let i = 0; i < d.drainDrops.length; i++) { const drop = d.drainDrops[i], local = (q - (.27 + i * .025)) / .27, fall = clamp(local), visible = stage === 4 && local >= 0 && local <= 1; drop.visible = visible; if (visible) { const source = pos.clone(); source.y -= horizontal ? .18 : .5; drop.position.set(source.x + (i % 3 - 1) * .035, THREE.MathUtils.lerp(source.y, stage === 4 && q < .58 ? 1.02 : .16, fall * fall), source.z + (i % 2 ? -.025 : .025)); drop.material.opacity = Math.sin(Math.PI * Math.min(.999, fall)) * .82 } }

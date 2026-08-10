@@ -69,6 +69,7 @@ if (!initial.renderer.enabled || initial.renderer.legacy_2d_apparatus) throw new
 if (increasedForce.newton2.accelerating_force_n !== 0.3 || restoredForce.newton2.accelerating_force_n !== 0.2) throw new Error('Force controls regressed.');
 if (!initial.newton2.light_gate_system.connected_to_same_data_logger) throw new Error('Both gates do not report one shared logger.');
 if (initial.newton2.light_gate_system.cable_count !== 2) throw new Error('Expected two gate-to-logger cables.');
+if (initial.newton2.light_gate_system.logger_position?.x !== -0.28 || initial.newton2.light_gate_system.logger_position?.z !== 1.14) throw new Error('Logger is not in the requested foreground-left position.');
 if (initial.newton2.light_gate_system.gate_1.velocity_m_per_s !== null || initial.newton2.light_gate_system.gate_2.velocity_m_per_s !== null) throw new Error('Logger should begin with two blank readings.');
 if (!(afterGate1.newton2.light_gate_system.gate_1.velocity_m_per_s > 0) || afterGate1.newton2.light_gate_system.gate_2.velocity_m_per_s !== null) throw new Error('Gate 1 did not latch independently before Gate 2.');
 if (!(afterGate2.newton2.light_gate_system.gate_2.velocity_m_per_s > afterGate2.newton2.light_gate_system.gate_1.velocity_m_per_s)) throw new Error('Gate 2 should record the larger velocity.');

@@ -1,13 +1,75 @@
 {
   "errors": [],
-  "stage": 4,
+  "stage": 7,
   "animation": {
     "smooth_forceps_transfer": true,
     "potato_held_between_forceps_jaws": true,
+    "synchronized_forceps_and_potato_rotation": {
+      "shared_angle_degrees": -90,
+      "potato_angle_degrees": -90,
+      "forceps_angle_degrees": -90,
+      "relative_angle_degrees": 0,
+      "shared_rotation_source": true,
+      "same_rate_and_direction": true,
+      "remain_parallel": true,
+      "forceps_visible": false
+    },
     "water_molecules_visible": false,
     "water_molecule_direction": "into the potato cells",
-    "surface_drain_droplets": true,
-    "two_sheet_blotting_press": true,
+    "surface_drain_droplets": false,
+    "two_sheet_blotting_press": false,
     "balance_reading_settles": false
-  }
+  },
+  "rotation_snapshots": [
+    {
+      "shared_angle_degrees": -78.8,
+      "potato_angle_degrees": -78.8,
+      "forceps_angle_degrees": -78.8,
+      "relative_angle_degrees": 0,
+      "shared_rotation_source": true,
+      "same_rate_and_direction": true,
+      "remain_parallel": true,
+      "forceps_visible": true
+    },
+    {
+      "shared_angle_degrees": -56.71,
+      "potato_angle_degrees": -56.71,
+      "forceps_angle_degrees": -56.71,
+      "relative_angle_degrees": 0,
+      "shared_rotation_source": true,
+      "same_rate_and_direction": true,
+      "remain_parallel": true,
+      "forceps_visible": true
+    },
+    {
+      "shared_angle_degrees": -8.86,
+      "potato_angle_degrees": -8.86,
+      "forceps_angle_degrees": -8.86,
+      "relative_angle_degrees": 0,
+      "shared_rotation_source": true,
+      "same_rate_and_direction": true,
+      "remain_parallel": true,
+      "forceps_visible": true
+    },
+    {
+      "shared_angle_degrees": -62.82,
+      "potato_angle_degrees": -62.82,
+      "forceps_angle_degrees": -62.82,
+      "relative_angle_degrees": 0,
+      "shared_rotation_source": true,
+      "same_rate_and_direction": true,
+      "remain_parallel": true,
+      "forceps_visible": true
+    },
+    {
+      "shared_angle_degrees": -90,
+      "potato_angle_degrees": -90,
+      "forceps_angle_degrees": -90,
+      "relative_angle_degrees": 0,
+      "shared_rotation_source": true,
+      "same_rate_and_direction": true,
+      "remain_parallel": true,
+      "forceps_visible": true
+    }
+  ]
 }

@@ -1,5 +1,16 @@
 Original prompt: Build a very realistic virtual interactive chemistry lab web simulaiton app with required practicals for the OCR combined GCSE science specification. When the user clicks on one of these practicals the equipment loads up in to the main arena. Display kep chemical reactions and have a 'shelf' of key reactants and measuring devices like thermometers and pH meters. Also have graph plotting capabilities.
 
+- Current request: keep the osmosis tongs and potato chip rotating at the same rate and in the same direction so they remain parallel.
+- Replaced the opposing `+θ` / `−θ` transforms with one shared yaw-and-tilt rotation copied from the chip to the tongs, preserving the existing jaw path while keeping their relative angle exactly 0° throughout lowering and removal. Structured state now exposes both live angles and their synchronization contract.
+- Required-client validation reported matching −44.89° angles with 0° relative separation. Focused deterministic QA sampled both motion directions, confirmed identical angle deltas at every checkpoint, visually verified parallel transfer to the beaker and blotting paper, and reported no console/page errors. The reweighing checkpoint also remains aligned and the first result records normally.
+- TODO: none for this request.
+
+- Current request: extend the pondweed-style left-to-right fill animation to every practical control representing an active timed method step.
+- Replaced solid busy-state buttons with timer-derived progress fills across Chemistry, Biology and Physics workflows, including multi-phase controls such as titration, rates, hydrogen, osmosis, potometer, convection, conduction and specific heat. Toggle, reset, graph and untimed record controls retain their existing button treatment.
+- JavaScript syntax and whitespace validation pass. The required web-game client ran with WebGL enabled, and focused pixel QA confirmed distinct filled/unfilled regions at half progress for convection tracer addition, the complete convection observation, potato transfer and the simulated 30-minute osmosis soak.
+- Chemistry titration passed its complete indicator, tap, dropwise endpoint and record sequence; screenshots confirm the fill tracks both indicator addition and burette flow. The full Biology starch/lipase and Physics electromagnet/convection/conduction/thermal regressions also pass with `errors: []`.
+- TODO: none for this request.
+
 - Current request: declutter the resistance-of-a-wire practical so it is immediately clear which components are connected in series and which voltmeter leads are connected in parallel across the measured wire length.
 - Implementation plan: move the switch into the instrument row, separate the ruler from the instruments, reroute all cables into distinct non-crossing lanes with physically correct terminal colours, label the ammeter as series and voltmeter as parallel, add clear contact junctions and a highlighted measured segment, preserve the moving-contact animation, then visually verify open, live, recorded, moving and graph states.
 - Moved the ruler forward into its own clear measurement row and placed the supply, knife switch, ammeter and voltmeter in a compact instrument row behind it. The formerly crossing leads now form a traceable series loop from supply through switch/ammeter/wire and a thinner violet parallel branch connected only across the fixed and sliding contacts.
@@ -18,6 +29,10 @@ Original prompt: Build a very realistic virtual interactive chemistry lab web si
 - Follow-up request: make the Newton’s 2nd Law trolley a bit smaller.
 - Reduced the trolley’s overall footprint and visual bulk to approximately 86% of the previous design, proportionally shrinking its rounded chassis, deck, bumpers, wheels, hubs, stacked masses and interrupt card while preserving its runway height, light-gate beam alignment and motion path.
 - Validation passed: syntax and diff checks are clean; deterministic browser QA confirms both gate readings, controls, completion state, compact landscape layout, and no console errors.
+
+- Follow-up request: move the Newton’s 2nd Law data logger a little closer to the camera and left.
+- Shifted the complete logger assembly 0.28 scene units left and 0.22 units toward the camera. Its two ports, cable endpoints, approach curves and educational reading overlay now follow the revised position together.
+- Validation passed: the required web-game client confirmed the healthy foreground-left coordinates, and focused composited Newton QA visually confirmed the logger/cables in initial and both-reading states. The full run, force controls, compact landscape layout and console/page error checks all pass.
 
 - Current request: correct the Bunsen gas hose where it reaches the gas tap so the hose expands over part of the brass outlet and is oriented along the outlet rather than meeting it diagonally.
 - Diagnosed the joint as two conflicting geometries: the tap outlet and constant-radius sleeve were horizontal, but the flexible TubeGeometry ended on a diagonal tangent. Reworked only the final spline controls so the original broad U-shaped hose remains smooth and its final tangent becomes coaxial with the tap's +x outlet axis.

@@ -32,6 +32,13 @@
         "v₁",
         "v₂"
       ],
+      "logger_position": {
+        "x": -0.28,
+        "y": 0.05,
+        "z": 1.14,
+        "shifted_left": true,
+        "closer_to_camera": true
+      },
       "gate_1": {
         "time_s": null,
         "velocity_m_per_s": null
@@ -85,6 +92,13 @@
         "v₁",
         "v₂"
       ],
+      "logger_position": {
+        "x": -0.28,
+        "y": 0.05,
+        "z": 1.14,
+        "shifted_left": true,
+        "closer_to_camera": true
+      },
       "gate_1": {
         "time_s": 1.843,
         "velocity_m_per_s": 0.37
@@ -134,6 +148,13 @@
         "v₁",
         "v₂"
       ],
+      "logger_position": {
+        "x": -0.28,
+        "y": 0.05,
+        "z": 1.14,
+        "shifted_left": true,
+        "closer_to_camera": true
+      },
       "gate_1": {
         "time_s": 1.843,
         "velocity_m_per_s": 0.37
@@ -183,6 +204,13 @@
         "v₁",
         "v₂"
       ],
+      "logger_position": {
+        "x": -0.28,
+        "y": 0.05,
+        "z": 1.14,
+        "shifted_left": true,
+        "closer_to_camera": true
+      },
       "gate_1": {
         "time_s": 1.843,
         "velocity_m_per_s": 0.37
@@ -256,6 +284,13 @@
           "v₁",
           "v₂"
         ],
+        "logger_position": {
+          "x": -0.28,
+          "y": 0.05,
+          "z": 1.14,
+          "shifted_left": true,
+          "closer_to_camera": true
+        },
         "gate_1": {
           "time_s": 1.843,
           "velocity_m_per_s": 0.37
@@ -312,6 +347,13 @@
         "v₁",
         "v₂"
       ],
+      "logger_position": {
+        "x": -0.28,
+        "y": 0.05,
+        "z": 1.14,
+        "shifted_left": true,
+        "closer_to_camera": true
+      },
       "gate_1": {
         "time_s": null,
         "velocity_m_per_s": null

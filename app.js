@@ -1,4 +1,4 @@
-import { LabRenderer3D } from './lab3d.js?v=20260810-101';
+import { LabRenderer3D } from './lab3d.js?v=20260810-102';
 import { drawThermalBenchScene } from './thermalview.js';
 const canvas = document.getElementById('lab'), visibleCtx = canvas.getContext('2d'), buffer = document.createElement('canvas'), webglCanvas = document.getElementById('webgl'), lab3d = new LabRenderer3D(webglCanvas); let ctx = buffer.getContext('2d');
 webglCanvas.addEventListener('lab3dneedsredraw',()=>requestAnimationFrame(()=>draw()));
@@ -807,6 +807,9 @@ function progressButton(label, x, y, w, h, progress = 0, active = false) {
   text(label, x + w / 2, y + h / 2, 12, '#000', 700, 'center');
   hit('button', x, y, w, h, label);
 }
+function timedRatio(timer, duration, active = true) {
+  return active && duration > 0 ? Math.max(0, Math.min(1, timer / duration)) : 0;
+}
 function flaskPath() { ctx.beginPath(); ctx.moveTo(-14, -76); ctx.lineTo(-14, -43); ctx.lineTo(-48, 20); ctx.quadraticCurveTo(-57, 42, -32, 48); ctx.quadraticCurveTo(0, 54, 32, 48); ctx.quadraticCurveTo(57, 42, 48, 20); ctx.lineTo(14, -43); ctx.lineTo(14, -76) }
 function drawFlask(x, y, scale = 1, opt = {}) {
   const angle = opt.angle || 0, liquid = opt.liquid ?? .55, color = opt.color || '79,195,181'; ctx.save(); ctx.translate(x, y); ctx.rotate(angle); ctx.scale(scale, scale);
@@ -957,7 +960,7 @@ function drawChemicalTags(id) {
   if (id === 'specificheat') tags.splice(0, tags.length, ['1.00 kg ALUMINIUM', [.15, .18, .08], 27, { size: 8.1, minWidth: 122 }]);
   tags.forEach(([label, world, offsetY, options]) => chemicalTag(label, world, offsetY, options));
   if (id === 'newton2') {
-    const loggerScreen = lab3d.projectToScreen(0, .54, 1.24);
+    const loggerScreen = lab3d.projectToScreen(-.28, .54, 1.46);
     if (loggerScreen) {
       const reading = value => Number.isFinite(value) ? value.toFixed(2) : '--.--';
       text('DATA LOGGER', loggerScreen.x, loggerScreen.y - 15, 5.5, '#89a8af', 800, 'center');
@@ -966,35 +969,36 @@ function drawChemicalTags(id) {
     }
   }
 }
-function drawTitrationControls(x, benchY) { const addingIndicator = state.titrationIndicatorTimer > 0, labels = ['ADD INDICATOR', 'OPEN TAP', 'TAP OPEN…', 'ADD ONE DROP', 'RECORD TITRE', 'RESET PRACTICAL'], label = addingIndicator ? 'ADDING INDICATOR…' : labels[state.titrationStage] || labels[0], status = addingIndicator ? 'ADDING 2 DROPS' : state.titrationStage === 0 ? 'HCl 25.0 cm³' : state.complete ? 'PALE PINK ENDPOINT' : `BURETTE ${state.titrationVolume.toFixed(2)} cm³`; button(label, x + 30, benchY + 46, 150, 38, state.running); rr(x + 190, benchY + 46, 164, 38, 8, '#f5f7f6', C.line); text(status, x + 272, benchY + 65, status.length > 19 ? 9.2 : 10.5, state.complete ? '#b23678' : C.ink, 750, 'center'); button('RESULTS', x + 364, benchY + 46, 84, 38, state.tab === 'graph') }
-function drawMassControls(x, benchY) { const stage = state.massStage, primary = ['MOVE TO TRIPOD', 'TRANSFERRING…', 'REMOVE LID', 'LIGHT BUNSEN', 'HEATING…', 'COOL & REWEIGH', 'REWEIGHING…', 'RESET PRACTICAL'][stage] || 'MOVE TO TRIPOD', secondary = ['RECORD BEFORE', 'INITIAL MASS SAVED', 'LID CLOSED', 'READY TO HEAT', 'MAGNESIUM BURNING', 'MgO FORMED', 'BALANCE SETTLING', 'RECORD AFTER'][stage] || 'RECORD BEFORE'; button(primary, x + 30, benchY + 46, 144, 38, stage === 4); button(secondary, x + 184, benchY + 46, 140, 38, false); button('RESULTS', x + 334, benchY + 46, 90, 38, state.tab === 'graph') }
+function drawTitrationControls(x, benchY) { const addingIndicator = state.titrationIndicatorTimer > 0, dropping = state.titrationDropTimer > 0, tapRunning = state.titrationStage === 2 && state.running, labels = ['ADD INDICATOR', 'OPEN TAP', 'TAP OPEN…', 'ADD ONE DROP', 'RECORD TITRE', 'RESET PRACTICAL'], label = addingIndicator ? 'ADDING INDICATOR…' : labels[state.titrationStage] || labels[0], status = addingIndicator ? 'ADDING 2 DROPS' : state.titrationStage === 0 ? 'HCl 25.0 cm³' : state.complete ? 'PALE PINK ENDPOINT' : `BURETTE ${state.titrationVolume.toFixed(2)} cm³`, q = addingIndicator ? timedRatio(state.titrationIndicatorTimer, titrationIndicatorDuration) : tapRunning ? timedRatio(state.titrationVolume, 24.8) : dropping ? 1 - timedRatio(state.titrationDropTimer, .42) : 0; progressButton(label, x + 30, benchY + 46, 150, 38, q, addingIndicator || tapRunning || dropping); rr(x + 190, benchY + 46, 164, 38, 8, '#f5f7f6', C.line); text(status, x + 272, benchY + 65, status.length > 19 ? 9.2 : 10.5, state.complete ? '#b23678' : C.ink, 750, 'center'); button('RESULTS', x + 364, benchY + 46, 84, 38, state.tab === 'graph') }
+function drawMassControls(x, benchY) { const stage = state.massStage, primary = ['MOVE TO TRIPOD', 'TRANSFERRING…', 'REMOVE LID', 'LIGHT BUNSEN', 'HEATING…', 'COOL & REWEIGH', 'REWEIGHING…', 'RESET PRACTICAL'][stage] || 'MOVE TO TRIPOD', secondary = ['RECORD BEFORE', 'INITIAL MASS SAVED', 'LID CLOSED', 'READY TO HEAT', 'MAGNESIUM BURNING', 'MgO FORMED', 'BALANCE SETTLING', 'RECORD AFTER'][stage] || 'RECORD BEFORE', busy = stage === 1 || stage === 4 || stage === 6, q = stage === 1 || stage === 6 ? timedRatio(state.massTransfer?.t || 0, 1.55) : stage === 4 ? state.progress : 0; progressButton(primary, x + 30, benchY + 46, 144, 38, q, busy); button(secondary, x + 184, benchY + 46, 140, 38, false); button('RESULTS', x + 334, benchY + 46, 90, 38, state.tab === 'graph') }
 function ratesPrimaryLabel() { if (state.ratesConditioning) return 'HEATING BATH…'; if (state.ratesStage === 0) return 'MOVE TO CROSS'; if (state.ratesStage === 1) return 'MOVING FLASK…'; if (state.ratesStage === 2) return 'ADD HCl'; if (state.ratesStage === 3) return 'REACTION RUNNING…'; return state.ratesResults.length < ratesTemperatures.length ? 'NEXT TEMPERATURE' : 'VIEW GRAPH' }
-function drawRatesControls(x, benchY) { const primary = ratesPrimaryLabel(), busy = state.ratesConditioning || state.ratesStage === 1 || state.ratesStage === 3; button(primary, x + 30, benchY + 46, 158, 38, busy); button('RESET SERIES', x + 198, benchY + 46, 108, 38, false); button("BIRD'S EYE", x + 316, benchY + 46, 106, 38, state.tab === 'birdseye'); text(`TRIAL ${Math.min(ratesTemperatures.length, state.ratesTrialIndex + 1)} / ${ratesTemperatures.length}  ·  ${state.ratesTargetTemp} °C`, x + 30, benchY + 31, 9.5, '#d8e8ed', 750) }
-function drawHydrogenControls(x, benchY) { const stage = state.hydrogenStage, primary = ['POUR DILUTE HCl', 'POURING…', 'COLLECTING H₂…', 'TEST WITH LIT SPLINT', 'IGNITING…', 'RESET PRACTICAL'][stage] || 'POUR DILUTE HCl', secondary = ['Mg RIBBON READY', 'ACID TRANSFER', 'THUMB SEALED', 'H₂ COLLECTED', 'SQUEAKY POP!', 'TEST COMPLETE'][stage] || 'Mg RIBBON READY'; button(primary, x + 30, benchY + 46, 168, 38, stage === 1 || stage === 4); button(secondary, x + 208, benchY + 46, 138, 38, false); button('RECORD', x + 356, benchY + 46, 82, 38, false) }
-function drawSaltsControls(x, benchY) { const stage = state.saltsStage, primary = ['POUR CuO', 'FILTER MIXTURE', 'HEAT SOLUTION', 'COOL & CRYSTALLISE', 'RESET PRACTICAL'][stage] || 'POUR CuO', secondary = ['ACID READY', 'CuO ADDED', 'FILTRATE READY', 'HEATING...', 'CRYSTALS FORMED'][stage] || 'ACID READY'; button(primary, x + 30, benchY + 46, 178, 38, !state.running); button(secondary, x + 218, benchY + 46, 142, 38, false) }
-function drawWaterControls(x, benchY) { button(state.coolingWater ? 'WATER OFF' : 'WATER ON', x + 30, benchY + 46, 112, 38, state.coolingWater); button(state.burner ? 'HEATER OFF' : 'HEATER ON', x + 152, benchY + 46, 112, 38, state.burner); button('RECORD', x + 274, benchY + 46, 90, 38, false) }
-function drawElectroControls(x, benchY) { button(state.running || state.complete || state.electroWeighing ? 'RESET' : 'SWITCH ON', x + 30, benchY + 46, 112, 38, state.running); button('RECORD MASSES', x + 152, benchY + 46, 128, 38, state.electroRecorded || state.electroWeighing); button('RESULTS', x + 290, benchY + 46, 90, 38, state.tab === 'graph') }
+function drawRatesControls(x, benchY) { const primary = ratesPrimaryLabel(), busy = state.ratesConditioning || state.ratesStage === 1 || state.ratesStage === 3 || !!state.pour, conditioningSpan = Math.max(.01, state.ratesTargetTemp - 20), q = state.pour ? timedRatio(state.pour.t, 3.6) : state.ratesConditioning ? timedRatio(state.ratesBathTemp - 20, conditioningSpan) : state.ratesStage === 1 ? timedRatio(state.ratesStageTimer, 1.8) : state.ratesStage === 3 ? timedRatio(state.ratesStageTimer, ratesVisualDuration()) : 0; progressButton(primary, x + 30, benchY + 46, 158, 38, q, busy); button('RESET SERIES', x + 198, benchY + 46, 108, 38, false); button("BIRD'S EYE", x + 316, benchY + 46, 106, 38, state.tab === 'birdseye'); text(`TRIAL ${Math.min(ratesTemperatures.length, state.ratesTrialIndex + 1)} / ${ratesTemperatures.length}  ·  ${state.ratesTargetTemp} °C`, x + 30, benchY + 31, 9.5, '#d8e8ed', 750) }
+function drawHydrogenControls(x, benchY) { const stage = state.hydrogenStage, primary = ['POUR DILUTE HCl', 'POURING…', 'COLLECTING H₂…', 'TEST WITH LIT SPLINT', 'IGNITING…', 'RESET PRACTICAL'][stage] || 'POUR DILUTE HCl', secondary = ['Mg RIBBON READY', 'ACID TRANSFER', 'THUMB SEALED', 'H₂ COLLECTED', 'SQUEAKY POP!', 'TEST COMPLETE'][stage] || 'Mg RIBBON READY', duration = stage === 1 ? 2.25 : stage === 2 ? 3.4 : stage === 4 ? 1.25 : 0, busy = !!duration && state.running; progressButton(primary, x + 30, benchY + 46, 168, 38, timedRatio(state.hydrogenTimer, duration, busy), busy); button(secondary, x + 208, benchY + 46, 138, 38, false); button('RECORD', x + 356, benchY + 46, 82, 38, false) }
+function drawSaltsControls(x, benchY) { const stage = state.saltsStage, primary = ['POUR CuO', 'FILTER MIXTURE', 'HEAT SOLUTION', 'COOL & CRYSTALLISE', 'RESET PRACTICAL'][stage] || 'POUR CuO', secondary = ['ACID READY', 'CuO ADDED', 'FILTRATE READY', 'HEATING...', 'CRYSTALS FORMED'][stage] || 'ACID READY', duration = ({ 1: 2.5, 2: 3, 3: 4, 4: 5 })[stage] || 0; progressButton(primary, x + 30, benchY + 46, 178, 38, timedRatio(state.saltsTimer, duration, state.running), state.running); button(secondary, x + 218, benchY + 46, 142, 38, false) }
+function drawWaterControls(x, benchY) { button(state.coolingWater ? 'WATER OFF' : 'WATER ON', x + 30, benchY + 46, 112, 38, state.coolingWater); progressButton(state.burner ? 'HEATER OFF' : 'HEATER ON', x + 152, benchY + 46, 112, 38, state.progress, state.burner && state.running); button('RECORD', x + 274, benchY + 46, 90, 38, false) }
+function drawElectroControls(x, benchY) { progressButton(state.running || state.complete || state.electroWeighing ? 'RESET' : 'SWITCH ON', x + 30, benchY + 46, 112, 38, state.progress, state.running); progressButton('RECORD MASSES', x + 152, benchY + 46, 128, 38, timedRatio(state.electroWeighTimer, electroWeighDuration, state.electroWeighing), state.electroWeighing); button('RESULTS', x + 290, benchY + 46, 90, 38, state.tab === 'graph') }
 function flameTestPrimaryLabel() { if (state.flameTestStage === 0) return 'SCOOP SALT'; if (state.flameTestStage === 1) return 'SCOOPING…'; if (state.flameTestStage === 2) return 'ENTER BLUE FLAME'; if (state.flameTestStage === 3) return 'TESTING…'; return state.flameTestTested.length === flameTestSalts.length ? 'RESET SERIES' : 'NEXT SALT' }
-function drawFlameTestControls(x, benchY) { const salt = flameTestSalts[state.flameTestSalt], primary = flameTestPrimaryLabel(), busy = state.flameTestStage === 1 || state.flameTestStage === 3, status = state.flameTestStage >= 4 ? salt.flame.toUpperCase() : state.flameTestStage >= 2 ? `${salt.formula} ON SPATULA` : `${salt.formula} SELECTED`; button(primary, x + 30, benchY + 46, 156, 38, busy); rr(x + 196, benchY + 46, 150, 38, 8, '#f5f7f6', C.line); text(status, x + 271, benchY + 65, status.length > 18 ? 8.5 : 9.5, state.flameTestStage >= 4 ? salt.flameHex : C.ink, 800, 'center'); button('SPECTRA', x + 356, benchY + 46, 88, 38, state.tab === 'graph') }
-function drawThermiteControls(x, benchY) { const primary = state.complete ? 'RESET PRACTICAL' : state.running ? 'REACTION ACTIVE' : 'IGNITE FUSE', status = state.complete ? 'MOLTEN IRON FORMED' : state.running ? thermitePhase().toUpperCase() : 'SHIELD IN PLACE'; button(primary, x + 30, benchY + 46, 150, 38, state.running); rr(x + 190, benchY + 46, 174, 38, 8, '#f5f7f6', C.line); text(status, x + 277, benchY + 65, status.length > 20 ? 8.5 : 9.5, state.running ? '#d95b2f' : C.ink, 800, 'center'); button('GRAPH', x + 374, benchY + 46, 76, 38, state.tab === 'graph') }
-function drawDisplacementControls(x, benchY) { const labels = ['LOWER METALS', 'REACTIONS RUNNING…', 'RECORD RESULTS', 'RESET SERIES'], primary = labels[state.displacementStage] || labels[0], status = state.displacementStage === 0 ? '4 TEST TUBES READY' : state.displacementStage === 1 ? `${Math.round(state.progress * 100)}% OBSERVED` : state.displacementStage === 2 ? 'COATINGS FORMED' : 'SERIES RECORDED'; button(primary, x + 30, benchY + 46, 164, 38, state.running); rr(x + 204, benchY + 46, 152, 38, 8, '#f5f7f6', C.line); text(status, x + 280, benchY + 65, 9.2, state.complete ? '#9a542c' : C.ink, 800, 'center'); button('RESULTS', x + 366, benchY + 46, 86, 38, state.tab === 'graph') }
+function drawFlameTestControls(x, benchY) { const salt = flameTestSalts[state.flameTestSalt], primary = flameTestPrimaryLabel(), busy = state.flameTestStage === 1 || state.flameTestStage === 3, duration = state.flameTestStage === 1 ? 2.15 : state.flameTestStage === 3 ? 3.15 : 0, status = state.flameTestStage >= 4 ? salt.flame.toUpperCase() : state.flameTestStage >= 2 ? `${salt.formula} ON SPATULA` : `${salt.formula} SELECTED`; progressButton(primary, x + 30, benchY + 46, 156, 38, timedRatio(state.flameTestTimer, duration, busy), busy); rr(x + 196, benchY + 46, 150, 38, 8, '#f5f7f6', C.line); text(status, x + 271, benchY + 65, status.length > 18 ? 8.5 : 9.5, state.flameTestStage >= 4 ? salt.flameHex : C.ink, 800, 'center'); button('SPECTRA', x + 356, benchY + 46, 88, 38, state.tab === 'graph') }
+function drawThermiteControls(x, benchY) { const primary = state.complete ? 'RESET PRACTICAL' : state.running ? 'REACTION ACTIVE' : 'IGNITE FUSE', status = state.complete ? 'MOLTEN IRON FORMED' : state.running ? thermitePhase().toUpperCase() : 'SHIELD IN PLACE'; progressButton(primary, x + 30, benchY + 46, 150, 38, timedRatio(state.thermiteTimer, thermiteDuration, state.running), state.running); rr(x + 190, benchY + 46, 174, 38, 8, '#f5f7f6', C.line); text(status, x + 277, benchY + 65, status.length > 20 ? 8.5 : 9.5, state.running ? '#d95b2f' : C.ink, 800, 'center'); button('GRAPH', x + 374, benchY + 46, 76, 38, state.tab === 'graph') }
+function drawDisplacementControls(x, benchY) { const labels = ['LOWER METALS', 'REACTIONS RUNNING…', 'RECORD RESULTS', 'RESET SERIES'], primary = labels[state.displacementStage] || labels[0], status = state.displacementStage === 0 ? '4 TEST TUBES READY' : state.displacementStage === 1 ? `${Math.round(state.progress * 100)}% OBSERVED` : state.displacementStage === 2 ? 'COATINGS FORMED' : 'SERIES RECORDED'; progressButton(primary, x + 30, benchY + 46, 164, 38, timedRatio(state.displacementTimer, displacementDuration, state.running), state.running); rr(x + 204, benchY + 46, 152, 38, 8, '#f5f7f6', C.line); text(status, x + 280, benchY + 65, 9.2, state.complete ? '#9a542c' : C.ink, 800, 'center'); button('RESULTS', x + 366, benchY + 46, 86, 38, state.tab === 'graph') }
 function drawAlkaliControls(x, benchY) {
   const metal = alkaliMetal(), stage = state.alkaliStage || 0, labels = ['LOWER METAL', 'LOWERING…', 'REACTION RUNNING…', 'RECORD OBSERVATION', state.complete ? 'VIEW RESULTS' : 'NEXT METAL', 'CLEARING…'];
   const busy = [1, 2, 5].includes(stage);
-  button(labels[stage] || labels[0], x + 30, benchY + 46, 164, 38, busy);
+  const duration = stage === 1 ? 1.85 : stage === 2 ? metal.duration : stage === 5 ? 1.35 : 0;
+  progressButton(labels[stage] || labels[0], x + 30, benchY + 46, 164, 38, timedRatio(state.alkaliTimer, duration, busy), busy);
   button('RESULTS', x + 204, benchY + 46, 90, 38, state.tab === 'graph');
   text(`TRIAL ${Math.min(3, state.alkaliResults.length + 1)} / 3  ·  ${metal.name.toUpperCase()}  ·  SIMULATION ONLY`, x + 30, benchY + 31, 8.8, '#d8e8ed', 750);
 }
 function starchPrimaryLabel() { return ['BOIL LEAF', 'BOILING…', 'MOVE TO ETHANOL', 'DECOLOURISING…', 'RINSE LEAF', 'RINSING…', 'ADD IODINE', 'ADDING IODINE…', 'RESET PRACTICAL'][state.starchStage] || 'BOIL LEAF' }
-function drawStarchControls(x, benchY) { const stage = state.starchStage || 0, busy = [1, 3, 5, 7].includes(stage), statuses = ['FRESH GREEN LEAF', 'IN BOILING WATER', 'LEAF SOFTENED', 'CHLOROPHYLL REMOVING', 'PALE LEAF READY', 'RINSING LEAF', 'ON WHITE TILE', 'IODINE SPREADING', 'BLUE-BLACK · STARCH']; button(starchPrimaryLabel(), x + 30, benchY + 46, 166, 38, busy); rr(x + 206, benchY + 46, 164, 38, 8, '#f5f7f6', C.line); text(statuses[stage], x + 288, benchY + 65, (statuses[stage] || '').length > 19 ? 8.1 : 9.1, stage === 8 ? '#26344f' : C.ink, 800, 'center'); button('RESULT', x + 380, benchY + 46, 78, 38, state.tab === 'graph') }
+function drawStarchControls(x, benchY) { const stage = state.starchStage || 0, busy = [1, 3, 5, 7].includes(stage), statuses = ['FRESH GREEN LEAF', 'IN BOILING WATER', 'LEAF SOFTENED', 'CHLOROPHYLL REMOVING', 'PALE LEAF READY', 'RINSING LEAF', 'ON WHITE TILE', 'IODINE SPREADING', 'BLUE-BLACK · STARCH']; progressButton(starchPrimaryLabel(), x + 30, benchY + 46, 166, 38, timedRatio(state.starchTimer, starchStageDurations[stage], busy), busy); rr(x + 206, benchY + 46, 164, 38, 8, '#f5f7f6', C.line); text(statuses[stage], x + 288, benchY + 65, (statuses[stage] || '').length > 19 ? 8.1 : 9.1, stage === 8 ? '#26344f' : C.ink, 800, 'center'); button('RESULT', x + 380, benchY + 46, 78, 38, state.tab === 'graph') }
 function lipasePrimaryLabel() { if (state.lipaseConditioning) return 'HEATING BATH…'; if (state.lipaseStage === 0) return 'ADD LIPASE'; if (state.lipaseStage === 1) return 'ADDING LIPASE…'; if (state.lipaseStage === 2) return 'REACTION RUNNING…'; return state.lipaseResults.length < lipaseTemperatures.length ? 'NEXT TEMPERATURE' : 'VIEW GRAPH' }
-function drawLipaseControls(x, benchY) { const busy = state.lipaseConditioning || state.lipaseStage === 1 || state.lipaseStage === 2, q = lipaseReactionProgress(); button(lipasePrimaryLabel(), x + 30, benchY + 46, 166, 38, busy); button('RESET SERIES', x + 206, benchY + 46, 110, 38, false); button('GRAPH', x + 326, benchY + 46, 76, 38, state.tab === 'graph'); text(`TRIAL ${Math.min(lipaseTemperatures.length, state.lipaseTrialIndex + 1)} / ${lipaseTemperatures.length}  ·  ${state.lipaseTargetTemp} °C  ·  ${Math.round(q * 100)}%`, x + 30, benchY + 31, 9.3, '#d8e8ed', 750) }
+function drawLipaseControls(x, benchY) { const busy = state.lipaseConditioning || state.lipaseStage === 1 || state.lipaseStage === 2, q = lipaseReactionProgress(), conditioningSpan = Math.max(.01, Math.abs(state.lipaseTargetTemp - 20)), fill = state.lipaseConditioning ? timedRatio(Math.abs(state.lipaseBathTemp - 20), conditioningSpan) : state.lipaseStage === 1 ? timedRatio(state.lipaseTimer, 1.8) : q; progressButton(lipasePrimaryLabel(), x + 30, benchY + 46, 166, 38, fill, busy); button('RESET SERIES', x + 206, benchY + 46, 110, 38, false); button('GRAPH', x + 326, benchY + 46, 76, 38, state.tab === 'graph'); text(`TRIAL ${Math.min(lipaseTemperatures.length, state.lipaseTrialIndex + 1)} / ${lipaseTemperatures.length}  ·  ${state.lipaseTargetTemp} °C  ·  ${Math.round(q * 100)}%`, x + 30, benchY + 31, 9.3, '#d8e8ed', 750) }
 function osmosisPrimaryLabel() { return ['LOWER CHIP', 'TRANSFERRING…', 'SOAKING…', 'REMOVE & BLOT', 'BLOTTING…', 'REWEIGH CHIP', 'REWEIGHING…', state.osmosisResults.length < osmosisConcentrations.length ? 'NEXT CONCENTRATION' : 'VIEW GRAPH'][state.osmosisStage || 0] }
-function drawOsmosisControls(x, benchY) { const busy = [1, 2, 4, 6].includes(state.osmosisStage), q = osmosisProcessProgress(); button(osmosisPrimaryLabel(), x + 30, benchY + 46, 174, 38, busy); button('RESET SERIES', x + 214, benchY + 46, 108, 38, false); button('GRAPH', x + 332, benchY + 46, 76, 38, state.tab === 'graph'); text(`TRIAL ${Math.min(osmosisConcentrations.length, state.osmosisTrialIndex + 1)} / ${osmosisConcentrations.length}  ·  ${state.osmosisConcentration.toFixed(1)} mol dm⁻³  ·  ${Math.round(q * 30)} min`, x + 30, benchY + 31, 9.1, '#d8e8ed', 750) }
+function drawOsmosisControls(x, benchY) { const busy = [1, 2, 4, 6].includes(state.osmosisStage), q = osmosisProcessProgress(); progressButton(osmosisPrimaryLabel(), x + 30, benchY + 46, 174, 38, timedRatio(state.osmosisTimer, osmosisStageDurations[state.osmosisStage], busy), busy); button('RESET SERIES', x + 214, benchY + 46, 108, 38, false); button('GRAPH', x + 332, benchY + 46, 76, 38, state.tab === 'graph'); text(`TRIAL ${Math.min(osmosisConcentrations.length, state.osmosisTrialIndex + 1)} / ${osmosisConcentrations.length}  ·  ${state.osmosisConcentration.toFixed(1)} mol dm⁻³  ·  ${Math.round(q * 30)} min`, x + 30, benchY + 31, 9.1, '#d8e8ed', 750) }
 function potometerPrimaryLabel() { return ['INTRODUCE BUBBLE', 'INTRODUCING…', 'ALIGN TO ZERO', 'ALIGNING…', 'START 5 MIN RUN', 'MEASURING…', state.potometerResults.length < potometerWindSpeeds.length ? 'NEXT WIND SPEED' : 'VIEW GRAPH'][state.potometerStage || 0] }
 function drawPotometerControls(x, benchY) {
   const busy = [1, 3, 5].includes(state.potometerStage), q = potometerStageProgress(), elapsed = state.potometerStage === 5 ? q * 5 : state.potometerStage > 5 ? 5 : 0;
-  button(potometerPrimaryLabel(), x + 24, benchY + 46, 176, 38, busy);
+  progressButton(potometerPrimaryLabel(), x + 24, benchY + 46, 176, 38, q, busy);
   button('RESET SERIES', x + 210, benchY + 46, 108, 38, false);
   button('GRAPH', x + 328, benchY + 46, 76, 38, state.tab === 'graph');
   text(`TRIAL ${Math.min(potometerWindSpeeds.length, state.potometerTrialIndex + 1)} / ${potometerWindSpeeds.length}  ·  WIND ${state.potometerWindSpeed.toFixed(1)} m s⁻¹  ·  ${elapsed.toFixed(1)} min`, x + 24, benchY + 31, 8.8, '#d8e8ed', 750);
@@ -1005,7 +1009,7 @@ function quadratPrimaryLabel() {
 }
 function drawQuadratControls(x, benchY) {
   const sample = currentQuadratSample(), busy = [1, 3, 5].includes(state.quadratStage);
-  button(quadratPrimaryLabel(), x + 20, benchY + 46, 172, 38, busy);
+  progressButton(quadratPrimaryLabel(), x + 20, benchY + 46, 172, 38, quadratStageProgress(), busy);
   button('RESET STUDY', x + 202, benchY + 46, 104, 38, false);
   button('RESULTS', x + 316, benchY + 46, 88, 38, state.tab === 'graph');
   text(`SAMPLE ${Math.min(5, state.quadratSampleIndex + 1)} / 5  ·  RANDOM POINT (${sample.xM}, ${sample.yM})  ·  ${state.quadratStage >= 6 ? `${sample.daisies} DAISIES` : 'COUNT PENDING'}`, x + 20, benchY + 31, 8.6, '#d8e8ed', 750);
@@ -1016,7 +1020,7 @@ function transectPrimaryLabel() {
 }
 function drawShoreTransectControls(x, benchY) {
   const station = currentTransectStation(), busy = [1, 3, 5].includes(state.transectStage);
-  button(transectPrimaryLabel(), x + 20, benchY + 46, 172, 38, busy);
+  progressButton(transectPrimaryLabel(), x + 20, benchY + 46, 172, 38, transectStageProgress(), busy);
   button('RESET TRANSECT', x + 202, benchY + 46, 108, 38, false);
   button('ZONATION', x + 320, benchY + 46, 88, 38, state.tab === 'graph');
   text(`STATION ${Math.min(6, state.transectStationIndex + 1)} / 6  ·  ${station.distanceM} m  ·  ${station.zone} SHORE  ·  TIDE ${Math.round(state.shoreTideProgress * 100)}%`, x + 20, benchY + 31, 8.6, '#d8eef2', 750);
@@ -1027,7 +1031,7 @@ function ripplePrimaryLabel() {
 }
 function drawRippleControls(x, benchY) {
   const trial = currentRippleTrial(), measured = state.rippleStage >= 6, busy = [1, 3, 5].includes(state.rippleStage), measurement = rippleTrialMeasurement(trial);
-  button(ripplePrimaryLabel(), x + 20, benchY + 46, 174, 38, busy);
+  progressButton(ripplePrimaryLabel(), x + 20, benchY + 46, 174, 38, rippleStageProgress(), busy);
   button('RESET SERIES', x + 204, benchY + 46, 108, 38, false);
   button('RESULTS', x + 322, benchY + 46, 82, 38, state.tab === 'graph');
   text(`TRIAL ${Math.min(5, state.rippleTrialIndex + 1)} / 5  ·  ${trial.frequencyHz.toFixed(1)} Hz  ·  ${measured ? `10λ ${trial.tenWavelengthCm.toFixed(1)} cm  ·  λ ${measurement.wavelengthCm.toFixed(2)} cm` : 'WAVELENGTH PENDING'}`, x + 20, benchY + 31, 8.5, '#d8eef4', 750);
@@ -1150,7 +1154,7 @@ function main() {
   if (p.id === 'alkali') {
     drawAlkaliControls(x, benchY);
   } else {
-  if (free) { button('CLEAR BENCH', x + 30, benchY + 46, 112, 38, false); button('UNDO LAST', x + 152, benchY + 46, 105, 38, false); text(`${state.workspace.length} item${state.workspace.length === 1 ? '' : 's'} on bench`, x + 278, benchY + 65, 11, '#d8e8ed', 650) } else if (p.id === 'rates') drawRatesControls(x, benchY); else if (p.id === 'mass') drawMassControls(x, benchY); else if (p.id === 'hydrogen') drawHydrogenControls(x, benchY); else if (p.id === 'titration') drawTitrationControls(x, benchY); else if (p.id === 'salts') drawSaltsControls(x, benchY); else if (p.id === 'water') drawWaterControls(x, benchY); else if (p.id === 'electro') drawElectroControls(x, benchY); else if (p.id === 'flame') drawFlameTestControls(x, benchY); else if (p.id === 'displacement') drawDisplacementControls(x, benchY); else if (p.id === 'thermite') drawThermiteControls(x, benchY); else if (p.id === 'starchleaf') drawStarchControls(x, benchY); else if (p.id === 'lipase') drawLipaseControls(x, benchY); else if (p.id === 'osmosis') drawOsmosisControls(x, benchY); else if (p.id === 'potometer') drawPotometerControls(x, benchY); else if (p.id === 'pondweed') drawPondweedControls(x, benchY, w); else if (p.id === 'quadrats') drawQuadratControls(x, benchY); else if (p.id === 'shoretransect') drawShoreTransectControls(x, benchY); else if (p.id === 'ripple') drawRippleControls(x, benchY); else if (p.id === 'newton2') drawNewton2Controls(x, benchY, w); else if (p.id === 'electromagnet') drawElectromagnetControls(x, benchY); else if (p.id === 'convection') drawConvectionControls(x, benchY); else if (p.id === 'conduction') drawConductionControls(x, benchY); else if (p.id === 'thermal') drawThermalControls(x, benchY); else if (p.id === 'density') drawDensityControls(x, benchY); else if (p.id === 'hooke') drawHookeControls(x, benchY); else if (p.id === 'specificheat') drawSpecificHeatControls(x, benchY); else if (p.id === 'wirelength') drawWireLengthControls(x, benchY); else if (p.id === 'fieldlines') drawFieldLineControls(x, benchY); else { button(state.running ? 'RESET' : 'START', x + 30, benchY + 46, 112, 38, state.running); button('ADD REAGENT', x + 152, benchY + 46, 120, 38, false); button('RECORD', x + 282, benchY + 46, 90, 38, false) }
+  if (free) { button('CLEAR BENCH', x + 30, benchY + 46, 112, 38, false); button('UNDO LAST', x + 152, benchY + 46, 105, 38, false); text(`${state.workspace.length} item${state.workspace.length === 1 ? '' : 's'} on bench`, x + 278, benchY + 65, 11, '#d8e8ed', 650) } else if (p.id === 'rates') drawRatesControls(x, benchY); else if (p.id === 'mass') drawMassControls(x, benchY); else if (p.id === 'hydrogen') drawHydrogenControls(x, benchY); else if (p.id === 'titration') drawTitrationControls(x, benchY); else if (p.id === 'salts') drawSaltsControls(x, benchY); else if (p.id === 'water') drawWaterControls(x, benchY); else if (p.id === 'electro') drawElectroControls(x, benchY); else if (p.id === 'flame') drawFlameTestControls(x, benchY); else if (p.id === 'displacement') drawDisplacementControls(x, benchY); else if (p.id === 'thermite') drawThermiteControls(x, benchY); else if (p.id === 'starchleaf') drawStarchControls(x, benchY); else if (p.id === 'lipase') drawLipaseControls(x, benchY); else if (p.id === 'osmosis') drawOsmosisControls(x, benchY); else if (p.id === 'potometer') drawPotometerControls(x, benchY); else if (p.id === 'pondweed') drawPondweedControls(x, benchY, w); else if (p.id === 'quadrats') drawQuadratControls(x, benchY); else if (p.id === 'shoretransect') drawShoreTransectControls(x, benchY); else if (p.id === 'ripple') drawRippleControls(x, benchY); else if (p.id === 'newton2') drawNewton2Controls(x, benchY, w); else if (p.id === 'electromagnet') drawElectromagnetControls(x, benchY); else if (p.id === 'convection') drawConvectionControls(x, benchY); else if (p.id === 'conduction') drawConductionControls(x, benchY); else if (p.id === 'thermal') drawThermalControls(x, benchY); else if (p.id === 'density') drawDensityControls(x, benchY); else if (p.id === 'hooke') drawHookeControls(x, benchY); else if (p.id === 'specificheat') drawSpecificHeatControls(x, benchY); else if (p.id === 'wirelength') drawWireLengthControls(x, benchY); else if (p.id === 'fieldlines') drawFieldLineControls(x, benchY); else { progressButton(state.running ? 'RESET' : 'START', x + 30, benchY + 46, 112, 38, state.progress, state.running); progressButton('ADD REAGENT', x + 152, benchY + 46, 120, 38, state.pour ? timedRatio(state.pour.t, 3.6) : 0, !!state.pour); button('RECORD', x + 282, benchY + 46, 90, 38, false) }
   }
   // meters
   rr(x + w - 190, benchY + 35, 164, 58, 8, '#f5f7f6');
@@ -1271,7 +1275,7 @@ function drawNewton2Controls(x, benchY, w) {
   const layout = newton2ControlLayout(x, w);
   button('FORCE -0.1N', layout.minusX, benchY + 46, layout.forceWidth, 38, false);
   button('FORCE +0.1N', layout.plusX, benchY + 46, layout.forceWidth, 38, false);
-  button('RELEASE TROLLEY', layout.releaseX, benchY + 46, layout.releaseWidth, 38, state.newtonRunning);
+  progressButton('RELEASE TROLLEY', layout.releaseX, benchY + 46, layout.releaseWidth, 38, state.newtonPos, state.newtonRunning);
 }
 function electromagnetPrimaryLabel() {
   const labels = ['CLOSE SWITCH', 'ENERGISING…', 'LOWER CORE', 'LOWERING…', 'LIFT CORE', 'LIFTING…', 'RECORD COUNT', 'NEXT COIL'];
@@ -1279,20 +1283,21 @@ function electromagnetPrimaryLabel() {
 }
 function drawElectromagnetControls(x, benchY) {
   const busy = [1, 3, 5].includes(state.electromagnetStage), count = state.electromagnetStage >= 6 ? state.electromagnetClips : 0;
-  button(electromagnetPrimaryLabel(), x + 20, benchY + 46, 164, 38, busy);
+  progressButton(electromagnetPrimaryLabel(), x + 20, benchY + 46, 164, 38, timedRatio(state.electromagnetTimer, electromagnetStageDurations[state.electromagnetStage], busy), busy);
   button('RESET SERIES', x + 194, benchY + 46, 108, 38, false);
   button('GRAPH', x + 312, benchY + 46, 78, 38, state.tab === 'graph');
   text(`TRIAL ${Math.min(5, state.electromagnetTrialIndex + 1)} / 5  ·  ${state.electromagnetTurns} turns  ·  ${count || '—'} clips`, x + 20, benchY + 31, 9.2, '#d8e8ed', 750);
 }
 function convectionPrimaryLabel() { return ['ADD TRACER', 'ADDING TRACER…', 'LIGHT BUNSEN', 'CONVECTION ACTIVE…', 'RESET DEMO'][state.convectionStage] || 'ADD TRACER' }
 function drawConvectionControls(x, benchY) {
-  button(convectionPrimaryLabel(), x + 20, benchY + 46, 166, 38, state.running);
+  const duration = state.convectionStage === 1 ? 1.9 : state.convectionStage === 3 ? convectionDuration : 0;
+  progressButton(convectionPrimaryLabel(), x + 20, benchY + 46, 166, 38, timedRatio(state.convectionTimer, duration, state.running), state.running);
   button('OBSERVATION', x + 196, benchY + 46, 112, 38, state.tab === 'graph');
   button('RESET DEMO', x + 318, benchY + 46, 104, 38, false);
   text(state.convectionStage >= 3 ? 'ORANGE TRACER SHOWS CLOCKWISE WATER FLOW' : 'TEACHER DEMONSTRATION · SIMULATION ONLY', x + 20, benchY + 31, 8.8, '#d8e8ed', 750);
 }
 function drawConductionControls(x, benchY) {
-  button(state.conductionStage === 0 ? 'LIGHT BUNSEN' : state.running ? 'HEATING RODS…' : 'RESET DEMO', x + 20, benchY + 46, 154, 38, state.running);
+  progressButton(state.conductionStage === 0 ? 'LIGHT BUNSEN' : state.running ? 'HEATING RODS…' : 'RESET DEMO', x + 20, benchY + 46, 154, 38, timedRatio(state.conductionTimer, conductionDuration, state.running), state.running);
   button('RESULTS', x + 184, benchY + 46, 92, 38, state.tab === 'graph');
   button('RESET DEMO', x + 286, benchY + 46, 106, 38, false);
   const fallen = Object.values(conductionPinTimes).flat().filter(t => state.conductionTimer >= t).length;
@@ -1301,7 +1306,7 @@ function drawConductionControls(x, benchY) {
 function thermalPrimaryLabel() { return ['ADD HOT WATER', 'POURING WATER…', 'PICK UP CAMERA', 'CAMERA MOVING…', 'CAPTURE IMAGE', 'RESET DEMO'][state.thermalStage] || 'ADD HOT WATER' }
 function drawThermalControls(x, benchY) {
   const facing = thermalFacingSurface();
-  button(thermalPrimaryLabel(), x + 20, benchY + 46, 162, 38, state.running);
+  progressButton(thermalPrimaryLabel(), x + 20, benchY + 46, 162, 38, timedRatio(state.thermalTimer, thermalStageDurations[state.thermalStage], state.running), state.running);
   button('THERMAL VIEW', x + 192, benchY + 46, 112, 38, state.tab === 'graph');
   button('RESET DEMO', x + 314, benchY + 46, 106, 38, false);
   text(state.thermalStage >= 4 ? `LIVE FALSE-COLOUR VIEW · ${facing.label} ${facing.temperature.toFixed(0)} °C` : state.thermalStage >= 1 ? 'LESLIE CUBE WARMING & ROTATING · CAMERA READY' : 'AMBIENT LAB · 21 °C', x + 20, benchY + 31, 8.9, '#d8e8ed', 750);
@@ -1310,7 +1315,8 @@ function drawDensityControls(x, benchY) {
   const stage = state.densityStage || 0;
   const primaryLabel = stage === 0 ? 'WEIGH OBJECT' : stage === 1 ? 'FILL EUREKA CAN' : stage === 2 ? 'FILLING & MOVING…' : stage === 3 ? 'LOWER OBJECT' : stage === 4 ? 'LOWERING…' : stage === 5 ? 'RECORD DENSITY' : 'CHANGE SAMPLE';
   const busy = stage === 2 || stage === 4;
-  button(primaryLabel, x + 20, benchY + 46, 155, 38, busy);
+  const duration = stage === 2 ? densityTransferDuration : stage === 4 ? densityImmersionDuration : 0;
+  progressButton(primaryLabel, x + 20, benchY + 46, 155, 38, timedRatio(state.densityTimer, duration, busy), busy);
   button('CHANGE SAMPLE', x + 185, benchY + 46, 140, 38, busy);
   button('RESET PRACTICAL', x + 335, benchY + 46, 145, 38, false);
 }
@@ -1320,7 +1326,7 @@ function hookePrimaryLabel() {
 }
 function drawHookeControls(x, benchY) {
   const busy = state.hookeStage === 1;
-  button(hookePrimaryLabel(), x + 20, benchY + 46, 176, 38, busy);
+  progressButton(hookePrimaryLabel(), x + 20, benchY + 46, 176, 38, timedRatio(state.hookeTimer, hookeStageDurations[1], busy), busy);
   button('RESET SERIES', x + 206, benchY + 46, 108, 38, false);
   button('GRAPH', x + 324, benchY + 46, 76, 38, state.tab === 'graph');
   const status = state.hookeStage === 1 ? 'SPRING MOVING' : state.hookeStage === 2 ? 'SETTLED · READ AT EYE LEVEL' : state.complete ? 'PROPORTIONAL LIMIT FOUND' : `${state.hookeResults.length} / ${hookeForcesN.length} READINGS`;
@@ -1332,7 +1338,7 @@ function specificHeatPrimaryLabel() {
 }
 function drawSpecificHeatControls(x, benchY) {
   const busy = state.shcStage === 1 || state.shcStage === 3;
-  button(specificHeatPrimaryLabel(), x + 20, benchY + 46, 188, 38, busy);
+  progressButton(specificHeatPrimaryLabel(), x + 20, benchY + 46, 188, 38, timedRatio(state.shcTimer, shcStageDurations[state.shcStage], busy), busy);
   button('RESET PRACTICAL', x + 218, benchY + 46, 130, 38, false);
   button('GRAPH', x + 358, benchY + 46, 76, 38, state.tab === 'graph');
   const power = state.shcStage === 3 ? '24.0 W ON' : 'SUPPLY OFF', prepared = state.shcStage >= 2 ? 'PROBES SEATED' : 'BLOCK READY';
@@ -1344,7 +1350,7 @@ function wirePrimaryLabel() {
 }
 function drawWireLengthControls(x, benchY) {
   const busy = state.wireStage === 1 || state.wireStage === 4;
-  button(wirePrimaryLabel(), x + 20, benchY + 46, 164, 38, busy);
+  progressButton(wirePrimaryLabel(), x + 20, benchY + 46, 164, 38, timedRatio(state.wireTimer, wireStageDurations[state.wireStage], busy), busy);
   button('RESET SERIES', x + 194, benchY + 46, 108, 38, false);
   button('GRAPH', x + 312, benchY + 46, 78, 38, state.tab === 'graph');
   const live = state.wireStage >= 1 && state.wireStage <= 2;
@@ -1356,7 +1362,7 @@ function fieldPrimaryLabel() {
 }
 function drawFieldLineControls(x, benchY) {
   const busy = [1, 3, 5].includes(state.fieldStage);
-  button(fieldPrimaryLabel(), x + 20, benchY + 46, 172, 38, busy);
+  progressButton(fieldPrimaryLabel(), x + 20, benchY + 46, 172, 38, timedRatio(state.fieldTimer, fieldStageDurations[state.fieldStage], busy), busy);
   button('RESET STUDY', x + 202, benchY + 46, 104, 38, false);
   button('PATTERNS', x + 316, benchY + 46, 90, 38, state.tab === 'graph');
   text(`PATTERN ${Math.min(3, state.fieldConfigIndex + 1)} / 3  ·  ${fieldConfigurations[state.fieldConfigIndex].short.toUpperCase()}`, x + 20, benchY + 31, 8.9, '#d8e8ed', 750);
@@ -4171,6 +4177,7 @@ window.render_game_to_text = () => {
         connected_to_same_data_logger: true,
         cable_count: 2,
         logger_display_channels: ['v₁', 'v₂'],
+        logger_position: { x: -0.28, y: 0.05, z: 1.14, shifted_left: true, closer_to_camera: true },
         gate_1: { time_s: state.newtonGate1Time, velocity_m_per_s: state.newtonGate1Velocity },
         gate_2: { time_s: state.newtonGate2Time, velocity_m_per_s: state.newtonGate2Velocity }
       },
@@ -4617,6 +4624,7 @@ window.render_game_to_text = () => {
       animation: {
         smooth_forceps_transfer: true,
         potato_held_between_forceps_jaws: true,
+        synchronized_forceps_and_potato_rotation: lab3d.osmosisRotationState,
         water_molecules_visible: state.osmosisStage === 2,
         water_molecule_direction: osmosisDirection(),
         surface_drain_droplets: state.osmosisStage === 4,

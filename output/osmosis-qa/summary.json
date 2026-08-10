@@ -4,6 +4,10 @@
     "enabled": true,
     "renderer": "WebGL / Three.js",
     "objects": 1,
+    "context_lost": false,
+    "scene_compiling": false,
+    "scene_warmup_frames": 2,
+    "canvas_visible": true,
     "legacy_2d_apparatus": false
   },
   "initial_stage": 0,
