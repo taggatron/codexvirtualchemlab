@@ -76,7 +76,7 @@ export class LabRenderer3D {
     this.room = { hemi, key, rim, wall, grid, bench, edge };
   }
   configureEnvironment(id) {
-    const meadow = id === 'quadrats', shore = id === 'shoretransect', outdoor = meadow || shore;
+    const meadow = id === 'quadrats' || id === 'capture', shore = id === 'shoretransect', outdoor = meadow || shore;
     this.room.wall.visible = !outdoor; this.room.grid.visible = !outdoor; this.room.bench.visible = !outdoor; this.room.edge.visible = !outdoor;
     const background = shore ? 0x8fcde5 : meadow ? 0x78c8ec : 0xeaf1f2;
     this.scene.background.setHex(background); this.renderer.setClearColor(background, 1);
@@ -85,7 +85,7 @@ export class LabRenderer3D {
     this.room.key.shadow.camera.left = shore ? -14.5 : -9; this.room.key.shadow.camera.right = shore ? 14.5 : 9; this.room.key.shadow.camera.updateProjectionMatrix();
   }
   applyCameraForPractical(id, hookeFocusProgress = 0) {
-    if (id === 'quadrats') { this.camera.fov = 40; this.camera.position.set(0, 5.35, 9.45); this.camera.lookAt(0, .55, .42) }
+    if (id === 'quadrats' || id === 'capture') { this.camera.fov = 40; this.camera.position.set(0, 5.35, 9.45); this.camera.lookAt(0, .55, .42) }
     else if (id === 'shoretransect') { this.camera.fov = 42; this.camera.position.set(0, 5.7, 10.2); this.camera.lookAt(0, .72, -.24) }
     else if (id === 'ripple') { this.camera.fov = 38; this.camera.position.set(0, 5.5, 8.85); this.camera.lookAt(0, 1.12, -.05) }
     else { this.camera.fov = 36; this.camera.position.set(0, 4.65, 8.55); this.camera.lookAt(0, 1.05, 0) }
@@ -1413,7 +1413,7 @@ export class LabRenderer3D {
     const meadowSurface = new THREE.Mesh(meadowGeo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: .97, metalness: 0, side: THREE.DoubleSide })); meadowSurface.rotation.x = -Math.PI / 2; meadowSurface.position.set(0, .3, 1.55); meadowSurface.receiveShadow = true; g.add(meadowSurface);
     const bladeGeometry = new THREE.PlaneGeometry(.032, .34, 1, 4); bladeGeometry.translate(0, .17, 0); const bladeMaterial = new THREE.MeshStandardMaterial({ color: 0xc4e5a8, roughness: .82, side: THREE.DoubleSide, vertexColors: true, emissive: 0x2b7432, emissiveIntensity: .42 }); const grassUniforms = { uTime: { value: 0 }, uWind: { value: 1 }, uGrow: { value: 0 } };
     bladeMaterial.onBeforeCompile = shader => { Object.assign(shader.uniforms, grassUniforms); shader.vertexShader = shader.vertexShader.replace('#include <common>', '#include <common>\nattribute float bladePhase; attribute float bladeDelay; uniform float uTime; uniform float uWind; uniform float uGrow;').replace('#include <begin_vertex>', '#include <begin_vertex>\nfloat bladeGrow = smoothstep(bladeDelay, min(1.0, bladeDelay + 0.26), uGrow); transformed.y *= bladeGrow; float bladeTip = clamp(uv.y, 0.0, 1.0); transformed.x += sin(uTime * 2.15 + bladePhase) * uWind * pow(bladeTip, 1.7) * 0.105; transformed.z += sin(uTime * 1.47 + bladePhase * 1.73) * uWind * pow(bladeTip, 1.9) * 0.055;'); bladeMaterial.userData.shader = shader };
-    const bladeCount = 1520, grass = new THREE.InstancedMesh(bladeGeometry, bladeMaterial, bladeCount), dummy = new THREE.Object3D(), phases = new Float32Array(bladeCount), delays = new Float32Array(bladeCount); let seed = 41729; const rnd = () => ((seed = Math.imul(seed, 1664525) + 1013904223 >>> 0) / 4294967296);
+    const bladeCount = 6000, grass = new THREE.InstancedMesh(bladeGeometry, bladeMaterial, bladeCount), dummy = new THREE.Object3D(), phases = new Float32Array(bladeCount), delays = new Float32Array(bladeCount); let seed = 41729; const rnd = () => ((seed = Math.imul(seed, 1664525) + 1013904223 >>> 0) / 4294967296);
     for (let i = 0; i < bladeCount; i++) { const x = (rnd() - .5) * 11.75, z = (rnd() - .5) * 8.65 + 1.48, s = .62 + rnd() * .86; dummy.position.set(x, .305, z); dummy.rotation.set(0, rnd() * Math.PI * 2, (rnd() - .5) * .08); dummy.scale.set(.72 + rnd() * .55, s, 1); dummy.updateMatrix(); grass.setMatrixAt(i, dummy.matrix); grass.setColorAt(i, new THREE.Color().setHSL(.27 + rnd() * .06, .5 + rnd() * .18, .42 + rnd() * .14)); phases[i] = rnd() * Math.PI * 2; delays[i] = rnd() * .72 }
     bladeGeometry.setAttribute('bladePhase', new THREE.InstancedBufferAttribute(phases, 1)); bladeGeometry.setAttribute('bladeDelay', new THREE.InstancedBufferAttribute(delays, 1)); grass.instanceMatrix.needsUpdate = true; grass.castShadow = false; grass.receiveShadow = false; g.add(grass);
     const mossCount = 240, mossGeometry = new THREE.IcosahedronGeometry(.058, 1), mossMaterial = new THREE.MeshStandardMaterial({ color: 0x4d7637, roughness: 1, flatShading: true, transparent: true, opacity: 0 }), moss = new THREE.InstancedMesh(mossGeometry, mossMaterial, mossCount);
@@ -1427,6 +1427,71 @@ export class LabRenderer3D {
     const displayCanvas = document.createElement('canvas'), dc = displayCanvas.getContext('2d'); displayCanvas.width = 512; displayCanvas.height = 220; const displayTexture = new THREE.CanvasTexture(displayCanvas); displayTexture.colorSpace = THREE.SRGBColorSpace; const generator = new THREE.Group(), generatorBody = new THREE.Mesh(roundedBox(1.2, .74, .2, .08), new THREE.MeshPhysicalMaterial({ color: 0x213d43, roughness: .38, metalness: .18, clearcoat: .45 })); generatorBody.position.y = .4; generator.add(generatorBody); const screen = new THREE.Mesh(new THREE.PlaneGeometry(.98, .42), new THREE.MeshBasicMaterial({ map: displayTexture, toneMapped: false })); screen.position.set(0, .43, .111); generator.add(screen); generator.position.set(-3.15, .36, -1.45); generator.rotation.y = .08; g.add(generator);
     this.dynamic.push({ kind: 'randomSampling', grassUniforms, grassMaterial: bladeMaterial, mossMaterial, clouds, trees, daisies, quadrat, display: { canvas: displayCanvas, context: dc, texture: displayTexture }, targets: sampleTargets });
     Object.assign(g.userData, { randomQuadratHabitat: true, grassBladeCount: bladeCount, mossPatchCount: mossCount, daisyCount: daisies.length, treeCount: trees.length, cloudCount: clouds.length, realisticLayeredTrees: true, treeDepthRows: 3, curvedTaperedTrunks: true, radialConnectedBranching: true, canopyLobesPerTree: 11, upperCanopyWindFlex: true, forestShrubCount: shrubs.length, visibleRootFlares: true, lowPolygonBackgroundBranches: true, laboratoryTilesHidden: true, laboratoryBenchAndCupboardsReplaced: true, foregroundMeadowFillsArena: true, windAffectedTurf: true, mossBetweenGrassBlades: true, detailedDaisies: true }); const ready = shadowReady(g); trees.forEach(tree=>tree.group.traverse(node=>{if(node.isMesh)node.castShadow=false})); shrubs.forEach(shrub=>shrub.castShadow=false); grass.castShadow = false; grass.receiveShadow = false; moss.castShadow = false; meadowSurface.castShadow = false; return ready
+  }
+  captureRig(state) {
+    const g = new THREE.Group(), skyCanvas = document.createElement('canvas'), sc = skyCanvas.getContext('2d'); skyCanvas.width = 1024; skyCanvas.height = 512; const skyGrad = sc.createLinearGradient(0, 0, 0, 512); skyGrad.addColorStop(0, '#36a9e8'); skyGrad.addColorStop(.58, '#8bd6f2'); skyGrad.addColorStop(1, '#d9f0dc'); sc.fillStyle = skyGrad; sc.fillRect(0, 0, 1024, 512); const skyTexture = new THREE.CanvasTexture(skyCanvas); skyTexture.colorSpace = THREE.SRGBColorSpace; const sky = new THREE.Mesh(new THREE.PlaneGeometry(22, 8.2), new THREE.MeshBasicMaterial({ map: skyTexture, toneMapped: false })); sky.position.set(0, 3.75, -4.95); g.add(sky);
+    const sunHalo = new THREE.Mesh(new THREE.CircleGeometry(.68, 64), new THREE.MeshBasicMaterial({ color: 0xfff1a6, transparent: true, opacity: .24, depthWrite: false, toneMapped: false })); sunHalo.position.set(3.65, 5.35, -4.78); g.add(sunHalo); const sun = new THREE.Mesh(new THREE.CircleGeometry(.32, 64), new THREE.MeshBasicMaterial({ color: 0xfff6bd, toneMapped: false })); sun.position.set(3.65, 5.35, -4.76); g.add(sun);
+    const clouds = [], cloudMat = new THREE.MeshLambertMaterial({ color: 0xffffff, transparent: true, opacity: .88, depthWrite: false });
+    [[-3.7, 5.2, .92], [-.45, 4.9, .7], [3.05, 4.55, .78]].forEach(([x, y, scale], ci) => { const cloud = new THREE.Group(); for (let i = 0; i < 7; i++) { const puff = new THREE.Mesh(new THREE.SphereGeometry(.38 + (i % 3) * .08, 24, 14), cloudMat); puff.scale.set(1.35, .58 + (i % 2) * .18, .35); puff.position.set((i - 3) * .26, Math.sin(i * 1.7) * .1 + (i % 3 === 1 ? .13 : 0), 0); cloud.add(puff) } cloud.position.set(x, y, -4.62 + ci * .025); cloud.scale.setScalar(scale); g.add(cloud); clouds.push({ group: cloud, baseX: x, phase: ci * 1.7 }) });
+    const barkCanvas = document.createElement('canvas'), bc = barkCanvas.getContext('2d'); barkCanvas.width = 96; barkCanvas.height = 256; bc.fillStyle = '#765038'; bc.fillRect(0, 0, 96, 256); let barkSeed = 98231; const barkRnd = () => ((barkSeed = Math.imul(barkSeed, 1664525) + 1013904223 >>> 0) / 4294967296); for (let i = 0; i < 150; i++) { const x = barkRnd() * 96, y = barkRnd() * 256, length = 12 + barkRnd() * 62; bc.strokeStyle = barkRnd() > .48 ? `rgba(42,24,15,${.18 + barkRnd() * .28})` : `rgba(211,160,106,${.1 + barkRnd() * .18})`; bc.lineWidth = .5 + barkRnd() * 2.1; bc.beginPath(); bc.moveTo(x, y); bc.bezierCurveTo(x + (barkRnd() - .5) * 5, y + length * .3, x + (barkRnd() - .5) * 4, y + length * .7, x + (barkRnd() - .5) * 3, y + length); bc.stroke() } const barkTexture = new THREE.CanvasTexture(barkCanvas); barkTexture.wrapS = barkTexture.wrapT = THREE.RepeatWrapping; barkTexture.repeat.set(1.15, 2.7); barkTexture.colorSpace = THREE.SRGBColorSpace;
+    const meadowHeight=(x,z)=>.3+Math.sin(x*.72+z*.31)*.016+Math.sin(z*1.18-x*.28)*.011,trees=[],trunkMat=new THREE.MeshStandardMaterial({color:0x8a684b,map:barkTexture,bumpMap:barkTexture,bumpScale:.045,roughness:.96}),foliageGeometry=new THREE.IcosahedronGeometry(1,2),foliageMats=[0x183f28,0x245b32,0x34743b,0x438443,0x568f49].map(color=>new THREE.MeshStandardMaterial({color,roughness:.94,flatShading:false})),treeTubeBetween=(a,b,startRadius,endRadius,mat)=>{const d=b.clone().sub(a),mesh=new THREE.Mesh(new THREE.CylinderGeometry(endRadius,startRadius,d.length(),12,2,false),mat);mesh.position.copy(a).add(b).multiplyScalar(.5);mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.clone().normalize());return mesh};foliageGeometry.computeVertexNormals();let treeSeed=26813;const treeRnd=()=>((treeSeed=Math.imul(treeSeed,1664525)+1013904223>>>0)/4294967296);
+    for (let i = 0; i < 11; i++) {
+      const tree=new THREE.Group(),depthRow=i%3,x=-5.65+i*1.13+(treeRnd()-.5)*.55,z=-2.28-depthRow*.31+(treeRnd()-.5)*.18,treeScale=.82-depthRow*.06+treeRnd()*.28,leanX=(treeRnd()-.5)*.26,leanZ=(treeRnd()-.5)*.18,p0=new THREE.Vector3(0,0,0),p1=new THREE.Vector3(leanX*.18,.68,leanZ*.12),p2=new THREE.Vector3(leanX*.43,1.16,leanZ*.32),p3=new THREE.Vector3(leanX*.72,1.68,leanZ*.62),p4=new THREE.Vector3(leanX,2.17,leanZ);
+      tree.add(treeTubeBetween(p0,p1,.18,.15,trunkMat),treeTubeBetween(p1,p2,.15,.12,trunkMat));
+      for(let r=0;r<3;r++){const a=r/3*Math.PI*2+i*.71,rootStart=new THREE.Vector3(Math.cos(a)*.035,.08,Math.sin(a)*.035),rootEnd=new THREE.Vector3(Math.cos(a)*(.22+treeRnd()*.08),.012,Math.sin(a)*(.22+treeRnd()*.08));tree.add(treeTubeBetween(rootStart,rootEnd,.075,.018,trunkMat))}
+      const swayPivot=new THREE.Group();swayPivot.position.copy(p2);tree.add(swayPivot);const rel3=p3.clone().sub(p2),rel4=p4.clone().sub(p2),knuckle=new THREE.Mesh(new THREE.IcosahedronGeometry(.125,1),trunkMat);knuckle.scale.set(1.04,.82,1.04);swayPivot.add(knuckle,treeTubeBetween(new THREE.Vector3(0,-.018,0),rel3,.12,.086,trunkMat),treeTubeBetween(rel3,rel4,.086,.052,trunkMat));
+      const branchTips = [];
+      for(let b=0;b<6;b++){const fraction=.12+b*.135,azimuth=b*2.399+i*.47,base=rel4.clone().multiplyScalar(fraction),reach=.43+treeRnd()*.24,mid=base.clone().add(new THREE.Vector3(Math.cos(azimuth)*reach*.58,.2+treeRnd()*.13,Math.sin(azimuth)*reach*.5)),tip=mid.clone().add(new THREE.Vector3(Math.cos(azimuth+(treeRnd()-.5)*.38)*reach*.42,.13+treeRnd()*.14,Math.sin(azimuth+(treeRnd()-.5)*.38)*reach*.36));swayPivot.add(treeTubeBetween(base,mid,.057-b*.003,.03,trunkMat),treeTubeBetween(mid,tip,.03,.012,trunkMat));branchTips.push(tip)}
+      const archetype=Math.floor(treeRnd()*3),coreCentres=[rel4.clone().multiplyScalar(.62).add(new THREE.Vector3(-.2,.12,.05)),rel4.clone().multiplyScalar(.76).add(new THREE.Vector3(.2,.08,-.08)),rel4.clone().multiplyScalar(.9).add(new THREE.Vector3(0,.12,.12)),rel4.clone().multiplyScalar(.66).add(new THREE.Vector3(.02,-.08,-.22)),rel4.clone().multiplyScalar(.82).add(new THREE.Vector3(-.08,.04,.24))],lobeCentres=[...branchTips,...coreCentres],outerLobes=[];
+      lobeCentres.forEach((centre,li)=>{const materialIndex=li<6?2+(i+li)%3:Math.min(2,(i+li)%3),lobe=new THREE.Mesh(foliageGeometry,foliageMats[materialIndex]),broad=archetype===0?1.13:archetype===1?.88:.72,upright=archetype===1?1.2:archetype===2?1.12:.86,base=.34+treeRnd()*.17;lobe.position.copy(centre).add(new THREE.Vector3((treeRnd()-.5)*.18,(treeRnd()-.5)*.12,(treeRnd()-.5)*.2));lobe.scale.set(base*broad*(1+treeRnd()*.22),base*upright*(1+treeRnd()*.2),base*(.88+treeRnd()*.34));lobe.rotation.set(treeRnd()*.7,treeRnd()*Math.PI,treeRnd()*.55);swayPivot.add(lobe);if(li<6||li>8)outerLobes.push({mesh:lobe,base:lobe.rotation.clone(),phase:i*.73+li*.61})});
+      tree.position.set(x,meadowHeight(x,z)-.008,z);tree.scale.setScalar(treeScale);g.add(tree);trees.push({group:tree,swayPivot,outerLobes,phase:i*.53,depthRow})
+    }
+    const shrubGeometry=new THREE.IcosahedronGeometry(1,1),shrubMats=[foliageMats[0],foliageMats[1],foliageMats[3]],shrubs=[];
+    for(let i=0;i<28;i++){const shrub=new THREE.Mesh(shrubGeometry,shrubMats[i%shrubMats.length]),x=-6.1+i/27*12.2+(treeRnd()-.5)*.42,z=-2.03-treeRnd()*.72;shrub.position.set(x,meadowHeight(x,z)+.08+(i%3)*.012,z);shrub.scale.set(.22+treeRnd()*.17,.15+treeRnd()*.1,.18+treeRnd()*.16);shrub.rotation.set(treeRnd()*.24,treeRnd()*Math.PI*2,treeRnd()*.18);g.add(shrub);shrubs.push(shrub)}
+    const meadowGeo = new THREE.PlaneGeometry(12.4, 9.2, 30, 24), meadowPos = meadowGeo.getAttribute('position'), meadowColours = [], meadowColour = new THREE.Color();
+    for (let i = 0; i < meadowPos.count; i++) {
+      const lx = meadowPos.getX(i), ly = meadowPos.getY(i), wz = 1.55 - ly, rise = meadowHeight(lx,wz)-.3;
+      meadowPos.setZ(i, rise); meadowColour.setHSL(.29 + Math.sin(lx * .47 + wz) * .012, .48 + Math.sin(wz * .63) * .04, .31 + Math.sin(lx * .8 - wz * .45) * .025); meadowColours.push(meadowColour.r, meadowColour.g, meadowColour.b)
+    }
+    meadowGeo.setAttribute('color', new THREE.Float32BufferAttribute(meadowColours, 3)); meadowGeo.computeVertexNormals();
+    const meadowSurface = new THREE.Mesh(meadowGeo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: .97, metalness: 0, side: THREE.DoubleSide })); meadowSurface.rotation.x = -Math.PI / 2; meadowSurface.position.set(0, .3, 1.55); meadowSurface.receiveShadow = true; g.add(meadowSurface);
+    const bladeGeometry = new THREE.PlaneGeometry(.032, .34, 1, 4); bladeGeometry.translate(0, .17, 0); const bladeMaterial = new THREE.MeshStandardMaterial({ color: 0xc4e5a8, roughness: .82, side: THREE.DoubleSide, vertexColors: true, emissive: 0x2b7432, emissiveIntensity: .42 }); const grassUniforms = { uTime: { value: 0 }, uWind: { value: 1 }, uGrow: { value: 0 } };
+    bladeMaterial.onBeforeCompile = shader => { Object.assign(shader.uniforms, grassUniforms); shader.vertexShader = shader.vertexShader.replace('#include <common>', '#include <common>\nattribute float bladePhase; attribute float bladeDelay; uniform float uTime; uniform float uWind; uniform float uGrow;').replace('#include <begin_vertex>', '#include <begin_vertex>\nfloat bladeGrow = smoothstep(bladeDelay, min(1.0, bladeDelay + 0.26), uGrow); transformed.y *= bladeGrow; float bladeTip = clamp(uv.y, 0.0, 1.0); transformed.x += sin(uTime * 2.15 + bladePhase) * uWind * pow(bladeTip, 1.7) * 0.105; transformed.z += sin(uTime * 1.47 + bladePhase * 1.73) * uWind * pow(bladeTip, 1.9) * 0.055;'); bladeMaterial.userData.shader = shader };
+    const bladeCount = 6000, grass = new THREE.InstancedMesh(bladeGeometry, bladeMaterial, bladeCount), dummy = new THREE.Object3D(), phases = new Float32Array(bladeCount), delays = new Float32Array(bladeCount); let seed = 41729; const rnd = () => ((seed = Math.imul(seed, 1664525) + 1013904223 >>> 0) / 4294967296);
+    for (let i = 0; i < bladeCount; i++) { const x = (rnd() - .5) * 11.75, z = (rnd() - .5) * 8.65 + 1.48, s = .62 + rnd() * .86; dummy.position.set(x, .305, z); dummy.rotation.set(0, rnd() * Math.PI * 2, (rnd() - .5) * .08); dummy.scale.set(.72 + rnd() * .55, s, 1); dummy.updateMatrix(); grass.setMatrixAt(i, dummy.matrix); grass.setColorAt(i, new THREE.Color().setHSL(.27 + rnd() * .06, .5 + rnd() * .18, .42 + rnd() * .14)); phases[i] = rnd() * Math.PI * 2; delays[i] = rnd() * .72 }
+    bladeGeometry.setAttribute('bladePhase', new THREE.InstancedBufferAttribute(phases, 1)); bladeGeometry.setAttribute('bladeDelay', new THREE.InstancedBufferAttribute(delays, 1)); grass.instanceMatrix.needsUpdate = true; grass.castShadow = false; grass.receiveShadow = false; g.add(grass);
+    const mossCount = 240, mossGeometry = new THREE.IcosahedronGeometry(.058, 1), mossMaterial = new THREE.MeshStandardMaterial({ color: 0x4d7637, roughness: 1, flatShading: true, transparent: true, opacity: 0 }), moss = new THREE.InstancedMesh(mossGeometry, mossMaterial, mossCount);
+    for (let i = 0; i < mossCount; i++) { const x = (rnd() - .5) * 11.55, z = (rnd() - .5) * 8.45 + 1.48, spread = .5 + rnd() * .82; dummy.position.set(x, .315 + rnd() * .006, z); dummy.rotation.set(rnd() * .12, rnd() * Math.PI * 2, rnd() * .1); dummy.scale.set(spread, .3 + rnd() * .28, .5 + rnd() * .82); dummy.updateMatrix(); moss.setMatrixAt(i, dummy.matrix); moss.setColorAt(i, new THREE.Color().setHSL(.22 + rnd() * .075, .3 + rnd() * .2, .2 + rnd() * .105)) }
+    moss.instanceMatrix.needsUpdate = true; moss.castShadow = false; moss.receiveShadow = true; g.add(moss);
+
+    const traps = [];
+    const trapPos = [[-1.85,.48], [1.72,-.64], [-.04,-.02], [-2.35,-.86], [1.18,.7]];
+    trapPos.forEach(([x,z]) => {
+      const h = meadowHeight(x, z);
+      const trap = new THREE.Group();
+      const hole = new THREE.Mesh(new THREE.CylinderGeometry(.06, .05, .14, 16), solid(0x1a211e, .2));
+      hole.position.y = -.07;
+      const rim = new THREE.Mesh(new THREE.TorusGeometry(.06, .005, 8, 16), new THREE.MeshStandardMaterial({ color: 0x827f71, roughness: .9 }));
+      rim.rotation.x = Math.PI / 2;
+      trap.add(hole, rim);
+      trap.position.set(x, h - .02, z);
+      trap.visible = false;
+      g.add(trap);
+      traps.push(trap);
+    });
+
+    const bugs = [];
+    const bugGeo = new THREE.SphereGeometry(.012, 8, 8), bugMat = new THREE.MeshStandardMaterial({ color: 0x3d271d, roughness: .8 });
+    for (let i = 0; i < 40; i++) {
+      const bug = new THREE.Mesh(bugGeo, bugMat.clone());
+      bug.visible = false;
+      bug.userData = { id: i, startPhase: i * 1.34, marked: false };
+      g.add(bug);
+      bugs.push(bug);
+    }
+    
+    this.dynamic.push({ kind: 'capture', grassUniforms, grassMaterial: bladeMaterial, mossMaterial, clouds, trees, traps, bugs, getMeadowHeight: meadowHeight });
+    Object.assign(g.userData, { captureHabitat: true }); const ready = shadowReady(g); trees.forEach(tree=>tree.group.traverse(node=>{if(node.isMesh)node.castShadow=false})); shrubs.forEach(shrub=>shrub.castShadow=false); grass.castShadow = false; grass.receiveShadow = false; moss.castShadow = false; meadowSurface.castShadow = false; return ready
   }
   shoreHeight(x, z) { return .14 + Math.max(0, 3.4 - z) * .115 + Math.sin(x * 1.8 + z * .7) * .055 + Math.sin(z * 2.35 - x * .54) * .035 }
   rockyShoreRig(state) {
@@ -3203,6 +3268,7 @@ export class LabRenderer3D {
     else if (id === 'potometer') { this.root.add(this.potometerRig(state)) }
     else if (id === 'pondweed') { this.root.add(this.pondweedRig(state)) }
     else if (id === 'quadrats') { this.root.add(this.randomSamplingRig(state)) }
+    else if (id === 'capture') { this.root.add(this.captureRig(state)) }
     else if (id === 'shoretransect') { this.root.add(this.rockyShoreRig(state)) }
     else if (id === 'ripple') { this.root.add(this.rippleTankRig(state)) }
     else if (id === 'newton2') { this.root.add(this.newton2Rig(state)) }
@@ -3614,6 +3680,36 @@ export class LabRenderer3D {
         if (stage < 3) d.quadrat.position.copy(start); else d.quadrat.position.lerpVectors(start, target, eased);
         if (stage === 3) { d.quadrat.position.y += Math.sin(Math.PI * eased) * 1.78; if (q > .76) d.quadrat.position.y += Math.abs(Math.sin((q - .76) * Math.PI * 7)) * (1 - q) * .24; d.quadrat.rotation.set(Math.sin(Math.PI * q) * .18, (1 - eased) * Math.PI * 2.15 + rotations[sampleIndex], Math.sin(Math.PI * q * 2) * .13) } else d.quadrat.rotation.set(0, stage >= 4 ? rotations[sampleIndex] : -.12, 0);
         if (d.display) { const { canvas, context: dc, texture } = d.display, cycling = stage === 1, cx = cycling ? (Math.floor(clock * 8) % 10) + 1 : [2, 8, 5, 1, 7][sampleIndex], cy = cycling ? (Math.floor(clock * 13 + 3) % 10) + 1 : [7, 3, 5, 2, 8][sampleIndex]; dc.clearRect(0, 0, canvas.width, canvas.height); dc.fillStyle = '#071d20'; dc.fillRect(0, 0, canvas.width, canvas.height); dc.fillStyle = cycling ? '#fff07b' : '#85f3d2'; dc.shadowColor = cycling ? '#f9cf43' : '#57e8c1'; dc.shadowBlur = 18; dc.font = '800 90px ui-monospace, SFMono-Regular, Menlo, monospace'; dc.textAlign = 'center'; dc.textBaseline = 'middle'; dc.fillText(`X ${cx}   Y ${cy}`, 256, 91); dc.shadowBlur = 0; dc.fillStyle = '#bed3d3'; dc.font = '700 29px Inter, sans-serif'; dc.fillText(cycling ? 'RANDOMISING COORDINATES' : 'UNBIASED GRID POINT', 256, 174); texture.needsUpdate = true }
+      }
+      else if (d.kind === 'capture') {
+        const clock = Math.max(0, state.meadowWindClock || 0), stage = state.captureStage || 0, clamp = q => Math.max(0, Math.min(1, q)), smooth = q => { q = clamp(q); return q * q * (3 - 2 * q) }, grow = smooth(clock / 2.8), wind = .72 + .28 * Math.sin(clock * .41);
+        d.grassUniforms.uTime.value = clock; d.grassUniforms.uWind.value = wind; d.grassUniforms.uGrow.value = grow; d.mossMaterial.opacity = smooth((clock - .28) / 1.9) * .96;
+        for (const cloud of d.clouds) cloud.group.position.x = cloud.baseX + Math.sin(clock * (.055 + cloud.phase * .006) + cloud.phase) * .7;
+        for (const tree of d.trees) { const gust = Math.sin(clock * .55 + tree.phase) * (.012 + tree.depthRow * .002) + Math.sin(clock * 1.35 + tree.phase * 1.7) * .004; tree.swayPivot.rotation.z = gust; tree.swayPivot.rotation.x = Math.sin(clock * .48 + tree.phase * .7) * Math.abs(gust) * .35; tree.outerLobes.forEach(lobe => { lobe.mesh.rotation.z = lobe.base.z + Math.sin(clock * 1.18 + lobe.phase) * .005; lobe.mesh.rotation.x = lobe.base.x + Math.sin(clock * .93 + lobe.phase * .74) * .003 }) }
+
+        d.traps.forEach(t => { t.visible = stage > 0; });
+        const dayMode = stage < 1 || stage === 4 || stage === 5;
+        
+        d.bugs.forEach((bug, i) => {
+          bug.visible = !dayMode;
+          if (stage >= 3 && i < state.captureFirstCatch) bug.userData.marked = true;
+          bug.material.color.setHex(bug.userData.marked ? 0xcf4b13 : 0x3d271d);
+          
+          if (!dayMode) {
+             const t = d.traps[i % d.traps.length];
+             const caught = (stage < 4 && i < state.captureFirstCatch) || (stage >= 6 && ((i < state.captureRecaptured && bug.userData.marked) || (i >= state.captureFirstCatch && i < state.captureFirstCatch + state.captureSecondCatch - state.captureRecaptured)));
+             if (caught) {
+                bug.position.copy(t.position);
+                bug.position.x += Math.cos(i * 1.8) * .02;
+                bug.position.z += Math.sin(i * 1.8) * .02;
+                bug.position.y -= .05;
+             } else {
+                const rx = Math.sin(clock * .5 + bug.userData.startPhase) * 2;
+                const rz = Math.cos(clock * .6 + bug.userData.startPhase * 1.3) * 2;
+                bug.position.set(rx, d.getMeadowHeight(rx, rz) + .02, rz);
+             }
+          }
+        });
       }
       else if (d.kind === 'rockyShoreSampling') {
         const clock = Math.max(0, state.shoreTideClock || 0), tide = Math.max(0, Math.min(.8, state.shoreTideProgress || 0)), stage = state.transectStage || 0, timer = Math.max(0, state.transectTimer || 0), index = Math.max(0, Math.min(d.stationZ.length - 1, state.transectStationIndex || 0)), clamp = q => Math.max(0, Math.min(1, q)), smooth = q => { q = clamp(q); return q * q * (3 - 2 * q) }, tapeQ = stage === 1 ? smooth(timer / 3.15) : stage > 1 ? 1 : 0;

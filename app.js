@@ -25,6 +25,7 @@ const practicals = [
   { id: 'potometer', subject: 'biology', icon: '♧', color: '#2f8d73', title: 'Bubble potometer', sub: 'Wind & transpiration', objective: 'Investigate how wind speed affects water uptake by a leafy shoot using a bubble potometer.', eq: 'rate of water uptake = distance moved by air bubble ÷ time', word: 'water absorbed by the shoot replaces water lost from the leaves by transpiration', steps: ['Cut the leafy shoot underwater and seal it into a water-filled potometer', 'Introduce one air bubble and use the refiller to align it with zero', 'Expose the shoot to a measured wind speed for 5 minutes', 'Record bubble speed, reset and repeat at four wind speeds'], gear: ['Bubble potometer', 'Leafy shoot + bung', 'Refiller + stopcock', 'Desk fan + anemometer'], reactants: ['Fresh leafy shoot', 'Water', 'Petroleum jelly seal'] },
   { id: 'pondweed', subject: 'biology', icon: '🌿', color: '#2e7d32', title: 'Light intensity & pondweed', sub: 'Photosynthesis rate', objective: 'Investigate how light intensity affects the rate of photosynthesis in pondweed by measuring oxygen bubble production.', eq: '6CO₂ + 6H₂O —(light)→ C₆H₁₂O₆ + 6O₂', word: 'carbon dioxide + water —(light)→ glucose + oxygen', steps: ['Place pondweed in NaHCO₃ solution', 'Measure 10–50 cm from the beaker edge', 'Switch on the filament lamp to acclimatise', 'Count oxygen bubbles produced in 1 minute'], gear: ['Beaker', 'Boiling tube + pondweed', 'Funnel', 'Filament desk lamp', 'Meter ruler'], reactants: ['NaHCO₃ solution', 'Elodea pondweed', 'Water'] },
   { id: 'quadrats', subject: 'biology', icon: '▦', color: '#3b8b52', title: 'Random quadrat sampling', sub: 'Daisy population estimate', objective: 'Estimate daisy abundance in a meadow using unbiased random coordinates and repeated quadrat samples.', eq: 'estimated population = mean count × habitat area ÷ quadrat area', word: 'random quadrat samples provide an unbiased estimate of abundance across the whole habitat', steps: ['Generate a random grid coordinate without choosing a favourable patch', 'Place the 1 m² quadrat at that coordinate', 'Count daisies rooted inside using one consistent edge rule', 'Repeat five times, calculate a mean and estimate the population'], gear: ['1 m² gridded quadrat', '10 m × 10 m grid', 'Random coordinate generator', 'Field tally counter'], reactants: ['Living grass turf', 'Daisy plants', 'Soil habitat'] },
+  { id: 'capture', subject: 'biology', icon: '🪲', color: '#8b5a2b', title: 'Mark-release-recapture', sub: 'Animal population estimate', objective: 'Estimate a mobile animal population using pitfall traps and the Lincoln Index.', eq: 'population = (first catch × second catch) ÷ marked recaptured', word: 'a sample is captured, marked, released, and a second sample is captured to estimate population size', steps: ['Set pitfall traps overnight', 'Count the total number caught in the first sample and mark them', 'Release the marked animals back into the habitat and wait 24 hours', 'Recapture and count the total number caught and the number of marked recaptures'], gear: ['Pitfall traps', 'Non-toxic marker', 'Magnifying glass'], reactants: ['Ground beetles', 'Soil habitat'] },
   { id: 'shoretransect', subject: 'biology', icon: '≋', color: '#297f86', title: 'Rocky-shore belt transect', sub: 'Strata & species zonation', objective: 'Compare organism distribution through upper, middle and lower shore strata using a belt transect.', eq: '% cover = occupied grid squares ÷ total grid squares × 100', word: 'systematic quadrats along a shore gradient reveal changes in abundance and percentage cover', steps: ['Lay a belt transect from the upper shore towards the low-water mark', 'Place equal-area quadrats at fixed 2 m intervals in each shore stratum', 'Identify organisms and estimate percentage cover using the grid', 'Record six stations and compare zonation with distance down the shore'], gear: ['10 m tape measure', '1 m² gridded quadrat', 'Species identification key', 'Tide table + tally sheet'], reactants: ['Barnacles and limpets', 'Brown seaweed', 'Rock-pool habitat'] },
   { id: 'ripple', subject: 'physics', icon: '∿', color: '#1687ad', title: 'Wave speed in a ripple tank', sub: 'v = fλ water waves', objective: 'Measure water-wave speed from frequency and wavelength in a level ripple tank.', eq: 'v = fλ', word: 'wave speed (m s⁻¹) = frequency (Hz) × wavelength (m)', steps: ['Check that the ripple tank contains shallow water of constant depth and is level', 'Drive the straight dipper at a known frequency to produce plane wavefronts', 'Synchronise the strobe and measure the distance across ten wavelengths', 'Divide by ten, convert to metres, calculate v = fλ and repeat at five frequencies'], gear: ['Transparent ripple tank + levelling feet', 'Straight dipper + vibration motor', 'Signal generator + LED strobe', 'Metric ruler + depth gauge'], reactants: ['Shallow water at constant depth', 'Plane water wavefronts', 'Foam wave absorber'] },
   { id: 'newton2', subject: 'physics', icon: '⚡', color: '#0288d1', title: 'Newton’s 2nd Law', sub: 'F = m × a acceleration', objective: 'Investigate how trolley acceleration depends on applied force and mass using light gates.', eq: 'F = m × a   ⇒   a = F / m', word: 'accelerating force (N) = mass (kg) × acceleration (m s⁻²)', steps: ['Set hanging force (0.1 N - 0.5 N)', 'Position Light Gate 1 and Light Gate 2 on elevated track', 'Release trolley down the ramp', 'Automatic acceleration graph plotting'], gear: ['Elevated track & pulley', 'Rounded trolley + card', '2 × gates + shared logger', 'Hanging mass hanger'], reactants: ['Accelerating force (0.1 N - 0.5 N)', 'Constant trolley mass (1.0 kg)'] },
@@ -61,7 +62,7 @@ const graphSpecs = {
   specificheat: { xLabel: 'temperature rise / °C', yLabel: 'energy transferred / kJ', xMin: 0, xMax: 20, yMin: 0, yMax: 18, yDp: 1 },
   wirelength: { xLabel: 'wire length / cm', yLabel: 'resistance / Ω', xMin: 0, xMax: 100, yMin: 0, yMax: 10, yDp: 1 }
 };
-const nonGraphResultIds = new Set(['free', 'titration', 'salts', 'mass', 'co2', 'electro', 'flame', 'displacement', 'chrom', 'starchleaf', 'quadrats', 'shoretransect', 'ripple', 'convection', 'conduction', 'thermal', 'fieldlines']);
+const nonGraphResultIds = new Set(['free', 'titration', 'salts', 'mass', 'co2', 'electro', 'flame', 'displacement', 'chrom', 'starchleaf', 'quadrats', 'capture', 'shoretransect', 'ripple', 'convection', 'conduction', 'thermal', 'fieldlines']);
 nonGraphResultIds.add('alkali');
 const GRAPH_SIDEBAR_HEADER_Y = 134, GRAPH_SIDEBAR_DESCRIPTION_OFFSET = 32;
 function currentGraphModalKind(id = practicals[state.selected]?.id) {
@@ -476,7 +477,7 @@ const freeReactionRules = [
   { id: 'h2so4-lime', reactants: ['h2so4', 'lime'], symbol: 'H₂SO₄(aq) + Ca(OH)₂(aq) → CaSO₄(s) + 2H₂O(l)', word: 'sulfuric acid + limewater → calcium sulfate + water', kind: 'precipitate', precipitate: true, product: 'calcium sulfate precipitate', productColor: 0xd9d4bd, heat: 6, duration: 3 },
   { id: 'lime-co2', reactants: ['lime', 'CO₂'], symbol: 'Ca(OH)₂(aq) + CO₂(g) → CaCO₃(s) + H₂O(l)', word: 'limewater + carbon dioxide → calcium carbonate + water', kind: 'precipitate', precipitate: true, product: 'milky calcium carbonate', productColor: 0xe8e6d9, duration: 3 }
 ];
-const state = { selected: 0, subject: 'chemistry', subjectTabX: 149, subjectTabW: 114, sidebarScroll: { chemistry: 0, biology: 0, physics: 0 }, running: false, complete: false, temp: 20, ph: 7, time: 0, volume: 0, progress: 0, tab: 'equipment', graphModal: false, evaluationModal: false, focusMode: false, methodDropdown: false, reactantSafety: null, points: [], hover: null, toast: 'Click equipment to add it, or drag it onto the bench.', drag: null, pour: null, burner: false, coolingWater: false, particles: [], layout: null, flamePhase: 0, transferred: 0, workspace: [], nextItem: 1, dose: null, reaction: null, massStage: 0, massLidOn: true, massTransfer: null, massBefore: 4.01, massAfter: null, hydrogenStage: 0, hydrogenTimer: 0, hydrogenAudioPlayed: false, hydrogenGas: 0, saltsStage: 0, saltsTimer: 0, chromSelectedDye: null, electroRecorded: false, electroWeighing: false, electroWeighTimer: 0, titrationStage: 0, titrationVolume: 0, titrationDropTimer: 0, titrationDrops: 0, titrationIndicator: false, titrationIndicatorTimer: 0, titrationRecorded: false, ratesStage: 0, ratesStageTimer: 0, ratesTrialIndex: 0, ratesTargetTemp: 20, ratesBathTemp: 20, ratesConditioning: false, ratesResults: [], thermiteTimer: 0, thermiteAudioPlayed: false, displacementStage: 0, displacementTimer: 0, displacementRecorded: false, flameTestStage: 0, flameTestTimer: 0, flameTestSalt: 0, flameTestTested: [], starchStage: 0, starchTimer: 0, lipaseStage: 0, lipaseTimer: 0, lipaseTrialIndex: 0, lipaseTargetTemp: 20, lipaseBathTemp: 20, lipaseConditioning: false, lipaseResults: [], osmosisStage: 0, osmosisTimer: 0, osmosisTrialIndex: 0, osmosisConcentration: 0, osmosisResults: [], potometerStage: 0, potometerTimer: 0, potometerTrialIndex: 0, potometerWindSpeed: 0, potometerBubbleMm: 0, potometerResults: [], pondweedDistance: 20, pondweedLampOn: true, pondweedTimer: 0, pondweedBubbles: 0, pondweedResults: [], quadratStage: 0, quadratTimer: 0, quadratSampleIndex: 0, quadratCurrentCount: 0, quadratResults: [], meadowWindClock: 0, transectStage: 0, transectTimer: 0, transectStationIndex: 0, transectDistanceM: 0, transectCurrentObservation: null, transectResults: [], shoreTideClock: 0, shoreTideProgress: 0, rippleStage: 0, rippleTimer: 0, rippleTrialIndex: 0, rippleFrequencyHz: 4, rippleTenWavelengthCm: 0, rippleWavelengthCm: 0, rippleSpeedMs: 0, rippleResults: [], rippleWaveClock: 0, newtonForce: 0.2, newtonMass: 1.0, newtonPos: 0, newtonVel: 0, newtonAcc: 0.2, newtonTimer: 0, newtonRunning: false, newtonGate1Time: null, newtonGate2Time: null, newtonGate1Velocity: null, newtonGate2Velocity: null, newtonResults: [], electromagnetStage: 0, electromagnetTimer: 0, electromagnetTrialIndex: 0, electromagnetTurns: 10, electromagnetClips: 0, electromagnetResults: [], convectionStage: 0, convectionTimer: 0, conductionStage: 0, conductionTimer: 0, thermalStage: 0, thermalTimer: 0, thermalCaptured: false, densityStage: 0, densitySample: 0, densityTimer: 0, densityRecorded: false, densityResults: [], hookeStage: 0, hookeTimer: 0, hookeTrialIndex: 0, hookeForceN: 0, hookeResults: [], shcStage: 0, shcTimer: 0, shcEnergyJ: 0, shcTemperatureC: 20, shcResults: [], wireStage: 0, wireTimer: 0, wireTrialIndex: 0, wireLengthCm: 20, wireVoltageV: 1.5, wireResults: [], fieldStage: 0, fieldTimer: 0, fieldConfigIndex: 0, fieldResults: [] };
+const state = { selected: 0, subject: 'chemistry', subjectTabX: 149, subjectTabW: 114, sidebarScroll: { chemistry: 0, biology: 0, physics: 0 }, running: false, complete: false, temp: 20, ph: 7, time: 0, volume: 0, progress: 0, tab: 'equipment', graphModal: false, evaluationModal: false, focusMode: false, methodDropdown: false, reactantSafety: null, points: [], hover: null, toast: 'Click equipment to add it, or drag it onto the bench.', drag: null, pour: null, burner: false, coolingWater: false, particles: [], layout: null, flamePhase: 0, transferred: 0, workspace: [], nextItem: 1, dose: null, reaction: null, massStage: 0, massLidOn: true, massTransfer: null, massBefore: 4.01, massAfter: null, hydrogenStage: 0, hydrogenTimer: 0, hydrogenAudioPlayed: false, hydrogenGas: 0, saltsStage: 0, saltsTimer: 0, chromSelectedDye: null, electroRecorded: false, electroWeighing: false, electroWeighTimer: 0, titrationStage: 0, titrationVolume: 0, titrationDropTimer: 0, titrationDrops: 0, titrationIndicator: false, titrationIndicatorTimer: 0, titrationRecorded: false, ratesStage: 0, ratesStageTimer: 0, ratesTrialIndex: 0, ratesTargetTemp: 20, ratesBathTemp: 20, ratesConditioning: false, ratesResults: [], thermiteTimer: 0, thermiteAudioPlayed: false, displacementStage: 0, displacementTimer: 0, displacementRecorded: false, flameTestStage: 0, flameTestTimer: 0, flameTestSalt: 0, flameTestTested: [], starchStage: 0, starchTimer: 0, lipaseStage: 0, lipaseTimer: 0, lipaseTrialIndex: 0, lipaseTargetTemp: 20, lipaseBathTemp: 20, lipaseConditioning: false, lipaseResults: [], osmosisStage: 0, osmosisTimer: 0, osmosisTrialIndex: 0, osmosisConcentration: 0, osmosisResults: [], potometerStage: 0, potometerTimer: 0, potometerTrialIndex: 0, potometerWindSpeed: 0, potometerBubbleMm: 0, potometerResults: [], pondweedDistance: 20, pondweedLampOn: true, pondweedTimer: 0, pondweedBubbles: 0, pondweedResults: [], quadratStage: 0, quadratTimer: 0, quadratSampleIndex: 0, quadratCurrentCount: 0, quadratResults: [], captureStage: 0, captureTimer: 0, captureFirstCatch: 15, captureSecondCatch: 18, captureRecaptured: 6, meadowWindClock: 0, transectStage: 0, transectTimer: 0, transectStationIndex: 0, transectDistanceM: 0, transectCurrentObservation: null, transectResults: [], shoreTideClock: 0, shoreTideProgress: 0, rippleStage: 0, rippleTimer: 0, rippleTrialIndex: 0, rippleFrequencyHz: 4, rippleTenWavelengthCm: 0, rippleWavelengthCm: 0, rippleSpeedMs: 0, rippleResults: [], rippleWaveClock: 0, newtonForce: 0.2, newtonMass: 1.0, newtonPos: 0, newtonVel: 0, newtonAcc: 0.2, newtonTimer: 0, newtonRunning: false, newtonGate1Time: null, newtonGate2Time: null, newtonGate1Velocity: null, newtonGate2Velocity: null, newtonResults: [], electromagnetStage: 0, electromagnetTimer: 0, electromagnetTrialIndex: 0, electromagnetTurns: 10, electromagnetClips: 0, electromagnetResults: [], convectionStage: 0, convectionTimer: 0, conductionStage: 0, conductionTimer: 0, thermalStage: 0, thermalTimer: 0, thermalCaptured: false, densityStage: 0, densitySample: 0, densityTimer: 0, densityRecorded: false, densityResults: [], hookeStage: 0, hookeTimer: 0, hookeTrialIndex: 0, hookeForceN: 0, hookeResults: [], shcStage: 0, shcTimer: 0, shcEnergyJ: 0, shcTemperatureC: 20, shcResults: [], wireStage: 0, wireTimer: 0, wireTrialIndex: 0, wireLengthCm: 20, wireVoltageV: 1.5, wireResults: [], fieldStage: 0, fieldTimer: 0, fieldConfigIndex: 0, fieldResults: [] };
 state.hookeFocusModal = false;
 state.hookeFocusProgress = 0;
 Object.assign(state, { pondweedCountAnimating: false, pondweedCountTimer: 0, pondweedPendingBpm: null });
@@ -1003,16 +1004,19 @@ function drawPotometerControls(x, benchY) {
   button('GRAPH', x + 328, benchY + 46, 76, 38, state.tab === 'graph');
   text(`TRIAL ${Math.min(potometerWindSpeeds.length, state.potometerTrialIndex + 1)} / ${potometerWindSpeeds.length}  ·  WIND ${state.potometerWindSpeed.toFixed(1)} m s⁻¹  ·  ${elapsed.toFixed(1)} min`, x + 24, benchY + 31, 8.8, '#d8e8ed', 750);
 }
-function quadratPrimaryLabel() {
-  if (state.quadratStage === 7) return state.complete ? 'VIEW RESULTS' : 'NEXT SAMPLE';
-  return ['GENERATE POINT', 'RANDOMISING…', 'PLACE QUADRAT', 'QUADRAT FALLING…', 'COUNT DAISIES', 'COUNTING…', 'RECORD SAMPLE'][state.quadratStage] || 'GENERATE POINT';
+function capturePrimaryLabel() {
+  if (state.captureStage === 9) return state.complete ? 'VIEW RESULTS' : 'RECORD';
+  return ['SET TRAPS', 'WAITING OVERNIGHT…', 'FIRST CAPTURE', 'MARKING BUGS…', 'RELEASE & WAIT', 'WAITING 24H…', 'SECOND CAPTURE', 'COUNTING…', 'RECORD'][state.captureStage] || 'SET TRAPS';
 }
-function drawQuadratControls(x, benchY) {
-  const sample = currentQuadratSample(), busy = [1, 3, 5].includes(state.quadratStage);
-  progressButton(quadratPrimaryLabel(), x + 20, benchY + 46, 172, 38, quadratStageProgress(), busy);
-  button('RESET STUDY', x + 202, benchY + 46, 104, 38, false);
+function drawCaptureControls(x, benchY) {
+  const busy = [1, 3, 5, 7].includes(state.captureStage);
+  const prog = (state.captureStage % 2 !== 0 && state.captureStage < 8) ? Math.min(1, state.captureTimer / 2) : 0;
+  progressButton(capturePrimaryLabel(), x + 20, benchY + 46, 180, 38, prog, busy);
   button('RESULTS', x + 316, benchY + 46, 88, 38, state.tab === 'graph');
-  text(`SAMPLE ${Math.min(5, state.quadratSampleIndex + 1)} / 5  ·  RANDOM POINT (${sample.xM}, ${sample.yM})  ·  ${state.quadratStage >= 6 ? `${sample.daisies} DAISIES` : 'COUNT PENDING'}`, x + 20, benchY + 31, 8.6, '#d8e8ed', 750);
+  let info = 'AWAITING TRAPS';
+  if (state.captureStage >= 4) info = `MARKED: ${state.captureFirstCatch}`;
+  if (state.captureStage >= 8) info = `RECAPTURE: ${state.captureSecondCatch} (MARKED: ${state.captureRecaptured})`;
+  text(`LINCOLN INDEX ESTIMATE  ·  ${info}`, x + 20, benchY + 31, 8.6, '#d8e8ed', 750);
 }
 function transectPrimaryLabel() {
   if (state.transectStage === 7) return state.complete ? 'VIEW ZONATION' : 'NEXT POSITION';
@@ -1443,7 +1447,7 @@ function rightbar() {
   const graphContentY = graphSidebarContentY(p.id);
   if (state.tab === 'bench') {
     const compact = mobileLandscapeLayout || UI_SCALE < .995 || H < 790, contentTop = compact ? 122 : 126, contentBottom = H - (compact ? 9 : 14), cardX = x + 18, cardW = R - 36;
-    const activeStep = state.complete ? p.steps.length - 1 : p.id === 'rates' ? ratesStepIndex() : p.id === 'mass' ? massStepIndex() : p.id === 'hydrogen' ? hydrogenStepIndex() : p.id === 'titration' ? titrationStepIndex() : p.id === 'salts' ? saltsStepIndex() : p.id === 'flame' ? flameTestStepIndex() : p.id === 'displacement' ? displacementStepIndex() : p.id === 'alkali' ? alkaliStepIndex() : p.id === 'thermite' ? thermiteStepIndex() : p.id === 'starchleaf' ? starchStepIndex() : p.id === 'lipase' ? lipaseStepIndex() : p.id === 'osmosis' ? osmosisStepIndex() : p.id === 'potometer' ? potometerStepIndex() : p.id === 'quadrats' ? quadratStepIndex() : p.id === 'shoretransect' ? transectStepIndex() : p.id === 'ripple' ? rippleStepIndex() : p.id === 'electromagnet' ? electromagnetStepIndex() : p.id === 'convection' ? convectionStepIndex() : p.id === 'conduction' ? conductionStepIndex() : p.id === 'thermal' ? thermalStepIndex() : p.id === 'density' ? densityStepIndex() : p.id === 'hooke' ? hookeStepIndex() : p.id === 'specificheat' ? shcStepIndex() : p.id === 'wirelength' ? wireStepIndex() : p.id === 'fieldlines' ? fieldStepIndex() : Math.floor(state.progress * 3);
+    const activeStep = state.complete ? p.steps.length - 1 : p.id === 'rates' ? ratesStepIndex() : p.id === 'mass' ? massStepIndex() : p.id === 'hydrogen' ? hydrogenStepIndex() : p.id === 'titration' ? titrationStepIndex() : p.id === 'salts' ? saltsStepIndex() : p.id === 'flame' ? flameTestStepIndex() : p.id === 'displacement' ? displacementStepIndex() : p.id === 'alkali' ? alkaliStepIndex() : p.id === 'thermite' ? thermiteStepIndex() : p.id === 'starchleaf' ? starchStepIndex() : p.id === 'lipase' ? lipaseStepIndex() : p.id === 'osmosis' ? osmosisStepIndex() : p.id === 'potometer' ? potometerStepIndex() : p.id === 'quadrats' ? quadratStepIndex() : p.id === 'capture' ? captureStepIndex() : p.id === 'shoretransect' ? transectStepIndex() : p.id === 'ripple' ? rippleStepIndex() : p.id === 'electromagnet' ? electromagnetStepIndex() : p.id === 'convection' ? convectionStepIndex() : p.id === 'conduction' ? conductionStepIndex() : p.id === 'thermal' ? thermalStepIndex() : p.id === 'density' ? densityStepIndex() : p.id === 'hooke' ? hookeStepIndex() : p.id === 'specificheat' ? shcStepIndex() : p.id === 'wirelength' ? wireStepIndex() : p.id === 'fieldlines' ? fieldStepIndex() : Math.floor(state.progress * 3);
     const headingHeight = compact ? 12 : 15, headingToContentGap = compact ? 3 : 7, baseSectionGap = compact ? 4 : 9, headingSize = compact ? 10.1 : 10.8;
     const methodSize = compact ? 9.2 : 10.6, methodLineHeight = compact ? 11.2 : 13.4, methodTextWidth = cardW - 58, methodCardGap = compact ? 3 : 5;
     const methodCards = p.steps.map(step => { const lines = wrapTextLines(step, methodTextWidth, methodSize, 650); return { step, lines, baseHeight: Math.max(compact ? 28 : 42, lines.length * methodLineHeight + (compact ? 7 : 16)) } });
@@ -1529,6 +1533,7 @@ function rightbar() {
   else if (p.id === 'lipase') drawLipaseTemperatureChart(x + 18, graphContentY, R - 36);
   else if (p.id === 'osmosis') drawOsmosisMassChart(x + 18, graphContentY, R - 36);
   else if (p.id === 'quadrats') drawQuadratSamplingResults(x + 18, graphContentY, R - 36);
+  else if (p.id === 'capture') drawCaptureSamplingResults(x + 18, graphContentY, R - 36);
   else if (p.id === 'shoretransect') drawShoreTransectResults(x + 18, graphContentY, R - 36);
   else if (p.id === 'ripple') drawRippleTankResults(x + 18, graphContentY, R - 36);
   else if (p.id === 'convection') drawConvectionObservation(x + 18, graphContentY, R - 36);
@@ -1745,6 +1750,7 @@ function lipaseStepIndex() { if (state.lipaseConditioning || state.lipaseStage =
 function osmosisStepIndex() { const stage = state.osmosisStage || 0; return stage < 1 ? 0 : stage < 3 ? 1 : stage < 6 ? 2 : 3 }
 function potometerStepIndex() { const stage = state.potometerStage || 0; return stage < 1 ? 0 : stage < 4 ? 1 : stage < 6 ? 2 : 3 }
 function quadratStepIndex() { const stage = state.quadratStage || 0; return stage < 1 ? 0 : stage < 4 ? 1 : stage < 7 ? 2 : 3 }
+function captureStepIndex() { const stage = state.captureStage || 0; return stage < 2 ? 0 : stage < 4 ? 1 : stage < 6 ? 2 : 3 }
 function transectStepIndex() { const stage = state.transectStage || 0; return stage < 1 ? 0 : stage < 4 ? 1 : stage < 7 ? 2 : 3 }
 function rippleStepIndex() { const stage = state.rippleStage || 0; return stage < 2 ? 0 : stage < 4 ? 1 : stage < 7 ? 2 : 3 }
 function electromagnetStepIndex() { const stage = state.electromagnetStage || 0; return stage < 1 ? 0 : stage < 3 ? 1 : stage < 5 ? 2 : 3 }
@@ -1864,6 +1870,26 @@ function drawQuadratSamplingResults(x, y, w) {
   text('100 m² ESTIMATE', x + w - 14, summaryY + 18, 8, C.muted, 800, 'right');
   text(state.quadratResults.length ? `${estimate} daisies` : '—', x + w - 14, summaryY + 39, 13.2, '#28754a', 800, 'right');
   wrappedText(state.complete ? 'Five unbiased repeats give an estimated meadow population of 500 daisies.' : 'Complete all five random positions before judging the meadow population.', x + 14, summaryY + 60, w - 28, 8.5, C.ink, 600, 10, 2);
+}
+function drawCaptureSamplingResults(x, y, w) {
+  text('MARK-RELEASE-RECAPTURE RESULTS', x, y, 10, C.muted, 800);
+  wrappedText('Using the Lincoln Index to estimate the population from two trap samples.', x, y + 18, w, 9, C.ink, 600, 11, 3);
+  const cardY = y + 44, rowH = 30;
+  rr(x, cardY, w, 102, 8, '#fff', C.line);
+  text('FIRST CATCH (MARKED)', x + 14, cardY + 20, 8, C.muted, 800);
+  text(state.captureStage >= 4 ? String(state.captureFirstCatch) : '—', x + w - 14, cardY + 20, 10, state.captureStage >= 4 ? '#8b5a2b' : C.muted, 800, 'right');
+  
+  text('SECOND CATCH (TOTAL)', x + 14, cardY + 50, 8, C.muted, 800);
+  text(state.captureStage >= 8 ? String(state.captureSecondCatch) : '—', x + w - 14, cardY + 50, 10, state.captureStage >= 8 ? '#8b5a2b' : C.muted, 800, 'right');
+
+  text('MARKED RECAPTURED', x + 14, cardY + 80, 8, C.muted, 800);
+  text(state.captureStage >= 8 ? String(state.captureRecaptured) : '—', x + w - 14, cardY + 80, 10, state.captureStage >= 8 ? '#8b5a2b' : C.muted, 800, 'right');
+
+  const summaryY = cardY + 116;
+  const estimate = Math.round((state.captureFirstCatch * state.captureSecondCatch) / state.captureRecaptured);
+  rr(x, summaryY, w, 68, 8, state.complete ? '#f4e9de' : '#eef3f2', state.complete ? '#b38259' : C.line);
+  text('LINCOLN INDEX ESTIMATE', x + 14, summaryY + 18, 8, C.muted, 800);
+  text(state.complete ? `${estimate} beetles` : 'awaiting samples', x + 14, summaryY + 39, 13.2, '#8b5a2b', 800);
 }
 function drawShoreTransectResults(x, y, w) {
   text('ROCKY-SHORE ZONATION', x, y, 10, C.muted, 800);
@@ -2562,6 +2588,35 @@ function activateQuadrat(label) {
     state.tab = 'graph'; state.toast = `Mean density ${quadratMean().toFixed(1)} daisies m⁻²; estimated meadow population ${quadratPopulationEstimate()}.`;
   } else if (label === 'RESET STUDY') resetQuadratPractical();
 }
+function resetCapturePractical() {
+  state.running = false; state.complete = false; state.time = 0; state.progress = 0; state.points = [];
+  state.captureStage = 0; state.captureTimer = 0; state.meadowWindClock = 0;
+  state.captureFirstCatch = 16; state.captureSecondCatch = 20; state.captureRecaptured = 6;
+  state.tab = 'bench';
+  state.toast = 'The meadow is ready. Set pitfall traps to begin the capture-mark-recapture study.';
+}
+function activateCapture(label) {
+  const stage = state.captureStage || 0;
+  if (label === 'SET TRAPS' && stage === 0) {
+    state.captureStage = 1; state.captureTimer = 0; state.running = true; state.complete = false;
+    state.toast = 'Setting pitfall traps and leaving them overnight...';
+  } else if (label === 'FIRST CAPTURE' && stage === 2) {
+    state.captureStage = 3; state.captureTimer = 0; state.running = true;
+    state.toast = 'Counting caught bugs and marking them carefully with a non-toxic marker...';
+  } else if (label === 'RELEASE & WAIT' && stage === 4) {
+    state.captureStage = 5; state.captureTimer = 0; state.running = true;
+    state.toast = 'Releasing marked bugs back into the habitat and waiting 24 hours...';
+  } else if (label === 'SECOND CAPTURE' && stage === 6) {
+    state.captureStage = 7; state.captureTimer = 0; state.running = true;
+    state.toast = 'Counting total bugs caught in the second sample and checking for marked ones...';
+  } else if (label === 'RECORD' && stage === 8) {
+    state.captureStage = 9; state.running = false; state.progress = 1;
+    state.complete = true;
+    state.toast = `Study complete: First catch ${state.captureFirstCatch}, Second catch ${state.captureSecondCatch}, Recaptured ${state.captureRecaptured}.`;
+  } else if (label === 'VIEW RESULTS' || label === 'RESULTS') {
+    state.tab = 'graph'; state.toast = `Lincoln Index population estimate calculated.`;
+  } else if (label === 'RESET STUDY') resetCapturePractical();
+}
 function resetShoreTransectPractical() {
   state.running = false; state.complete = false; state.time = 0; state.progress = 0; state.points = [];
   state.transectStage = 0; state.transectTimer = 0; state.transectStationIndex = 0; state.transectDistanceM = 0; state.transectCurrentObservation = null; state.transectResults = []; state.shoreTideClock = 0; state.shoreTideProgress = 0;
@@ -3092,6 +3147,7 @@ function activate(label) {
   if (id === 'potometer' && ['INTRODUCE BUBBLE', 'INTRODUCING…', 'ALIGN TO ZERO', 'ALIGNING…', 'START 5 MIN RUN', 'MEASURING…', 'NEXT WIND SPEED', 'VIEW GRAPH', 'RESET SERIES', 'GRAPH'].includes(label)) { activatePotometer(label); draw(); return }
   if (id === 'pondweed' && ['- 10cm', '+ 10cm', 'LAMP ON', 'LAMP OFF', 'COUNT 1 MIN', 'RESET PRACTICAL', 'METHOD', 'RESULTS', 'GRAPH'].includes(label)) { activatePondweed(label); draw(); return }
   if (id === 'quadrats' && ['GENERATE POINT', 'RANDOMISING…', 'PLACE QUADRAT', 'QUADRAT FALLING…', 'COUNT DAISIES', 'COUNTING…', 'RECORD SAMPLE', 'NEXT SAMPLE', 'VIEW RESULTS', 'RESET STUDY', 'RESULTS'].includes(label)) { activateQuadrat(label); draw(); return }
+  if (id === 'capture' && ['SET TRAPS', 'WAITING OVERNIGHT…', 'FIRST CAPTURE', 'MARKING BUGS…', 'RELEASE & WAIT', 'WAITING 24H…', 'SECOND CAPTURE', 'COUNTING…', 'RECORD', 'VIEW RESULTS', 'RESET STUDY', 'RESULTS'].includes(label)) { activateCapture(label); draw(); return }
   if (id === 'shoretransect' && ['LAY TRANSECT', 'EXTENDING TAPE…', 'MOVE QUADRAT', 'MOVING QUADRAT…', 'SURVEY QUADRAT', 'IDENTIFYING…', 'RECORD SAMPLE', 'NEXT POSITION', 'VIEW ZONATION', 'RESET TRANSECT', 'ZONATION'].includes(label)) { activateShoreTransect(label); draw(); return }
   if (id === 'ripple' && ['LEVEL TANK', 'LEVELLING…', 'START VIBRATOR', 'WAVES FORMING…', 'MEASURE 10 WAVES', 'STROBE + RULER…', 'RECORD SPEED', 'NEXT FREQUENCY', 'VIEW RESULTS', 'RESET SERIES', 'RESULTS'].includes(label)) { activateRipple(label); draw(); return }
   if (id === 'newton2' && ['FORCE -0.1N', 'FORCE +0.1N', 'RELEASE TROLLEY', 'RESET TROLLEY', 'RESET PRACTICAL', 'METHOD', 'RESULTS', 'GRAPH'].includes(label)) { activateNewton2(label); draw(); return }
@@ -3545,6 +3601,26 @@ function update(dt, skipDraw = false) {
         state.quadratCurrentCount = Math.min(sample.daisies, Math.floor(q * sample.daisies + .001));
         state.toast = q < .72 ? `Identifying rooted daisy stems one at a time: ${state.quadratCurrentCount} counted.` : 'Checking boundary plants and confirming the tally.';
         if (q >= 1) { state.quadratStage = 6; state.quadratTimer = 0; state.running = false; state.quadratCurrentCount = sample.daisies; state.toast = `${sample.daisies} daisies are rooted inside this 1 m² quadrat. Record the sample.` }
+      }
+    }
+    if (!skipDraw) draw();
+    return;
+  }
+  if (id === 'capture') {
+    state.meadowWindClock += dt;
+    const stage = state.captureStage || 0;
+    if (state.running) {
+      state.captureTimer += dt;
+      const duration = 2;
+      const q = Math.max(0, Math.min(1, state.captureTimer / duration));
+      if (stage === 1) {
+        if (q >= 1) { state.captureStage = 2; state.captureTimer = 0; state.running = false; state.toast = 'Traps set overnight. Ready for first capture.' }
+      } else if (stage === 3) {
+        if (q >= 1) { state.captureStage = 4; state.captureTimer = 0; state.running = false; state.toast = `${state.captureFirstCatch} bugs caught and marked. Ready to release.` }
+      } else if (stage === 5) {
+        if (q >= 1) { state.captureStage = 6; state.captureTimer = 0; state.running = false; state.toast = '24 hours elapsed. Ready for second capture.' }
+      } else if (stage === 7) {
+        if (q >= 1) { state.captureStage = 8; state.captureTimer = 0; state.running = false; state.toast = `Second catch: ${state.captureSecondCatch} bugs total. ${state.captureRecaptured} marked recaptured.` }
       }
     }
     if (!skipDraw) draw();
@@ -4719,6 +4795,19 @@ window.render_game_to_text = () => {
       conclusion: state.complete ? 'Five randomly located repeats give a mean of 5.0 daisies m⁻² and an estimated population of 500 daisies in the 100 m² habitat.' : null
     };
     payload.controls = ['GENERATE POINT', 'PLACE QUADRAT', 'COUNT DAISIES', 'RECORD SAMPLE', 'NEXT SAMPLE', 'RESET STUDY', 'RESULTS', 'METHOD', 'F fullscreen'];
+  } else if (id === 'capture') {
+    const phases = ['meadow ready', 'traps waiting overnight', 'ready for first capture', 'marking bugs', 'ready to release', 'waiting 24 hours', 'ready for second capture', 'counting second catch', 'ready to record', 'study complete'];
+    payload.graph_axes = null; payload.graph_readings = state.complete ? 1 : 0; payload.results_view = 'Lincoln Index calculation';
+    payload.capture_mark_recapture_practical = {
+      stage: state.captureStage,
+      phase: phases[state.captureStage],
+      first_catch_marked: state.captureStage >= 4 ? state.captureFirstCatch : null,
+      second_catch_total: state.captureStage >= 8 ? state.captureSecondCatch : null,
+      marked_recaptured: state.captureStage >= 8 ? state.captureRecaptured : null,
+      lincoln_index_estimate: state.complete ? Math.round((state.captureFirstCatch * state.captureSecondCatch) / state.captureRecaptured) : null,
+      complete: state.complete
+    };
+    payload.controls = ['SET TRAPS', 'FIRST CAPTURE', 'RELEASE & WAIT', 'SECOND CAPTURE', 'RECORD', 'RESET STUDY', 'RESULTS', 'METHOD', 'F fullscreen'];
   } else if (id === 'shoretransect') {
     const station = currentTransectStation(), phases = ['rocky shore and incoming tide ready', 'unreeling parallel belt tapes downslope', 'belt fixed through all three strata', 'moving quadrat to fixed station', 'quadrat positioned on shore rock', 'identifying organisms and estimating cover', 'station ready to record', 'station recorded'];
     payload.graph_axes = null; payload.graph_readings = state.transectResults.length; payload.results_view = 'multi-species zonation profile and six-station results table';
