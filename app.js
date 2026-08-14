@@ -3153,6 +3153,9 @@ function resetFieldLinePractical() {
   state.tab = 'bench';
   state.toast = 'A single red-and-blue bar magnet is centred below clean white paper. Sprinkle a thin, even layer of simulated iron filings.';
 }
+function resetNuclearPractical() {
+  state.nuclearStage = 0; state.nuclearTimer = 0; state.nuclearSource = 0; state.nuclearAbsorber = 0; state.nuclearCount = 0; state.nuclearAnimAbsorber = 0; state.nuclearAnimProgress = 1; state.running = false; state.toast = 'Select a radioactive source and an absorber to begin.';
+}
 function activateFieldLines(label) {
   const stage = state.fieldStage || 0, configuration = fieldConfigurations[state.fieldConfigIndex];
   if (label === 'SPRINKLE FILINGS' && stage === 0) {
