@@ -1177,8 +1177,8 @@ function main() {
   }
   ctx.fillStyle = '#171d21'; ctx.fillRect(x, H - 5, w, 5); ctx.restore();
   const sceneBottom = immersiveOutdoor ? H : benchY;
-  if (lab3d.available) ctx.clearRect(x, arenaTop, w, sceneBottom - arenaTop);
-  const cx = x + w * .52, cy = benchY - 57; if (lab3d.available) { lab3d.resize(x, arenaTop, w, Math.max(180, sceneBottom - arenaTop), UI_SCALE); registerWebGLInteractions(p.id, cx, cy); ctx.save(); ctx.globalCompositeOperation = 'destination-out'; ctx.fillRect(x, arenaTop, w, sceneBottom - arenaTop); ctx.restore(); if (!free) drawChemicalTags(p.id); if (p.id === 'mass' && state.massStage === 2 && state.massLidOn && state.layout?.lid) { const lp = state.layout.lid; rr(lp.x - 76, lp.y - 64, 152, 27, 8, 'rgba(255,255,255,.96)', 'rgba(124,98,184,.6)'); text('CLICK LID TO REMOVE', lp.x, lp.y - 50, 9.5, '#6b52a6', 800, 'center') } if (p.id === 'hydrogen' && ((state.hydrogenStage === 4 && state.hydrogenTimer > .36) || state.hydrogenStage === 5)) { const active = state.hydrogenStage === 4, hp = lab3d.projectToScreen(.65, active ? 3.35 : 2.85, .02); if (hp) { rr(hp.x - 72, hp.y - 14, 144, 30, 9, active ? 'rgba(255,245,224,.97)' : 'rgba(232,247,241,.97)', active ? 'rgba(228,93,79,.72)' : 'rgba(8,127,117,.55)'); text(active ? 'SQUEAKY POP!' : 'HYDROGEN CONFIRMED', hp.x, hp.y + 1, 10, active ? '#c94b3f' : C.teal, 850, 'center') } } } else drawApparatus(p.id, cx, cy, w, benchY, x);
+  if (lab3d.available && p.id !== 'nuclear') ctx.clearRect(x, arenaTop, w, sceneBottom - arenaTop);
+  const cx = x + w * .52, cy = benchY - 57; if (lab3d.available && p.id !== 'nuclear') { lab3d.resize(x, arenaTop, w, Math.max(180, sceneBottom - arenaTop), UI_SCALE); registerWebGLInteractions(p.id, cx, cy); ctx.save(); ctx.globalCompositeOperation = 'destination-out'; ctx.fillRect(x, arenaTop, w, sceneBottom - arenaTop); ctx.restore(); if (!free) drawChemicalTags(p.id); if (p.id === 'mass' && state.massStage === 2 && state.massLidOn && state.layout?.lid) { const lp = state.layout.lid; rr(lp.x - 76, lp.y - 64, 152, 27, 8, 'rgba(255,255,255,.96)', 'rgba(124,98,184,.6)'); text('CLICK LID TO REMOVE', lp.x, lp.y - 50, 9.5, '#6b52a6', 800, 'center') } if (p.id === 'hydrogen' && ((state.hydrogenStage === 4 && state.hydrogenTimer > .36) || state.hydrogenStage === 5)) { const active = state.hydrogenStage === 4, hp = lab3d.projectToScreen(.65, active ? 3.35 : 2.85, .02); if (hp) { rr(hp.x - 72, hp.y - 14, 144, 30, 9, active ? 'rgba(255,245,224,.97)' : 'rgba(232,247,241,.97)', active ? 'rgba(228,93,79,.72)' : 'rgba(8,127,117,.55)'); text(active ? 'SQUEAKY POP!' : 'HYDROGEN CONFIRMED', hp.x, hp.y + 1, 10, active ? '#c94b3f' : C.teal, 850, 'center') } } } else drawApparatus(p.id, cx, cy, w, benchY, x);
   if (state.focusMode) drawFocusModeTopBar(p);
   if (shoreScene) rr(x + 8, benchY + 18, w - 16, 86, 12, 'rgba(5,31,45,.78)', 'rgba(116,221,226,.28)');
   else if (meadowScene) rr(x + 8, benchY + 18, w - 16, 86, 12, 'rgba(12,43,24,.8)', 'rgba(164,224,137,.3)');
@@ -1766,7 +1766,38 @@ function drawReactantSafetyModal() {
   hit('close-reactant-safety-modal', closeX, closeY, closeW, closeH);
 }
 function drawApparatus(id, cx, cy, w, benchY, arenaX) {
-  state.layout = { target: { x: cx + 72, y: cy - 1 }, source: { x: cx - 155, y: cy - 1 } }; if (id === 'free') { drawWorkspace(arenaX, w, benchY) } else if (id === 'electro') { drawBeaker(cx - 73, cy - 78, 146, 108, { liquid: .55, color: 'rgba(41,159,180,.34)', deep: 'rgba(20,126,153,.68)' }); ctx.strokeStyle = '#2d373b'; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(cx - 35, cy - 112); ctx.lineTo(cx - 35, cy + 13); ctx.moveTo(cx + 35, cy - 112); ctx.lineTo(cx + 35, cy + 13); ctx.stroke(); ctx.strokeStyle = '#d3e2e5'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(cx - 33, cy - 108); ctx.lineTo(cx - 33, cy + 9); ctx.stroke(); rr(cx - 78, cy - 151, 156, 38, 8, '#253c46', '#172c35'); text(state.running ? '6.0 V   ● ON' : '0.0 V   ○ OFF', cx, cy - 132, 13, state.running ? '#68eeaa' : '#cbd5d8', 750, 'center'); if (state.running) { for (let i = 0; i < 14; i++) { ctx.strokeStyle = i % 2 ? 'rgba(205,245,250,.9)' : 'rgba(118,222,235,.75)'; ctx.beginPath(); ctx.arc(cx + (i % 2 ? 35 : -35) + (i % 3 - 1) * 4, cy + 7 - ((state.time * (18 + i) % 72)), 2 + i % 3, 0, 7); ctx.stroke() } } } else if (id === 'displacement') { ctx.strokeStyle = '#43545a'; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(cx - 188, cy + 35); ctx.lineTo(cx + 188, cy + 35); ctx.moveTo(cx - 188, cy - 45); ctx.lineTo(cx + 188, cy - 45); ctx.stroke(); ['Mg', 'Zn', 'Fe', 'Cu'].forEach((metal, i) => { const tx = cx - 150 + i * 100; drawTestTube(tx, cy - 8, .94); ctx.fillStyle = i === 3 ? '#b86c3d' : '#aab5b8'; ctx.fillRect(tx - 5, cy - 85 + (state.displacementStage ? 46 : 0), 10, 72); text(metal, tx, cy - 108, 10, C.ink, 800, 'center') }) } else if (id === 'chrom') { drawBeaker(cx - 82, cy - 100, 164, 130, { liquid: .12, color: 'rgba(180,220,230,.28)', deep: 'rgba(90,174,194,.4)' }); ctx.fillStyle = '#fffef3'; ctx.shadowColor = 'rgba(20,40,48,.18)'; ctx.shadowBlur = 4; ctx.fillRect(cx - 43, cy - 128, 86, 149); ctx.shadowBlur = 0; ctx.strokeStyle = '#89969a'; ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(cx - 43, cy - 55); ctx.lineTo(cx + 43, cy - 55); ctx.stroke(); ctx.setLineDash([]);['#e34b4b', '#3669d1', '#efc438'].forEach((c, i) => { ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(cx - 25 + i * 25, cy - 50 - (state.running ? state.progress * (38 + i * 15) : 0), 4, 8 + state.progress * 12, 0, 0, 7); ctx.fill() }) } else if (id === 'salts') { ctx.strokeStyle = '#69777b'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(cx - 58, benchY - 4); ctx.lineTo(cx - 42, benchY - 123); ctx.moveTo(cx + 58, benchY - 4); ctx.lineTo(cx + 42, benchY - 123); ctx.stroke(); ctx.strokeStyle = '#39484d'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(cx - 60, benchY - 122); ctx.lineTo(cx + 60, benchY - 122); ctx.stroke(); drawBunsen(cx, benchY - 3, state.burner); drawBeaker(cx - 62, benchY - 220, 124, 90, { liquid: .5, color: 'rgba(38,151,212,.38)', deep: 'rgba(24,108,185,.65)' }); if (state.burner) { for (let i = 0; i < 5; i++) { ctx.strokeStyle = `rgba(255,255,255,${.18 - i * .025})`; ctx.beginPath(); ctx.arc(cx, benchY - 222 - i * 10, 20 + i * 5, Math.PI * 1.1, Math.PI * 1.9); ctx.stroke() } } } else if (id === 'water') { drawBunsen(cx - 78, benchY - 4, state.burner); drawFlask(cx - 78, cy - 22, .82, { color: '80,161,195', liquid: .52, bubbles: state.burner }); ctx.strokeStyle = '#78919a'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(cx - 68, cy - 82); ctx.quadraticCurveTo(cx - 5, cy - 138, cx + 58, cy - 55); ctx.lineTo(cx + 90, cy - 5); ctx.stroke(); drawBeaker(cx + 68, cy - 30, 60, 61, { liquid: state.running ? .48 : .14, color: 'rgba(150,218,232,.3)', deep: 'rgba(82,178,204,.45)' }) } else if (id === 'mass') { drawBalance(cx - 170, cy + 4, .72, { mass: state.running ? 4.18 : 4.01 }); drawTripod(cx + 70, benchY - 4, .9); drawBunsen(cx + 70, benchY - 3, state.burner); ctx.fillStyle = '#d7c7a9'; ctx.beginPath(); ctx.ellipse(cx + 70, benchY - 112, 38, 14, 0, 0, 7); ctx.fill(); ctx.strokeStyle = '#756c5c'; ctx.stroke(); text(state.running ? 'MgO: 4.18 g' : 'Mg: 4.01 g', cx - 170, cy - 68, 11, C.ink, 700, 'center') } else if (id === 'hydrogen') { drawFlask(cx - 90, cy, .92, { color: '190,220,225', liquid: .47, bubbles: state.running, label: 'Mg + HCl' }); ctx.strokeStyle = '#718990'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(cx - 80, cy - 75); ctx.quadraticCurveTo(cx - 15, cy - 130, cx + 55, cy - 70); ctx.lineTo(cx + 86, cy - 44); ctx.stroke(); drawTestTube(cx + 102, cy - 10, .9); if (state.running) { ctx.fillStyle = '#f16a42'; ctx.beginPath(); ctx.arc(cx + 135, cy - 93, 12 + Math.sin(state.flamePhase) * 4, 0, 7); ctx.fill(); text('POP!', cx + 135, cy - 118, 13, C.red, 800, 'center') } } else if (id === 'co2') { drawFlask(cx - 100, cy, .9, { color: '215,213,185', liquid: .5, bubbles: state.running, label: 'CaCO₃ + HCl' }); ctx.strokeStyle = '#718990'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(cx - 90, cy - 75); ctx.quadraticCurveTo(cx - 25, cy - 135, cx + 56, cy - 67); ctx.lineTo(cx + 92, cy - 43); ctx.stroke(); drawTestTube(cx + 108, cy - 8, .98, { cloudy: state.running }); if (state.running) text('MILKY', cx + 108, cy + 65, 11, C.teal, 800, 'center') } else { const sourcePos = state.drag?.kind === 'HCl(aq)' ? { x: state.drag.x, y: state.drag.y } : state.pour ? { x: state.layout.target.x - 116, y: state.layout.target.y - 78 } : { ...state.layout.source }; const near = state.drag?.kind === 'HCl(aq)' && Math.hypot(state.drag.x - state.layout.target.x, state.drag.y - state.layout.target.y) < 145; if (near) { ctx.strokeStyle = 'rgba(13,160,139,.68)'; ctx.lineWidth = 3; ctx.setLineDash([7, 6]); ctx.beginPath(); ctx.arc(state.layout.target.x, state.layout.target.y, 74 + Math.sin(state.flamePhase * 3) * 3, 0, 7); ctx.stroke(); ctx.setLineDash([]); text('RELEASE TO POUR', state.layout.target.x, state.layout.target.y - 115, 10, C.teal, 800, 'center') } drawFlask(state.layout.target.x, state.layout.target.y, 1.08, { color: id === 'temp' ? '182,91,127' : '232,205,74', liquid: .38 + state.transferred * .22, bubbles: state.running, label: id === 'temp' ? 'NaOH(aq)' : 'Na₂S₂O₃(aq)' }); let ang = state.pour ? 1.14 : 0; drawFlask(sourcePos.x, sourcePos.y, .9, { color: '186,221,226', liquid: Math.max(.15, .68 - state.transferred * .48), angle: ang, label: state.pour ? '' : 'HCl(aq)' }); hit('reagent', sourcePos.x - 58, sourcePos.y - 88, 116, 150, 'HCl(aq)'); if (state.pour) { const sx = sourcePos.x + Math.sin(ang) * 68, sy = sourcePos.y - Math.cos(ang) * 68; const tx = state.layout.target.x - 4, ty = state.layout.target.y - 72; let sg = ctx.createLinearGradient(sx, sy, tx, ty); sg.addColorStop(0, 'rgba(220,248,255,.95)'); sg.addColorStop(1, 'rgba(112,211,231,.62)'); ctx.strokeStyle = sg; ctx.lineWidth = 5 + Math.sin(state.time * 16); ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.quadraticCurveTo((sx + tx) / 2 + 8, (sy + ty) / 2 - 3, tx, ty); ctx.stroke(); ctx.lineCap = 'butt' } if (id === 'temp') { drawThermometer(state.layout.target.x + 22, state.layout.target.y - 8) } }
+  state.layout = { target: { x: cx + 72, y: cy - 1 }, source: { x: cx - 155, y: cy - 1 } }; if (id === 'free') { drawWorkspace(arenaX, w, benchY) } else if (id === 'electro') { drawBeaker(cx - 73, cy - 78, 146, 108, { liquid: .55, color: 'rgba(41,159,180,.34)', deep: 'rgba(20,126,153,.68)' }); ctx.strokeStyle = '#2d373b'; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(cx - 35, cy - 112); ctx.lineTo(cx - 35, cy + 13); ctx.moveTo(cx + 35, cy - 112); ctx.lineTo(cx + 35, cy + 13); ctx.stroke(); ctx.strokeStyle = '#d3e2e5'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(cx - 33, cy - 108); ctx.lineTo(cx - 33, cy + 9); ctx.stroke(); rr(cx - 78, cy - 151, 156, 38, 8, '#253c46', '#172c35'); text(state.running ? '6.0 V   ● ON' : '0.0 V   ○ OFF', cx, cy - 132, 13, state.running ? '#68eeaa' : '#cbd5d8', 750, 'center'); if (state.running) { for (let i = 0; i < 14; i++) { ctx.strokeStyle = i % 2 ? 'rgba(205,245,250,.9)' : 'rgba(118,222,235,.75)'; ctx.beginPath(); ctx.arc(cx + (i % 2 ? 35 : -35) + (i % 3 - 1) * 4, cy + 7 - ((state.time * (18 + i) % 72)), 2 + i % 3, 0, 7); ctx.stroke() } } } else if (id === 'displacement') { ctx.strokeStyle = '#43545a'; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(cx - 188, cy + 35); ctx.lineTo(cx + 188, cy + 35); ctx.moveTo(cx - 188, cy - 45); ctx.lineTo(cx + 188, cy - 45); ctx.stroke(); ['Mg', 'Zn', 'Fe', 'Cu'].forEach((metal, i) => { const tx = cx - 150 + i * 100; drawTestTube(tx, cy - 8, .94); ctx.fillStyle = i === 3 ? '#b86c3d' : '#aab5b8'; ctx.fillRect(tx - 5, cy - 85 + (state.displacementStage ? 46 : 0), 10, 72); text(metal, tx, cy - 108, 10, C.ink, 800, 'center') }) } else if (id === 'chrom') { drawBeaker(cx - 82, cy - 100, 164, 130, { liquid: .12, color: 'rgba(180,220,230,.28)', deep: 'rgba(90,174,194,.4)' }); ctx.fillStyle = '#fffef3'; ctx.shadowColor = 'rgba(20,40,48,.18)'; ctx.shadowBlur = 4; ctx.fillRect(cx - 43, cy - 128, 86, 149); ctx.shadowBlur = 0; ctx.strokeStyle = '#89969a'; ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(cx - 43, cy - 55); ctx.lineTo(cx + 43, cy - 55); ctx.stroke(); ctx.setLineDash([]);['#e34b4b', '#3669d1', '#efc438'].forEach((c, i) => { ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(cx - 25 + i * 25, cy - 50 - (state.running ? state.progress * (38 + i * 15) : 0), 4, 8 + state.progress * 12, 0, 0, 7); ctx.fill() }) } else if (id === 'salts') { ctx.strokeStyle = '#69777b'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(cx - 58, benchY - 4); ctx.lineTo(cx - 42, benchY - 123); ctx.moveTo(cx + 58, benchY - 4); ctx.lineTo(cx + 42, benchY - 123); ctx.stroke(); ctx.strokeStyle = '#39484d'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(cx - 60, benchY - 122); ctx.lineTo(cx + 60, benchY - 122); ctx.stroke(); drawBunsen(cx, benchY - 3, state.burner); drawBeaker(cx - 62, benchY - 220, 124, 90, { liquid: .5, color: 'rgba(38,151,212,.38)', deep: 'rgba(24,108,185,.65)' }); if (state.burner) { for (let i = 0; i < 5; i++) { ctx.strokeStyle = `rgba(255,255,255,${.18 - i * .025})`; ctx.beginPath(); ctx.arc(cx, benchY - 222 - i * 10, 20 + i * 5, Math.PI * 1.1, Math.PI * 1.9); ctx.stroke() } } } else if (id === 'water') { drawBunsen(cx - 78, benchY - 4, state.burner); drawFlask(cx - 78, cy - 22, .82, { color: '80,161,195', liquid: .52, bubbles: state.burner }); ctx.strokeStyle = '#78919a'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(cx - 68, cy - 82); ctx.quadraticCurveTo(cx - 5, cy - 138, cx + 58, cy - 55); ctx.lineTo(cx + 90, cy - 5); ctx.stroke(); drawBeaker(cx + 68, cy - 30, 60, 61, { liquid: state.running ? .48 : .14, color: 'rgba(150,218,232,.3)', deep: 'rgba(82,178,204,.45)' }) } else if (id === 'mass') { drawBalance(cx - 170, cy + 4, .72, { mass: state.running ? 4.18 : 4.01 }); drawTripod(cx + 70, benchY - 4, .9); drawBunsen(cx + 70, benchY - 3, state.burner); ctx.fillStyle = '#d7c7a9'; ctx.beginPath(); ctx.ellipse(cx + 70, benchY - 112, 38, 14, 0, 0, 7); ctx.fill(); ctx.strokeStyle = '#756c5c'; ctx.stroke(); text(state.running ? 'MgO: 4.18 g' : 'Mg: 4.01 g', cx - 170, cy - 68, 11, C.ink, 700, 'center') } else if (id === 'hydrogen') { drawFlask(cx - 90, cy, .92, { color: '190,220,225', liquid: .47, bubbles: state.running, label: 'Mg + HCl' }); ctx.strokeStyle = '#718990'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(cx - 80, cy - 75); ctx.quadraticCurveTo(cx - 15, cy - 130, cx + 55, cy - 70); ctx.lineTo(cx + 86, cy - 44); ctx.stroke(); drawTestTube(cx + 102, cy - 10, .9); if (state.running) { ctx.fillStyle = '#f16a42'; ctx.beginPath(); ctx.arc(cx + 135, cy - 93, 12 + Math.sin(state.flamePhase) * 4, 0, 7); ctx.fill(); text('POP!', cx + 135, cy - 118, 13, C.red, 800, 'center') } } else if (id === 'co2') { drawFlask(cx - 100, cy, .9, { color: '215,213,185', liquid: .5, bubbles: state.running, label: 'CaCO₃ + HCl' }); ctx.strokeStyle = '#718990'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(cx - 90, cy - 75); ctx.quadraticCurveTo(cx - 25, cy - 135, cx + 56, cy - 67); ctx.lineTo(cx + 92, cy - 43); ctx.stroke(); drawTestTube(cx + 108, cy - 8, .98, { cloudy: state.running }); if (state.running) text('MILKY', cx + 108, cy + 65, 11, C.teal, 800, 'center') } else if (id === 'nuclear') {
+    rr(cx + 40, cy - 80, 140, 90, 8, '#2a3b45', '#162329');
+    rr(cx + 50, cy - 70, 120, 45, 4, '#a3c4a8', '#89a88e');
+    text(Math.floor(state.nuclearCount).toString().padStart(4, '0'), cx + 110, cy - 47, 24, '#1b3320', 800, 'center');
+    text('COUNTS', cx + 110, cy - 20, 10, '#86a89c', 700, 'center');
+    ctx.fillStyle = '#657881'; ctx.beginPath(); ctx.roundRect(cx - 30, cy - 45, 70, 20, 4); ctx.fill();
+    ctx.fillStyle = '#17313e'; ctx.beginPath(); ctx.roundRect(cx - 30, cy - 40, 20, 10, 2); ctx.fill();
+    ctx.strokeStyle = '#102a3a'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(cx + 40, cy - 35); ctx.quadraticCurveTo(cx + 40, cy - 10, cx + 50, cy - 10); ctx.stroke();
+    rr(cx - 160, cy - 35, 30, 40, 4, '#4a5b63', '#2a3b45');
+    if (state.nuclearSource > 0) {
+      const colors = ['transparent', '#e45d4f', '#308bc1', '#a0522d'];
+      ctx.fillStyle = colors[state.nuclearSource];
+      ctx.beginPath(); ctx.arc(cx - 145, cy - 15, 8, 0, Math.PI * 2); ctx.fill();
+    }
+    if (state.nuclearAnimProgress < 1 || state.nuclearAnimAbsorber > 0 || state.nuclearAbsorber > 0) {
+      const absColors = ['transparent', '#fcfaf2', '#d5dadd', '#4b575e'];
+      const currentAbs = state.nuclearAbsorber, prevAbs = state.nuclearAnimAbsorber;
+      const drawAbs = (type, yOff) => {
+        if (type === 0) return;
+        ctx.fillStyle = absColors[type];
+        ctx.fillRect(cx - 85, cy - 50 + yOff, 10, 70);
+        ctx.strokeStyle = '#102a3a'; ctx.lineWidth = 1; ctx.strokeRect(cx - 85, cy - 50 + yOff, 10, 70);
+      };
+      if (state.nuclearAnimProgress < 1) {
+        const q = state.nuclearAnimProgress, smooth = q * q * (3 - 2 * q);
+        if (prevAbs > 0) drawAbs(prevAbs, smooth * 120);
+        if (currentAbs > 0) drawAbs(currentAbs, -120 + smooth * 120);
+      } else {
+        drawAbs(currentAbs, 0);
+      }
+    }
+  } else { const sourcePos = state.drag?.kind === 'HCl(aq)' ? { x: state.drag.x, y: state.drag.y } : state.pour ? { x: state.layout.target.x - 116, y: state.layout.target.y - 78 } : { ...state.layout.source }; const near = state.drag?.kind === 'HCl(aq)' && Math.hypot(state.drag.x - state.layout.target.x, state.drag.y - state.layout.target.y) < 145; if (near) { ctx.strokeStyle = 'rgba(13,160,139,.68)'; ctx.lineWidth = 3; ctx.setLineDash([7, 6]); ctx.beginPath(); ctx.arc(state.layout.target.x, state.layout.target.y, 74 + Math.sin(state.flamePhase * 3) * 3, 0, 7); ctx.stroke(); ctx.setLineDash([]); text('RELEASE TO POUR', state.layout.target.x, state.layout.target.y - 115, 10, C.teal, 800, 'center') } drawFlask(state.layout.target.x, state.layout.target.y, 1.08, { color: id === 'temp' ? '182,91,127' : '232,205,74', liquid: .38 + state.transferred * .22, bubbles: state.running, label: id === 'temp' ? 'NaOH(aq)' : 'Na₂S₂O₃(aq)' }); let ang = state.pour ? 1.14 : 0; drawFlask(sourcePos.x, sourcePos.y, .9, { color: '186,221,226', liquid: Math.max(.15, .68 - state.transferred * .48), angle: ang, label: state.pour ? '' : 'HCl(aq)' }); hit('reagent', sourcePos.x - 58, sourcePos.y - 88, 116, 150, 'HCl(aq)'); if (state.pour) { const sx = sourcePos.x + Math.sin(ang) * 68, sy = sourcePos.y - Math.cos(ang) * 68; const tx = state.layout.target.x - 4, ty = state.layout.target.y - 72; let sg = ctx.createLinearGradient(sx, sy, tx, ty); sg.addColorStop(0, 'rgba(220,248,255,.95)'); sg.addColorStop(1, 'rgba(112,211,231,.62)'); ctx.strokeStyle = sg; ctx.lineWidth = 5 + Math.sin(state.time * 16); ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.quadraticCurveTo((sx + tx) / 2 + 8, (sy + ty) / 2 - 3, tx, ty); ctx.stroke(); ctx.lineCap = 'butt' } if (id === 'temp') { drawThermometer(state.layout.target.x + 22, state.layout.target.y - 8) } }
   state.particles.forEach(pt => { ctx.globalAlpha = Math.max(0, pt.life); ctx.strokeStyle = pt.color || 'rgba(255,255,255,.8)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(pt.x, pt.y, pt.r, 0, 7); ctx.stroke(); ctx.globalAlpha = 1 });
   if (state.complete) { rr(cx - 105, cy - 165, 210, 38, 8, '#e4f4ed', '#84c8aa'); text('✓  Practical result captured', cx, cy - 146, 13, '#277655', 700, 'center') }
 }
@@ -4564,68 +4595,7 @@ window.render_game_to_text = () => {
       smooth_stage_animation: true
     };
     payload.controls = ['CLOSE SWITCH', 'RECORD READING', 'NEXT LENGTH', 'RESET SERIES', 'GRAPH', 'METHOD', 'F fullscreen'];
-  } else if (id === 'nuclear') {
-    rr(cx + 40, cy - 80, 140, 90, 8, '#2a3b45', '#162329');
-    rr(cx + 50, cy - 70, 120, 45, 4, '#a3c4a8', '#89a88e');
-    text(Math.floor(state.nuclearCount).toString().padStart(4, '0'), cx + 110, cy - 47, 24, '#1b3320', 800, 'center');
-    text('COUNTS', cx + 110, cy - 20, 10, '#86a89c', 700, 'center');
-    ctx.fillStyle = '#657881'; ctx.beginPath(); ctx.roundRect(cx - 30, cy - 45, 70, 20, 4); ctx.fill();
-    ctx.fillStyle = '#17313e'; ctx.beginPath(); ctx.roundRect(cx - 30, cy - 40, 20, 10, 2); ctx.fill();
-    ctx.strokeStyle = '#102a3a'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(cx + 40, cy - 35); ctx.quadraticCurveTo(cx + 40, cy - 10, cx + 50, cy - 10); ctx.stroke();
-    rr(cx - 160, cy - 35, 30, 40, 4, '#4a5b63', '#2a3b45');
-    if (state.nuclearSource > 0) {
-      const colors = ['transparent', '#e45d4f', '#308bc1', '#a0522d'];
-      ctx.fillStyle = colors[state.nuclearSource];
-      ctx.beginPath(); ctx.arc(cx - 145, cy - 15, 8, 0, Math.PI * 2); ctx.fill();
-    }
-    if (state.nuclearAnimProgress < 1 || state.nuclearAnimAbsorber > 0 || state.nuclearAbsorber > 0) {
-      const absColors = ['transparent', '#fcfaf2', '#d5dadd', '#4b575e'];
-      const currentAbs = state.nuclearAbsorber, prevAbs = state.nuclearAnimAbsorber;
-      const drawAbs = (type, yOff) => {
-        if (type === 0) return;
-        ctx.fillStyle = absColors[type];
-        ctx.fillRect(cx - 85, cy - 50 + yOff, 10, 70);
-        ctx.strokeStyle = '#102a3a'; ctx.lineWidth = 1; ctx.strokeRect(cx - 85, cy - 50 + yOff, 10, 70);
-      };
-      if (state.nuclearAnimProgress < 1) {
-        const q = state.nuclearAnimProgress, smooth = q * q * (3 - 2 * q);
-        if (prevAbs > 0) drawAbs(prevAbs, smooth * 120);
-        if (currentAbs > 0) drawAbs(currentAbs, -120 + smooth * 120);
-      } else {
-        drawAbs(currentAbs, 0);
-      }
-    }
-  } else if (id === 'nuclear') {
-    rr(cx + 40, cy - 80, 140, 90, 8, '#2a3b45', '#162329');
-    rr(cx + 50, cy - 70, 120, 45, 4, '#a3c4a8', '#89a88e');
-    text(Math.floor(state.nuclearCount).toString().padStart(4, '0'), cx + 110, cy - 47, 24, '#1b3320', 800, 'center');
-    text('COUNTS', cx + 110, cy - 20, 10, '#86a89c', 700, 'center');
-    ctx.fillStyle = '#657881'; ctx.beginPath(); ctx.roundRect(cx - 30, cy - 45, 70, 20, 4); ctx.fill();
-    ctx.fillStyle = '#17313e'; ctx.beginPath(); ctx.roundRect(cx - 30, cy - 40, 20, 10, 2); ctx.fill();
-    ctx.strokeStyle = '#102a3a'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(cx + 40, cy - 35); ctx.quadraticCurveTo(cx + 40, cy - 10, cx + 50, cy - 10); ctx.stroke();
-    rr(cx - 160, cy - 35, 30, 40, 4, '#4a5b63', '#2a3b45');
-    if (state.nuclearSource > 0) {
-      const colors = ['transparent', '#e45d4f', '#308bc1', '#a0522d'];
-      ctx.fillStyle = colors[state.nuclearSource];
-      ctx.beginPath(); ctx.arc(cx - 145, cy - 15, 8, 0, Math.PI * 2); ctx.fill();
-    }
-    if (state.nuclearAnimProgress < 1 || state.nuclearAnimAbsorber > 0 || state.nuclearAbsorber > 0) {
-      const absColors = ['transparent', '#fcfaf2', '#d5dadd', '#4b575e'];
-      const currentAbs = state.nuclearAbsorber, prevAbs = state.nuclearAnimAbsorber;
-      const drawAbs = (type, yOff) => {
-        if (type === 0) return;
-        ctx.fillStyle = absColors[type];
-        ctx.fillRect(cx - 85, cy - 50 + yOff, 10, 70);
-        ctx.strokeStyle = '#102a3a'; ctx.lineWidth = 1; ctx.strokeRect(cx - 85, cy - 50 + yOff, 10, 70);
-      };
-      if (state.nuclearAnimProgress < 1) {
-        const q = state.nuclearAnimProgress, smooth = q * q * (3 - 2 * q);
-        if (prevAbs > 0) drawAbs(prevAbs, smooth * 120);
-        if (currentAbs > 0) drawAbs(currentAbs, -120 + smooth * 120);
-      } else {
-        drawAbs(currentAbs, 0);
-      }
-    }
+
   } else if (id === 'fieldlines') {
     const configuration = fieldConfigurations[state.fieldConfigIndex];
     const phases = ['fresh paper over magnet arrangement', 'filings shaker moving and sprinkling', 'loose filings ready to tap', 'paper tapping and filings aligning', 'field pattern formed ready to record', 'filings clearing and magnet configuration changing'];
