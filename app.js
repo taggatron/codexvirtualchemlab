@@ -1,4 +1,4 @@
-import { LabRenderer3D } from './lab3d.js?v=20260810-103';
+import { LabRenderer3D } from './lab3d.js?v=20260817-108';
 import { drawThermalBenchScene } from './thermalview.js';
 const canvas = document.getElementById('lab'), visibleCtx = canvas.getContext('2d'), buffer = document.createElement('canvas'), webglCanvas = document.getElementById('webgl'), lab3d = new LabRenderer3D(webglCanvas); let ctx = buffer.getContext('2d');
 webglCanvas.addEventListener('lab3dneedsredraw',()=>requestAnimationFrame(()=>draw()));
@@ -36,9 +36,10 @@ const practicals = [
   { id: 'density', subject: 'physics', icon: '⚖', color: '#00897b', title: 'Density of solids', sub: 'Eureka can & balance', objective: 'Determine the density of an irregular solid object using a Eureka can and measuring cylinder.', eq: 'ρ = m / V', word: 'density (g/cm³) = mass (g) ÷ volume (cm³)', steps: ['Weigh irregular object on balance', 'Fill Eureka can up to spout', 'Lower object into Eureka can', 'Measure displaced water volume'], gear: ['Eureka can', 'Measuring cylinder', 'Electronic balance', 'Irregular solid'], reactants: ['Granite stone', 'Brass weight', 'Aluminum block', 'Steel nut'] },
   { id: 'hooke', subject: 'physics', icon: '↕', color: '#9b4f87', title: 'Force and extension of a spring', sub: 'Hooke’s law & proportionality', objective: 'Measure how a spring extends under increasing force, determine its spring constant and identify where proportionality ends.', eq: 'F = kx', word: 'force (N) = spring constant (N m⁻¹) × extension (m)', steps: ['Record the unloaded pointer position as zero extension', 'Add one 100 g slotted mass and wait for the spring to settle', 'Read total length at eye level and calculate extension', 'Repeat to 6 N, plot force against extension and find the linear gradient'], gear: ['Heavy clamp stand + boss', 'Steel helical spring', 'Vertical ruler + fiducial pointer', 'Mass hanger + safety tray'], reactants: ['Steel spring', '100 g slotted masses', 'Mass hanger and safety tray'] },
   { id: 'specificheat', subject: 'physics', icon: 'ΔT', color: '#d06b38', title: 'Specific heat capacity', sub: 'Electrically heated aluminium', objective: 'Determine the specific heat capacity of a 1.00 kg aluminium block from electrical energy transferred and temperature rise.', eq: 'c = ΔE / (mΔθ)', word: 'specific heat capacity = energy transferred ÷ (mass × temperature change)', steps: ['Add thermal paste and insert the heater and temperature probe', 'Close the insulation, zero the joulemeter and record the initial temperature', 'Switch on the low-voltage heater and record energy and temperature', 'Calculate c from ΔE ÷ (mΔθ) and evaluate heat loss'], gear: ['1.00 kg aluminium block', 'Immersion heater + probe', 'Insulating jacket', '12 V supply + joulemeter'], reactants: ['Aluminium block', 'Thermal paste', 'Low-voltage electrical energy'] },
+  { id: 'latentheat', subject: 'physics', icon: '⇡⇣', color: '#c66a43', title: 'Heating & cooling curves', sub: 'Latent heat and change of state', objective: 'Plot heating and cooling curves for paraffin wax or stearic acid and identify the constant-temperature change-of-state region.', eq: 'E = mL   during a change of state', word: 'energy is transferred while intermolecular bonds change, so temperature stays nearly constant during melting or freezing', steps: ['Clamp the boiling tube in the water bath and lower the thermometer into the solid sample', 'Heat gently and record temperature at equal time intervals through the melting plateau', 'Turn off the Bunsen and continue recording as the liquid cools and solidifies', 'Plot both curves and identify the plateau where latent heat is absorbed or released'], gear: ['Clamped 500 cm³ beaker water bath', 'Boiling tube + thermometer', 'Bunsen burner + heatproof mat', 'Clamp stand + timer'], reactants: ['Paraffin wax pellets', 'Stearic acid flakes', 'Hot water bath'] },
   { id: 'wirelength', subject: 'physics', icon: 'Ω', color: '#7a4eb0', title: 'Resistance of a wire', sub: 'Length of nichrome wire', objective: 'Investigate how the resistance of a uniform wire changes as its measured length increases.', eq: 'R = V / I   and   R = ρL / A', word: 'resistance = potential difference ÷ current; for one uniform wire, resistance increases with length', steps: ['Set the sliding contact to a measured length', 'Close the switch briefly and read V and I', 'Calculate resistance using R = V ÷ I', 'Repeat for five lengths and plot R against L'], gear: ['100 cm metre ruler', 'Nichrome wire + crocodile clips', '1.5 V DC supply + switch', 'Ammeter + voltmeter'], reactants: ['20–100 cm wire lengths', 'Constant wire material & diameter', 'Low fixed potential difference'] },
   { id: 'fieldlines', subject: 'physics', icon: '⌁', color: '#d45757', title: 'Magnetic field patterns', sub: 'Iron filings over magnets', objective: 'Reveal and compare magnetic-field patterns around one or two bar magnets using iron filings above paper.', eq: 'magnetic field direction outside a magnet: N → S', word: 'iron filings become temporary magnets and align along the local magnetic field', steps: ['Place the magnet configuration below the paper', 'Sprinkle a thin, even layer of iron filings', 'Tap the paper gently so the filings can rotate', 'Record single, attraction and repulsion patterns'], gear: ['Bar magnet(s)', 'White paper on clear support', 'Perforated filings shaker', 'Gentle tapping tool'], reactants: ['Fine iron filings (sealed simulation)', 'Single N–S bar magnet', 'Unlike-pole & like-pole pairs'] },
-  { id: 'nuclear', subject: 'physics', icon: '☢', color: '#ffcc00', title: 'Nuclear radiation', sub: 'Alpha, Beta & Gamma', objective: 'Investigate the penetrating power of alpha, beta and gamma radiation using different absorbers.', eq: 'Activity measured in counts per minute', word: 'alpha is stopped by paper, beta by aluminium, gamma is reduced by lead', steps: ['Select a radioactive source', 'Select an absorber', 'Measure the count rate', 'Compare penetration power'], gear: ['Geiger-Müller tube', 'Digital counter', 'Radioactive sources', 'Absorbers (Paper, Al, Pb)'], reactants: ['Americium-241 (Alpha)', 'Strontium-90 (Beta)', 'Cobalt-60 (Gamma)'] }
+  { id: 'nuclear', subject: 'physics', icon: '☢', color: '#ffcc00', title: 'Nuclear radiation', sub: 'Alpha, Beta & Gamma', objective: 'Compare the penetrating power of alpha, beta and gamma radiation at a fixed source–detector distance using paper, aluminium and lead absorbers.', eq: 'count rate (counts min⁻¹) = corrected count ÷ time (min)', word: 'alpha is stopped by paper, beta by aluminium, gamma is reduced by thick lead', steps: ['Use tongs to place one sealed source at the fixed distance', 'Choose an absorber and lower it into the holder', 'Measure for 10 s and note the count and equivalent count rate', 'Compare α with paper, β with aluminium and γ with lead'], gear: ['Geiger–Müller tube + clamp', 'Digital scaler / counter', 'Lead-lined source store + tongs', 'Paper, aluminium and lead absorbers'], reactants: ['Americium-241 sealed source (Alpha)', 'Strontium-90 sealed source (Beta)', 'Cobalt-60 sealed source (Gamma)'] }
 ];
 const graphSpecs = {
   rates: { xLabel: 'temperature / °C', yLabel: 'time for cross to disappear / s', xMin: 20, xMax: 60, yMin: 0, yMax: 50, yDp: 0 },
@@ -61,6 +62,7 @@ const graphSpecs = {
   density: { xLabel: 'volume / cm³', yLabel: 'mass / g', xMin: 0, xMax: 100, yMin: 0, yMax: 250, yDp: 1 },
   hooke: { xLabel: 'extension / m', yLabel: 'force / N', xMin: 0, xMax: 0.14, yMin: 0, yMax: 7, xDp: 2, yDp: 1 },
   specificheat: { xLabel: 'temperature rise / °C', yLabel: 'energy transferred / kJ', xMin: 0, xMax: 20, yMin: 0, yMax: 18, yDp: 1 },
+  latentheat: { xLabel: 'time from start of stage / s', yLabel: 'sample temperature / °C', xMin: 0, xMax: 480, yMin: 20, yMax: 90, xDp: 0, yDp: 0 },
   wirelength: { xLabel: 'wire length / cm', yLabel: 'resistance / Ω', xMin: 0, xMax: 100, yMin: 0, yMax: 10, yDp: 1 }
 };
 const nonGraphResultIds = new Set(['free', 'titration', 'salts', 'mass', 'co2', 'electro', 'flame', 'displacement', 'chrom', 'starchleaf', 'quadrats', 'capture', 'shoretransect', 'ripple', 'convection', 'conduction', 'thermal', 'fieldlines', 'nuclear']);
@@ -392,6 +394,16 @@ const practicalEvaluations = {
       'Record energy with a joulemeter and temperature with a data logger, then use the gradient of energy against temperature rise rather than one pair of readings.'
     ]
   },
+  latentheat: {
+    iv: 'Direction of energy transfer (heating or cooling) and sample material (paraffin wax or stearic acid)',
+    dv: 'Sample temperature (°C) recorded at equal time intervals to locate the melting / freezing plateau',
+    cvs: 'Sample mass, boiling-tube dimensions, thermometer depth, water-bath volume, Bunsen setting, starting temperature and recording interval.',
+    improvements: [
+      'Keep the thermometer bulb central in the sample without touching the glass, and stir the water bath gently so the sample is heated evenly.',
+      'Use a temperature probe and data logger to collect closely spaced readings through both plateaux without reaction-time or transcription errors.',
+      'Repeat with the same sample mass and use a thermostatically controlled bath; insulate the cooling setup from draughts so heating and cooling curves can be compared fairly.'
+    ]
+  },
   wirelength: {
     iv: 'Length of nichrome wire between the fixed and sliding crocodile contacts (20, 40, 60, 80 or 100 cm)',
     dv: 'Resistance R (Ω), calculated from the measured potential difference and current using R = V ÷ I',
@@ -478,7 +490,9 @@ const freeReactionRules = [
   { id: 'h2so4-lime', reactants: ['h2so4', 'lime'], symbol: 'H₂SO₄(aq) + Ca(OH)₂(aq) → CaSO₄(s) + 2H₂O(l)', word: 'sulfuric acid + limewater → calcium sulfate + water', kind: 'precipitate', precipitate: true, product: 'calcium sulfate precipitate', productColor: 0xd9d4bd, heat: 6, duration: 3 },
   { id: 'lime-co2', reactants: ['lime', 'CO₂'], symbol: 'Ca(OH)₂(aq) + CO₂(g) → CaCO₃(s) + H₂O(l)', word: 'limewater + carbon dioxide → calcium carbonate + water', kind: 'precipitate', precipitate: true, product: 'milky calcium carbonate', productColor: 0xe8e6d9, duration: 3 }
 ];
-const state = { selected: 0, subject: 'chemistry', subjectTabX: 149, subjectTabW: 114, sidebarScroll: { chemistry: 0, biology: 0, physics: 0 }, running: false, complete: false, temp: 20, ph: 7, time: 0, volume: 0, progress: 0, tab: 'equipment', graphModal: false, evaluationModal: false, focusMode: false, methodDropdown: false, reactantSafety: null, points: [], hover: null, toast: 'Click equipment to add it, or drag it onto the bench.', drag: null, pour: null, burner: false, coolingWater: false, particles: [], layout: null, flamePhase: 0, transferred: 0, workspace: [], nextItem: 1, dose: null, reaction: null, massStage: 0, massLidOn: true, massTransfer: null, massBefore: 4.01, massAfter: null, hydrogenStage: 0, hydrogenTimer: 0, hydrogenAudioPlayed: false, hydrogenGas: 0, saltsStage: 0, saltsTimer: 0, chromSelectedDye: null, electroRecorded: false, electroWeighing: false, electroWeighTimer: 0, titrationStage: 0, titrationVolume: 0, titrationDropTimer: 0, titrationDrops: 0, titrationIndicator: false, titrationIndicatorTimer: 0, titrationRecorded: false, ratesStage: 0, ratesStageTimer: 0, ratesTrialIndex: 0, ratesTargetTemp: 20, ratesBathTemp: 20, ratesConditioning: false, ratesResults: [], thermiteTimer: 0, thermiteAudioPlayed: false, displacementStage: 0, displacementTimer: 0, displacementRecorded: false, flameTestStage: 0, flameTestTimer: 0, flameTestSalt: 0, flameTestTested: [], starchStage: 0, starchTimer: 0, lipaseStage: 0, lipaseTimer: 0, lipaseTrialIndex: 0, lipaseTargetTemp: 20, lipaseBathTemp: 20, lipaseConditioning: false, lipaseResults: [], osmosisStage: 0, osmosisTimer: 0, osmosisTrialIndex: 0, osmosisConcentration: 0, osmosisResults: [], potometerStage: 0, potometerTimer: 0, potometerTrialIndex: 0, potometerWindSpeed: 0, potometerBubbleMm: 0, potometerResults: [], pondweedDistance: 20, pondweedLampOn: true, pondweedTimer: 0, pondweedBubbles: 0, pondweedResults: [], quadratStage: 0, quadratTimer: 0, quadratSampleIndex: 0, quadratCurrentCount: 0, quadratResults: [], captureStage: 0, captureTimer: 0, captureFirstCatch: 15, captureSecondCatch: 18, captureRecaptured: 6, meadowWindClock: 0, transectStage: 0, transectTimer: 0, transectStationIndex: 0, transectDistanceM: 0, transectCurrentObservation: null, transectResults: [], shoreTideClock: 0, shoreTideProgress: 0, rippleStage: 0, rippleTimer: 0, rippleTrialIndex: 0, rippleFrequencyHz: 4, rippleTenWavelengthCm: 0, rippleWavelengthCm: 0, rippleSpeedMs: 0, rippleResults: [], rippleWaveClock: 0, newtonForce: 0.2, newtonMass: 1.0, newtonPos: 0, newtonVel: 0, newtonAcc: 0.2, newtonTimer: 0, newtonRunning: false, newtonGate1Time: null, newtonGate2Time: null, newtonGate1Velocity: null, newtonGate2Velocity: null, newtonResults: [], electromagnetStage: 0, electromagnetTimer: 0, electromagnetTrialIndex: 0, electromagnetTurns: 10, electromagnetClips: 0, electromagnetResults: [], convectionStage: 0, convectionTimer: 0, conductionStage: 0, conductionTimer: 0, thermalStage: 0, thermalTimer: 0, thermalCaptured: false, densityStage: 0, densitySample: 0, densityTimer: 0, densityRecorded: false, densityResults: [], hookeStage: 0, hookeTimer: 0, hookeTrialIndex: 0, hookeForceN: 0, hookeResults: [], shcStage: 0, shcTimer: 0, shcEnergyJ: 0, shcTemperatureC: 20, shcResults: [], wireStage: 0, wireTimer: 0, wireTrialIndex: 0, wireLengthCm: 20, wireVoltageV: 1.5, wireResults: [], fieldStage: 0, fieldTimer: 0, fieldConfigIndex: 0, fieldResults: [], nuclearStage: 0, nuclearTimer: 0, nuclearSource: 0, nuclearAbsorber: 0, nuclearCount: 0, nuclearAnimAbsorber: 0, nuclearAnimProgress: 1 };
+const state = { selected: 0, subject: 'chemistry', subjectTabX: 149, subjectTabW: 114, sidebarScroll: { chemistry: 0, biology: 0, physics: 0 }, running: false, complete: false, temp: 20, ph: 7, time: 0, volume: 0, progress: 0, tab: 'equipment', graphModal: false, evaluationModal: false, focusMode: false, methodDropdown: false, reactantSafety: null, points: [], hover: null, drag: null, pour: null, burner: false, coolingWater: false, particles: [], layout: null, flamePhase: 0, transferred: 0, workspace: [], nextItem: 1, dose: null, reaction: null, massStage: 0, massLidOn: true, massTransfer: null, massBefore: 4.01, massAfter: null, hydrogenStage: 0, hydrogenTimer: 0, hydrogenAudioPlayed: false, hydrogenGas: 0, saltsStage: 0, saltsTimer: 0, chromSelectedDye: null, electroRecorded: false, electroWeighing: false, electroWeighTimer: 0, titrationStage: 0, titrationVolume: 0, titrationDropTimer: 0, titrationDrops: 0, titrationIndicator: false, titrationIndicatorTimer: 0, titrationRecorded: false, ratesStage: 0, ratesStageTimer: 0, ratesTrialIndex: 0, ratesTargetTemp: 20, ratesBathTemp: 20, ratesConditioning: false, ratesResults: [], thermiteTimer: 0, thermiteAudioPlayed: false, displacementStage: 0, displacementTimer: 0, displacementRecorded: false, flameTestStage: 0, flameTestTimer: 0, flameTestSalt: 0, flameTestTested: [], starchStage: 0, starchTimer: 0, lipaseStage: 0, lipaseTimer: 0, lipaseTrialIndex: 0, lipaseTargetTemp: 20, lipaseBathTemp: 20, lipaseConditioning: false, lipaseResults: [], osmosisStage: 0, osmosisTimer: 0, osmosisTrialIndex: 0, osmosisConcentration: 0, osmosisResults: [], potometerStage: 0, potometerTimer: 0, potometerTrialIndex: 0, potometerWindSpeed: 0, potometerBubbleMm: 0, potometerResults: [], pondweedDistance: 20, pondweedLampOn: true, pondweedTimer: 0, pondweedBubbles: 0, pondweedResults: [], quadratStage: 0, quadratTimer: 0, quadratSampleIndex: 0, quadratCurrentCount: 0, quadratResults: [], captureStage: 0, captureTimer: 0, captureFirstCatch: 15, captureSecondCatch: 18, captureRecaptured: 6, meadowWindClock: 0, transectStage: 0, transectTimer: 0, transectStationIndex: 0, transectDistanceM: 0, transectCurrentObservation: null, transectResults: [], shoreTideClock: 0, shoreTideProgress: 0, rippleStage: 0, rippleTimer: 0, rippleTrialIndex: 0, rippleFrequencyHz: 4, rippleTenWavelengthCm: 0, rippleWavelengthCm: 0, rippleSpeedMs: 0, rippleResults: [], rippleWaveClock: 0, newtonForce: 0.2, newtonMass: 1.0, newtonPos: 0, newtonVel: 0, newtonAcc: 0.2, newtonTimer: 0, newtonRunning: false, newtonGate1Time: null, newtonGate2Time: null, newtonGate1Velocity: null, newtonGate2Velocity: null, newtonResults: [], electromagnetStage: 0, electromagnetTimer: 0, electromagnetTrialIndex: 0, electromagnetTurns: 10, electromagnetClips: 0, electromagnetResults: [], convectionStage: 0, convectionTimer: 0, conductionStage: 0, conductionTimer: 0, thermalStage: 0, thermalTimer: 0, thermalCaptured: false, densityStage: 0, densitySample: 0, densityTimer: 0, densityRecorded: false, densityResults: [], hookeStage: 0, hookeTimer: 0, hookeTrialIndex: 0, hookeForceN: 0, hookeResults: [], shcStage: 0, shcTimer: 0, shcEnergyJ: 0, shcTemperatureC: 20, shcResults: [], wireStage: 0, wireTimer: 0, wireTrialIndex: 0, wireLengthCm: 20, wireVoltageV: 1.5, wireResults: [], fieldStage: 0, fieldTimer: 0, fieldConfigIndex: 0, fieldResults: [], nuclearStage: 0, nuclearTimer: 0, nuclearSource: 0, nuclearPreviousSource: 0, nuclearSourceTransition: 1, nuclearAbsorber: 0, nuclearCount: 0, nuclearAnimAbsorber: 0, nuclearAnimProgress: 1, nuclearResults: [], nuclearPulseClock: 0 };
+state.shcMaterial = 'aluminium';
+state.toast = 'Click equipment to add it, or drag it onto the bench.';
 state.hookeFocusModal = false;
 state.hookeFocusProgress = 0;
 Object.assign(state, { pondweedCountAnimating: false, pondweedCountTimer: 0, pondweedPendingBpm: null });
@@ -537,11 +551,11 @@ function potometerDistance(windSpeed = state.potometerWindSpeed) { const index =
 function potometerRate(windSpeed = state.potometerWindSpeed) { return +(potometerDistance(windSpeed) / 5).toFixed(1) }
 function potometerStageProgress() { const stage = state.potometerStage || 0, duration = potometerStageDurations[stage]; return duration ? Math.max(0, Math.min(1, state.potometerTimer / duration)) : 0 }
 const quadratSamples = [
-  { xM: 2, yM: 7, daisies: 4, worldX: -1.85, worldZ: .48, rotation: -.18 },
-  { xM: 8, yM: 3, daisies: 7, worldX: 1.72, worldZ: -.64, rotation: .14 },
-  { xM: 5, yM: 5, daisies: 5, worldX: -.04, worldZ: -.02, rotation: -.08 },
-  { xM: 1, yM: 2, daisies: 3, worldX: -2.35, worldZ: -.86, rotation: .2 },
-  { xM: 7, yM: 8, daisies: 6, worldX: 1.18, worldZ: .7, rotation: -.12 }
+  { xM: 2, yM: 7, daisies: 4, worldX: -1.85, worldZ: 3.48, rotation: -.18 },
+  { xM: 8, yM: 3, daisies: 7, worldX: 1.72, worldZ: 2.36, rotation: .14 },
+  { xM: 5, yM: 5, daisies: 5, worldX: -.04, worldZ: 2.98, rotation: -.08 },
+  { xM: 1, yM: 2, daisies: 3, worldX: -2.35, worldZ: 2.14, rotation: .2 },
+  { xM: 7, yM: 8, daisies: 6, worldX: 1.18, worldZ: 3.7, rotation: -.12 }
 ];
 const quadratStageDurations = { 1: 3.5, 3: 1.25, 5: 2.4, 7: 4.2 };
 function currentQuadratSample() { return quadratSamples[Math.min(quadratSamples.length - 1, state.quadratSampleIndex || 0)] }
@@ -586,10 +600,16 @@ function hookeSpringConstant() { return 50 }
 function hookeStepIndex() { return state.complete ? 3 : state.hookeStage === 2 ? 2 : state.hookeStage === 1 || state.hookeResults.length ? 1 : 0 }
 const shcStageDurations = { 1: 3.8, 3: 8 };
 const shcEnergyReadingsJ = [0, 3600, 7200, 10800, 14400, 18000];
-const shcTemperatureReadingsC = [20, 24, 28, 32, 36, 40];
+const shcMaterials = {
+  aluminium: { label: 'ALUMINIUM', specificHeat: 900, colour: 0xaebbc0 },
+  copper: { label: 'COPPER', specificHeat: 390, colour: 0xb96d45 }
+};
+function currentShcMaterial() { return shcMaterials[state.shcMaterial] || shcMaterials.aluminium }
+function shcFinalTemperatureC() { return +(20 + 18000 / currentShcMaterial().specificHeat).toFixed(1) }
+function shcTemperatureForEnergy(energyJ) { return +(20 + energyJ / currentShcMaterial().specificHeat).toFixed(1) }
 function shcHeatingProgress() { return state.shcStage < 3 ? 0 : state.shcStage > 3 ? 1 : Math.max(0, Math.min(1, state.shcTimer / shcStageDurations[3])) }
 function shcTemperatureRiseC() { return +(Math.max(0, state.shcTemperatureC - 20)).toFixed(1) }
-function shcCalculatedSpecificHeat() { const rise = shcTemperatureRiseC(); return rise > 0 ? Math.round(state.shcEnergyJ / rise) : 0 }
+function shcCalculatedSpecificHeat() { const rise = Math.max(0, state.shcTemperatureC - 20); return rise > 0 ? Math.round(state.shcEnergyJ / rise) : 0 }
 function shcStepIndex() {
   if (state.complete || state.shcStage >= 4) return 3;
   if (state.shcStage === 3) return 2;
@@ -610,6 +630,29 @@ const fieldConfigurations = [
 ];
 const fieldStageDurations = { 1: 3.35, 3: 4.45, 5: 3.15 };
 function fieldStepIndex() { return state.complete ? 3 : state.fieldStage >= 4 ? 3 : state.fieldStage >= 3 ? 2 : state.fieldStage >= 1 ? 1 : 0 }
+const nuclearSources = [
+  { id: 'none', short: 'NO SOURCE', symbol: '—', isotope: 'background', colour: '#60747c' },
+  { id: 'alpha', short: 'α Am-241', symbol: 'α', isotope: 'Am-241', colour: '#ed654f' },
+  { id: 'beta', short: 'β Sr-90', symbol: 'β', isotope: 'Sr-90', colour: '#42a7dc' },
+  { id: 'gamma', short: 'γ Co-60', symbol: 'γ', isotope: 'Co-60', colour: '#f1bf3e' }
+];
+const nuclearAbsorbers = [
+  { id: 'none', short: 'OPEN BEAM', label: 'none' },
+  { id: 'paper', short: 'PAPER', label: 'paper' },
+  { id: 'aluminium', short: 'ALUMINIUM', label: 'aluminium' },
+  { id: 'lead', short: 'LEAD', label: 'lead' }
+];
+const nuclearCounts10s = [
+  [4, 4, 4, 4],
+  [468, 5, 4, 4],
+  [612, 548, 11, 6],
+  [384, 366, 318, 74]
+];
+const nuclearSourceTransitionDuration = 1.8;
+const nuclearAbsorberTransitionDuration = 1.45;
+function nuclearTargetCount10s(source = state.nuclearSource, absorber = state.nuclearAbsorber) { return nuclearCounts10s[source]?.[absorber] ?? 4 }
+function nuclearTransmissionFraction(source = state.nuclearSource, absorber = state.nuclearAbsorber) { const open = nuclearTargetCount10s(source, 0); return source && open ? Math.max(0, Math.min(1, (nuclearTargetCount10s(source, absorber) - 4) / Math.max(1, open - 4))) : 0 }
+function nuclearStepIndex() { if (state.complete || state.nuclearStage === 6) return 3; if (state.nuclearStage === 5) return 2; if (state.nuclearSource > 0 && state.nuclearStage >= 2) return 1; return 0 }
 const convectionDuration = 8.4;
 const conductionDuration = 9.4;
 const conductionPinTimes = {
@@ -712,7 +755,10 @@ function refreshWorkspacePh() {
 function reactionRuleFor(item) { const ids = new Set((item?.contents || []).map(c => c.id)); for (const gas of item?.generatedGases || []) ids.add(gas); return freeReactionRules.find(rule => rule.reactants.every(id => ids.has(id)) && !(item.reactedPairs || []).includes(rule.id)) || null }
 function triggerWorkspaceReaction(item, rule) { if (!item || !rule) return; const previous = state.reaction; if (previous && !previous.complete) previous.complete = true; const reaction = { ruleId: rule.id, targetUid: item.uid, symbol: rule.symbol, word: rule.word, kind: rule.kind, product: rule.product, productColor: rule.productColor, gas: rule.gas || null, precipitate: !!rule.precipitate, heat: rule.heat || 0, duration: rule.duration || 3, t: 0, progress: 0, complete: false }; item.reactedPairs ??= []; item.reactedPairs.push(rule.id); item.reaction = reaction; state.reaction = reaction; state.running = true; state.complete = false; state.time = 0; state.progress = 0; state.lastReactant = rule.reactants.join('+'); state.toast = `Reaction started: ${rule.symbol}` }
 function updateWorkspaceReaction(dt) { const reaction = state.reaction; if (!reaction || reaction.complete) return false; reaction.t += dt; reaction.progress = Math.min(1, reaction.t / reaction.duration); const item = state.workspace.find(a => a.uid === reaction.targetUid); if (item) item.reaction = reaction; state.running = true; state.progress = reaction.progress; state.time = reaction.t; state.temp = Math.max(state.temp, 20 + (reaction.heat || 0) * Math.sin(Math.min(1, reaction.progress) * Math.PI)); refreshWorkspacePh(); if (reaction.progress >= 1) { reaction.complete = true; state.running = false; state.toast = `Reaction complete: ${reaction.product}.`; if (item) { item.products ??= []; item.products.push({ ruleId: reaction.ruleId, label: reaction.product }); if (reaction.gas) { item.generatedGases ??= []; if (!item.generatedGases.includes(reaction.gas)) item.generatedGases.push(reaction.gas) } } } return true }
-function currentGraphSpec() { return graphSpecs[practicals[state.selected].id] || graphSpecs.rates }
+function currentGraphSpec() {
+  const id = practicals[state.selected].id, spec = graphSpecs[id] || graphSpecs.rates;
+  return id === 'specificheat' ? { ...spec, xMax: Math.ceil((shcFinalTemperatureC() - 20) / 10) * 10 } : spec;
+}
 function graphReading() { const id = practicals[state.selected].id, s = currentGraphSpec(); let xValue = id === 'chrom' ? state.progress * 10 : Math.min(s.xMax, state.time), yValue = state.temp; if (id === 'mass') yValue = 4.01 + .17 * state.progress; else if (id === 'hydrogen') yValue = state.hydrogenGas; else if (id === 'co2') yValue = 100 * state.progress; else if (id === 'electro') yValue = 48 * state.progress; else if (id === 'chrom') yValue = 6.4 * state.progress; else if (id === 'titration') { xValue = state.titrationVolume; yValue = state.ph } else if (id === 'thermite') { xValue = state.thermiteTimer; yValue = state.temp } else if (id === 'wirelength') { xValue = state.wireLengthCm; yValue = wireResistance() } const x = Math.max(0, Math.min(1, (xValue - s.xMin) / (s.xMax - s.xMin))), y = Math.max(0, Math.min(1, (yValue - s.yMin) / (s.yMax - s.yMin))); return { x, y, xValue, yValue, t: state.time } }
 const asphaltTile = document.createElement('canvas'); asphaltTile.width = asphaltTile.height = 96; const asphaltCtx = asphaltTile.getContext('2d'); asphaltCtx.fillStyle = '#1b465c'; asphaltCtx.fillRect(0, 0, 96, 96); let asphaltSeed = 1297; const asphaltRandom = () => ((asphaltSeed = Math.imul(asphaltSeed, 1664525) + 1013904223 >>> 0) / 4294967296); for (let i = 0; i < 520; i++) { asphaltCtx.fillStyle = asphaltRandom() > .52 ? `rgba(137,186,201,${.06 + asphaltRandom() * .16})` : `rgba(3,26,40,${.08 + asphaltRandom() * .18})`; const r = .3 + asphaltRandom() * .9; asphaltCtx.beginPath(); asphaltCtx.arc(asphaltRandom() * 96, asphaltRandom() * 96, r, 0, Math.PI * 2); asphaltCtx.fill() }
 let W = 0, H = 0, D = 1, VIEW_W = 0, VIEW_H = 0, UI_SCALE = 1, portraitPromptVisible = false, mobileLandscapeLayout = false, regions = [], rightSidebarLayoutSnapshot = null, hookeGuidanceHitbox = null;
@@ -754,6 +800,7 @@ function wrappedText(t, x, y, maxWidth, size = 10, color = C.ink, weight = 600, 
 function guidedReactantSafety(name, practicalId = practicals[state.selected]?.id) {
   const key = String(name).toLowerCase(), practical = practicals.find(item => item.id === practicalId);
   const detail = (rating, color, summary, handling, response, disposal) => ({ name, practicalId, practicalTitle: practical?.title || '', rating, color, summary, handling, response, disposal });
+  if (practicalId === 'nuclear') return detail('IONISING RADIATION — SEALED SOURCE', '#c99500', 'A radioactive source emits ionising radiation. The simulation shows sealed school sources; the animated tracks are an explanatory model and are not visible in a real experiment.', 'Teacher-controlled use only. Keep exposure time short, maximise distance, use the long-handled tongs, never touch a source and keep it in the lead-lined store whenever it is not clamped in the holder.', 'Do not approach or pick up a dropped or damaged source. Clear the area, prevent access and alert the responsible teacher or radiation-protection supervisor immediately.', 'Never discard a source. Use tongs to return an intact source to its labelled shielded store under the school’s local rules and source-accounting procedure.');
   if (practicalId === 'alkali') return detail('HIGHLY REACTIVE — SIMULATION ONLY', '#944f8f', 'Lithium, sodium and potassium react exothermically with water, releasing flammable hydrogen and strongly alkaline hydroxide solution.', 'Do not carry out this comparison as a student practical. The screen, tiny stored-under-oil samples and remote forceps are represented only in this simulation or an approved teacher demonstration.', 'Keep clear of any real reaction and alert staff immediately for a spill, fire or splash. Never add water to an alkali-metal fire.', 'Only trained staff may quench and dispose of alkali-metal residues using the current school procedure; never put residues or contaminated water into a normal sink.');
   if (key.includes('thermite')) return detail('DEMONSTRATION ONLY', '#b53f32', 'The sealed charge can produce molten iron, intense heat, sparks and very bright light.', 'Teacher-controlled demonstration only. Keep the safety screen and sand containment in place and observe from the marked distance.', 'Do not approach until the teacher confirms the products are completely cool. Follow the laboratory emergency procedure for fire or burns.', 'Leave all charge residue and hot products for trained staff to dispose of.');
   if (key.includes('potassium dichromate')) return detail('TOXIC — SIMULATION ONLY', '#9d3b63', 'Potassium dichromate is toxic, carcinogenic, oxidising and environmentally hazardous; it is represented only as a simulation here.', 'Do not use this material in a student practical. A teacher should select a safer approved convection tracer for any real investigation.', 'Avoid all contact. If exposure occurs, alert staff immediately and follow the current SDS and school emergency procedure.', 'Treat as hazardous chemical waste; never pour it into a sink.');
@@ -774,6 +821,7 @@ function guidedReactantSafety(name, practicalId = practicals[state.selected]?.id
   if (key.includes('oxygen')) return detail('SUPPORTS COMBUSTION', '#d46b32', 'Oxygen is not flammable, but it makes other materials burn more vigorously.', 'Keep oxygen away from flames, sparks, oils and greases. Use only the small amount present in the apparatus.', 'Close the source if safe and alert staff if combustion becomes vigorous.', 'Vent small classroom quantities safely as directed; never seal oxygen in an unsuitable container.');
   if (key.includes('hot water')) return detail('SCALD HAZARD', '#d46b32', 'Hot water, steam and heated apparatus can scald skin and remain hot after the practical.', 'Use heat-resistant gloves where directed, pour slowly and keep the flask and cube stable and below face height.', 'Cool a scald under cool running water for at least 20 minutes and alert staff immediately.', 'Allow water and apparatus to cool before emptying or storing them.');
   if (key.includes('wax')) return detail('HOT SURFACE / MOLTEN WAX', '#d48a32', 'Heated rods and softened wax can burn skin; dropped pins may also remain hot.', 'Wear eye protection, use tongs and keep hands clear of the heated rod ends and falling pins.', 'Cool a burn under running water and alert staff. Do not pick up hot pins by hand.', 'Allow wax, rods and pins to cool completely before reuse or disposal.');
+  if (key.includes('stearic acid')) return detail('HOT MOLTEN SAMPLE / IRRITANT', '#d48a32', 'Stearic acid is low hazard when cool but the molten sample, boiling tube and water bath can burn skin; dust may irritate eyes.', 'Wear eye protection, use a small amount, clamp the tube securely and keep the thermometer bulb away from the glass wall.', 'Cool a burn under running water for at least 20 minutes and alert staff. Rinse dust from eyes with clean water.', 'Allow the sample and glassware to solidify and cool fully, then follow the school procedure for reusable or solid chemical waste.');
   if (key.includes('steel spring') || key.includes('slotted mass') || key.includes('mass hanger')) return detail('STORED ENERGY / FALLING MASS', '#5f7f8c', 'A stretched spring stores energy, and slotted masses can fall or trap fingers if the stand or hanger is unstable.', 'Wear eye protection, secure the heavy stand, add one mass gently at a time and keep hands and feet away from the safety tray below.', 'Step back if the spring, clamp or stand shifts. Tell staff about a fallen mass, damaged spring or trapped finger.', 'Remove all masses before unclamping the spring and return the spring only if it has not been permanently stretched.');
   if (key.includes('thermal paste')) return detail('CONTACT IRRITANT', '#8b6b45', 'Thermal paste can irritate skin or eyes and can make equipment slippery if over-applied.', 'Use a small bead with the applicator, avoid skin contact and wipe excess paste from the block before heating.', 'Rinse exposed skin or eyes with water and tell staff. Wipe spills with the approved disposable material.', 'Place paste-contaminated wipes in the designated solid-waste container.');
   if (key.includes('low-voltage electrical energy') || key.includes('aluminium block')) return detail('HOT METAL / LOW-VOLTAGE ELECTRICAL', '#d48a32', 'The aluminium block, heater and probe can become hot while looking unchanged; damaged leads can also overheat.', 'Use only the specified low-voltage supply, keep the block insulated and switch off before touching probes, leads or metal.', 'Isolate the supply and alert staff if a lead becomes hot or damaged. Cool a burn under running water for at least 20 minutes.', 'Allow the block and probes to cool fully, disconnect the supply and return the equipment for inspection.');
@@ -790,7 +838,45 @@ function guidedReactantSafety(name, practicalId = practicals[state.selected]?.id
   return detail('LOW HAZARD', '#4f8f73', 'This material is low hazard in the small quantities shown, but normal laboratory hygiene still applies.', 'Wear eye protection where directed, do not ingest materials and wash hands after the practical.', 'Tell staff about any spill or exposure and rinse affected skin or eyes with water.', 'Return reusable material or use the labelled waste route specified by the teacher.');
 }
 function hit(id, x, y, w, h, data) { regions.push({ id, x, y, w, h, data }) }
-function button(label, x, y, w, h, active = false) { rr(x, y, w, h, 8, active ? C.teal : '#fff', active ? C.teal : C.line); text(label, x + w / 2, y + h / 2, 12, active ? '#fff' : C.ink, 700, 'center'); hit('button', x, y, w, h, label) }
+function fittedButtonLabelLayout(label, w, h, baseSize = 12, weight = 700) {
+  const value = String(label), horizontalPadding = Math.max(10, Math.min(18, w * .1)), availableWidth = Math.max(1, w - horizontalPadding);
+  const measure = (line, size) => { ctx.font = `${weight} ${size}px Inter,system-ui`; return ctx.measureText(line).width };
+  const baseWidth = measure(value, baseSize), oneLineSize = Math.min(baseSize, baseSize * availableWidth / Math.max(1, baseWidth) * .975);
+  if (oneLineSize >= 10 || !value.includes(' ') || h < 30) {
+    const fontSize = Math.max(7, oneLineSize), widest = measure(value, fontSize);
+    return { lines: [value], fontSize, lineHeight: fontSize, availableWidth, widest, fits: widest <= availableWidth + .25 };
+  }
+
+  const words = value.split(/\s+/), candidates = [];
+  for (let split = 1; split < words.length; split++) {
+    const lines = [words.slice(0, split).join(' '), words.slice(split).join(' ')];
+    if (lines[0] === '·' || lines[1] === '·') continue;
+    const widestAtBase = Math.max(...lines.map(line => measure(line, baseSize)));
+    const fontSize = Math.min(10.5, baseSize * availableWidth / Math.max(1, widestAtBase) * .975, (h - 8) / 2.12);
+    const widths = lines.map(line => measure(line, fontSize));
+    candidates.push({ lines, fontSize, lineHeight: fontSize * 1.06, availableWidth, widest: Math.max(...widths), balance: Math.abs(widths[0] - widths[1]) });
+  }
+  candidates.sort((a, b) => b.fontSize - a.fontSize || a.balance - b.balance);
+  const best = candidates[0];
+  if (!best) {
+    const fontSize = Math.max(7, oneLineSize), widest = measure(value, fontSize);
+    return { lines: [value], fontSize, lineHeight: fontSize, availableWidth, widest, fits: widest <= availableWidth + .25 };
+  }
+  best.fontSize = Math.max(7, best.fontSize);
+  best.widest = Math.max(...best.lines.map(line => measure(line, best.fontSize)));
+  best.fits = best.widest <= availableWidth + .25 && best.lineHeight * best.lines.length <= h - 4;
+  return best;
+}
+function drawFittedButtonLabel(label, x, y, w, h, color, weight = 700) {
+  const layout = fittedButtonLabelLayout(label, w, h, 12, weight), centreY = y + h / 2;
+  ctx.save();
+  ctx.fillStyle = color; ctx.font = `${weight} ${layout.fontSize}px Inter,system-ui`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const firstY = centreY - (layout.lines.length - 1) * layout.lineHeight / 2;
+  layout.lines.forEach((line, index) => ctx.fillText(line, x + w / 2, firstY + index * layout.lineHeight));
+  ctx.restore();
+  window.__buttonLabelAudit.push({ label: String(label), lines: layout.lines, font_size_px: +layout.fontSize.toFixed(2), widest_line_px: +layout.widest.toFixed(2), available_width_px: +layout.availableWidth.toFixed(2), button_width_px: +w.toFixed(2), fits: layout.fits });
+}
+function button(label, x, y, w, h, active = false) { rr(x, y, w, h, 8, active ? C.teal : '#fff', active ? C.teal : C.line); drawFittedButtonLabel(label, x, y, w, h, active ? '#fff' : C.ink); hit('button', x, y, w, h, label) }
 function progressButton(label, x, y, w, h, progress = 0, active = false) {
   const q = Math.max(0, Math.min(1, progress));
   rr(x, y, w, h, 8, active ? '#e7f7f4' : '#fff', active ? C.teal : C.line);
@@ -806,7 +892,7 @@ function progressButton(label, x, y, w, h, progress = 0, active = false) {
     ctx.fillRect(x, y, w * q, h);
     ctx.restore();
   }
-  text(label, x + w / 2, y + h / 2, 12, '#000', 700, 'center');
+  drawFittedButtonLabel(label, x, y, w, h, '#000');
   hit('button', x, y, w, h, label);
 }
 function timedRatio(timer, duration, active = true) {
@@ -958,8 +1044,7 @@ function drawChemicalTags(id) {
   if (id === 'lipase') tags.splice(0, tags.length, ['MILK + INDICATOR', [.55, .1, -.38], 44, { size: 8.2, minWidth: 118 }]);
   if (id === 'potometer') tags.splice(0, tags.length, ['SEALED LEAFY SHOOT', [-.15, 2.48, -.15], -5, { size: 8.1, minWidth: 112 }], ['GRADUATED CAPILLARY', [2.04, .3, .02], 34, { size: 7.9, minWidth: 124 }], [`WIND ${state.potometerWindSpeed.toFixed(1)} m s⁻¹`, [-2.42, .38, -.25], 23, { size: 8.1, minWidth: 104 }]);
   if (id === 'electromagnet') tags.splice(0, tags.length, [`${state.electromagnetTurns} WIRE TURNS`, [1.42, 2.62, .08], -7, { size: 8.4, minWidth: 96 }], ['STEEL PAPER CLIPS', [2.08, .12, .12], 28, { size: 8.2, minWidth: 104 }]);
-  if (id === 'hooke') tags.splice(0, tags.length, [`${state.hookeForceN.toFixed(1)} N  ·  ${hookeExtensionCm().toFixed(1)} cm`, [-.35, .3, .16], 30, { size: 8.1, minWidth: 130 }]);
-  if (id === 'specificheat') tags.splice(0, tags.length, ['1.00 kg ALUMINIUM', [.15, .18, .08], 27, { size: 8.1, minWidth: 122 }]);
+  if (id === 'specificheat') tags.splice(0, tags.length, [`1.00 kg ${currentShcMaterial().label}`, [.15, .18, .08], 27, { size: 8.1, minWidth: 122 }]);
   tags.forEach(([label, world, offsetY, options]) => chemicalTag(label, world, offsetY, options));
   if (id === 'newton2') {
     const loggerScreen = lab3d.projectToScreen(-.28, .54, 1.46);
@@ -1178,7 +1263,7 @@ function main() {
   ctx.fillStyle = '#171d21'; ctx.fillRect(x, H - 5, w, 5); ctx.restore();
   const sceneBottom = immersiveOutdoor ? H : benchY;
   if (lab3d.available) ctx.clearRect(x, arenaTop, w, sceneBottom - arenaTop);
-  const cx = x + w * .52, cy = benchY - 57; if (lab3d.available) { lab3d.resize(x, arenaTop, w, Math.max(180, sceneBottom - arenaTop), UI_SCALE); registerWebGLInteractions(p.id, cx, cy); ctx.save(); ctx.globalCompositeOperation = 'destination-out'; ctx.fillRect(x, arenaTop, w, sceneBottom - arenaTop); ctx.restore(); if (!free) drawChemicalTags(p.id); if (p.id === 'mass' && state.massStage === 2 && state.massLidOn && state.layout?.lid) { const lp = state.layout.lid; rr(lp.x - 76, lp.y - 64, 152, 27, 8, 'rgba(255,255,255,.96)', 'rgba(124,98,184,.6)'); text('CLICK LID TO REMOVE', lp.x, lp.y - 50, 9.5, '#6b52a6', 800, 'center') } if (p.id === 'hydrogen' && ((state.hydrogenStage === 4 && state.hydrogenTimer > .36) || state.hydrogenStage === 5)) { const active = state.hydrogenStage === 4, hp = lab3d.projectToScreen(.65, active ? 3.35 : 2.85, .02); if (hp) { rr(hp.x - 72, hp.y - 14, 144, 30, 9, active ? 'rgba(255,245,224,.97)' : 'rgba(232,247,241,.97)', active ? 'rgba(228,93,79,.72)' : 'rgba(8,127,117,.55)'); text(active ? 'SQUEAKY POP!' : 'HYDROGEN CONFIRMED', hp.x, hp.y + 1, 10, active ? '#c94b3f' : C.teal, 850, 'center') } } if (p.id === 'nuclear') { drawApparatus(p.id, cx, cy, w, benchY, x); } } else drawApparatus(p.id, cx, cy, w, benchY, x);
+  const cx = x + w * .52, cy = benchY - 57; if (lab3d.available) { lab3d.resize(x, arenaTop, w, Math.max(180, sceneBottom - arenaTop), UI_SCALE); registerWebGLInteractions(p.id, cx, cy); ctx.save(); ctx.globalCompositeOperation = 'destination-out'; ctx.fillRect(x, arenaTop, w, sceneBottom - arenaTop); ctx.restore(); if (!free) drawChemicalTags(p.id); if (p.id === 'mass' && state.massStage === 2 && state.massLidOn && state.layout?.lid) { const lp = state.layout.lid; rr(lp.x - 76, lp.y - 64, 152, 27, 8, 'rgba(255,255,255,.96)', 'rgba(124,98,184,.6)'); text('CLICK LID TO REMOVE', lp.x, lp.y - 50, 9.5, '#6b52a6', 800, 'center') } if (p.id === 'hydrogen' && ((state.hydrogenStage === 4 && state.hydrogenTimer > .36) || state.hydrogenStage === 5)) { const active = state.hydrogenStage === 4, hp = lab3d.projectToScreen(.65, active ? 3.35 : 2.85, .02); if (hp) { rr(hp.x - 72, hp.y - 14, 144, 30, 9, active ? 'rgba(255,245,224,.97)' : 'rgba(232,247,241,.97)', active ? 'rgba(228,93,79,.72)' : 'rgba(8,127,117,.55)'); text(active ? 'SQUEAKY POP!' : 'HYDROGEN CONFIRMED', hp.x, hp.y + 1, 10, active ? '#c94b3f' : C.teal, 850, 'center') } } } else drawApparatus(p.id, cx, cy, w, benchY, x);
   if (state.focusMode) drawFocusModeTopBar(p);
   if (shoreScene) rr(x + 8, benchY + 18, w - 16, 86, 12, 'rgba(5,31,45,.78)', 'rgba(116,221,226,.28)');
   else if (meadowScene) rr(x + 8, benchY + 18, w - 16, 86, 12, 'rgba(12,43,24,.8)', 'rgba(164,224,137,.3)');
@@ -1190,7 +1275,7 @@ function main() {
   }
   // meters
   rr(x + w - 190, benchY + 35, 164, 58, 8, '#f5f7f6');
-  text(p.id === 'thermite' ? 'SIMULATED CORE' : p.id === 'displacement' ? 'SERIES STATUS' : p.id === 'flame' ? 'ACTIVE SAMPLE' : p.id === 'starchleaf' ? 'LEAF TEST' : p.id === 'lipase' ? 'ENZYME TRIAL' : p.id === 'osmosis' ? 'OSMOSIS TRIAL' : p.id === 'potometer' ? 'WATER UPTAKE' : p.id === 'pondweed' ? 'PHOTOSYNTHESIS' : p.id === 'quadrats' ? 'QUADRAT SAMPLE' : p.id === 'shoretransect' ? 'SHORE ZONATION' : p.id === 'ripple' ? 'WAVE SPEED' : p.id === 'newton2' ? 'ACCELERATION' : p.id === 'electromagnet' ? 'MAGNETIC LIFT' : p.id === 'convection' ? 'WATER FLOW' : p.id === 'conduction' ? 'PIN FALL TEST' : p.id === 'thermal' ? 'INFRARED VIEW' : p.id === 'density' ? 'DENSITY MEASURE' : p.id === 'hooke' ? 'FORCE / EXTENSION' : p.id === 'specificheat' ? 'ENERGY / TEMPERATURE' : p.id === 'wirelength' ? 'ELECTRICAL READING' : p.id === 'fieldlines' ? 'FIELD PATTERN' : 'LIVE READINGS', x + w - 177, benchY + 49, 9, C.muted, 800);
+  text(p.id === 'thermite' ? 'SIMULATED CORE' : p.id === 'displacement' ? 'SERIES STATUS' : p.id === 'flame' ? 'ACTIVE SAMPLE' : p.id === 'starchleaf' ? 'LEAF TEST' : p.id === 'lipase' ? 'ENZYME TRIAL' : p.id === 'osmosis' ? 'OSMOSIS TRIAL' : p.id === 'potometer' ? 'WATER UPTAKE' : p.id === 'pondweed' ? 'PHOTOSYNTHESIS' : p.id === 'quadrats' ? 'QUADRAT SAMPLE' : p.id === 'shoretransect' ? 'SHORE ZONATION' : p.id === 'ripple' ? 'WAVE SPEED' : p.id === 'newton2' ? 'ACCELERATION' : p.id === 'electromagnet' ? 'MAGNETIC LIFT' : p.id === 'convection' ? 'WATER FLOW' : p.id === 'conduction' ? 'PIN FALL TEST' : p.id === 'thermal' ? 'INFRARED VIEW' : p.id === 'density' ? 'DENSITY MEASURE' : p.id === 'hooke' ? 'FORCE / EXTENSION' : p.id === 'specificheat' ? 'ENERGY / TEMPERATURE' : p.id === 'wirelength' ? 'ELECTRICAL READING' : p.id === 'fieldlines' ? 'FIELD PATTERN' : p.id === 'nuclear' ? 'RADIATION COUNT' : 'LIVE READINGS', x + w - 177, benchY + 49, 9, C.muted, 800);
   if (p.id === 'titration') {
     text(`${state.titrationVolume.toFixed(2)} cm³`, x + w - 177, benchY + 72, 15, '#b23678', 750);
     text(`pH ${state.ph.toFixed(1)}`, x + w - 78, benchY + 72, 14, C.blue, 700);
@@ -1277,6 +1362,9 @@ function main() {
     const aligned = state.fieldStage >= 4;
     text(`${state.fieldResults.length} / 3`, x + w - 177, benchY + 72, 15, '#d45757', 800);
     text(aligned ? 'ALIGNED' : state.fieldStage >= 1 ? 'LOOSE' : 'READY', x + w - 74, benchY + 72, 9.5, aligned ? '#d45757' : C.muted, 800, 'center');
+  } else if (p.id === 'nuclear') {
+    text(`${Math.floor(state.nuclearCount)} counts`, x + w - 177, benchY + 72, 12.6, nuclearSources[state.nuclearSource].colour, 800);
+    text(state.running ? `${Math.max(0, 10 - state.nuclearTimer).toFixed(1)} s` : state.nuclearStage === 6 ? `${state.nuclearCount * 6} cpm` : 'READY', x + w - 74, benchY + 72, 9.5, state.running ? '#e2aa1b' : C.teal, 800, 'center');
   } else {
     text(`${state.temp.toFixed(1)} °C`, x + w - 177, benchY + 72, 17, C.red, 750);
     text(`pH ${state.ph.toFixed(1)}`, x + w - 78, benchY + 72, 14, C.blue, 700);
@@ -1370,11 +1458,12 @@ function specificHeatPrimaryLabel() {
 }
 function drawSpecificHeatControls(x, benchY) {
   const busy = state.shcStage === 1 || state.shcStage === 3;
-  progressButton(specificHeatPrimaryLabel(), x + 20, benchY + 46, 188, 38, timedRatio(state.shcTimer, shcStageDurations[state.shcStage], busy), busy);
-  button('RESET PRACTICAL', x + 218, benchY + 46, 130, 38, false);
-  button('GRAPH', x + 358, benchY + 46, 76, 38, state.tab === 'graph');
+  progressButton(specificHeatPrimaryLabel(), x + 20, benchY + 46, 174, 38, timedRatio(state.shcTimer, shcStageDurations[state.shcStage], busy), busy);
+  button(`MATERIAL: ${currentShcMaterial().label}`, x + 204, benchY + 46, 150, 38, busy);
+  button('RESET', x + 364, benchY + 46, 74, 38, false);
+  button('GRAPH', x + 448, benchY + 46, 72, 38, state.tab === 'graph');
   const power = state.shcStage === 3 ? '24.0 W ON' : 'SUPPLY OFF', prepared = state.shcStage >= 2 ? 'PROBES SEATED' : 'BLOCK READY';
-  text(`${prepared}  ·  ${power}  ·  ${(state.shcEnergyJ / 1000).toFixed(1)} kJ`, x + 20, benchY + 31, 8.9, '#d8e8ed', 750);
+  text(`1.00 kg ${currentShcMaterial().label}  ·  ${prepared}  ·  ${power}  ·  ${(state.shcEnergyJ / 1000).toFixed(1)} kJ`, x + 20, benchY + 31, 8.9, '#d8e8ed', 750);
 }
 function wirePrimaryLabel() {
   if (state.complete) return 'VIEW GRAPH';
@@ -1400,10 +1489,12 @@ function drawFieldLineControls(x, benchY) {
   text(`PATTERN ${Math.min(3, state.fieldConfigIndex + 1)} / 3  ·  ${fieldConfigurations[state.fieldConfigIndex].short.toUpperCase()}`, x + 20, benchY + 31, 8.9, '#d8e8ed', 750);
 }
 function drawNuclearControls(x, benchY) {
-  const sources = ['NO SOURCE', 'ALPHA (Am-241)', 'BETA (Sr-90)', 'GAMMA (Co-60)'], absorbers = ['NONE', 'PAPER', 'ALUMINIUM', 'LEAD'];
-  button('SOURCE: ' + sources[state.nuclearSource], x + 30, benchY + 46, 172, 38, false);
-  button('ABSORBER: ' + absorbers[state.nuclearAbsorber], x + 214, benchY + 46, 160, 38, false);
-  progressButton(state.running ? 'STOP COUNT' : 'MEASURE 10s', x + 386, benchY + 46, 130, 38, state.running ? state.nuclearTimer / 10 : 0, state.running);
+  button('SOURCE · ' + nuclearSources[state.nuclearSource].short, x + 20, benchY + 46, 146, 38, false);
+  button('ABSORBER · ' + nuclearAbsorbers[state.nuclearAbsorber].short, x + 174, benchY + 46, 130, 38, false);
+  progressButton(state.running ? 'STOP COUNT' : 'MEASURE 10 s', x + 312, benchY + 46, 112, 38, state.running ? state.nuclearTimer / 10 : 0, state.running);
+  button('RESET', x + 432, benchY + 46, 76, 38, false);
+  const phase = state.nuclearStage === 1 ? 'SOURCE TRANSFER' : state.nuclearStage === 3 ? 'ABSORBER MOVING' : state.running ? 'COUNTING' : state.nuclearStage === 6 ? 'READING HELD' : state.nuclearSource ? 'ALIGNED · READY' : 'SELECT A SEALED SOURCE';
+  text(`${phase}  ·  ${state.nuclearResults.length} reading${state.nuclearResults.length === 1 ? '' : 's'} saved`, x + 20, benchY + 31, 8.7, '#d8e8ed', 750);
 }
 function drawPracticalEvaluationButton(x, y, w, h = 46) {
   const complete = state.complete;
@@ -1481,7 +1572,7 @@ function rightbar() {
   const graphContentY = graphSidebarContentY(p.id);
   if (state.tab === 'bench') {
     const compact = mobileLandscapeLayout || UI_SCALE < .995 || H < 790, contentTop = compact ? 122 : 126, contentBottom = H - (compact ? 9 : 14), cardX = x + 18, cardW = R - 36;
-    const activeStep = state.complete ? p.steps.length - 1 : p.id === 'rates' ? ratesStepIndex() : p.id === 'mass' ? massStepIndex() : p.id === 'hydrogen' ? hydrogenStepIndex() : p.id === 'titration' ? titrationStepIndex() : p.id === 'salts' ? saltsStepIndex() : p.id === 'flame' ? flameTestStepIndex() : p.id === 'displacement' ? displacementStepIndex() : p.id === 'alkali' ? alkaliStepIndex() : p.id === 'thermite' ? thermiteStepIndex() : p.id === 'starchleaf' ? starchStepIndex() : p.id === 'lipase' ? lipaseStepIndex() : p.id === 'osmosis' ? osmosisStepIndex() : p.id === 'potometer' ? potometerStepIndex() : p.id === 'quadrats' ? quadratStepIndex() : p.id === 'capture' ? captureStepIndex() : p.id === 'shoretransect' ? transectStepIndex() : p.id === 'ripple' ? rippleStepIndex() : p.id === 'electromagnet' ? electromagnetStepIndex() : p.id === 'convection' ? convectionStepIndex() : p.id === 'conduction' ? conductionStepIndex() : p.id === 'thermal' ? thermalStepIndex() : p.id === 'density' ? densityStepIndex() : p.id === 'hooke' ? hookeStepIndex() : p.id === 'specificheat' ? shcStepIndex() : p.id === 'wirelength' ? wireStepIndex() : p.id === 'fieldlines' ? fieldStepIndex() : Math.floor(state.progress * 3);
+    const activeStep = state.complete ? p.steps.length - 1 : p.id === 'rates' ? ratesStepIndex() : p.id === 'mass' ? massStepIndex() : p.id === 'hydrogen' ? hydrogenStepIndex() : p.id === 'titration' ? titrationStepIndex() : p.id === 'salts' ? saltsStepIndex() : p.id === 'flame' ? flameTestStepIndex() : p.id === 'displacement' ? displacementStepIndex() : p.id === 'alkali' ? alkaliStepIndex() : p.id === 'thermite' ? thermiteStepIndex() : p.id === 'starchleaf' ? starchStepIndex() : p.id === 'lipase' ? lipaseStepIndex() : p.id === 'osmosis' ? osmosisStepIndex() : p.id === 'potometer' ? potometerStepIndex() : p.id === 'quadrats' ? quadratStepIndex() : p.id === 'capture' ? captureStepIndex() : p.id === 'shoretransect' ? transectStepIndex() : p.id === 'ripple' ? rippleStepIndex() : p.id === 'electromagnet' ? electromagnetStepIndex() : p.id === 'convection' ? convectionStepIndex() : p.id === 'conduction' ? conductionStepIndex() : p.id === 'thermal' ? thermalStepIndex() : p.id === 'density' ? densityStepIndex() : p.id === 'hooke' ? hookeStepIndex() : p.id === 'specificheat' ? shcStepIndex() : p.id === 'wirelength' ? wireStepIndex() : p.id === 'fieldlines' ? fieldStepIndex() : p.id === 'nuclear' ? nuclearStepIndex() : Math.floor(state.progress * 3);
     const headingHeight = compact ? 12 : 15, headingToContentGap = compact ? 3 : 7, baseSectionGap = compact ? 4 : 9, headingSize = compact ? 10.1 : 10.8;
     const methodSize = compact ? 9.2 : 10.6, methodLineHeight = compact ? 11.2 : 13.4, methodTextWidth = cardW - 58, methodCardGap = compact ? 3 : 5;
     const methodCards = p.steps.map(step => { const lines = wrapTextLines(step, methodTextWidth, methodSize, 650); return { step, lines, baseHeight: Math.max(compact ? 28 : 42, lines.length * methodLineHeight + (compact ? 7 : 16)) } });
@@ -1509,7 +1600,7 @@ function rightbar() {
       drawTextLines(card.lines, cardX + 40, centreY, methodSize, C.ink, current ? 700 : 625, methodLineHeight); cursorY += cardHeight + (i < methodCards.length - 1 ? methodCardGap : 0)
     });
 
-    const safetyHeading = ['quadrats', 'shoretransect'].includes(p.id) ? 'BIOLOGICAL SAMPLES — CLICK FOR SAFETY' : ['ripple', 'hooke', 'specificheat'].includes(p.id) ? 'MATERIALS — CLICK FOR SAFETY' : 'REACTANTS — CLICK FOR SAFETY';
+    const safetyHeading = ['quadrats', 'shoretransect'].includes(p.id) ? 'BIOLOGICAL SAMPLES — CLICK FOR SAFETY' : ['ripple', 'hooke', 'specificheat'].includes(p.id) ? 'MATERIALS — CLICK FOR SAFETY' : p.id === 'nuclear' ? 'SEALED SOURCES — CLICK FOR SAFETY' : 'REACTANTS — CLICK FOR SAFETY';
     cursorY += sectionGap; text(safetyHeading, x + 22, cursorY + headingHeight / 2, headingSize, C.muted, 800); cursorY += sectionHeadingBlock;
     const reactantRows = [];
     reactantCards.forEach((card, i) => {
@@ -1814,7 +1905,7 @@ function starchStepIndex() { const stage = state.starchStage || 0; return stage 
 function lipaseStepIndex() { if (state.lipaseConditioning || state.lipaseStage === 0) return 0; if (state.lipaseStage === 1) return 1; if (state.lipaseStage === 2) return 2; return 3 }
 function osmosisStepIndex() { const stage = state.osmosisStage || 0; return stage < 1 ? 0 : stage < 3 ? 1 : stage < 6 ? 2 : 3 }
 function potometerStepIndex() { const stage = state.potometerStage || 0; return stage < 1 ? 0 : stage < 4 ? 1 : stage < 6 ? 2 : 3 }
-function quadratStepIndex() { const stage = state.quadratStage || 0; return stage < 1 ? 0 : stage < 4 ? 1 : stage < 7 ? 2 : 3 }
+function quadratStepIndex() { const stage = state.quadratStage || 0; return stage < 2 ? 0 : stage < 5 ? 1 : stage < 7 ? 2 : stage < 9 ? 3 : 4 }
 function captureStepIndex() { const stage = state.captureStage || 0; return stage < 2 ? 0 : stage < 4 ? 1 : stage < 6 ? 2 : 3 }
 function transectStepIndex() { const stage = state.transectStage || 0; return stage < 1 ? 0 : stage < 4 ? 1 : stage < 7 ? 2 : 3 }
 function rippleStepIndex() { const stage = state.rippleStage || 0; return stage < 2 ? 0 : stage < 4 ? 1 : stage < 7 ? 2 : 3 }
@@ -2390,8 +2481,8 @@ function drawSpecificHeatResults(x, y, w) {
   const summaryY = tableY + 48 + shcEnergyReadingsJ.length * rowH;
   rr(x, summaryY, w, 66, 7, state.complete ? '#faeee7' : '#eef3f2', state.complete ? '#df9c76' : C.line);
   text('SPECIFIC HEAT CAPACITY', x + 12, summaryY + 16, 7.6, C.muted, 800);
-  text(state.complete ? '900 J kg⁻¹ °C⁻¹' : 'calculate after heating', x + 12, summaryY + 36, 11.4, '#c05f31', 800);
-  wrappedText(state.complete ? '18,000 J ÷ (1.00 kg × 20.0 °C)' : 'The gradient of E against Δθ equals mc.', x + 12, summaryY + 53, w - 24, 7.8, C.ink, 600, 9, 2);
+  text(state.complete ? `${shcCalculatedSpecificHeat()} J kg⁻¹ °C⁻¹` : 'calculate after heating', x + 12, summaryY + 36, 11.4, '#c05f31', 800);
+  wrappedText(state.complete ? `18,000 J ÷ (1.00 kg × ${shcTemperatureRiseC().toFixed(1)} °C) · ${currentShcMaterial().label}` : 'The gradient of E against Δθ equals mc.', x + 12, summaryY + 53, w - 24, 7.8, C.ink, 600, 9, 2);
 }
 function drawExpandedLineGraph(x, y, w, h) {
   const s = currentGraphSpec(), cardY = y + 38, cardH = h - 38, left = x + 98, right = x + w - 34, top = cardY + 36, bottom = cardY + cardH - 72, gw = right - left, gh = bottom - top;
@@ -2533,6 +2624,7 @@ function drawHookeFocusModal() {
 function idDp(max) { return max < 10 ? 1 : 0 }
 function draw(skipWebGL = false) {
   regions = [];
+  window.__buttonLabelAudit = [];
   ctx.globalAlpha = 1;
   ctx.globalCompositeOperation = 'source-over';
   ctx.filter = 'none';
@@ -2627,7 +2719,7 @@ function resetQuadratPractical() {
   state.running = false; state.complete = false; state.time = 0; state.progress = 0; state.points = [];
   state.quadratStage = 0; state.quadratTimer = 0; state.quadratSampleIndex = 0; state.quadratCurrentCount = 0; state.quadratResults = []; state.meadowWindClock = 0;
   state.tab = 'bench';
-  state.toast = 'The meadow turf is growing into view. Generate a random coordinate before placing the quadrat so the sampling position cannot be chosen for its daisy count.';
+  state.toast = 'The meadow turf is growing into view. Lay two tape measures at right angles before generating a random coordinate.';
 }
 function activateQuadrat(label) {
   const stage = state.quadratStage || 0, sample = currentQuadratSample();
@@ -3114,10 +3206,11 @@ function resetSpecificHeatPractical() {
   state.shcTemperatureC = 20;
   state.shcResults = [];
   state.tab = 'bench';
-  state.toast = 'The 1.00 kg aluminium block is cool. Add small thermal-paste beads, then seat the heater and temperature probe before insulating it.';
+  state.toast = `The 1.00 kg ${currentShcMaterial().label.toLowerCase()} block is cool. Add thermal paste, seat the heater and temperature probe, then insulate it.`;
 }
 function syncSpecificHeatGraphPoints() {
-  state.points = state.shcResults.map(item => ({ x: item.temperature_rise_c / 20, y: (item.energy_j / 1000) / 18, xValue: item.temperature_rise_c, yValue: item.energy_j / 1000 }));
+  const finalRise = shcFinalTemperatureC() - 20;
+  state.points = state.shcResults.map(item => ({ x: item.temperature_rise_c / finalRise, y: (item.energy_j / 1000) / 18, xValue: item.temperature_rise_c, yValue: item.energy_j / 1000 }));
 }
 function activateSpecificHeat(label) {
   const stage = state.shcStage || 0;
@@ -3129,11 +3222,16 @@ function activateSpecificHeat(label) {
     state.toast = 'The 12 V low-voltage supply is on. The joulemeter and digital probe now update continuously as energy enters the insulated block.';
   } else if (label === 'CALCULATE c' && stage === 4) {
     state.shcStage = 5; state.running = false; state.complete = true; state.progress = 1; state.tab = 'graph';
-    state.toast = 'c = 18,000 J ÷ (1.00 kg × 20.0 °C) = 900 J kg⁻¹ °C⁻¹. In a real experiment, heat loss usually raises the calculated value.';
+    state.toast = `c = 18,000 J ÷ (1.00 kg × ${shcTemperatureRiseC().toFixed(1)} °C) = ${shcCalculatedSpecificHeat()} J kg⁻¹ °C⁻¹ for ${currentShcMaterial().label.toLowerCase()}.`;
+  } else if (label.startsWith('MATERIAL:') && !state.running) {
+    state.shcMaterial = state.shcMaterial === 'aluminium' ? 'copper' : 'aluminium';
+    resetSpecificHeatPractical();
+    lab3d.signature = '';
+    state.toast = `Changed to a 1.00 kg ${currentShcMaterial().label.toLowerCase()} block. Compare its temperature rise under the same 18.0 kJ input.`;
   } else if (label === 'VIEW GRAPH' || label === 'GRAPH') {
     state.tab = 'graph';
     state.toast = state.complete ? 'The energy–temperature-rise graph has gradient mc = 0.900 kJ °C⁻¹; dividing by 1.00 kg gives c = 900 J kg⁻¹ °C⁻¹.' : 'Complete the heating run before calculating specific heat capacity.';
-  } else if (label === 'RESET PRACTICAL') resetSpecificHeatPractical();
+  } else if (label === 'RESET PRACTICAL' || label === 'RESET') resetSpecificHeatPractical();
 }
 function resetWireLengthPractical() {
   state.running = false;
@@ -3185,7 +3283,10 @@ function resetFieldLinePractical() {
   state.toast = 'A single red-and-blue bar magnet is centred below clean white paper. Sprinkle a thin, even layer of simulated iron filings.';
 }
 function resetNuclearPractical() {
-  state.nuclearStage = 0; state.nuclearTimer = 0; state.nuclearSource = 0; state.nuclearAbsorber = 0; state.nuclearCount = 0; state.nuclearAnimAbsorber = 0; state.nuclearAnimProgress = 1; state.running = false; state.toast = 'Select a radioactive source and an absorber to begin.';
+  state.running = false; state.complete = false; state.progress = 0; state.time = 0; state.tab = 'bench';
+  state.nuclearStage = 0; state.nuclearTimer = 0; state.nuclearSource = 0; state.nuclearPreviousSource = 0; state.nuclearSourceTransition = 1;
+  state.nuclearAbsorber = 0; state.nuclearCount = 0; state.nuclearAnimAbsorber = 0; state.nuclearAnimProgress = 1; state.nuclearResults = []; state.nuclearPulseClock = 0;
+  state.toast = 'The source–absorber–detector rail is aligned at a fixed distance. Select a sealed source; it will be transferred with long-handled tongs.';
 }
 function activateFieldLines(label) {
   const stage = state.fieldStage || 0, configuration = fieldConfigurations[state.fieldConfigIndex];
@@ -3210,6 +3311,38 @@ function activateFieldLines(label) {
     state.toast = 'Compare filing density and curvature for the single, attraction and repulsion patterns.';
   } else if (label === 'RESET STUDY') resetFieldLinePractical();
 }
+function activateNuclear(label) {
+  if (label === 'RESET') { resetNuclearPractical(); return }
+  if (label.startsWith('SOURCE · ')) {
+    if (state.running) { state.running = false; state.nuclearTimer = 0; state.nuclearCount = 0 }
+    state.nuclearPreviousSource = state.nuclearSource;
+    state.nuclearSource = (state.nuclearSource + 1) % nuclearSources.length;
+    state.nuclearSourceTransition = 0; state.nuclearStage = 1; state.complete = false;
+    const source = nuclearSources[state.nuclearSource];
+    state.toast = state.nuclearSource ? `Using remote tongs to lift the sealed ${source.isotope} ${source.symbol} source from its shielded store and clamp it at the fixed rail mark.` : 'The source is being returned to its labelled shielded store with remote tongs.';
+    return
+  }
+  if (label.startsWith('ABSORBER · ')) {
+    if (state.running) { state.running = false; state.nuclearTimer = 0; state.nuclearCount = 0 }
+    state.nuclearAnimAbsorber = state.nuclearAbsorber;
+    state.nuclearAbsorber = (state.nuclearAbsorber + 1) % nuclearAbsorbers.length;
+    state.nuclearAnimProgress = 0; state.nuclearStage = 3; state.complete = false;
+    const absorber = nuclearAbsorbers[state.nuclearAbsorber];
+    state.toast = state.nuclearAbsorber ? `The labelled ${absorber.label} sheet is lifting from the rack and lowering squarely into the beam holder.` : 'The absorber is lifting clear to leave an open beam path.';
+    return
+  }
+  if (label === 'STOP COUNT') {
+    state.running = false; state.nuclearStage = state.nuclearSource ? 4 : 0;
+    state.toast = 'Measurement stopped. The partial count was not saved; the displayed source and absorber remain selected.';
+    return
+  }
+  if (label === 'MEASURE 10 s') {
+    if (!state.nuclearSource) { state.toast = 'Select a sealed alpha, beta or gamma source before starting the ten-second measurement.'; return }
+    if (state.nuclearSourceTransition < 1 || state.nuclearAnimProgress < 1) { state.toast = 'Wait until the source and absorber are stationary in their holders before measuring.'; return }
+    state.nuclearStage = 5; state.nuclearTimer = 0; state.nuclearCount = 0; state.nuclearPulseClock = 0; state.running = true; state.complete = false;
+    state.toast = `Counting ${nuclearSources[state.nuclearSource].symbol} radiation for 10.0 s with ${nuclearAbsorbers[state.nuclearAbsorber].label} in the holder.`;
+  }
+}
 function activate(label) {
   const id = practicals[state.selected].id;
   if (id === 'starchleaf' && ['BOIL LEAF', 'BOILING…', 'MOVE TO ETHANOL', 'DECOLOURISING…', 'RINSE LEAF', 'RINSING…', 'ADD IODINE', 'ADDING IODINE…', 'RESET PRACTICAL', 'RESULT'].includes(label)) { activateStarch(label); draw(); return }
@@ -3228,9 +3361,9 @@ function activate(label) {
   if (id === 'thermal' && ['ADD HOT WATER', 'POURING WATER…', 'PICK UP CAMERA', 'CAMERA MOVING…', 'CAPTURE IMAGE', 'THERMAL VIEW', 'RESET DEMO', 'RESET PRACTICAL'].includes(label)) { activateThermal(label); draw(); return }
   if (id === 'density' && ['WEIGH OBJECT', 'FILL EUREKA CAN', 'LOWER OBJECT', 'RECORD DENSITY', 'CHANGE SAMPLE', 'RESET PRACTICAL', 'METHOD', 'RESULTS', 'GRAPH'].includes(label)) { activateDensity(label); draw(); return }
   if (id === 'hooke' && ['RECORD ZERO', 'ADDING + SETTLING…', 'RECORD READING', 'ADD 100 g MASS', 'VIEW GRAPH', 'RESET SERIES', 'GRAPH'].includes(label)) { activateHooke(label); draw(); return }
-  if (id === 'specificheat' && ['PREPARE BLOCK', 'INSERTING + INSULATING…', 'START HEATING', 'HEATING…', 'CALCULATE c', 'VIEW GRAPH', 'RESET PRACTICAL', 'GRAPH'].includes(label)) { activateSpecificHeat(label); draw(); return }
+  if (id === 'specificheat' && (label.startsWith('MATERIAL:') || ['PREPARE BLOCK', 'INSERTING + INSULATING…', 'START HEATING', 'HEATING…', 'CALCULATE c', 'VIEW GRAPH', 'RESET PRACTICAL', 'RESET', 'GRAPH'].includes(label))) { activateSpecificHeat(label); draw(); return }
   if (id === 'wirelength' && ['CLOSE SWITCH', 'READING SETTLING…', 'RECORD READING', 'NEXT LENGTH', 'MOVING CONTACT…', 'VIEW GRAPH', 'RESET SERIES', 'GRAPH'].includes(label)) { activateWireLength(label); draw(); return }
-  if (id === 'nuclear' && ['SOURCE: NO SOURCE', 'SOURCE: ALPHA (Am-241)', 'SOURCE: BETA (Sr-90)', 'SOURCE: GAMMA (Co-60)', 'ABSORBER: NONE', 'ABSORBER: PAPER', 'ABSORBER: ALUMINIUM', 'ABSORBER: LEAD', 'MEASURE 10s', 'STOP COUNT'].includes(label)) { activateNuclear(label); draw(); return }
+  if (id === 'nuclear' && (label.startsWith('SOURCE · ') || label.startsWith('ABSORBER · ') || ['MEASURE 10 s', 'STOP COUNT', 'RESET'].includes(label))) { activateNuclear(label); draw(); return }
   if (id === 'fieldlines' && ['SPRINKLE FILINGS', 'SPRINKLING…', 'TAP PAPER', 'FILINGS ALIGNING…', 'RECORD PATTERN', 'CHANGING MAGNETS…', 'VIEW PATTERNS', 'RESET STUDY', 'PATTERNS'].includes(label)) { activateFieldLines(label); draw(); return }
   if (id === 'rates' && ['MOVE TO CROSS', 'MOVING FLASK…', 'ADD HCl', 'REACTION RUNNING…', 'NEXT TEMPERATURE', 'VIEW GRAPH', 'RESET SERIES', "BIRD'S EYE", 'HEATING BATH…'].includes(label)) { activateRates(label); draw(); return }
   if (id === 'titration' && ['ADD INDICATOR', 'OPEN TAP', 'TAP OPEN…', 'ADD ONE DROP', 'RECORD TITRE', 'RESET PRACTICAL', 'RESULTS'].includes(label)) { activateTitration(label); draw(); return }
@@ -3666,15 +3799,18 @@ function update(dt, skipDraw = false) {
       state.quadratTimer += dt;
       const q = Math.max(0, Math.min(1, state.quadratTimer / duration));
       if (stage === 1) {
-        state.toast = q < .45 ? 'The x coordinate is being generated independently.' : q < .82 ? 'The y coordinate is being generated independently.' : `Unused random point (${sample.xM}, ${sample.yM}) selected.`;
-        if (q >= 1) { state.quadratStage = 2; state.quadratTimer = 0; state.running = false; state.toast = `Random coordinate (${sample.xM}, ${sample.yM}) locked. Place the quadrat without shifting it toward any flowers.` }
+        state.toast = q < .42 ? 'The first 10 m tape is unrolling from the datum along the meadow x-axis.' : q < .86 ? 'The second tape is unrolling from the same datum at 90°, toward the foreground y-axis.' : 'Both perpendicular tapes now define the 10 m × 10 m coordinate grid.';
+        if (q >= 1) { state.quadratStage = 2; state.quadratTimer = 0; state.running = false; state.toast = 'The x and y tapes share one origin and lie at right angles. Generate an unbiased coordinate.' }
       } else if (stage === 3) {
-        state.toast = q < .34 ? 'The aluminium frame rises clear of the turf.' : q < .78 ? 'The quadrat follows a smooth arc toward the generated coordinate.' : 'The frame settles flat; stems are judged by their rooted position.';
-        if (q >= 1) { state.quadratStage = 4; state.quadratTimer = 0; state.running = false; state.toast = 'Quadrat settled at the random point. Count daisies rooted inside using the fixed top-and-right edge rule.' }
+        state.toast = q < .45 ? 'The x coordinate is being generated independently.' : q < .82 ? 'The y coordinate is being generated independently.' : `Unused random point (${sample.xM}, ${sample.yM}) selected.`;
+        if (q >= 1) { state.quadratStage = 4; state.quadratTimer = 0; state.running = false; state.toast = `Random coordinate (${sample.xM}, ${sample.yM}) locked. Place the quadrat without shifting it toward any flowers.` }
       } else if (stage === 5) {
+        state.toast = q < .34 ? 'The aluminium frame rises clear of the turf.' : q < .78 ? 'The quadrat follows a smooth arc toward the generated coordinate.' : 'The frame settles flat; stems are judged by their rooted position.';
+        if (q >= 1) { state.quadratStage = 6; state.quadratTimer = 0; state.running = false; state.toast = 'Quadrat settled at the random point. Count daisies rooted inside using the fixed top-and-right edge rule.' }
+      } else if (stage === 7) {
         state.quadratCurrentCount = Math.min(sample.daisies, Math.floor(q * sample.daisies + .001));
         state.toast = q < .72 ? `Identifying rooted daisy stems one at a time: ${state.quadratCurrentCount} counted.` : 'Checking boundary plants and confirming the tally.';
-        if (q >= 1) { state.quadratStage = 6; state.quadratTimer = 0; state.running = false; state.quadratCurrentCount = sample.daisies; state.toast = `${sample.daisies} daisies are rooted inside this 1 m² quadrat. Record the sample.` }
+        if (q >= 1) { state.quadratStage = 8; state.quadratTimer = 0; state.running = false; state.quadratCurrentCount = sample.daisies; state.toast = `${sample.daisies} daisies are rooted inside this 1 m² quadrat. Record the sample.` }
       }
     }
     if (!skipDraw) draw();
@@ -3948,13 +4084,13 @@ function update(dt, skipDraw = false) {
     } else if (state.running && state.shcStage === 3) {
       state.shcTimer += dt;
       const q = Math.max(0, Math.min(1, state.shcTimer / shcStageDurations[3]));
-      state.time = 750 * q; state.shcEnergyJ = +(18000 * q).toFixed(0); state.shcTemperatureC = +(20 + 20 * q).toFixed(1); state.temp = state.shcTemperatureC; state.progress = .18 + q * .72;
-      for (let i = 0; i < shcEnergyReadingsJ.length; i++) if (q + 1e-6 >= i / (shcEnergyReadingsJ.length - 1) && !state.shcResults.some(item => item.energy_j === shcEnergyReadingsJ[i])) state.shcResults.push({ time_s: i * 150, energy_j: shcEnergyReadingsJ[i], temperature_c: shcTemperatureReadingsC[i], temperature_rise_c: shcTemperatureReadingsC[i] - 20 });
+      state.time = 750 * q; state.shcEnergyJ = +(18000 * q).toFixed(0); state.shcTemperatureC = shcTemperatureForEnergy(state.shcEnergyJ); state.temp = state.shcTemperatureC; state.progress = .18 + q * .72;
+      for (let i = 0; i < shcEnergyReadingsJ.length; i++) if (q + 1e-6 >= i / (shcEnergyReadingsJ.length - 1) && !state.shcResults.some(item => item.energy_j === shcEnergyReadingsJ[i])) { const temperature = shcTemperatureForEnergy(shcEnergyReadingsJ[i]); state.shcResults.push({ time_s: i * 150, energy_j: shcEnergyReadingsJ[i], temperature_c: temperature, temperature_rise_c: +(temperature - 20).toFixed(1) }); }
       state.shcResults.sort((a, b) => a.energy_j - b.energy_j); syncSpecificHeatGraphPoints();
-      state.toast = q < .2 ? 'The switch closes and the heater core begins transferring energy into the aluminium.' : q < .82 ? `Heating: ${(state.shcEnergyJ / 1000).toFixed(2)} kJ transferred; probe ${state.shcTemperatureC.toFixed(1)} °C.` : 'Approaching the final temperature; the insulation reduces, but cannot eliminate, energy loss in a real experiment.';
+      state.toast = q < .2 ? `The heater begins transferring energy into the ${currentShcMaterial().label.toLowerCase()}.` : q < .82 ? `Heating: ${(state.shcEnergyJ / 1000).toFixed(2)} kJ transferred; probe ${state.shcTemperatureC.toFixed(1)} °C.` : 'Approaching the final temperature; insulation reduces heat loss.';
       if (q >= 1) {
-        state.shcEnergyJ = 18000; state.shcTemperatureC = 40; state.temp = 40; state.shcStage = 4; state.shcTimer = shcStageDurations[3]; state.running = false; state.progress = .92; syncSpecificHeatGraphPoints();
-        state.toast = 'Supply off. Final readings: 18,000 J and 40.0 °C, so Δθ = 20.0 °C. Calculate the specific heat capacity.';
+        state.shcEnergyJ = 18000; state.shcTemperatureC = shcFinalTemperatureC(); state.temp = state.shcTemperatureC; state.shcStage = 4; state.shcTimer = shcStageDurations[3]; state.running = false; state.progress = .92; syncSpecificHeatGraphPoints();
+        state.toast = `Supply off. Final readings: 18,000 J and ${state.shcTemperatureC.toFixed(1)} °C, so Δθ = ${shcTemperatureRiseC().toFixed(1)} °C.`;
       }
     }
     if (!skipDraw && (state.running || state.complete || state.shcStage > 0)) draw();
@@ -3987,29 +4123,43 @@ function update(dt, skipDraw = false) {
     return;
   }
   if (id === 'nuclear') {
+    let visualChanged = false;
+    if (state.nuclearSourceTransition < 1) {
+      state.nuclearSourceTransition = Math.min(1, state.nuclearSourceTransition + dt / nuclearSourceTransitionDuration); visualChanged = true;
+      if (state.nuclearSourceTransition >= 1) {
+        state.nuclearPreviousSource = state.nuclearSource;
+        state.nuclearStage = state.nuclearSource ? (state.nuclearAbsorber ? 4 : 2) : 0;
+        state.toast = state.nuclearSource ? `${nuclearSources[state.nuclearSource].isotope} is locked in the source holder. The aperture, absorber slot and GM tube window are aligned.` : 'The active position is empty and all sealed sources are secure in the shielded store.';
+      }
+    }
     if (state.nuclearAnimProgress < 1) {
-      state.nuclearAnimProgress = Math.min(1, state.nuclearAnimProgress + dt * 3);
-      if (state.nuclearAnimProgress >= 1) state.nuclearAnimAbsorber = state.nuclearAbsorber;
-      if (!skipDraw) draw();
+      state.nuclearAnimProgress = Math.min(1, state.nuclearAnimProgress + dt / nuclearAbsorberTransitionDuration); visualChanged = true;
+      if (state.nuclearAnimProgress >= 1) {
+        state.nuclearAnimAbsorber = state.nuclearAbsorber; state.nuclearStage = state.nuclearSource ? 4 : 0;
+        state.toast = state.nuclearAbsorber ? `${nuclearAbsorbers[state.nuclearAbsorber].short} is seated in the holder. The source–detector distance has not changed.` : 'The absorber holder is empty. The direct source–detector path is clear.';
+      }
     }
     if (state.running) {
-      state.nuclearTimer += dt;
-      let targetRate = 0.5; // background
-      if (state.nuclearSource === 1) targetRate = state.nuclearAbsorber === 0 ? 50 : 0.5;
-      else if (state.nuclearSource === 2) targetRate = state.nuclearAbsorber < 2 ? 60 : 1.5;
-      else if (state.nuclearSource === 3) targetRate = state.nuclearAbsorber < 3 ? 40 : 8;
-      let prob = targetRate * dt, clicks = 0;
-      while (prob > 1) { clicks++; prob--; }
-      if (Math.random() < prob) clicks++;
-      if (clicks > 0) { state.nuclearCount += clicks; playGeigerClick(); }
+      const before = state.nuclearCount, target = nuclearTargetCount10s();
+      state.nuclearTimer = Math.min(10, state.nuclearTimer + dt); state.time += dt; state.nuclearPulseClock += dt;
+      const q = Math.max(0, Math.min(1, state.nuclearTimer / 10));
+      state.nuclearCount = Math.min(target, Math.floor(target * q + .0001));
+      if (state.nuclearCount > before) playGeigerClick();
       if (state.nuclearTimer >= 10) {
-        state.running = false;
-        state.toast = `10-second measurement complete. Total counts: ${state.nuclearCount}.`;
+        state.running = false; state.nuclearStage = 6;
+        const result = { source: nuclearSources[state.nuclearSource].id, isotope: nuclearSources[state.nuclearSource].isotope, radiation: nuclearSources[state.nuclearSource].symbol, absorber: nuclearAbsorbers[state.nuclearAbsorber].id, count_10s: state.nuclearCount, count_rate_cpm: state.nuclearCount * 6, transmission_fraction: +nuclearTransmissionFraction().toFixed(3) };
+        const key = `${result.source}:${result.absorber}`, existing = state.nuclearResults.findIndex(item => `${item.source}:${item.absorber}` === key);
+        if (existing >= 0) state.nuclearResults[existing] = result; else state.nuclearResults.push(result);
+        const canonical = [['alpha', 'paper'], ['beta', 'aluminium'], ['gamma', 'lead']];
+        const completedComparisons = canonical.filter(([source, absorber]) => state.nuclearResults.some(item => item.source === source && item.absorber === absorber)).length;
+        state.progress = completedComparisons / canonical.length; state.complete = completedComparisons === canonical.length;
+        state.toast = `${nuclearSources[state.nuclearSource].symbol} with ${nuclearAbsorbers[state.nuclearAbsorber].label}: ${state.nuclearCount} counts in 10 s = ${state.nuclearCount * 6} counts min⁻¹.${state.complete ? ' The three key penetration comparisons are complete.' : ''}`;
       } else {
-        state.toast = `Measuring radiation... ${Math.max(0, 10 - state.nuclearTimer).toFixed(1)}s remaining.`;
+        state.toast = `GM tube counting ${nuclearSources[state.nuclearSource].symbol} radiation through ${nuclearAbsorbers[state.nuclearAbsorber].label}… ${Math.max(0, 10 - state.nuclearTimer).toFixed(1)} s remaining.`;
       }
-      if (!skipDraw) draw();
+      visualChanged = true;
     }
+    if (visualChanged && !skipDraw) draw();
     return;
   }
   if (id === 'fieldlines') {
@@ -4659,12 +4809,14 @@ window.render_game_to_text = () => {
     };
     payload.controls = ['RECORD ZERO', 'ADD 100 g MASS', 'RECORD READING', 'RESET SERIES', 'GRAPH', 'METHOD', 'F fullscreen', ...(state.hookeFocusModal ? ['CLOSE RULER VIEW'] : [])];
   } else if (id === 'specificheat') {
-    const phases = ['unprepared aluminium block', 'applying paste, inserting probes and closing insulation', 'prepared and zeroed', 'electrical heating and live measurement', 'supply off ready to calculate', 'specific heat capacity calculated'];
+    const phases = ['unprepared material block', 'applying paste, inserting probes and closing insulation', 'prepared and zeroed', 'electrical heating and live measurement', 'supply off ready to calculate', 'specific heat capacity calculated'];
     payload.specific_heat_capacity_practical = {
       stage: state.shcStage,
       phase: phases[state.shcStage],
       elapsed_stage_s: +state.shcTimer.toFixed(2),
-      apparatus: ['1.00 kg aluminium block with two separate bores', '12 V cartridge heater', 'digital temperature probe', 'thermal paste collars', 'close-fitting foam jacket with bored lid', 'low-voltage supply', 'ammeter and joulemeter'],
+      material: state.shcMaterial,
+      reference_specific_heat_j_per_kg_c: currentShcMaterial().specificHeat,
+      apparatus: [`1.00 kg ${state.shcMaterial} block with two separate bores`, '12 V cartridge heater', 'digital temperature probe', 'thermal paste collars', 'close-fitting foam jacket with bored lid', 'low-voltage supply', 'ammeter and joulemeter'],
       preparation: { thermal_paste_applied: state.shcStage >= 2, heater_fully_inserted: state.shcStage >= 2, probe_fully_inserted: state.shcStage >= 2, insulation_closed: state.shcStage >= 2, bored_insulating_lid_closed: state.shcStage >= 2 },
       electrical_circuit: { complete: true, route: 'supply positive → ammeter → joulemeter → heater → supply negative', thermometer_probe_has_separate_data_lead: true },
       mass_kg: 1,
@@ -4676,14 +4828,14 @@ window.render_game_to_text = () => {
       temperature_c: state.shcTemperatureC,
       temperature_rise_c: shcTemperatureRiseC(),
       measured_results: state.shcResults,
-      calculation: state.shcStage >= 5 ? '18,000 J ÷ (1.00 kg × 20.0 °C) = 900 J kg⁻¹ °C⁻¹' : null,
+      calculation: state.shcStage >= 5 ? `18,000 J ÷ (1.00 kg × ${shcTemperatureRiseC().toFixed(1)} °C) = ${shcCalculatedSpecificHeat()} J kg⁻¹ °C⁻¹` : null,
       calculated_specific_heat_j_per_kg_c: state.shcStage >= 5 ? shcCalculatedSpecificHeat() : null,
       specific_heat_capacity_j_per_kg_k: state.shcStage >= 5 ? shcCalculatedSpecificHeat() : null,
       graph_axes: { x: 'temperature rise / °C', y: 'energy transferred / kJ' },
       heat_loss_evaluation: state.complete ? 'energy loss to the surroundings makes the measured temperature rise too small and the calculated c too high' : null,
       smooth_stage_animation: true
     };
-    payload.controls = ['PREPARE BLOCK', 'START HEATING', 'CALCULATE c', 'RESET PRACTICAL', 'GRAPH', 'METHOD', 'F fullscreen'];
+    payload.controls = [`MATERIAL: ${currentShcMaterial().label}`, 'PREPARE BLOCK', 'START HEATING', 'CALCULATE c', 'RESET', 'GRAPH', 'METHOD', 'F fullscreen'];
   }
   return JSON.stringify(payload)
 };
@@ -4872,7 +5024,7 @@ window.render_game_to_text = () => {
     };
     payload.controls = ['INTRODUCE BUBBLE', 'ALIGN TO ZERO', 'START 5 MIN RUN', 'NEXT WIND SPEED', 'RESET SERIES', 'GRAPH', 'METHOD', 'F fullscreen'];
   } else if (id === 'quadrats') {
-    const sample = currentQuadratSample(), phases = ['meadow ready for unbiased sampling', 'generating independent x and y coordinates', 'random coordinate locked', 'quadrat following a smooth throw arc', 'quadrat settled at the coordinate', 'identifying and highlighting rooted daisies', 'count ready to record', 'sample recorded'];
+    const sample = currentQuadratSample(), phases = ['meadow ready; grid tapes not yet laid', 'laying x and y grid tapes from one datum', 'perpendicular 10 m × 10 m grid ready', 'generating independent x and y coordinates', 'random coordinate locked', 'quadrat following a smooth throw arc', 'quadrat settled at the coordinate', 'identifying and highlighting rooted daisies', 'count ready to record', 'sample recorded'], clamp01 = value => Math.max(0, Math.min(1, value)), smooth01 = value => { const q = clamp01(value); return q * q * (3 - 2 * q) }, tapeOverall = state.quadratStage === 1 ? smooth01(state.quadratTimer / 3.5) : state.quadratStage > 1 ? 1 : 0, tapeXProgress = smooth01(tapeOverall / .62), tapeYProgress = smooth01((tapeOverall - .28) / .72), tapeOrigin = [-2.8, .344, -1], tapeXEnd = [2.8, .344, -1], tapeYEnd = [-2.8, .344, 4.2];
     payload.graph_axes = null; payload.graph_readings = state.quadratResults.length; payload.results_view = 'coordinate-and-count table with mean density and habitat population estimate';
     payload.random_quadrat_sampling_practical = {
       stage: state.quadratStage,
@@ -4883,14 +5035,17 @@ window.render_game_to_text = () => {
       current_random_coordinate_m: { x: sample.xM, y: sample.yM },
       random_placement_without_bias: true,
       duplicate_coordinates_allowed: false,
-      habitat: { dimensions_m: [10, 10], area_m2: 100, living_turf: true, grass_blade_count: 1520, moss_patch_count: 240, moss_between_grass_blades: true, daisy_model_detail: 'curved stems, leaves, individual white petals and yellow disc florets' },
-      quadrat: { dimensions_m: [1, 1], area_m2: 1, internal_grid: '4 × 4', aluminium_frame: true, rooted_inside_rule: 'include top and right boundary only' },
-      current_count: state.quadratStage >= 6 ? sample.daisies : state.quadratCurrentCount,
-      highlighted_daisy_ids: Array.from({ length: state.quadratStage >= 6 ? sample.daisies : state.quadratCurrentCount }, (_, i) => `sample-${state.quadratSampleIndex + 1}-daisy-${i + 1}`),
+      habitat: { dimensions_m: [10, 10], area_m2: 100, living_turf: true, grass_blade_count: 26720, grass_blade_density_per_rendered_m2: 78.0, grass_blade_geometry: 'short tapered strip with a pointed tip', grass_blade_height_range_world: [0.194, 0.329], subtle_per_blade_tone_variation: true, rendered_meadow_bounds_world: { x: [-14, 14], z: [-3.05, 9.95] }, rendered_meadow_extends_beyond_visible_view: true, supported_maximum_scene_aspect: 2.5, moss_patch_count: 900, moss_between_grass_blades: true, daisy_model_detail: 'curved stems, leaves, individual white petals and yellow disc florets' },
+      quadrat: { dimensions_m: [1, 1], area_m2: 1, internal_grid: '4 × 4', aluminium_frame: true, rooted_inside_rule: 'include top and right boundary only', initial_world_position: [-2.75, 0.43, 1.2], visible_at_supported_browser_widths: true },
+      coordinate_generator: { world_position: [-3.2, 0.36, -0.25], visible_at_supported_browser_widths: true },
+      grid_tapes: { physical_lengths_m: { x: 10, y: 10 }, common_origin_world: tapeOrigin, x_direction_world: [1, 0, 0], y_direction_world: [0, 0, 1], x_end_world: tapeXEnd, y_end_world: tapeYEnd, current_x_end_world: [+(tapeOrigin[0] + (tapeXEnd[0] - tapeOrigin[0]) * tapeXProgress).toFixed(3), tapeOrigin[1], tapeOrigin[2]], current_y_end_world: [tapeOrigin[0], tapeOrigin[1], +(tapeOrigin[2] + (tapeYEnd[2] - tapeOrigin[2]) * tapeYProgress).toFixed(3)], x_unroll_progress: +tapeXProgress.toFixed(3), y_unroll_progress: +tapeYProgress.toFixed(3), right_angle_degrees: 90, direction_dot_product: 0, share_exact_origin: true, lie_on_meadow_surface: true, x_increases_left_to_right: true, y_increases_toward_foreground: true, completed_endpoints_inside_supported_view: true },
+      current_target_world: [sample.worldX, .39, sample.worldZ],
+      current_count: state.quadratStage >= 8 ? sample.daisies : state.quadratCurrentCount,
+      highlighted_daisy_ids: Array.from({ length: state.quadratStage >= 8 ? sample.daisies : state.quadratCurrentCount }, (_, i) => `sample-${state.quadratSampleIndex + 1}-daisy-${i + 1}`),
       results: state.quadratResults.map(result => ({ ...result })),
       mean_density_daisies_m2: +quadratMean().toFixed(1),
       estimated_population_in_100_m2: quadratPopulationEstimate(),
-      environment: { laboratory_tiles_visible: false, laboratory_worktop_visible: false, laboratory_cupboards_visible: false, full_height_meadow_scene: true, outdoor_scene_extends_behind_footer: true, forest_background: true, detailed_trees: true, realistic_layered_trees: true, tree_depth_rows: 3, curved_tapered_trunks: true, radial_connected_branches: true, canopy_lobes_per_tree: 11, visible_root_flares: true, low_polygon_background_branches: true, forest_shrub_count: 28, blue_sunny_sky: true, sun_visible: true, cloud_count: 3, grass_growth_fraction: +Math.min(1, state.meadowWindClock / 2.8).toFixed(2), moss_growth_fraction: +Math.min(1, Math.max(0, state.meadowWindClock - .28) / 1.9).toFixed(2), wind_clock_s: +state.meadowWindClock.toFixed(2), grass_and_daisies_sway_in_wind: true },
+      environment: { laboratory_tiles_visible: false, laboratory_worktop_visible: false, laboratory_cupboards_visible: false, full_height_meadow_scene: true, outdoor_scene_extends_behind_footer: true, horizontal_field_overscan: true, narrow_arena_horizontal_framing_preserved: true, supported_minimum_arena_aspect: 0.43, forest_background: true, detailed_trees: true, realistic_layered_trees: true, tree_depth_rows: 3, curved_tapered_trunks: true, radial_connected_branches: true, canopy_lobes_per_tree: 11, visible_root_flares: true, low_polygon_background_branches: true, forest_shrub_count: 28, blue_sunny_sky: true, sun_visible: true, cloud_count: 3, grass_growth_fraction: +Math.min(1, state.meadowWindClock / 2.8).toFixed(2), moss_growth_fraction: +Math.min(1, Math.max(0, state.meadowWindClock - .28) / 1.9).toFixed(2), wind_clock_s: +state.meadowWindClock.toFixed(2), grass_and_daisies_sway_in_wind: true },
       animation: { turf_grows_into_full_outdoor_arena: state.meadowWindClock < 2.8, moss_emerges_between_blades: state.meadowWindClock < 2.18, upper_tree_canopies_sway_from_fixed_lower_trunks: true, subtle_leaf_mass_flutter: true, coordinate_generator_spins: state.quadratStage === 3, quadrat_smooth_throw_arc: state.quadratStage === 5, quadrat_settle_bounce: state.quadratStage === 5, counted_daisies_pulse: state.quadratStage === 7 || state.quadratStage === 8, measuring_tapes_unwind: state.quadratStage === 1 },
       complete: state.complete,
       conclusion: state.complete ? 'Five randomly located repeats give a mean of 5.0 daisies m⁻² and an estimated population of 500 daisies in the 100 m² habitat.' : null
@@ -4905,6 +5060,7 @@ window.render_game_to_text = () => {
       first_catch_marked: state.captureStage >= 4 ? state.captureFirstCatch : null,
       second_catch_total: state.captureStage >= 8 ? state.captureSecondCatch : null,
       marked_recaptured: state.captureStage >= 8 ? state.captureRecaptured : null,
+      habitat: { living_turf: true, grass_blade_count: 26720, grass_blade_density_per_rendered_m2: 78.0, grass_blade_geometry: 'short tapered strip with a pointed tip', subtle_per_blade_tone_variation: true, rendered_meadow_bounds_world: { x: [-14, 14], z: [-3.05, 9.95] }, rendered_meadow_extends_beyond_visible_view: true, moss_patch_count: 900 },
       lincoln_index_estimate: state.complete ? Math.round((state.captureFirstCatch * state.captureSecondCatch) / state.captureRecaptured) : null,
       complete: state.complete
     };
@@ -4922,7 +5078,7 @@ window.render_game_to_text = () => {
       sampling_design: { method: 'systematic belt transect within upper, middle and lower shore strata', belt_length_m: 10, belt_width_m: 1, station_interval_m: 2, stations_per_stratum: 2, quadrat_area_m2: 1, tape_perpendicular_to_waterline: true, first_quadrat_clear_of_cliff_face: true },
       current_observation: state.transectStage >= 6 ? { limpets: station.limpets, barnacle_cover_percent: station.barnacleCover, brown_seaweed_cover_percent: station.seaweedCover } : null,
       results: state.transectResults.map(result => ({ station: result.station, distance_m: result.distanceM, stratum: result.zone.toLowerCase(), limpets: result.limpets, barnacle_cover_percent: result.barnacleCover, brown_seaweed_cover_percent: result.seaweedCover })),
-      landscape: { laboratory_tiles_visible: false, realistic_rocky_shore: true, realistic_eroded_cliff: true, detailed_cliffs: true, cliff_face_grid: [75, 12], continuous_cliff_top: true, grass_topped_cliff: true, broken_projecting_rock_ledges: 19, recessed_branched_fissures: true, exposed_peat_soil_edge: true, cliff_lichen_patches: 48, cliff_top_grass_blades: 390, cliff_maximum_world_y: 3.02, cliff_within_canvas: true, cliff_bounds_world: { x: [-12.2, 12.2], maximum_y: 3.02 }, supported_max_scene_aspect: 2.17, rock_beach_floor_bounds_world: { x: [-13.5, 13.5], z: [-4.6, 7.4] }, rock_beach_floor_extends_beyond_visible_view: true, minimum_compact_lateral_overdraw_world: 1.7, foreground_depth_overdraw_world: 2.5, shore_gravel_count: 300, irregular_rock_pools: true, rock_pool_count: 3, rock_pool_seaweed_clumps: 12, wet_and_dry_rock_zones: true, organisms: ['limpets', 'barnacles', 'mussels', 'brown seaweed', 'lichen'] },
+      landscape: { laboratory_tiles_visible: false, realistic_rocky_shore: true, realistic_eroded_cliff: true, detailed_cliffs: true, cliff_face_grid: [75, 12], continuous_cliff_top: true, grass_topped_cliff: true, cliff_top_grass_blades: 680, cliff_top_grass_geometry: 'short tapered strip with a pointed tip', cliff_top_grass_subtle_tone_variation: true, broken_projecting_rock_ledges: 19, recessed_branched_fissures: true, exposed_peat_soil_edge: true, cliff_lichen_patches: 48, cliff_maximum_world_y: 3.02, cliff_within_canvas: true, cliff_bounds_world: { x: [-12.2, 12.2], maximum_y: 3.02 }, supported_max_scene_aspect: 2.17, rock_beach_floor_bounds_world: { x: [-13.5, 13.5], z: [-4.6, 7.4] }, rock_beach_floor_extends_beyond_visible_view: true, minimum_compact_lateral_overdraw_world: 1.7, foreground_depth_overdraw_world: 2.5, shore_gravel_count: 300, irregular_rock_pools: true, rock_pool_count: 3, rock_pool_seaweed_clumps: 12, wet_and_dry_rock_zones: true, organisms: ['limpets', 'barnacles', 'mussels', 'brown seaweed', 'lichen'] },
       tide: { incoming_from_bottom_foreground: true, progress: +state.shoreTideProgress.toFixed(3), clock_s: +state.shoreTideClock.toFixed(2), layered_gerstner_style_waves: true, translucent_shallow_water: true, water_world_dimensions: [22, 12], animated_foam_bands: 3, foam_world_span: 22.4, wet_rock_front: true, safe_working_line_observed: true },
       lab_drawers_hidden: true,
       animation: { tape_unreels_smoothly: state.transectStage === 1, quadrat_moves_and_settles: state.transectStage === 3, organisms_highlight_during_survey: state.transectStage === 5 || state.transectStage === 6, rock_pool_seaweed_sways: true, tide_continuously_animated: true },
@@ -5166,7 +5322,7 @@ window.render_game_to_text = () => {
     click_enabled: true,
     drag_enabled: false,
     experiment_setup_action_hidden: true,
-    heading: ['quadrats', 'shoretransect'].includes(activePractical.id) ? 'BIOLOGICAL SAMPLES — CLICK FOR SAFETY' : activePractical.id === 'ripple' ? 'MATERIALS — CLICK FOR SAFETY' : 'REACTANTS — CLICK FOR SAFETY',
+    heading: ['quadrats', 'shoretransect'].includes(activePractical.id) ? 'BIOLOGICAL SAMPLES — CLICK FOR SAFETY' : ['ripple', 'hooke', 'specificheat'].includes(activePractical.id) ? 'MATERIALS — CLICK FOR SAFETY' : activePractical.id === 'nuclear' ? 'SEALED SOURCES — CLICK FOR SAFETY' : 'REACTANTS — CLICK FOR SAFETY',
     popup: state.reactantSafety ? {
       open: true,
       reactant: state.reactantSafety.name,
@@ -5264,4 +5420,47 @@ function drawChromatogramSoakPanel(x, y, w, h) {
   const tableY = cardY + cardH + 22; text('MEASURED DISTANCES', x, tableY, 10, C.muted, 800); text('Click a pigment row to show its ruler.', x, tableY + 16, 8.8, C.muted, 550); chromPigments.forEach((d, i) => { const ry = tableY + 29 + i * 31, measurement = measurements[i], active = selected === d.id; rr(x, ry, w, 26, 6, active ? '#edf8f3' : '#fff', active ? d.color : C.line); ctx.fillStyle = d.color; ctx.beginPath(); ctx.arc(x + 13, ry + 13, 5, 0, Math.PI * 2); ctx.fill(); text(d.label, x + 26, ry + 13, 9.6, C.ink, 700); text(q > .02 ? `${measurement.distance_cm.toFixed(1)} cm` : '—', x + w - 90, ry + 13, 9.6, q > .02 ? d.color : C.muted, 800, 'right'); text(q > .02 ? `Rf ${measurement.rf.toFixed(2)}` : 'run separation', x + w - 10, ry + 13, 8.5, C.muted, 650, 'right'); hit('chrom-dye', x, ry, w, 26, d.id) }); const hintY = tableY + 29 + chromPigments.length * 31 + 11; rr(x, hintY, w, 46, 7, '#e8efed'); wrappedText(q > .02 ? 'Ruler distance is measured from the graphite baseline to the pigment centre.' : 'Start the separation, then click a pigment to measure it.', x + 12, hintY + 15, w - 24, 8.8, C.ink, 600, 11, 2);
 }
 drawChromatogramPanel = drawChromatogramSoakPanel;
+const nuclearAwareRenderGameToText = window.render_game_to_text;
+window.render_game_to_text = () => {
+  const payload = JSON.parse(nuclearAwareRenderGameToText());
+  const buttonAudit = window.__buttonLabelAudit || [];
+  payload.control_label_layout = {
+    all_visible_button_labels_fit: buttonAudit.every(item => item.fits),
+    visible_button_count: buttonAudit.length,
+    wrapped_button_labels: buttonAudit.filter(item => item.lines.length > 1).map(item => ({ label: item.label, lines: item.lines, font_size_px: item.font_size_px })),
+    minimum_font_size_px: buttonAudit.length ? Math.min(...buttonAudit.map(item => item.font_size_px)) : null,
+    labels: buttonAudit.map(item => ({ ...item }))
+  };
+  if (practicals[state.selected].id === 'nuclear') {
+    const source = nuclearSources[state.nuclearSource], absorber = nuclearAbsorbers[state.nuclearAbsorber], phases = ['shielded store ready', 'sealed source moving with remote tongs', 'source clamped at fixed mark', 'absorber moving into holder', 'source and absorber aligned', 'ten-second GM count running', 'reading held for comparison'];
+    payload.graph_axes = null;
+    payload.results_view = 'radiation penetration comparison readings';
+    payload.nuclear_radiation = {
+      stage: state.nuclearStage,
+      phase: phases[state.nuclearStage] || phases[0],
+      source: { id: source.id, isotope: source.isotope, radiation: source.symbol, sealed: state.nuclearSource > 0 },
+      absorber: { id: absorber.id, label: absorber.label, transition_progress: +state.nuclearAnimProgress.toFixed(3) },
+      source_transfer_progress: +state.nuclearSourceTransition.toFixed(3),
+      timer_s: +state.nuclearTimer.toFixed(2),
+      displayed_count: Math.floor(state.nuclearCount),
+      target_count_10s: nuclearTargetCount10s(),
+      equivalent_count_rate_cpm: state.nuclearStage === 6 ? state.nuclearCount * 6 : null,
+      transmission_fraction_relative_to_open_beam: +nuclearTransmissionFraction().toFixed(3),
+      counting: state.running,
+      readings_saved: state.nuclearResults.map(result => ({ ...result })),
+      canonical_comparisons_complete: state.complete,
+      apparatus: {
+        alignment: 'source, absorber and GM window remain at fixed positions without a visible rail or scale',
+        source_handling: 'three sealed carriers, labelled lead-lined store and long-handled tongs',
+        absorbers: ['paper 0.10 mm', 'aluminium 3 mm', 'lead 10 mm'],
+        detector: 'cylindrical Geiger–Müller tube with thin mica window facing the source',
+        scaler: 'compact angled digital counter positioned clear of the GM tube, with count and elapsed-time display'
+      },
+      educational_radiation_tracks: { visible_only_while_counting: true, types: ['clustered alpha particles', 'deflected beta electrons', 'gamma photon rings'], visible_in_reality: false },
+      safety: { simulation_only: true, time_distance_shielding: true, sources_never_touched: true, store_sources_when_not_in_use: true }
+    };
+    payload.controls = [`SOURCE · ${source.short}`, `ABSORBER · ${absorber.short}`, state.running ? 'STOP COUNT' : 'MEASURE 10 s', 'RESET', 'METHOD', 'F fullscreen'];
+  }
+  return JSON.stringify(payload)
+};
 draw();

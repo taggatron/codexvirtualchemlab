@@ -5,6 +5,74 @@ const GLASS = () => new THREE.MeshPhysicalMaterial({ color: 0xccefff, transparen
 const metal = (color = 0x687b82, roughness = .26) => new THREE.MeshStandardMaterial({ color, metalness: .82, roughness });
 const solid = (color, roughness = .46) => new THREE.MeshStandardMaterial({ color, roughness, metalness: .05 });
 
+const MEADOW_SURFACE_WIDTH = 28;
+const MEADOW_SURFACE_DEPTH = 13;
+const MEADOW_CENTRE_Z = 3.45;
+const MEADOW_GRASS_WIDTH = 27.4;
+const MEADOW_GRASS_DEPTH = 12.5;
+const MEADOW_GRASS_CENTRE_Z = 3.3;
+const MEADOW_GRASS_COUNT = 26720;
+const MEADOW_MOSS_COUNT = 900;
+
+// A real pointed strip gives every biology grass blade a tapered silhouette.
+// Keeping the UV height continuous also lets the existing growth/wind shader
+// bend the tip more than the rooted base without shearing the outline.
+function taperedGrassBladeGeometry(width = .036, height = .27) {
+  const rows = [
+    { y: 0, width: 1, bend: 0 },
+    { y: .24, width: .94, bend: .01 },
+    { y: .49, width: .76, bend: .035 },
+    { y: .7, width: .54, bend: .07 },
+    { y: .87, width: .29, bend: .11 }
+  ], positions = [], uvs = [], colours = [], indices = [];
+  rows.forEach(row => {
+    const centre = row.bend * width, half = row.width * width * .5, shade = .7 + row.y * .3;
+    positions.push(centre - half, row.y * height, 0, centre + half, row.y * height, 0);
+    uvs.push(0, row.y, 1, row.y); colours.push(shade, shade, shade, shade, shade, shade)
+  });
+  const tipIndex = positions.length / 3;
+  positions.push(width * .16, height, 0); uvs.push(.5, 1); colours.push(1, 1, 1);
+  for (let row = 0; row < rows.length - 1; row++) {
+    const a = row * 2, b = a + 1, c = a + 2, d = a + 3;
+    indices.push(a, b, c, b, d, c)
+  }
+  const last = (rows.length - 1) * 2;
+  indices.push(last, last + 1, tipIndex);
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+  geometry.setAttribute('color', new THREE.Float32BufferAttribute(colours, 3));
+  geometry.setIndex(indices); geometry.computeVertexNormals(); geometry.computeBoundingBox(); geometry.computeBoundingSphere();
+  Object.assign(geometry.userData, { taperedGrassBlade: true, nominalWidth: width, nominalHeight: height, pointedTip: true });
+  return geometry
+}
+
+function animatedMeadowGrass(heightAt, seedValue = 41729) {
+  const geometry = taperedGrassBladeGeometry(.036, .27), uniforms = { uTime: { value: 0 }, uWind: { value: 1 }, uGrow: { value: 0 } };
+  const material = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide, vertexColors: true, toneMapped: false, dithering: true });
+  material.onBeforeCompile = shader => {
+    Object.assign(shader.uniforms, uniforms);
+    shader.vertexShader = shader.vertexShader.replace('#include <common>', '#include <common>\nattribute float bladePhase; attribute float bladeDelay; uniform float uTime; uniform float uWind; uniform float uGrow;').replace('#include <begin_vertex>', '#include <begin_vertex>\nfloat bladeGrow = smoothstep(bladeDelay, min(1.0, bladeDelay + 0.26), uGrow); transformed.y *= bladeGrow; float bladeTip = clamp(uv.y, 0.0, 1.0); transformed.x += sin(uTime * 2.15 + bladePhase) * uWind * pow(bladeTip, 1.7) * 0.075; transformed.z += sin(uTime * 1.47 + bladePhase * 1.73) * uWind * pow(bladeTip, 1.9) * 0.042;');
+    material.userData.shader = shader
+  };
+  const grass = new THREE.InstancedMesh(geometry, material, MEADOW_GRASS_COUNT), dummy = new THREE.Object3D(), phases = new Float32Array(MEADOW_GRASS_COUNT), delays = new Float32Array(MEADOW_GRASS_COUNT), palette = [0x2d7438, 0x397f3d, 0x438a43, 0x4d9449, 0x579d50].map(hex => new THREE.Color(hex));
+  let seed = seedValue; const rnd = () => ((seed = Math.imul(seed, 1664525) + 1013904223 >>> 0) / 4294967296), tone = new THREE.Color();
+  for (let i = 0; i < MEADOW_GRASS_COUNT; i++) {
+    const x = (rnd() - .5) * MEADOW_GRASS_WIDTH, z = (rnd() - .5) * MEADOW_GRASS_DEPTH + MEADOW_GRASS_CENTRE_Z;
+    dummy.position.set(x, heightAt(x, z) + .003, z);
+    dummy.rotation.set(0, rnd() * Math.PI * 2, (rnd() - .5) * .065);
+    dummy.scale.set(.74 + rnd() * .48, .72 + rnd() * .5, 1); dummy.updateMatrix(); grass.setMatrixAt(i, dummy.matrix);
+    const toneA = Math.floor(rnd() * palette.length), toneB = Math.min(palette.length - 1, Math.max(0, toneA + (rnd() > .5 ? 1 : -1)));
+    tone.copy(palette[toneA]).lerp(palette[toneB], rnd() * .34); grass.setColorAt(i, tone);
+    phases[i] = rnd() * Math.PI * 2; delays[i] = rnd() * .72
+  }
+  geometry.setAttribute('bladePhase', new THREE.InstancedBufferAttribute(phases, 1));
+  geometry.setAttribute('bladeDelay', new THREE.InstancedBufferAttribute(delays, 1));
+  grass.instanceMatrix.needsUpdate = true; grass.instanceColor.needsUpdate = true; grass.castShadow = false; grass.receiveShadow = false;
+  Object.assign(grass.userData, { taperedBlades: true, bladeCount: MEADOW_GRASS_COUNT, densityPerSquareMetre: +(MEADOW_GRASS_COUNT / (MEADOW_GRASS_WIDTH * MEADOW_GRASS_DEPTH)).toFixed(1), bladeHeightRange: [.194, .329], subtleInstanceToneVariation: true });
+  return { grass, material, uniforms }
+}
+
 function shadowReady(root) { root.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true } }); return root }
 function cylinder(r, h, mat, segments = 40) { return new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, segments), mat) }
 function roundedBox(w, h, d, r = .035, smooth = 4) { const shape = new THREE.Shape(), hw = w / 2 - r, hh = h / 2 - r; shape.moveTo(-hw, -h / 2); shape.lineTo(hw, -h / 2); shape.quadraticCurveTo(w / 2, -h / 2, w / 2, -hh); shape.lineTo(w / 2, hh); shape.quadraticCurveTo(w / 2, h / 2, hw, h / 2); shape.lineTo(-hw, h / 2); shape.quadraticCurveTo(-w / 2, h / 2, -w / 2, hh); shape.lineTo(-w / 2, -hh); shape.quadraticCurveTo(-w / 2, -h / 2, -hw, -h / 2); const geo = new THREE.ExtrudeGeometry(shape, { depth: Math.max(.001, d - r * 2), bevelEnabled: true, bevelSegments: smooth, steps: 1, bevelSize: r, bevelThickness: r, curveSegments: smooth * 2 }); geo.center(); return geo }
@@ -82,10 +150,18 @@ export class LabRenderer3D {
     this.scene.background.setHex(background); this.renderer.setClearColor(background, 1);
     this.scene.fog.color.setHex(background); this.scene.fog.near = outdoor ? 16 : 13; this.scene.fog.far = outdoor ? 30 : 24;
     this.room.hemi.intensity = outdoor ? 2.75 : 2.25; this.room.key.intensity = outdoor ? 3.75 : 3.1; this.room.rim.intensity = outdoor ? 9 : 16;
-    this.room.key.shadow.camera.left = shore ? -14.5 : -9; this.room.key.shadow.camera.right = shore ? 14.5 : 9; this.room.key.shadow.camera.updateProjectionMatrix();
+    this.room.key.shadow.camera.left = outdoor ? -14.5 : -9; this.room.key.shadow.camera.right = outdoor ? 14.5 : 9; this.room.key.shadow.camera.updateProjectionMatrix();
   }
   applyCameraForPractical(id, hookeFocusProgress = 0) {
-    if (id === 'quadrats' || id === 'capture') { this.camera.fov = 40; this.camera.position.set(0, 5.35, 9.45); this.camera.lookAt(0, .55, .42) }
+    if (id === 'quadrats' || id === 'capture') {
+      // Preserve the normal 1.25-aspect horizontal field of view when the
+      // browser makes the arena tall and narrow. This keeps the quadrat,
+      // grid tapes and coordinate generator framed without shrinking the
+      // ordinary desktop view; portrait phones still use the rotate prompt.
+      const baseFov = 40, baseAspect = 1.25, aspect = Math.max(.4, this.camera.aspect || baseAspect), baseHalfWidth = Math.tan(THREE.MathUtils.degToRad(baseFov * .5)) * baseAspect;
+      this.camera.fov = aspect < baseAspect ? Math.min(96, THREE.MathUtils.radToDeg(2 * Math.atan(baseHalfWidth / aspect))) : baseFov;
+      this.camera.position.set(0, 5.35, 9.45); this.camera.lookAt(0, .55, .42)
+    }
     else if (id === 'shoretransect') { this.camera.fov = 42; this.camera.position.set(0, 5.7, 10.2); this.camera.lookAt(0, .72, -.24) }
     else if (id === 'ripple') { this.camera.fov = 38; this.camera.position.set(0, 5.5, 8.85); this.camera.lookAt(0, 1.12, -.05) }
     else { this.camera.fov = 36; this.camera.position.set(0, 4.65, 8.55); this.camera.lookAt(0, 1.05, 0) }
@@ -1380,7 +1456,7 @@ export class LabRenderer3D {
     g.position.copy(position); Object.assign(g.userData, { sampleIndex, localIndex, head, discMat, highlight, baseScale: scale }); return shadowReady(g)
   }
   randomSamplingRig(state) {
-    const g = new THREE.Group(), skyCanvas = document.createElement('canvas'), sc = skyCanvas.getContext('2d'); skyCanvas.width = 1024; skyCanvas.height = 512; const skyGrad = sc.createLinearGradient(0, 0, 0, 512); skyGrad.addColorStop(0, '#36a9e8'); skyGrad.addColorStop(.58, '#8bd6f2'); skyGrad.addColorStop(1, '#d9f0dc'); sc.fillStyle = skyGrad; sc.fillRect(0, 0, 1024, 512); const skyTexture = new THREE.CanvasTexture(skyCanvas); skyTexture.colorSpace = THREE.SRGBColorSpace; const sky = new THREE.Mesh(new THREE.PlaneGeometry(22, 8.2), new THREE.MeshBasicMaterial({ map: skyTexture, toneMapped: false })); sky.position.set(0, 3.75, -4.95); g.add(sky);
+    const g = new THREE.Group(), skyCanvas = document.createElement('canvas'), sc = skyCanvas.getContext('2d'); skyCanvas.width = 1024; skyCanvas.height = 512; const skyGrad = sc.createLinearGradient(0, 0, 0, 512); skyGrad.addColorStop(0, '#36a9e8'); skyGrad.addColorStop(.58, '#8bd6f2'); skyGrad.addColorStop(1, '#d9f0dc'); sc.fillStyle = skyGrad; sc.fillRect(0, 0, 1024, 512); const skyTexture = new THREE.CanvasTexture(skyCanvas); skyTexture.colorSpace = THREE.SRGBColorSpace; const sky = new THREE.Mesh(new THREE.PlaneGeometry(32, 8.2), new THREE.MeshBasicMaterial({ map: skyTexture, toneMapped: false })); sky.position.set(0, 3.75, -4.95); g.add(sky);
     const sunHalo = new THREE.Mesh(new THREE.CircleGeometry(.68, 64), new THREE.MeshBasicMaterial({ color: 0xfff1a6, transparent: true, opacity: .24, depthWrite: false, toneMapped: false })); sunHalo.position.set(3.65, 5.35, -4.78); g.add(sunHalo); const sun = new THREE.Mesh(new THREE.CircleGeometry(.32, 64), new THREE.MeshBasicMaterial({ color: 0xfff6bd, toneMapped: false })); sun.position.set(3.65, 5.35, -4.76); g.add(sun);
     const clouds = [], cloudMat = new THREE.MeshLambertMaterial({ color: 0xffffff, transparent: true, opacity: .88, depthWrite: false });
     [[-3.7, 5.2, .92], [-.45, 4.9, .7], [3.05, 4.55, .78]].forEach(([x, y, scale], ci) => { const cloud = new THREE.Group(); for (let i = 0; i < 7; i++) { const puff = new THREE.Mesh(new THREE.SphereGeometry(.38 + (i % 3) * .08, 24, 14), cloudMat); puff.scale.set(1.35, .58 + (i % 2) * .18, .35); puff.position.set((i - 3) * .26, Math.sin(i * 1.7) * .1 + (i % 3 === 1 ? .13 : 0), 0); cloud.add(puff) } cloud.position.set(x, y, -4.62 + ci * .025); cloud.scale.setScalar(scale); g.add(cloud); clouds.push({ group: cloud, baseX: x, phase: ci * 1.7 }) });
@@ -1404,9 +1480,9 @@ export class LabRenderer3D {
     // The habitat is a broad field surface rather than a turf block placed on
     // the laboratory bench.  It extends beyond the near camera frustum so the
     // former worktop and cupboard frontage are completely replaced by meadow.
-    const meadowGeo = new THREE.PlaneGeometry(12.4, 9.2, 30, 24), meadowPos = meadowGeo.getAttribute('position'), meadowColours = [], meadowColour = new THREE.Color();
+    const meadowGeo = new THREE.PlaneGeometry(MEADOW_SURFACE_WIDTH, MEADOW_SURFACE_DEPTH, 70, 24), meadowPos = meadowGeo.getAttribute('position'), meadowColours = [], meadowColour = new THREE.Color();
     for (let i = 0; i < meadowPos.count; i++) {
-      const lx = meadowPos.getX(i), ly = meadowPos.getY(i), wz = 1.55 - ly, rise = meadowHeight(lx,wz)-.3;
+      const lx = meadowPos.getX(i), ly = meadowPos.getY(i), wz = MEADOW_CENTRE_Z - ly, rise = meadowHeight(lx,wz)-.3;
       const noise = Math.sin(lx * 2.3 + wz * 1.8) * Math.cos(lx * 1.1 - wz * 2.7);
       const hue = .29 + Math.sin(lx * .47 + wz) * .012 - (noise > .6 ? .15 * (noise - .6) : 0);
       const sat = .48 + Math.sin(wz * .63) * .04 - (noise > .3 ? .2 * (noise - .3) : 0);
@@ -1414,27 +1490,36 @@ export class LabRenderer3D {
       meadowPos.setZ(i, rise); meadowColour.setHSL(hue, sat, Math.max(0.1, light)); meadowColours.push(meadowColour.r, meadowColour.g, meadowColour.b)
     }
     meadowGeo.setAttribute('color', new THREE.Float32BufferAttribute(meadowColours, 3)); meadowGeo.computeVertexNormals();
-    const meadowSurface = new THREE.Mesh(meadowGeo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: .97, metalness: 0, side: THREE.DoubleSide })); meadowSurface.rotation.x = -Math.PI / 2; meadowSurface.position.set(0, .3, 1.55); meadowSurface.receiveShadow = true; g.add(meadowSurface);
-    const bladeGeometry = new THREE.PlaneGeometry(.032, .34, 1, 4); bladeGeometry.translate(0, .17, 0); const bladeMaterial = new THREE.MeshStandardMaterial({ color: 0xc4e5a8, roughness: .82, side: THREE.DoubleSide, vertexColors: true, emissive: 0x2b7432, emissiveIntensity: .42 }); const grassUniforms = { uTime: { value: 0 }, uWind: { value: 1 }, uGrow: { value: 0 } };
-    bladeMaterial.onBeforeCompile = shader => { Object.assign(shader.uniforms, grassUniforms); shader.vertexShader = shader.vertexShader.replace('#include <common>', '#include <common>\nattribute float bladePhase; attribute float bladeDelay; uniform float uTime; uniform float uWind; uniform float uGrow;').replace('#include <begin_vertex>', '#include <begin_vertex>\nfloat bladeGrow = smoothstep(bladeDelay, min(1.0, bladeDelay + 0.26), uGrow); transformed.y *= bladeGrow; float bladeTip = clamp(uv.y, 0.0, 1.0); transformed.x += sin(uTime * 2.15 + bladePhase) * uWind * pow(bladeTip, 1.7) * 0.105; transformed.z += sin(uTime * 1.47 + bladePhase * 1.73) * uWind * pow(bladeTip, 1.9) * 0.055;'); bladeMaterial.userData.shader = shader };
-    const bladeCount = 6000, grass = new THREE.InstancedMesh(bladeGeometry, bladeMaterial, bladeCount), dummy = new THREE.Object3D(), phases = new Float32Array(bladeCount), delays = new Float32Array(bladeCount); let seed = 41729; const rnd = () => ((seed = Math.imul(seed, 1664525) + 1013904223 >>> 0) / 4294967296);
-    for (let i = 0; i < bladeCount; i++) { const x = (rnd() - .5) * 11.75, z = (rnd() - .5) * 8.65 + 1.48, s = .62 + rnd() * .86; dummy.position.set(x, .305, z); dummy.rotation.set(0, rnd() * Math.PI * 2, (rnd() - .5) * .08); dummy.scale.set(.72 + rnd() * .55, s, 1); dummy.updateMatrix(); grass.setMatrixAt(i, dummy.matrix); grass.setColorAt(i, new THREE.Color().setHSL(.27 + rnd() * .06, .5 + rnd() * .18, .42 + rnd() * .14)); phases[i] = rnd() * Math.PI * 2; delays[i] = rnd() * .72 }
-    bladeGeometry.setAttribute('bladePhase', new THREE.InstancedBufferAttribute(phases, 1)); bladeGeometry.setAttribute('bladeDelay', new THREE.InstancedBufferAttribute(delays, 1)); grass.instanceMatrix.needsUpdate = true; grass.castShadow = false; grass.receiveShadow = false; g.add(grass);
-    const mossCount = 240, mossGeometry = new THREE.IcosahedronGeometry(.058, 1), mossMaterial = new THREE.MeshStandardMaterial({ color: 0x4d7637, roughness: 1, flatShading: true, transparent: true, opacity: 0 }), moss = new THREE.InstancedMesh(mossGeometry, mossMaterial, mossCount);
-    for (let i = 0; i < mossCount; i++) { const x = (rnd() - .5) * 11.55, z = (rnd() - .5) * 8.45 + 1.48, spread = .5 + rnd() * .82; dummy.position.set(x, .315 + rnd() * .006, z); dummy.rotation.set(rnd() * .12, rnd() * Math.PI * 2, rnd() * .1); dummy.scale.set(spread, .3 + rnd() * .28, .5 + rnd() * .82); dummy.updateMatrix(); moss.setMatrixAt(i, dummy.matrix); moss.setColorAt(i, new THREE.Color().setHSL(.22 + rnd() * .075, .3 + rnd() * .2, .2 + rnd() * .105)) }
-    moss.instanceMatrix.needsUpdate = true; moss.castShadow = false; moss.receiveShadow = true; g.add(moss);
-    const gridPts = []; for (let i = 0; i <= 10; i++) { const x = -3.92 + i * .784, z = -2.1 + i * .436; gridPts.push(x, .375, -2.1, x, .375, 2.26, -3.92, .375, z, 3.92, .375, z) } const gridGeo = new THREE.BufferGeometry(); gridGeo.setAttribute('position', new THREE.Float32BufferAttribute(gridPts, 3)); const habitatGrid = new THREE.LineSegments(gridGeo, new THREE.LineBasicMaterial({ color: 0xd9efc5, transparent: true, opacity: .18 })); g.add(habitatGrid);
+    const meadowSurface = new THREE.Mesh(meadowGeo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: .97, metalness: 0, side: THREE.DoubleSide })); meadowSurface.rotation.x = -Math.PI / 2; meadowSurface.position.set(0, .3, MEADOW_CENTRE_Z); meadowSurface.receiveShadow = true; g.add(meadowSurface);
+    const { grass, material: bladeMaterial, uniforms: grassUniforms } = animatedMeadowGrass(meadowHeight), bladeCount = MEADOW_GRASS_COUNT; g.add(grass);
+    const mossCount = MEADOW_MOSS_COUNT, mossGeometry = new THREE.IcosahedronGeometry(.058, 1), mossMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, toneMapped: false }), moss = new THREE.InstancedMesh(mossGeometry, mossMaterial, mossCount), mossDummy = new THREE.Object3D(), mossTone = new THREE.Color(), mossPalette = [0x365f2d, 0x416d33, 0x4c7839, 0x587f40].map(hex => new THREE.Color(hex));
+    let mossSeed = 91731; const mossRnd = () => ((mossSeed = Math.imul(mossSeed, 1664525) + 1013904223 >>> 0) / 4294967296);
+    for (let i = 0; i < mossCount; i++) { const x = (mossRnd() - .5) * 27.1, z = (mossRnd() - .5) * 12.3 + MEADOW_GRASS_CENTRE_Z, spread = .5 + mossRnd() * .82; mossDummy.position.set(x, meadowHeight(x, z) + .009 + mossRnd() * .006, z); mossDummy.rotation.set(mossRnd() * .12, mossRnd() * Math.PI * 2, mossRnd() * .1); mossDummy.scale.set(spread, .3 + mossRnd() * .28, .5 + mossRnd() * .82); mossDummy.updateMatrix(); moss.setMatrixAt(i, mossDummy.matrix); mossTone.copy(mossPalette[Math.floor(mossRnd() * mossPalette.length)]); moss.setColorAt(i, mossTone) }
+    moss.instanceMatrix.needsUpdate = true; moss.instanceColor.needsUpdate = true; moss.castShadow = false; moss.receiveShadow = true; g.add(moss);
+    // Keep the coordinate plot and both tapes on the same patch of meadow.
+    // +X runs left-to-right and the displayed Y coordinate runs toward +Z
+    // (toward the foreground), matching every quadrat target below.
+    const gridMinX = -2.8, gridMaxX = 2.8, gridMinZ = -1, gridMaxZ = 4.2, gridY = .375;
+    const gridPts = []; for (let i = 0; i <= 10; i++) { const x = THREE.MathUtils.lerp(gridMinX, gridMaxX, i / 10), z = THREE.MathUtils.lerp(gridMinZ, gridMaxZ, i / 10); gridPts.push(x, gridY, gridMinZ, x, gridY, gridMaxZ, gridMinX, gridY, z, gridMaxX, gridY, z) } const gridGeo = new THREE.BufferGeometry(); gridGeo.setAttribute('position', new THREE.Float32BufferAttribute(gridPts, 3)); const habitatGrid = new THREE.LineSegments(gridGeo, new THREE.LineBasicMaterial({ color: 0xd9efc5, transparent: true, opacity: .2 })); g.add(habitatGrid);
     const sampleTargets = [[-1.85, 3.48], [1.72, 2.36], [-.04, 2.98], [-2.35, 2.14], [1.18, 3.7]], sampleCounts = [4,7,5,3,6], daisies = [];
     sampleTargets.forEach(([cx, cz], si) => { for (let j = 0; j < sampleCounts[si]; j++) { const angle = j * 2.399 + si * .52, radius = .09 + (j % 3) * .12, pos = new THREE.Vector3(cx + Math.cos(angle) * radius, .36, cz + Math.sin(angle) * radius), plant = this.daisyPlant(si, j, pos, .78 + (j % 3) * .09); g.add(plant); daisies.push(plant) } });
     [[-3.15,4.18],[-2.65,3.12],[-1.15,1.65],[-.62,4.35],[.58,1.62],[2.18,3.24],[2.72,1.95],[3.08,4.15]].forEach(([x,z], i) => { const plant = this.daisyPlant(-1, i, new THREE.Vector3(x,.36,z), .72 + (i % 3) * .08); g.add(plant); daisies.push(plant) });
     const quadrat = this.samplingQuadratFrame(1.08); g.add(quadrat);
-    const displayCanvas = document.createElement('canvas'), dc = displayCanvas.getContext('2d'); displayCanvas.width = 512; displayCanvas.height = 220; const displayTexture = new THREE.CanvasTexture(displayCanvas); displayTexture.colorSpace = THREE.SRGBColorSpace; const generator = new THREE.Group(), generatorBody = new THREE.Mesh(roundedBox(1.2, .74, .2, .08), new THREE.MeshPhysicalMaterial({ color: 0x213d43, roughness: .38, metalness: .18, clearcoat: .45 })); generatorBody.position.y = .4; generator.add(generatorBody); const screen = new THREE.Mesh(new THREE.PlaneGeometry(.98, .42), new THREE.MeshBasicMaterial({ map: displayTexture, toneMapped: false })); screen.position.set(0, .43, .111); generator.add(screen); generator.position.set(-4.15, .36, 1.45); generator.rotation.y = .18; g.add(generator);
-    const tapeGeoX = new THREE.PlaneGeometry(10, .04), tapeGeoZ = new THREE.PlaneGeometry(10, .04); tapeGeoX.translate(5, 0, 0); tapeGeoZ.translate(5, 0, 0); const tapeX = new THREE.Mesh(tapeGeoX, new THREE.MeshBasicMaterial({ color: 0xddca55, side: THREE.DoubleSide })), tapeZ = new THREE.Mesh(tapeGeoZ, new THREE.MeshBasicMaterial({ color: 0xddca55, side: THREE.DoubleSide })); tapeX.rotation.x = -Math.PI / 2; tapeZ.rotation.x = -Math.PI / 2; tapeZ.rotation.z = Math.PI / 2; tapeX.position.set(-5, .37, -1); tapeZ.position.set(-5, .37, -1); g.add(tapeX); g.add(tapeZ);
-    this.dynamic.push({ kind: 'randomSampling', grassUniforms, grassMaterial: bladeMaterial, mossMaterial, clouds, trees, daisies, quadrat, display: { canvas: displayCanvas, context: dc, texture: displayTexture }, targets: sampleTargets, tapeX, tapeZ });
-    Object.assign(g.userData, { randomQuadratHabitat: true, grassBladeCount: bladeCount, mossPatchCount: mossCount, daisyCount: daisies.length, treeCount: trees.length, cloudCount: clouds.length, realisticLayeredTrees: true, treeDepthRows: 3, curvedTaperedTrunks: true, radialConnectedBranching: true, canopyLobesPerTree: 11, upperCanopyWindFlex: true, forestShrubCount: shrubs.length, visibleRootFlares: true, lowPolygonBackgroundBranches: true, laboratoryTilesHidden: true, laboratoryBenchAndCupboardsReplaced: true, foregroundMeadowFillsArena: true, windAffectedTurf: true, mossBetweenGrassBlades: true, detailedDaisies: true }); const ready = shadowReady(g); trees.forEach(tree=>tree.group.traverse(node=>{if(node.isMesh)node.castShadow=false})); shrubs.forEach(shrub=>shrub.castShadow=false); grass.castShadow = false; grass.receiveShadow = false; moss.castShadow = false; meadowSurface.castShadow = false; return ready
+    const displayCanvas = document.createElement('canvas'), dc = displayCanvas.getContext('2d'); displayCanvas.width = 512; displayCanvas.height = 220; const displayTexture = new THREE.CanvasTexture(displayCanvas); displayTexture.colorSpace = THREE.SRGBColorSpace; const generator = new THREE.Group(), generatorBody = new THREE.Mesh(roundedBox(1.2, .74, .2, .08), new THREE.MeshPhysicalMaterial({ color: 0x213d43, roughness: .38, metalness: .18, clearcoat: .45 })); generatorBody.position.y = .4; generator.add(generatorBody); const screen = new THREE.Mesh(new THREE.PlaneGeometry(.98, .42), new THREE.MeshBasicMaterial({ map: displayTexture, toneMapped: false })); screen.position.set(0, .43, .111); generator.add(screen); generator.position.set(-3.2, .36, -.25); generator.rotation.y = .12; g.add(generator);
+    const tapeMaterial = new THREE.MeshBasicMaterial({ color: 0xf0d34f, side: THREE.DoubleSide, toneMapped: false }), tickMaterial = new THREE.MeshBasicMaterial({ color: 0x493d19, toneMapped: false });
+    const makeGridTape = length => {
+      const tape = new THREE.Group(), stripGeometry = new THREE.PlaneGeometry(length, .052); stripGeometry.translate(length / 2, 0, 0); stripGeometry.rotateX(-Math.PI / 2); const strip = new THREE.Mesh(stripGeometry, tapeMaterial); tape.add(strip);
+      for (let i = 0; i <= 10; i++) { const tick = new THREE.Mesh(new THREE.BoxGeometry(.014, .012, i % 5 === 0 ? .105 : .078), tickMaterial); tick.position.set(length * i / 10, .007, 0); tape.add(tick) }
+      return tape
+    };
+    const tapeOrigin = new THREE.Vector3(gridMinX, meadowHeight(gridMinX, gridMinZ) + .06, gridMinZ), tapeXLength = gridMaxX - gridMinX, tapeYLength = gridMaxZ - gridMinZ;
+    const tapeX = makeGridTape(tapeXLength), tapeZ = makeGridTape(tapeYLength), tapeCorner = new THREE.Mesh(new THREE.CylinderGeometry(.065, .065, .022, 24), tickMaterial); tapeX.position.copy(tapeOrigin); tapeZ.position.copy(tapeOrigin); tapeZ.rotation.y = -Math.PI / 2; tapeCorner.position.copy(tapeOrigin); tapeCorner.position.y += .006; g.add(tapeX, tapeZ, tapeCorner);
+    const tapeXEnd = tapeOrigin.clone().add(new THREE.Vector3(tapeXLength, 0, 0)), tapeYEnd = tapeOrigin.clone().add(new THREE.Vector3(0, 0, tapeYLength));
+    this.dynamic.push({ kind: 'randomSampling', grassUniforms, grassMaterial: bladeMaterial, mossMaterial, clouds, trees, daisies, quadrat, display: { canvas: displayCanvas, context: dc, texture: displayTexture }, targets: sampleTargets, tapeX, tapeZ, tapeCorner, tapeXLength, tapeYLength });
+    Object.assign(g.userData, { randomQuadratHabitat: true, grassBladeCount: bladeCount, grassBladeDensityPerSquareMetre: +(bladeCount / (MEADOW_GRASS_WIDTH * MEADOW_GRASS_DEPTH)).toFixed(1), taperedGrassBlades: true, shortenedGrassBlades: true, subtleGrassToneVariation: true, meadowSurfaceBoundsWorld: { x: [-MEADOW_SURFACE_WIDTH / 2, MEADOW_SURFACE_WIDTH / 2], z: [MEADOW_CENTRE_Z - MEADOW_SURFACE_DEPTH / 2, MEADOW_CENTRE_Z + MEADOW_SURFACE_DEPTH / 2] }, meadowSurfaceExtendsBeyondVisibleView: true, supportedMaximumSceneAspect: 2.5, supportedMinimumArenaAspect: .43, narrowArenaHorizontalFramingPreserved: true, coordinateGeneratorPosition: [-3.2, .36, -.25], quadratStartPosition: [-2.75, .43, 1.2], apparatusWithinSupportedView: true, gridBoundsWorld: { x: [gridMinX, gridMaxX], z: [gridMinZ, gridMaxZ] }, gridTapeOriginWorld: tapeOrigin.toArray(), gridTapeXEndWorld: tapeXEnd.toArray(), gridTapeYEndWorld: tapeYEnd.toArray(), gridTapeDirections: { x: [1, 0, 0], y: [0, 0, 1] }, gridTapesShareOrigin: true, gridTapesRightAngleDegrees: 90, gridTapesLieOnMeadow: true, mossPatchCount: mossCount, daisyCount: daisies.length, treeCount: trees.length, cloudCount: clouds.length, realisticLayeredTrees: true, treeDepthRows: 3, curvedTaperedTrunks: true, radialConnectedBranching: true, canopyLobesPerTree: 11, upperCanopyWindFlex: true, forestShrubCount: shrubs.length, visibleRootFlares: true, lowPolygonBackgroundBranches: true, laboratoryTilesHidden: true, laboratoryBenchAndCupboardsReplaced: true, foregroundMeadowFillsArena: true, windAffectedTurf: true, mossBetweenGrassBlades: true, detailedDaisies: true }); const ready = shadowReady(g); trees.forEach(tree=>tree.group.traverse(node=>{if(node.isMesh)node.castShadow=false})); shrubs.forEach(shrub=>shrub.castShadow=false); grass.castShadow = false; grass.receiveShadow = false; moss.castShadow = false; meadowSurface.castShadow = false; return ready
   }
   captureRig(state) {
-    const g = new THREE.Group(), skyCanvas = document.createElement('canvas'), sc = skyCanvas.getContext('2d'); skyCanvas.width = 1024; skyCanvas.height = 512; const skyGrad = sc.createLinearGradient(0, 0, 0, 512); skyGrad.addColorStop(0, '#36a9e8'); skyGrad.addColorStop(.58, '#8bd6f2'); skyGrad.addColorStop(1, '#d9f0dc'); sc.fillStyle = skyGrad; sc.fillRect(0, 0, 1024, 512); const skyTexture = new THREE.CanvasTexture(skyCanvas); skyTexture.colorSpace = THREE.SRGBColorSpace; const sky = new THREE.Mesh(new THREE.PlaneGeometry(22, 8.2), new THREE.MeshBasicMaterial({ map: skyTexture, toneMapped: false })); sky.position.set(0, 3.75, -4.95); g.add(sky);
+    const g = new THREE.Group(), skyCanvas = document.createElement('canvas'), sc = skyCanvas.getContext('2d'); skyCanvas.width = 1024; skyCanvas.height = 512; const skyGrad = sc.createLinearGradient(0, 0, 0, 512); skyGrad.addColorStop(0, '#36a9e8'); skyGrad.addColorStop(.58, '#8bd6f2'); skyGrad.addColorStop(1, '#d9f0dc'); sc.fillStyle = skyGrad; sc.fillRect(0, 0, 1024, 512); const skyTexture = new THREE.CanvasTexture(skyCanvas); skyTexture.colorSpace = THREE.SRGBColorSpace; const sky = new THREE.Mesh(new THREE.PlaneGeometry(32, 8.2), new THREE.MeshBasicMaterial({ map: skyTexture, toneMapped: false })); sky.position.set(0, 3.75, -4.95); g.add(sky);
     const sunHalo = new THREE.Mesh(new THREE.CircleGeometry(.68, 64), new THREE.MeshBasicMaterial({ color: 0xfff1a6, transparent: true, opacity: .24, depthWrite: false, toneMapped: false })); sunHalo.position.set(3.65, 5.35, -4.78); g.add(sunHalo); const sun = new THREE.Mesh(new THREE.CircleGeometry(.32, 64), new THREE.MeshBasicMaterial({ color: 0xfff6bd, toneMapped: false })); sun.position.set(3.65, 5.35, -4.76); g.add(sun);
     const clouds = [], cloudMat = new THREE.MeshLambertMaterial({ color: 0xffffff, transparent: true, opacity: .88, depthWrite: false });
     [[-3.7, 5.2, .92], [-.45, 4.9, .7], [3.05, 4.55, .78]].forEach(([x, y, scale], ci) => { const cloud = new THREE.Group(); for (let i = 0; i < 7; i++) { const puff = new THREE.Mesh(new THREE.SphereGeometry(.38 + (i % 3) * .08, 24, 14), cloudMat); puff.scale.set(1.35, .58 + (i % 2) * .18, .35); puff.position.set((i - 3) * .26, Math.sin(i * 1.7) * .1 + (i % 3 === 1 ? .13 : 0), 0); cloud.add(puff) } cloud.position.set(x, y, -4.62 + ci * .025); cloud.scale.setScalar(scale); g.add(cloud); clouds.push({ group: cloud, baseX: x, phase: ci * 1.7 }) });
@@ -1453,9 +1538,9 @@ export class LabRenderer3D {
     }
     const shrubGeometry=new THREE.IcosahedronGeometry(1,1),shrubMats=[foliageMats[0],foliageMats[1],foliageMats[3]],shrubs=[];
     for(let i=0;i<28;i++){const shrub=new THREE.Mesh(shrubGeometry,shrubMats[i%shrubMats.length]),x=-6.1+i/27*12.2+(treeRnd()-.5)*.42,z=-2.03-treeRnd()*.72;shrub.position.set(x,meadowHeight(x,z)+.08+(i%3)*.012,z);shrub.scale.set(.22+treeRnd()*.17,.15+treeRnd()*.1,.18+treeRnd()*.16);shrub.rotation.set(treeRnd()*.24,treeRnd()*Math.PI*2,treeRnd()*.18);g.add(shrub);shrubs.push(shrub)}
-    const meadowGeo = new THREE.PlaneGeometry(12.4, 9.2, 30, 24), meadowPos = meadowGeo.getAttribute('position'), meadowColours = [], meadowColour = new THREE.Color();
+    const meadowGeo = new THREE.PlaneGeometry(MEADOW_SURFACE_WIDTH, MEADOW_SURFACE_DEPTH, 70, 24), meadowPos = meadowGeo.getAttribute('position'), meadowColours = [], meadowColour = new THREE.Color();
     for (let i = 0; i < meadowPos.count; i++) {
-      const lx = meadowPos.getX(i), ly = meadowPos.getY(i), wz = 1.55 - ly, rise = meadowHeight(lx,wz)-.3;
+      const lx = meadowPos.getX(i), ly = meadowPos.getY(i), wz = MEADOW_CENTRE_Z - ly, rise = meadowHeight(lx,wz)-.3;
       const noise = Math.sin(lx * 2.3 + wz * 1.8) * Math.cos(lx * 1.1 - wz * 2.7);
       const hue = .29 + Math.sin(lx * .47 + wz) * .012 - (noise > .6 ? .15 * (noise - .6) : 0);
       const sat = .48 + Math.sin(wz * .63) * .04 - (noise > .3 ? .2 * (noise - .3) : 0);
@@ -1463,15 +1548,12 @@ export class LabRenderer3D {
       meadowPos.setZ(i, rise); meadowColour.setHSL(hue, sat, Math.max(0.1, light)); meadowColours.push(meadowColour.r, meadowColour.g, meadowColour.b)
     }
     meadowGeo.setAttribute('color', new THREE.Float32BufferAttribute(meadowColours, 3)); meadowGeo.computeVertexNormals();
-    const meadowSurface = new THREE.Mesh(meadowGeo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: .97, metalness: 0, side: THREE.DoubleSide })); meadowSurface.rotation.x = -Math.PI / 2; meadowSurface.position.set(0, .3, 1.55); meadowSurface.receiveShadow = true; g.add(meadowSurface);
-    const bladeGeometry = new THREE.PlaneGeometry(.032, .34, 1, 4); bladeGeometry.translate(0, .17, 0); const bladeMaterial = new THREE.MeshStandardMaterial({ color: 0xc4e5a8, roughness: .82, side: THREE.DoubleSide, vertexColors: true, emissive: 0x2b7432, emissiveIntensity: .42 }); const grassUniforms = { uTime: { value: 0 }, uWind: { value: 1 }, uGrow: { value: 0 } };
-    bladeMaterial.onBeforeCompile = shader => { Object.assign(shader.uniforms, grassUniforms); shader.vertexShader = shader.vertexShader.replace('#include <common>', '#include <common>\nattribute float bladePhase; attribute float bladeDelay; uniform float uTime; uniform float uWind; uniform float uGrow;').replace('#include <begin_vertex>', '#include <begin_vertex>\nfloat bladeGrow = smoothstep(bladeDelay, min(1.0, bladeDelay + 0.26), uGrow); transformed.y *= bladeGrow; float bladeTip = clamp(uv.y, 0.0, 1.0); transformed.x += sin(uTime * 2.15 + bladePhase) * uWind * pow(bladeTip, 1.7) * 0.105; transformed.z += sin(uTime * 1.47 + bladePhase * 1.73) * uWind * pow(bladeTip, 1.9) * 0.055;'); bladeMaterial.userData.shader = shader };
-    const bladeCount = 6000, grass = new THREE.InstancedMesh(bladeGeometry, bladeMaterial, bladeCount), dummy = new THREE.Object3D(), phases = new Float32Array(bladeCount), delays = new Float32Array(bladeCount); let seed = 41729; const rnd = () => ((seed = Math.imul(seed, 1664525) + 1013904223 >>> 0) / 4294967296);
-    for (let i = 0; i < bladeCount; i++) { const x = (rnd() - .5) * 11.75, z = (rnd() - .5) * 8.65 + 1.48, s = .62 + rnd() * .86; dummy.position.set(x, .305, z); dummy.rotation.set(0, rnd() * Math.PI * 2, (rnd() - .5) * .08); dummy.scale.set(.72 + rnd() * .55, s, 1); dummy.updateMatrix(); grass.setMatrixAt(i, dummy.matrix); grass.setColorAt(i, new THREE.Color().setHSL(.27 + rnd() * .06, .5 + rnd() * .18, .42 + rnd() * .14)); phases[i] = rnd() * Math.PI * 2; delays[i] = rnd() * .72 }
-    bladeGeometry.setAttribute('bladePhase', new THREE.InstancedBufferAttribute(phases, 1)); bladeGeometry.setAttribute('bladeDelay', new THREE.InstancedBufferAttribute(delays, 1)); grass.instanceMatrix.needsUpdate = true; grass.castShadow = false; grass.receiveShadow = false; g.add(grass);
-    const mossCount = 240, mossGeometry = new THREE.IcosahedronGeometry(.058, 1), mossMaterial = new THREE.MeshStandardMaterial({ color: 0x4d7637, roughness: 1, flatShading: true, transparent: true, opacity: 0 }), moss = new THREE.InstancedMesh(mossGeometry, mossMaterial, mossCount);
-    for (let i = 0; i < mossCount; i++) { const x = (rnd() - .5) * 11.55, z = (rnd() - .5) * 8.45 + 1.48, spread = .5 + rnd() * .82; dummy.position.set(x, .315 + rnd() * .006, z); dummy.rotation.set(rnd() * .12, rnd() * Math.PI * 2, rnd() * .1); dummy.scale.set(spread, .3 + rnd() * .28, .5 + rnd() * .82); dummy.updateMatrix(); moss.setMatrixAt(i, dummy.matrix); moss.setColorAt(i, new THREE.Color().setHSL(.22 + rnd() * .075, .3 + rnd() * .2, .2 + rnd() * .105)) }
-    moss.instanceMatrix.needsUpdate = true; moss.castShadow = false; moss.receiveShadow = true; g.add(moss);
+    const meadowSurface = new THREE.Mesh(meadowGeo, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: .97, metalness: 0, side: THREE.DoubleSide })); meadowSurface.rotation.x = -Math.PI / 2; meadowSurface.position.set(0, .3, MEADOW_CENTRE_Z); meadowSurface.receiveShadow = true; g.add(meadowSurface);
+    const { grass, material: bladeMaterial, uniforms: grassUniforms } = animatedMeadowGrass(meadowHeight), bladeCount = MEADOW_GRASS_COUNT; g.add(grass);
+    const mossCount = MEADOW_MOSS_COUNT, mossGeometry = new THREE.IcosahedronGeometry(.058, 1), mossMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, toneMapped: false }), moss = new THREE.InstancedMesh(mossGeometry, mossMaterial, mossCount), mossDummy = new THREE.Object3D(), mossTone = new THREE.Color(), mossPalette = [0x365f2d, 0x416d33, 0x4c7839, 0x587f40].map(hex => new THREE.Color(hex));
+    let mossSeed = 91731; const mossRnd = () => ((mossSeed = Math.imul(mossSeed, 1664525) + 1013904223 >>> 0) / 4294967296);
+    for (let i = 0; i < mossCount; i++) { const x = (mossRnd() - .5) * 27.1, z = (mossRnd() - .5) * 12.3 + MEADOW_GRASS_CENTRE_Z, spread = .5 + mossRnd() * .82; mossDummy.position.set(x, meadowHeight(x, z) + .009 + mossRnd() * .006, z); mossDummy.rotation.set(mossRnd() * .12, mossRnd() * Math.PI * 2, mossRnd() * .1); mossDummy.scale.set(spread, .3 + mossRnd() * .28, .5 + mossRnd() * .82); mossDummy.updateMatrix(); moss.setMatrixAt(i, mossDummy.matrix); mossTone.copy(mossPalette[Math.floor(mossRnd() * mossPalette.length)]); moss.setColorAt(i, mossTone) }
+    moss.instanceMatrix.needsUpdate = true; moss.instanceColor.needsUpdate = true; moss.castShadow = false; moss.receiveShadow = true; g.add(moss);
 
     const traps = [];
     const trapPos = [[-1.85,.48], [1.72,-.64], [-.04,-.02], [-2.35,-.86], [1.18,.7]];
@@ -1500,7 +1582,7 @@ export class LabRenderer3D {
     }
     
     this.dynamic.push({ kind: 'capture', grassUniforms, grassMaterial: bladeMaterial, mossMaterial, clouds, trees, traps, bugs, getMeadowHeight: meadowHeight });
-    Object.assign(g.userData, { captureHabitat: true }); const ready = shadowReady(g); trees.forEach(tree=>tree.group.traverse(node=>{if(node.isMesh)node.castShadow=false})); shrubs.forEach(shrub=>shrub.castShadow=false); grass.castShadow = false; grass.receiveShadow = false; moss.castShadow = false; meadowSurface.castShadow = false; return ready
+    Object.assign(g.userData, { captureHabitat: true, grassBladeCount: bladeCount, grassBladeDensityPerSquareMetre: +(bladeCount / (MEADOW_GRASS_WIDTH * MEADOW_GRASS_DEPTH)).toFixed(1), taperedGrassBlades: true, shortenedGrassBlades: true, subtleGrassToneVariation: true, meadowSurfaceBoundsWorld: { x: [-MEADOW_SURFACE_WIDTH / 2, MEADOW_SURFACE_WIDTH / 2], z: [MEADOW_CENTRE_Z - MEADOW_SURFACE_DEPTH / 2, MEADOW_CENTRE_Z + MEADOW_SURFACE_DEPTH / 2] }, meadowSurfaceExtendsBeyondVisibleView: true, mossPatchCount: mossCount, windAffectedTurf: true }); const ready = shadowReady(g); trees.forEach(tree=>tree.group.traverse(node=>{if(node.isMesh)node.castShadow=false})); shrubs.forEach(shrub=>shrub.castShadow=false); grass.castShadow = false; grass.receiveShadow = false; moss.castShadow = false; meadowSurface.castShadow = false; return ready
   }
   shoreHeight(x, z) { return .14 + Math.max(0, 3.4 - z) * .115 + Math.sin(x * 1.8 + z * .7) * .055 + Math.sin(z * 2.35 - x * .54) * .035 }
   rockyShoreRig(state) {
@@ -1515,7 +1597,7 @@ export class LabRenderer3D {
     const crackPositions=[],crackIndices=[],appendCrack=(points,width=.012)=>{const start=crackPositions.length/3,last=Math.max(1,points.length-1);for(let i=0;i<points.length;i++){const [x,t]=points[i],w=width*Math.pow(Math.max(0,1-i/last),.72),y=THREE.MathUtils.lerp(baseY(x),ridgeY(x),t),z=cliffFrontZ(x,t)+.024;crackPositions.push(x-w,y,z,x+w,y,z)}for(let i=0;i<points.length-1;i++){const a=start+i*2,b=a+2;crackIndices.push(a,b,a+1,a+1,b,b+1)}};const crackDefs=[[-11.32,.9,.47,-1],[-9.56,.74,.37,1],[-7.88,.87,.52,-1],[-5.35,.8,.42,1],[-3.82,.93,.58,-1],[-1.27,.71,.35,1],[.42,.86,.49,-1],[2.93,.76,.39,1],[5.14,.91,.55,-1],[7.62,.72,.36,1],[9.15,.84,.45,-1],[11.27,.92,.51,1]];crackDefs.forEach(([x,t0,t1,dir],i)=>{const main=[[x,t0],[x+dir*(.035+(i%3)*.018),t0-.13],[x-dir*(.07+(i%2)*.028),t0-.29],[x+dir*.045,t0-.43],[x+dir*.13,t1]];appendCrack(main,.008+(i%4)*.0014);if(i%3!==1)appendCrack([[main[2][0],main[2][1]],[main[2][0]-dir*(.12+(i%2)*.04),main[2][1]-.075],[main[2][0]-dir*(.25+(i%3)*.035),main[2][1]-.13]],.0055)});const crackGeo=new THREE.BufferGeometry();crackGeo.setAttribute('position',new THREE.Float32BufferAttribute(crackPositions,3));crackGeo.setIndex(crackIndices);const crackMat=new THREE.MeshStandardMaterial({color:0x2d302d,roughness:1,transparent:true,opacity:.74,depthWrite:false,side:THREE.DoubleSide,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-3}),cracks=new THREE.Mesh(crackGeo,crackMat);cracks.renderOrder=4;cliff.add(cracks);
     const soilPositions=[],soilColours=[],soilIndices=[],soilColour=new THREE.Color();for(let ix=0;ix<cliffCols;ix++){const x=THREE.MathUtils.lerp(cliffMinX,cliffMaxX,ix/(cliffCols-1)),top=ridgeY(x),z=ridgeZ(x);soilPositions.push(x,top-.105,z+.012,x,top+.012,z-.006);soilColour.setHex(ix%3===0?0x493a28:ix%3===1?0x59452e:0x3f3528);soilColours.push(soilColour.r,soilColour.g,soilColour.b,soilColour.r*.88,soilColour.g*.9,soilColour.b*.8)}for(let ix=0;ix<cliffCols-1;ix++){const a=ix*2,b=a+2;soilIndices.push(a,b,a+1,a+1,b,b+1)}const soilGeo=new THREE.BufferGeometry();soilGeo.setAttribute('position',new THREE.Float32BufferAttribute(soilPositions,3));soilGeo.setAttribute('color',new THREE.Float32BufferAttribute(soilColours,3));soilGeo.setIndex(soilIndices);soilGeo.computeVertexNormals();cliff.add(new THREE.Mesh(soilGeo,new THREE.MeshStandardMaterial({vertexColors:true,roughness:1,flatShading:true})));
     const capPositions=[],capColours=[],capIndices=[],capColour=new THREE.Color();for(let ix=0;ix<cliffCols;ix++){const x=THREE.MathUtils.lerp(cliffMinX,cliffMaxX,ix/(cliffCols-1)),top=ridgeY(x);capPositions.push(x,top+.014,ridgeZ(x)-.008,x,top+.045+Math.sin(x*1.31)*.014,-4.18);capColour.setHSL(.27+Math.sin(x)*.012,.5,.25+Math.sin(x*.48)*.028);capColours.push(capColour.r,capColour.g,capColour.b,capColour.r*.72,capColour.g*.84,capColour.b*.67)}for(let ix=0;ix<cliffCols-1;ix++){const a=ix*2,b=a+2;capIndices.push(a,b,a+1,a+1,b,b+1)}const capGeo=new THREE.BufferGeometry();capGeo.setAttribute('position',new THREE.Float32BufferAttribute(capPositions,3));capGeo.setAttribute('color',new THREE.Float32BufferAttribute(capColours,3));capGeo.setIndex(capIndices);capGeo.computeVertexNormals();const grassCap=new THREE.Mesh(capGeo,new THREE.MeshStandardMaterial({vertexColors:true,roughness:.98,side:THREE.DoubleSide}));cliff.add(grassCap);
-    const cliffGrassCount=390,cliffGrassGeo=new THREE.PlaneGeometry(.022,.18,1,3);cliffGrassGeo.translate(0,.09,0);const cliffGrass=new THREE.InstancedMesh(cliffGrassGeo,new THREE.MeshStandardMaterial({color:0x668f42,roughness:.92,side:THREE.DoubleSide,vertexColors:true}),cliffGrassCount),cliffDummy=new THREE.Object3D();let cliffSeed=7319;const cliffRnd=()=>((cliffSeed=Math.imul(cliffSeed,1664525)+1013904223>>>0)/4294967296);for(let i=0;i<cliffGrassCount;i++){const x=cliffMinX+.1+cliffRnd()*(cliffMaxX-cliffMinX-.2),z=ridgeZ(x)-.04-cliffRnd()*1.15,scaleY=.62+cliffRnd()*.43;cliffDummy.position.set(x,ridgeY(x)+.018+cliffRnd()*.018,z);cliffDummy.rotation.set(0,cliffRnd()*Math.PI,(cliffRnd()-.5)*.13);cliffDummy.scale.set(.65+cliffRnd()*.55,scaleY,1);cliffDummy.updateMatrix();cliffGrass.setMatrixAt(i,cliffDummy.matrix);cliffGrass.setColorAt(i,new THREE.Color().setHSL(.23+cliffRnd()*.08,.48+cliffRnd()*.18,.31+cliffRnd()*.12))}cliffGrass.instanceMatrix.needsUpdate=true;cliffGrass.castShadow=false;cliff.add(cliffGrass);
+    const cliffGrassCount=680,cliffGrassGeo=taperedGrassBladeGeometry(.024,.15),cliffGrass=new THREE.InstancedMesh(cliffGrassGeo,new THREE.MeshBasicMaterial({color:0xffffff,side:THREE.DoubleSide,vertexColors:true,toneMapped:false,dithering:true}),cliffGrassCount),cliffDummy=new THREE.Object3D(),cliffGrassTone=new THREE.Color(),cliffGrassPalette=[0x496f31,0x557a35,0x62853b,0x6c8e41].map(hex=>new THREE.Color(hex));let cliffSeed=7319;const cliffRnd=()=>((cliffSeed=Math.imul(cliffSeed,1664525)+1013904223>>>0)/4294967296);for(let i=0;i<cliffGrassCount;i++){const x=cliffMinX+.1+cliffRnd()*(cliffMaxX-cliffMinX-.2),z=ridgeZ(x)-.04-cliffRnd()*1.15,scaleY=.67+cliffRnd()*.31;cliffDummy.position.set(x,ridgeY(x)+.018+cliffRnd()*.018,z);cliffDummy.rotation.set(0,cliffRnd()*Math.PI,(cliffRnd()-.5)*.11);cliffDummy.scale.set(.7+cliffRnd()*.46,scaleY,1);cliffDummy.updateMatrix();cliffGrass.setMatrixAt(i,cliffDummy.matrix);cliffGrassTone.copy(cliffGrassPalette[Math.floor(cliffRnd()*cliffGrassPalette.length)]);cliffGrass.setColorAt(i,cliffGrassTone)}cliffGrass.instanceMatrix.needsUpdate=true;cliffGrass.instanceColor.needsUpdate=true;cliffGrass.castShadow=false;cliff.add(cliffGrass);
     const lichenMeshes=[],cliffLichenPatches=48,lichenMats=[new THREE.MeshBasicMaterial({color:0x778553,transparent:true,opacity:.36,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2}),new THREE.MeshBasicMaterial({color:0xaa8d55,transparent:true,opacity:.3,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2}),new THREE.MeshBasicMaterial({color:0x9ba08c,transparent:true,opacity:.28,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2})];for(let i=0;i<cliffLichenPatches;i++){const x=cliffMinX+.45+((i*43)%149)/148*(cliffMaxX-cliffMinX-.9),t=.1+((i*67)%97)/96*.8,y=THREE.MathUtils.lerp(baseY(x),ridgeY(x),t),patch=new THREE.Mesh(new THREE.CircleGeometry(.065+(i%5)*.012,8),lichenMats[i%lichenMats.length]);patch.position.set(x,y,cliffFrontZ(x,t)+.029);patch.rotation.z=i*.91;patch.scale.set(.7+(i%4)*.32,.42+(i%3)*.24,1);patch.renderOrder=3;cliff.add(patch);lichenMeshes.push(patch)}
     const toeMats=[0x4f5552,0x67645b,0x756c5f,0x5c5e58].map(color=>new THREE.MeshStandardMaterial({color,roughness:.98,flatShading:true})),toeBoulderCount=35;for(let i=0;i<toeBoulderCount;i++){const x=cliffMinX+.38+i*(cliffMaxX-cliffMinX-.76)/(toeBoulderCount-1)+Math.sin(i*2.7)*.15,r=.2+(i%5)*.045,sy=.62+(i%4)*.1,z=toeZ(x)+.03+Math.sin(i)*.045,boulder=new THREE.Mesh(new THREE.DodecahedronGeometry(r,1),toeMats[i%toeMats.length]);boulder.scale.set(1.2+(i%3)*.28,sy,.75+(i%2)*.18);boulder.rotation.set(i*.37,i*.83,i*.21);boulder.position.set(x,this.shoreHeight(x,z)+r*sy*.58,z);cliff.add(boulder)}
     cliff.updateMatrixWorld(true);const cliffBounds=new THREE.Box3().setFromObject(cliff);g.add(cliff);
@@ -1536,7 +1618,7 @@ export class LabRenderer3D {
     const waterDepth=12,waterUniforms={uTime:{value:0},uAlpha:{value:.72}},waterMat=new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.DoubleSide,uniforms:waterUniforms,vertexShader:'uniform float uTime; varying float vWave; varying vec3 vPos; void main(){ vec3 p=position; float w=sin(p.x*1.45+uTime*2.4)*0.055+sin(p.z*2.2-uTime*1.65)*0.035+sin((p.x+p.z)*.72+uTime*.9)*0.028; p.y+=w; vWave=w; vPos=p; gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.0); }',fragmentShader:'uniform float uAlpha; varying float vWave; varying vec3 vPos; void main(){ float streak=.5+.5*sin(vPos.x*5.2+vPos.z*2.8+vWave*22.0); vec3 deep=vec3(.025,.29,.38); vec3 shallow=vec3(.12,.65,.72); vec3 c=mix(deep,shallow,.48+vWave*3.2)+pow(streak,18.0)*.24; gl_FragColor=vec4(c,uAlpha); }'}),water=new THREE.Mesh(new THREE.PlaneGeometry(22,waterDepth,88,56),waterMat);water.rotation.x=-Math.PI/2;water.renderOrder=5;g.add(water);
     const foamBands=[];for(let bi=0;bi<3;bi++){const pts=[];for(let i=0;i<=72;i++){const x=-11.2+i/72*22.4;pts.push(new THREE.Vector3(x,.24+bi*.008,Math.sin(x*1.7+bi)*.045+Math.sin(x*.53-bi)*.018))}const foam=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),144,.025-bi*.004,8,false),new THREE.MeshBasicMaterial({color:0xf4ffff,transparent:true,opacity:.68-bi*.12,depthWrite:false,toneMapped:false}));foam.renderOrder=7;g.add(foam);foamBands.push(foam)}
     const clouds=[];[[-3.4,4.05],[2.6,3.92]].forEach(([x,y],ci)=>{const cloud=new THREE.Group();for(let i=0;i<6;i++){const puff=new THREE.Mesh(new THREE.SphereGeometry(.34+(i%2)*.08,20,12),new THREE.MeshLambertMaterial({color:0xffffff,transparent:true,opacity:.82,depthWrite:false}));puff.scale.set(1.35,.56,.3);puff.position.set((i-2.5)*.27,Math.sin(i*2)*.08,0);cloud.add(puff)}cloud.position.set(x,y,-4.82+ci*.025);g.add(cloud);clouds.push({group:cloud,baseX:x,phase:ci*2})});
-    this.dynamic.push({kind:'rockyShoreSampling',tapeSegments,reel,quadrat,stationZ,organisms,poolSeaweed,water,waterDepth,waterUniforms,foamBands,clouds});Object.assign(g.userData,{rockyShore:true,cliffBackdrop:true,continuousCliffRidge:true,cliffTopGrass:true,realisticErodedCliff:true,cliffFaceGrid:[cliffCols,cliffRows],brokenRockLedges,recessedBranchedFissures:true,peatSoilEdge:true,cliffLichenPatches,cliffTopGrassBlades:cliffGrassCount,cliffMaximumY:+cliffBounds.max.y.toFixed(2),cliffWithinCameraFrame:cliffBounds.max.y<=3.02,cliffBoundsWorld:{x:[cliffMinX,cliffMaxX],maxY:+cliffBounds.max.y.toFixed(2)},supportedMaxSceneAspect:2.17,irregularRockPools:true,rockPools:pools.length,rockPoolSeaweedClumps:poolSeaweed.length,firstQuadratClearOfCliff:true,rockCount:scatteredRocks.length,shoreGravelCount,rockBeachFloorBoundsWorld:{x:[shoreMinX,shoreMaxX],z:[shoreMinZ,shoreMaxZ]},rockBeachFloorExtendsBeyondView:true,minimumCompactLateralOverdrawWorld:1.7,foregroundDepthOverdrawWorld:2.5,waterWorldDimensions:[22,waterDepth],foamWorldSpan:22.4,organismModels:organisms.length,beltLengthM:10,beltWidthM:1,incomingDetailedTide:true,laboratoryRoomHidden:true});const ready=shadowReady(g);cliffGrass.castShadow=false;shoreGravel.castShadow=false;water.castShadow=false;cracks.castShadow=false;cracks.receiveShadow=false;lichenMeshes.forEach(patch=>{patch.castShadow=false;patch.receiveShadow=false});pools.forEach(pool=>pool.castShadow=false);return ready
+    this.dynamic.push({kind:'rockyShoreSampling',tapeSegments,reel,quadrat,stationZ,organisms,poolSeaweed,water,waterDepth,waterUniforms,foamBands,clouds});Object.assign(g.userData,{rockyShore:true,cliffBackdrop:true,continuousCliffRidge:true,cliffTopGrass:true,cliffTopGrassTapered:true,cliffTopGrassShortened:true,cliffTopGrassSubtleToneVariation:true,realisticErodedCliff:true,cliffFaceGrid:[cliffCols,cliffRows],brokenRockLedges,recessedBranchedFissures:true,peatSoilEdge:true,cliffLichenPatches,cliffTopGrassBlades:cliffGrassCount,cliffMaximumY:+cliffBounds.max.y.toFixed(2),cliffWithinCameraFrame:cliffBounds.max.y<=3.02,cliffBoundsWorld:{x:[cliffMinX,cliffMaxX],maxY:+cliffBounds.max.y.toFixed(2)},supportedMaxSceneAspect:2.17,irregularRockPools:true,rockPools:pools.length,rockPoolSeaweedClumps:poolSeaweed.length,firstQuadratClearOfCliff:true,rockCount:scatteredRocks.length,shoreGravelCount,rockBeachFloorBoundsWorld:{x:[shoreMinX,shoreMaxX],z:[shoreMinZ,shoreMaxZ]},rockBeachFloorExtendsBeyondView:true,minimumCompactLateralOverdrawWorld:1.7,foregroundDepthOverdrawWorld:2.5,waterWorldDimensions:[22,waterDepth],foamWorldSpan:22.4,organismModels:organisms.length,beltLengthM:10,beltWidthM:1,incomingDetailedTide:true,laboratoryRoomHidden:true});const ready=shadowReady(g);cliffGrass.castShadow=false;shoreGravel.castShadow=false;water.castShadow=false;cracks.castShadow=false;cracks.receiveShadow=false;lichenMeshes.forEach(patch=>{patch.castShadow=false;patch.receiveShadow=false});pools.forEach(pool=>pool.castShadow=false);return ready
   }
   rippleTankRig(state) {
     const g = new THREE.Group(), tank = new THREE.Group(), aluminium = metal(0x9caeb4, .18), darkMetal = metal(0x344b54, .24), black = solid(0x142a33, .32), rubber = solid(0x17252a, .82), acrylic = new THREE.MeshPhysicalMaterial({ color: 0xd8f4fb, transparent: true, opacity: .34, transmission: .7, roughness: .035, ior: 1.48, thickness: .09, clearcoat: .7, clearcoatRoughness: .03, side: THREE.DoubleSide, depthWrite: false });
@@ -2926,6 +3008,123 @@ export class LabRenderer3D {
     Object.assign(g.userData, { magneticFieldRig: true, paperOnClearSupport: true, magnetsBelowPaper: true, individuallyModelledFilings: filings.length });
     return shadowReady(g);
   }
+  nuclearRadiationRig(state) {
+    const g = new THREE.Group(), steel = metal(0xaebbc0, .2), darkSteel = metal(0x34474f, .28), black = solid(0x17272d, .48);
+    const brass = metal(0xb68b39, .2);
+    const sourceColours = [0x60747c, 0xe85e49, 0x339ed2, 0xe9b62e], sourceSymbols = ['—', 'α', 'β', 'γ'], sourceNames = ['EMPTY', 'Am-241', 'Sr-90', 'Co-60'];
+    const sourceX = -1.82, sourceY = .83, beamZ = -.02, absorberX = -.35, detectorWindowX = .72;
+    const makePlacard = (title, subtitle, width = .75, height = .25, accent = '#178a7d', background = '#f7faf8') => {
+      const canvas = document.createElement('canvas'), context = canvas.getContext('2d'); canvas.width = 640; canvas.height = 208;
+      context.fillStyle = background; context.fillRect(0, 0, 640, 208); context.strokeStyle = accent; context.lineWidth = 12; context.strokeRect(6, 6, 628, 196);
+      context.fillStyle = accent; context.font = '800 63px Inter, Arial, sans-serif'; context.textAlign = 'center'; context.textBaseline = 'middle'; context.fillText(title, 320, subtitle ? 78 : 105);
+      if (subtitle) { context.fillStyle = '#304852'; context.font = '700 34px Inter, Arial, sans-serif'; context.fillText(subtitle, 320, 147) }
+      const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = Math.min(8, this.renderer.capabilities.getMaxAnisotropy());
+      const mesh = new THREE.Mesh(new THREE.PlaneGeometry(width, height), new THREE.MeshBasicMaterial({ map: texture, toneMapped: false, transparent: true })); mesh.renderOrder = 12; return mesh
+    };
+
+    // The holders themselves preserve the controlled source–detector spacing.
+    // Keeping the bench below them open makes their relationship much easier to read.
+
+    // Lead-lined store with three individually labelled sealed source carriers.
+    const store = new THREE.Group(), leadMat = new THREE.MeshPhysicalMaterial({ color: 0x3a464d, metalness: .66, roughness: .38, clearcoat: .2 });
+    const storeBody = new THREE.Mesh(roundedBox(.9, .86, 1.78, .08, 6), leadMat); storeBody.position.y = .46; store.add(storeBody);
+    const storeMouth = new THREE.Mesh(roundedBox(.64, .62, 1.5, .045, 4), new THREE.MeshStandardMaterial({ color: 0x16272d, roughness: .7 })); storeMouth.position.set(.06, .53, .12); store.add(storeMouth);
+    const storeLid = new THREE.Mesh(roundedBox(.92, .12, 1.82, .045, 5), leadMat); storeLid.position.set(-.22, .98, -.02); storeLid.rotation.z = -.18; store.add(storeLid);
+    const storeLabel = makePlacard('SHIELDED STORE', 'sealed sources · return after use', .9, .3, '#e5b51f', '#26353b'); storeLabel.position.set(.08, .46, 1.015); store.add(storeLabel);
+    store.position.set(-3.18, .04, -.42); g.add(store);
+    const storePositions = [null, new THREE.Vector3(-3.09, .64, -.98), new THREE.Vector3(-3.09, .64, -.42), new THREE.Vector3(-3.09, .64, .14)];
+    const sourceCarrier = type => {
+      const carrier = new THREE.Group(), carrierBody = new THREE.Mesh(roundedBox(.38, .48, .16, .06, 5), new THREE.MeshPhysicalMaterial({ color: 0xb7c2c5, metalness: .72, roughness: .2, clearcoat: .34 })); carrierBody.position.y = .02; carrier.add(carrierBody);
+      const sourceDisc = cylinder(.125, .035, new THREE.MeshStandardMaterial({ color: sourceColours[type], emissive: sourceColours[type], emissiveIntensity: .16, roughness: .38 }), 48); sourceDisc.rotation.x = Math.PI / 2; sourceDisc.position.set(0, .02, .103); carrier.add(sourceDisc);
+      const face = makePlacard(`${sourceSymbols[type]}  ${sourceNames[type]}`, 'SEALED', .31, .19, type === 1 ? '#b93428' : type === 2 ? '#167fac' : '#ad7a00', '#fffdf4'); face.position.set(0, -.09, .187); carrier.add(face);
+      const handle = new THREE.Mesh(new THREE.TorusGeometry(.12, .025, 10, 34, Math.PI), darkSteel); handle.position.y = .29; handle.rotation.z = Math.PI; carrier.add(handle);
+      Object.assign(carrier.userData, { sealedSourceCarrier: true, isotope: sourceNames[type], radiation: sourceSymbols[type] }); return shadowReady(carrier)
+    };
+    const storedCarriers = [null]; for (let type = 1; type <= 3; type++) { const carrier = sourceCarrier(type); carrier.position.copy(storePositions[type]); carrier.scale.setScalar(.84); g.add(carrier); storedCarriers[type] = carrier }
+    const activeSource = state.nuclearSource > 0 ? sourceCarrier(state.nuclearSource) : null; if (activeSource) g.add(activeSource);
+    const returningSource = state.nuclearPreviousSource > 0 && state.nuclearPreviousSource !== state.nuclearSource ? sourceCarrier(state.nuclearPreviousSource) : null; if (returningSource) g.add(returningSource);
+    const sourceBlock = new THREE.Mesh(roundedBox(.62, .54, .72, .07, 5), darkSteel); sourceBlock.position.set(sourceX, .48, beamZ); g.add(sourceBlock);
+    const apertureShield = cylinder(.29, .34, leadMat, 64); apertureShield.rotation.z = Math.PI / 2; apertureShield.position.set(sourceX + .31, sourceY, beamZ); g.add(apertureShield);
+    const aperture = cylinder(.105, .015, black, 48); aperture.rotation.z = Math.PI / 2; aperture.position.set(sourceX + .487, sourceY, beamZ); g.add(aperture);
+    const sourceHolderLabel = makePlacard('SOURCE', 'sealed carrier slot', .62, .24, '#c59200'); sourceHolderLabel.position.set(sourceX, .37, .47); g.add(sourceHolderLabel);
+
+    // Long-handled forceps remain visible throughout every source change.
+    const tongs = new THREE.Group(), tongMat = metal(0xcbd3d5, .14), gripMat = solid(0x27434b, .48);
+    for (const side of [-1, 1]) { tongs.add(this.tubeBetween(new THREE.Vector3(.16, side * .055, 0), new THREE.Vector3(1.55, side * .16, 0), .027, tongMat)); const jaw = this.tubeBetween(new THREE.Vector3(.0, side * .055, 0), new THREE.Vector3(.18, side * .055, 0), .035, tongMat); tongs.add(jaw) }
+    const tongGrip = new THREE.Mesh(roundedBox(.58, .16, .14, .045, 4), gripMat); tongGrip.position.x = 1.38; tongs.add(tongGrip); tongs.rotation.z = -.12; g.add(tongs);
+
+    // Three absorber samples are visibly different in thickness, finish and labelling.
+    const absorberMaterials = [null, new THREE.MeshPhysicalMaterial({ color: 0xfffdf2, roughness: .92, clearcoat: .015 }), new THREE.MeshPhysicalMaterial({ color: 0xc9d1d4, metalness: .76, roughness: .2, clearcoat: .32 }), new THREE.MeshPhysicalMaterial({ color: 0x515c62, metalness: .58, roughness: .5 })];
+    const absorberNames = [null, ['PAPER', '0.10 mm · stops α'], ['ALUMINIUM', '3 mm · stops β'], ['LEAD', '10 mm · reduces γ']], absorberThickness = [0, .025, .095, .24];
+    const absorberPlate = type => {
+      const plate = new THREE.Group(), sheet = new THREE.Mesh(roundedBox(absorberThickness[type], 1.15, .82, type === 1 ? .008 : .025, 4), absorberMaterials[type]); sheet.position.y = .58; plate.add(sheet);
+      const rim = new THREE.Mesh(new THREE.BoxGeometry(absorberThickness[type] + .035, .075, .9), type === 1 ? solid(0xd9d5c7, .75) : darkSteel); rim.position.y = .09; plate.add(rim);
+      const label = makePlacard(absorberNames[type][0], absorberNames[type][1], .72, .3, type === 1 ? '#8b7657' : type === 2 ? '#55747d' : '#e2b526', type === 3 ? '#303c42' : '#fbfdfb'); label.position.set(0, .6, .424); plate.add(label);
+      if (type === 1) for (let i = 0; i < 14; i++) { const fibre = new THREE.Mesh(new THREE.BoxGeometry(.012, .002, .62), new THREE.MeshBasicMaterial({ color: i % 2 ? 0xd9d0b7 : 0xe7dfca, transparent: true, opacity: .5 })); fibre.position.set(absorberThickness[type] / 2 + .002, .2 + i * .065, 0); fibre.rotation.x = .14 * Math.sin(i * 2.1); plate.add(fibre) }
+      Object.assign(plate.userData, { absorberSample: absorberNames[type][0], thickness: absorberNames[type][1] }); return shadowReady(plate)
+    };
+    const absorberStorePositions = [null, new THREE.Vector3(-1.05, .16, 1.34), new THREE.Vector3(-.28, .16, 1.34), new THREE.Vector3(.58, .16, 1.34)];
+    const absorberRackBase = new THREE.Mesh(roundedBox(2.55, .13, .62, .05, 4), darkSteel); absorberRackBase.position.set(-.25, .075, 1.32); g.add(absorberRackBase);
+    for (const x of [-1.37, -.68, .12, .98]) { const divider = new THREE.Mesh(roundedBox(.055, .55, .58, .018, 3), darkSteel); divider.position.set(x, .33, 1.32); g.add(divider) }
+    const storedAbsorbers = [null]; for (let type = 1; type <= 3; type++) { const plate = absorberPlate(type); plate.position.copy(absorberStorePositions[type]); plate.scale.setScalar(.62); g.add(plate); storedAbsorbers[type] = plate }
+    for (const z of [-.52, .48]) {
+      const lowerClip = new THREE.Mesh(roundedBox(.13, .36, .15, .028, 4), darkSteel); lowerClip.position.set(absorberX, .29, z); g.add(lowerClip);
+      const upperClip = new THREE.Mesh(roundedBox(.13, .3, .15, .028, 4), darkSteel); upperClip.position.set(absorberX, 1.27, z); g.add(upperClip);
+      const slot = new THREE.Mesh(roundedBox(.24, .12, .2, .025, 3), brass); slot.position.set(absorberX, 1.42, z); g.add(slot)
+    }
+    const holderLabel = makePlacard('ABSORBER', 'removable sample', .92, .28, '#0d887b'); holderLabel.position.set(absorberX, .35, .67); g.add(holderLabel);
+    const currentAbsorber = state.nuclearAbsorber > 0 ? absorberPlate(state.nuclearAbsorber) : null; if (currentAbsorber) g.add(currentAbsorber);
+    const outgoingAbsorber = state.nuclearAnimAbsorber > 0 && state.nuclearAnimAbsorber !== state.nuclearAbsorber ? absorberPlate(state.nuclearAnimAbsorber) : null; if (outgoingAbsorber) g.add(outgoingAbsorber);
+
+    // Cylindrical GM tube: thin mica window faces the source, protective ring,
+    // clamp stand and a single screened cable to the scaler.
+    const gm = new THREE.Group(), gmBodyMat = new THREE.MeshPhysicalMaterial({ color: 0xd8dfe1, metalness: .82, roughness: .18, clearcoat: .36 });
+    const gmBody = cylinder(.23, 1.45, gmBodyMat, 64); gmBody.rotation.z = Math.PI / 2; gmBody.position.x = 1.45; gm.add(gmBody);
+    const gmRear = cylinder(.255, .24, black, 48); gmRear.rotation.z = Math.PI / 2; gmRear.position.x = 2.25; gm.add(gmRear);
+    const windowRing = cylinder(.27, .12, darkSteel, 56); windowRing.rotation.z = Math.PI / 2; windowRing.position.x = .78; gm.add(windowRing);
+    const mica = cylinder(.205, .018, new THREE.MeshPhysicalMaterial({ color: 0xd2b56d, metalness: .18, roughness: .7, transparent: true, opacity: .9 }), 56); mica.rotation.z = Math.PI / 2; mica.position.x = .712; gm.add(mica);
+    for (let i = 0; i < 5; i++) { const guard = new THREE.Mesh(new THREE.TorusGeometry(.205 - i * .032, .009, 8, 32), darkSteel); guard.rotation.y = Math.PI / 2; guard.position.x = .699; gm.add(guard) }
+    gm.position.set(0, sourceY, beamZ); g.add(gm);
+    const gmStandBase = new THREE.Mesh(roundedBox(1.28, .15, .82, .065, 5), darkSteel); gmStandBase.position.set(1.48, .08, -.15); g.add(gmStandBase);
+    const gmStandRod = cylinder(.055, .82, steel, 32); gmStandRod.position.set(1.48, .47, -.42); g.add(gmStandRod);
+    const gmClamp = new THREE.Mesh(new THREE.TorusGeometry(.3, .045, 12, 42, Math.PI * 1.58), darkSteel); gmClamp.position.set(1.48, sourceY, -.05); gmClamp.rotation.set(Math.PI / 2, 0, -.3); g.add(gmClamp);
+
+    const counterDisplayCanvas = document.createElement('canvas'), counterDc = counterDisplayCanvas.getContext('2d'); counterDisplayCanvas.width = 800; counterDisplayCanvas.height = 330; const counterTexture = new THREE.CanvasTexture(counterDisplayCanvas); counterTexture.colorSpace = THREE.SRGBColorSpace;
+    const counter = new THREE.Group(), counterBody = new THREE.Mesh(roundedBox(1.92, 1.08, .7, .12, 7), new THREE.MeshPhysicalMaterial({ color: 0x273b44, metalness: .22, roughness: .37, clearcoat: .42 })); counterBody.position.y = .58; counter.add(counterBody);
+    const bezel = new THREE.Mesh(roundedBox(1.56, .72, .045, .06, 5), black); bezel.position.set(0, .66, .373); counter.add(bezel);
+    const screen = new THREE.Mesh(new THREE.PlaneGeometry(1.43, .58), new THREE.MeshBasicMaterial({ map: counterTexture, toneMapped: false, depthTest: false })); screen.position.set(0, .67, .458); screen.renderOrder = 24; counter.add(screen);
+    for (let i = 0; i < 7; i++) { const hole = cylinder(.025, .026, black, 16); hole.rotation.x = Math.PI / 2; hole.position.set(-.62 + i * .095, .16, .38); counter.add(hole) }
+    const pulseLed = new THREE.Mesh(new THREE.SphereGeometry(.055, 20, 12), new THREE.MeshStandardMaterial({ color: 0x486068, emissive: 0xffcf3d, emissiveIntensity: .08 })); pulseLed.position.set(.7, .17, .39); counter.add(pulseLed);
+    const resetButton = cylinder(.085, .035, solid(0xd8e1df, .32), 32); resetButton.rotation.x = Math.PI / 2; resetButton.position.set(.46, .17, .39); counter.add(resetButton);
+    counter.scale.setScalar(.82); counter.position.set(3.18, .04, -.72); counter.rotation.y = -.3; g.add(counter);
+    const cableCurve = new THREE.CatmullRomCurve3([new THREE.Vector3(2.27, sourceY, beamZ), new THREE.Vector3(2.57, .68, -.1), new THREE.Vector3(2.72, .3, -.34), new THREE.Vector3(2.44, .18, -.49)]); const cable = new THREE.Mesh(new THREE.TubeGeometry(cableCurve, 64, .035, 12, false), black); g.add(cable);
+
+    // Type-specific explanatory tracks. These are intentionally stylised and
+    // identified as a model in structured state; radiation is not visible.
+    const radiationParticles = [], particleCount = 36;
+    for (let i = 0; i < particleCount; i++) {
+      const group = new THREE.Group(), laneY = ((i % 5) - 2) * .052, laneZ = ((Math.floor(i / 5) % 5) - 2) * .045;
+      if (state.nuclearSource === 1) {
+        const nucleonColours = [0xef614c, 0xef614c, 0xf1c747, 0xf1c747];
+        [[-.022, -.022], [.022, -.022], [-.022, .022], [.022, .022]].forEach(([y, z], n) => { const sphere = new THREE.Mesh(new THREE.SphereGeometry(.025, 12, 8), new THREE.MeshBasicMaterial({ color: nucleonColours[n], toneMapped: false })); sphere.position.set(0, y, z); group.add(sphere) })
+      } else if (state.nuclearSource === 2) {
+        const electron = new THREE.Mesh(new THREE.SphereGeometry(.025, 14, 9), new THREE.MeshBasicMaterial({ color: 0x55c9ff, toneMapped: false })); electron.scale.x = 2.7; group.add(electron)
+      } else if (state.nuclearSource === 3) {
+        const photon = new THREE.Mesh(new THREE.TorusGeometry(.045, .011, 8, 22), new THREE.MeshBasicMaterial({ color: 0xffd950, toneMapped: false, transparent: true, opacity: .9 })); photon.rotation.y = Math.PI / 2; group.add(photon)
+      }
+      group.visible = false; g.add(group); radiationParticles.push({ mesh: group, phase: i / particleCount, laneY, laneZ, survives: i / particleCount < ({ 0: 1, 1: state.nuclearSource === 1 ? .01 : state.nuclearSource === 2 ? .9 : .94, 2: state.nuclearSource === 1 ? 0 : state.nuclearSource === 2 ? .015 : .82, 3: state.nuclearSource === 1 ? 0 : state.nuclearSource === 2 ? .005 : .18 }[state.nuclearAbsorber] ?? 1) })
+    }
+    const impactBursts = []; for (let i = 0; i < 6; i++) { const burst = new THREE.Mesh(new THREE.TorusGeometry(.05, .009, 8, 28), new THREE.MeshBasicMaterial({ color: sourceColours[state.nuclearSource] || 0xe5b51f, transparent: true, opacity: 0, toneMapped: false })); burst.rotation.y = Math.PI / 2; burst.position.set(absorberX - .02, sourceY, beamZ); burst.visible = false; g.add(burst); impactBursts.push(burst) }
+
+    this.dynamic.push({
+      kind: 'nuclearRadiation', sourceX, sourceY, beamZ, absorberX, detectorWindowX, sourceType: state.nuclearSource || 0, previousSourceType: state.nuclearPreviousSource || 0,
+      storedCarriers, storePositions, activeSource, returningSource, tongs, storedAbsorbers, absorberStorePositions, currentAbsorber, outgoingAbsorber,
+      currentAbsorberType: state.nuclearAbsorber || 0, previousAbsorberType: state.nuclearAnimAbsorber || 0, radiationParticles, impactBursts,
+      counterDisplay: { canvas: counterDisplayCanvas, context: counterDc, texture: counterTexture }, pulseLed
+    });
+    Object.assign(g.userData, { nuclearRadiationRig: true, fixedSourceDetectorDistance: true, visibleOpticalRail: false, visibleDistanceScale: false, shieldedSourceStore: true, sealedSourceCarriers: 3, remoteTongs: true, gmTubeMicaWindowFacingSource: true, counterClearOfGmTube: true, counterScale: .82, counterYawDegrees: -17.2, distinctAbsorberSamples: ['paper 0.10 mm', 'aluminium 3 mm', 'lead 10 mm'], educationalRadiationTracksNotVisibleInReality: true });
+    return shadowReady(g)
+  }
   hookeLawRig(state) {
     const g = new THREE.Group(), clamp = value => Math.max(0, Math.min(1, value));
     const smooth = value => { value = clamp(value); return value * value * (3 - 2 * value) };
@@ -2942,10 +3141,13 @@ export class LabRenderer3D {
     const zeroPointerY = springTopY - baseSpringLength - .16, rulerX = .72, rulerTopY = 3.3, rulerBottomY = .43;
 
     // Heavy retort stand, boss and a proper two-jaw spring clamp.
-    const base = new THREE.Mesh(roundedBox(1.62, .17, 1.18, .085, 6), new THREE.MeshPhysicalMaterial({ color: 0x263a43, metalness: .78, roughness: .24, clearcoat: .4 }));
-    base.position.set(-1.17, .085, -.22); g.add(base);
-    const baseInset = new THREE.Mesh(roundedBox(1.36, .035, .93, .04, 4), new THREE.MeshStandardMaterial({ color: 0x51656d, metalness: .58, roughness: .32 }));
-    baseInset.position.set(-1.17, .185, -.22); g.add(baseInset);
+    // Turn the long axis of the foot through 90 degrees towards the viewer.
+    // Its slimmer screen-space footprint clears the catch tray without moving
+    // the upright farther away from the spring (and lengthening the clamp arm).
+    const base = new THREE.Mesh(roundedBox(1.02, .17, 1.78, .085, 6), new THREE.MeshPhysicalMaterial({ color: 0x263a43, metalness: .78, roughness: .24, clearcoat: .4 }));
+    base.position.set(-1.34, .085, -.05); g.add(base);
+    const baseInset = new THREE.Mesh(roundedBox(.82, .035, 1.54, .04, 4), new THREE.MeshStandardMaterial({ color: 0x51656d, metalness: .58, roughness: .32 }));
+    baseInset.position.set(-1.34, .185, -.05); g.add(baseInset);
     const standRod = cylinder(.065, 3.36, steel, 40); standRod.position.set(-1.42, 1.82, -.48); g.add(standRod);
     const boss = new THREE.Mesh(roundedBox(.42, .36, .42, .065, 5), darkSteel); boss.position.set(-1.42, 3.03, -.42); g.add(boss);
     const bossScrew = cylinder(.075, .34, brass, 28); bossScrew.rotation.z = Math.PI / 2; bossScrew.position.set(-1.62, 3.03, -.42); g.add(bossScrew);
@@ -3024,10 +3226,30 @@ export class LabRenderer3D {
     // tray keeps the remaining discs organised to the right.
     const catchTray = new THREE.Mesh(roundedBox(.94, .075, .72, .045, 4), new THREE.MeshPhysicalMaterial({ color: 0xd8e1e3, metalness: .58, roughness: .3, clearcoat: .28 })); catchTray.position.set(-.2, .045, .16); g.add(catchTray);
     const catchWell = new THREE.Mesh(roundedBox(.78, .018, .57, .035, 3), new THREE.MeshStandardMaterial({ color: 0x6f7f84, metalness: .42, roughness: .5 })); catchWell.position.set(-.2, .088, .16); g.add(catchWell);
+    const sandMaterial = new THREE.MeshStandardMaterial({ color: 0xcba76b, roughness: .98, metalness: 0 });
+    const sandBed = new THREE.Mesh(roundedBox(.72, .035, .51, .045, 4), sandMaterial); sandBed.position.set(-.2, .116, .16); g.add(sandBed);
+    for (let i = 0; i < 34; i++) {
+      const grain = new THREE.Mesh(new THREE.SphereGeometry(.012 + (i % 3) * .004, 7, 5), sandMaterial);
+      grain.position.set(-.52 + (i % 9) * .08 + ((i * 7) % 3) * .009, .14 + (i % 4) * .004, -.04 + Math.floor(i / 9) * .125);
+      grain.scale.y = .42; grain.castShadow = false; g.add(grain);
+    }
     const catchStripe = new THREE.Mesh(new THREE.BoxGeometry(.82, .012, .045), new THREE.MeshBasicMaterial({ color: 0xe5a840, toneMapped: false })); catchStripe.position.set(-.2, .102, .47); g.add(catchStripe);
     const tray = new THREE.Mesh(roundedBox(1.72, .13, 1.03, .065, 5), new THREE.MeshPhysicalMaterial({ color: 0xdfe5e6, metalness: .65, roughness: .3, clearcoat: .3 })); tray.position.set(2.05, .075, .48); g.add(tray);
     const trayWell = new THREE.Mesh(roundedBox(1.48, .025, .8, .045, 4), new THREE.MeshStandardMaterial({ color: 0x66767b, metalness: .4, roughness: .48 })); trayWell.position.set(2.05, .15, .48); g.add(trayWell);
     const trayLabel = makeLabel('6 × 100 g', .75, .16, '#f4fbfb', 30); trayLabel.rotation.x = -Math.PI / 2; trayLabel.position.set(2.05, .175, .79); g.add(trayLabel);
+    const makeBenchLabel = (label, width) => {
+      const canvas = document.createElement('canvas'), dc = canvas.getContext('2d'); canvas.width = 768; canvas.height = 150;
+      dc.fillStyle = 'rgba(247,250,248,.96)'; dc.beginPath(); dc.roundRect(4, 4, 760, 142, 30); dc.fill();
+      dc.strokeStyle = '#9eacb0'; dc.lineWidth = 7; dc.stroke(); dc.fillStyle = '#203943';
+      dc.font = '800 48px Inter, sans-serif'; dc.textAlign = 'center'; dc.textBaseline = 'middle'; dc.fillText(label, 384, 76);
+      const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = Math.min(8, this.renderer.capabilities.getMaxAnisotropy());
+      const labelMesh = new THREE.Mesh(new THREE.PlaneGeometry(width, .28), new THREE.MeshBasicMaterial({ map: texture, transparent: true, toneMapped: false, depthWrite: false, depthTest: false, side: THREE.DoubleSide }));
+      // A shallow display-card angle keeps the label visually below its tray
+      // while avoiding the bench surface and remaining legible to the camera.
+      labelMesh.rotation.x = -Math.PI / 5; labelMesh.renderOrder = 12; return labelMesh;
+    };
+    const safetyTrayLabel = makeBenchLabel('SAFETY TRAY · SAND', 1.22); safetyTrayLabel.position.set(-.2, .105, .73); g.add(safetyTrayLabel);
+    const massesLabel = makeBenchLabel('100 g SLOTTED MASSES', 1.62); massesLabel.position.set(2.05, .105, 1.16); g.add(massesLabel);
     const trayPositions = [];
     for (let i = 0; i < 6; i++) {
       const row = Math.floor(i / 3), column = i % 3;
@@ -3058,7 +3280,8 @@ export class LabRenderer3D {
       apparatus: { clampStand: 'heavy metal base, rod, boss and two-jaw clamp', ruler: 'vertical white 0–36.4 cm length scale with fiducial pointer', massHanger: 'tared steel hanger' },
       spring: { material: 'polished steel', helicalTurns: helixTurns, terminalHooks: 2, unloadedLengthSceneUnits: baseSpringLength, extensionSeriesCm, proportionalFitSpringConstantNPerM: 50, limitOfProportionalityN: 5 },
       slottedMasses: { individuallyModelled: 6, eachMassG: 100, appliedForcePerDiscN: 1, attached: attachedDiscCount, spareTray: true, staggeredForVisibility: true },
-      safetyCatchTray: { directlyBelowHanger: true, centre: catchTray.position.toArray(), raisedRim: true },
+      safetyCatchTray: { directlyBelowHanger: true, centre: catchTray.position.toArray(), raisedRim: true, filledWithSand: true, labelledBelow: true },
+      clampStandBase: { rotatedTowardsCameraDegrees: 90, overlapsSafetyTray: false, clampArmLengthUnchanged: true },
       animation: { durationS: 3.4, movingDiscFromTray: stage === 1, dampedSpringSettling: stage === 1, coupledParts: ['coil pitch', 'lower hook', 'hanger', 'pointer'] }
     });
     const rig = shadowReady(g);
@@ -3068,7 +3291,8 @@ export class LabRenderer3D {
   specificHeatRig(state) {
     const g = new THREE.Group(), clamp = value => Math.max(0, Math.min(1, value));
     const smooth = value => { value = clamp(value); return value * value * (3 - 2 * value) }, stage = state.shcStage || 0;
-    const aluminium = new THREE.MeshPhysicalMaterial({ color: 0xaebbc0, metalness: .88, roughness: .2, clearcoat: .48, emissive: 0x4a1404, emissiveIntensity: 0 });
+    const materialId = state.shcMaterial === 'copper' ? 'copper' : 'aluminium', materialLabel = materialId.toUpperCase(), materialSpecificHeat = materialId === 'copper' ? 390 : 900;
+    const aluminium = new THREE.MeshPhysicalMaterial({ color: materialId === 'copper' ? 0xb96d45 : 0xaebbc0, metalness: .88, roughness: .2, clearcoat: .48, emissive: 0x4a1404, emissiveIntensity: 0 });
     const steel = metal(0xc4ced1, .13), dark = solid(0x1c2c33, .36), red = new THREE.MeshStandardMaterial({ color: 0xc63e43, roughness: .45 }), black = new THREE.MeshStandardMaterial({ color: 0x19242a, roughness: .58 });
     const foam = new THREE.MeshPhysicalMaterial({ color: 0xd9e1dc, roughness: .88, metalness: 0, clearcoat: .06 }), pasteMaterial = new THREE.MeshPhysicalMaterial({ color: 0xe9eef0, metalness: .18, roughness: .42, clearcoat: .3 });
     const blockX = .25, blockZ = .55, blockW = 1.55, blockH = 1.15, blockD = 1.22, blockBottomY = .14, blockTopY = blockBottomY + blockH;
@@ -3083,7 +3307,7 @@ export class LabRenderer3D {
       const opening = new THREE.Mesh(new THREE.TorusGeometry(.088, .014, 10, 42), steel); opening.rotation.x = Math.PI / 2; opening.position.set(bore.x, blockTopY + .018, bore.z); g.add(opening);
       const darkness = new THREE.Mesh(new THREE.CircleGeometry(.074, 36), new THREE.MeshBasicMaterial({ color: 0x17252b, toneMapped: false })); darkness.rotation.x = -Math.PI / 2; darkness.position.set(bore.x, blockTopY + .021, bore.z); g.add(darkness);
     }
-    const massStamp = (() => { const canvas = document.createElement('canvas'), dc = canvas.getContext('2d'); canvas.width = 512; canvas.height = 128; dc.clearRect(0, 0, 512, 128); dc.fillStyle = '#3f535a'; dc.font = '800 58px Inter, sans-serif'; dc.textAlign = 'center'; dc.textBaseline = 'middle'; dc.fillText('ALUMINIUM · 1.00 kg', 256, 64); const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace; const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1.18, .26), new THREE.MeshBasicMaterial({ map: texture, transparent: true, toneMapped: false, depthWrite: false })); mesh.position.set(blockX, .67, blockZ + blockD / 2 + .031); mesh.renderOrder = 8; return mesh })(); g.add(massStamp);
+    const massStamp = (() => { const canvas = document.createElement('canvas'), dc = canvas.getContext('2d'); canvas.width = 512; canvas.height = 128; dc.clearRect(0, 0, 512, 128); dc.fillStyle = materialId === 'copper' ? '#5e2d1f' : '#3f535a'; dc.font = '800 58px Inter, sans-serif'; dc.textAlign = 'center'; dc.textBaseline = 'middle'; dc.fillText(`${materialLabel} · 1.00 kg`, 256, 64); const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace; const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1.18, .26), new THREE.MeshBasicMaterial({ map: texture, transparent: true, toneMapped: false, depthWrite: false })); mesh.position.set(blockX, .67, blockZ + blockD / 2 + .031); mesh.renderOrder = 8; return mesh })(); g.add(massStamp);
 
     // Four side panels and a bored lid start opened out, then close snugly
     // around the block while leaving both probe collars accessible.
@@ -3110,17 +3334,17 @@ export class LabRenderer3D {
       Object.assign(probe.userData, { type, connectorLocal: new THREE.Vector3(0, .76, 0), insertionDepth: .95 }); return shadowReady(probe);
     };
     const heaterProbe = makeProbe('heater', 0xd64b43), thermometerProbe = makeProbe('thermometer', 0x2d879e);
-    const heaterStart = new THREE.Vector3(-1.58, .31, .72), thermometerStart = new THREE.Vector3(-1.5, .24, 1.22), heaterInserted = new THREE.Vector3(heaterBore.x, blockTopY + .14, heaterBore.z), thermometerInserted = new THREE.Vector3(thermometerBore.x, blockTopY + .14, thermometerBore.z);
+    const heaterStart = new THREE.Vector3(-2.62, .31, .72), thermometerStart = new THREE.Vector3(-2.48, .24, 1.22), heaterInserted = new THREE.Vector3(heaterBore.x, blockTopY + .14, heaterBore.z), thermometerInserted = new THREE.Vector3(thermometerBore.x, blockTopY + .14, thermometerBore.z);
     if (stage >= 2) { heaterProbe.position.copy(heaterInserted); thermometerProbe.position.copy(thermometerInserted) } else { heaterProbe.position.copy(heaterStart); heaterProbe.rotation.z = Math.PI / 2; thermometerProbe.position.copy(thermometerStart); thermometerProbe.rotation.z = Math.PI / 2 }
     g.add(heaterProbe, thermometerProbe);
 
     // Thermal-paste syringe, visible white paste beads and a small tool tray.
-    const toolTray = new THREE.Mesh(roundedBox(1.65, .09, .82, .055, 5), new THREE.MeshPhysicalMaterial({ color: 0xdce3e4, metalness: .62, roughness: .33 })); toolTray.position.set(-1.5, .065, .94); g.add(toolTray);
+    const toolTray = new THREE.Mesh(roundedBox(1.65, .09, .82, .055, 5), new THREE.MeshPhysicalMaterial({ color: 0xdce3e4, metalness: .62, roughness: .33 })); toolTray.position.set(-2.72, .065, .94); g.add(toolTray);
     const syringe = new THREE.Group(), barrel = cylinder(.105, .78, new THREE.MeshPhysicalMaterial({ color: 0xe9f5f6, transparent: true, opacity: .72, transmission: .35, roughness: .12 }), 36); barrel.position.y = .22; syringe.add(barrel);
     const pasteColumn = cylinder(.075, .52, pasteMaterial, 28); pasteColumn.position.y = .18; syringe.add(pasteColumn);
     const plunger = cylinder(.055, .45, steel, 24); plunger.position.y = .78; syringe.add(plunger); const thumb = cylinder(.17, .04, steel, 30); thumb.position.y = 1.01; syringe.add(thumb);
     const nozzle = new THREE.Mesh(new THREE.ConeGeometry(.055, .42, 28), pasteMaterial); nozzle.rotation.z = Math.PI; nozzle.position.y = -.39; syringe.add(nozzle);
-    syringe.position.set(-2.02, .25, .93); syringe.rotation.z = Math.PI / 2; syringe.scale.setScalar(.72); g.add(syringe);
+    syringe.position.set(-3.12, .25, .93); syringe.rotation.z = Math.PI / 2; syringe.scale.setScalar(.72); g.add(syringe);
     const pasteDrops = [];
     for (const [i, bore] of [heaterBore, thermometerBore].entries()) { const drop = new THREE.Mesh(new THREE.SphereGeometry(.09, 28, 18), pasteMaterial); drop.scale.set(1, .12, 1); drop.position.set(bore.x, blockTopY + .035, bore.z); drop.visible = stage >= 2; drop.userData.dropIndex = i; g.add(drop); pasteDrops.push(drop) }
 
@@ -3129,7 +3353,8 @@ export class LabRenderer3D {
       const bezel = new THREE.Mesh(roundedBox(.98, .43, .045, .04, 4), dark); bezel.position.set(0, .46, .335); instrument.add(bezel);
       const canvas = document.createElement('canvas'), dc = canvas.getContext('2d'); canvas.width = 512; canvas.height = 220; dc.fillStyle = '#071b22'; dc.fillRect(0, 0, 512, 220);
       const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace;
-      const screen = new THREE.Mesh(new THREE.PlaneGeometry(.88, .35), new THREE.MeshBasicMaterial({ map: texture, toneMapped: false, depthWrite: false })); screen.position.set(0, .47, .37); screen.renderOrder = 8; instrument.add(screen);
+      texture.needsUpdate = true;
+      const screen = new THREE.Mesh(new THREE.PlaneGeometry(.88, .35), new THREE.MeshBasicMaterial({ map: texture, toneMapped: false, depthWrite: false, depthTest: false })); screen.position.set(0, .47, .385); screen.renderOrder = 20; instrument.add(screen);
       for (const [x, colour] of [[-.37, 0x171c22], [.37, 0xd44247]]) { const terminal = cylinder(.068, .11, solid(colour, .26), 28); terminal.rotation.x = Math.PI / 2; terminal.position.set(x, .16, .34); instrument.add(terminal) }
       Object.assign(instrument.userData, { label, display: { canvas, context: dc, texture }, accent }); return shadowReady(instrument);
     };
@@ -3181,10 +3406,10 @@ export class LabRenderer3D {
     });
     Object.assign(g.userData, {
       specificHeatCapacityRig: true,
-      block: { material: 'aluminium', massKg: 1, boreHoles: 2, heaterBorePosition: heaterBore.toArray(), thermometerBorePosition: thermometerBore.toArray() },
+      block: { material: materialId, massKg: 1, specificHeatCapacityJPerKgC: materialSpecificHeat, boreHoles: 2, heaterBorePosition: heaterBore.toArray(), thermometerBorePosition: thermometerBore.toArray() },
       preparation: { thermalPasteSyringe: true, pasteDrops: 2, probesInserted: stage >= 2, probeInsertionDepthSceneUnits: .95, foamInsulationPanels: 5, boredInsulatingLid: true, foamInsulationClosed: stage >= 2, durationS: 3.8 },
       electrical: { supplyVoltageV: 12, currentA: 2, powerW: 24, instruments: ['12 V supply', 'ammeter', 'joulemeter', 'digital thermometer'], flexibleInsulatedCables: true, completeSeriesCircuit: true, route: 'supply positive → ammeter → joulemeter → heater → supply negative' },
-      measurement: { energyRangeJ: [0, 18000], temperatureRangeC: [20, 40], heatingDurationS: 8, targetSpecificHeatCapacityJPerKgC: 900 },
+      measurement: { energyRangeJ: [0, 18000], temperatureRangeC: [20, +(20 + 18000 / materialSpecificHeat).toFixed(1)], heatingDurationS: 8, targetSpecificHeatCapacityJPerKgC: materialSpecificHeat },
       animation: { preparationSequence: ['apply paste', 'insert heater', 'insert thermometer', 'close foam jacket'], liveHeaterGlow: stage === 3, energyParticles: energyParticles.length }
     });
     const rig = shadowReady(g);
@@ -3290,6 +3515,7 @@ export class LabRenderer3D {
     else if (id === 'specificheat') { this.root.add(this.specificHeatRig(state)) }
     else if (id === 'wirelength') { this.root.add(this.wireResistanceRig(state)) }
     else if (id === 'fieldlines') { this.root.add(this.magneticFieldRig(state)) }
+    else if (id === 'nuclear') { this.root.add(this.nuclearRadiationRig(state)) }
   }
   advanceBunsenLoad(dt) {
     const needsFrame = this.bunsenTransitionActive;
@@ -3325,6 +3551,8 @@ export class LabRenderer3D {
     const visualDrag = state.drag && ['palette', 'free-reactant', 'workspace'].includes(state.drag.kind) ? { kind: state.drag.kind, type: state.drag.type, uid: state.drag.uid, targetUid: state.drag.targetUid, snapUid: state.drag.snapUid } : state.drag ? { kind: state.drag.kind } : null;
     const visualWorkspace = state.workspace.map(({ temperature, reaction, ph, ...it }) => { const frozen = dragUid === it.uid && state.drag?.origin; const view = frozen ? { ...it, x: state.drag.origin.x, y: state.drag.origin.y, attachedTo: state.drag.origin.attachedTo } : it; return { ...view, temperatureBand: Math.floor((temperature || 20) / 10), reaction: reaction && { ruleId: reaction.ruleId, progress: Math.round((reaction.progress || 0) * 20), complete: !!reaction.complete } } });
     const temperatureKey = p.id === 'temp' ? Math.round((state.temp || 20) * 10) : p.id === 'rates' ? Math.round((state.ratesBathTemp || 20) * 10) : p.id === 'lipase' ? Math.round((state.lipaseBathTemp || 20) * 10) : 0;
+    const nuclearVisualKey = p.id === 'nuclear' ? `${state.nuclearStage}:${state.nuclearSource}:${state.nuclearPreviousSource}:${state.nuclearAbsorber}:${state.nuclearAnimAbsorber}` : '';
+    if (nuclearVisualKey !== this.nuclearVisualKey) { this.nuclearVisualKey = nuclearVisualKey; if (p.id === 'nuclear') this.signature = '' }
     const signature = JSON.stringify({ id: p.id, workspace: visualWorkspace, drag: visualDrag, running: p.id === 'titration' || p.id === 'thermite' || p.id === 'displacement' || p.id === 'density' || p.id === 'starchleaf' || p.id === 'lipase' || p.id === 'osmosis' || p.id === 'potometer' || p.id === 'ripple' || p.id === 'hooke' || p.id === 'specificheat' || p.id === 'wirelength' || p.id === 'fieldlines' ? false : state.running, burner: state.burner, coolingWater: state.coolingWater, pour: !!state.pour, pourTick: state.pour && Math.round(state.pour.t * 24), lastReactant: state.lastReactant, transferred: Math.round((state.transferred || 0) * 20), temperature: temperatureKey, ratesStage: state.ratesStage, ratesTick: p.id === 'rates' ? Math.round((state.ratesStageTimer || 0) * 18) : 0, ratesTarget: state.ratesTargetTemp, ratesConditioning: !!state.ratesConditioning, massStage: state.massStage, massLidOn: state.massLidOn, massTransfer: state.massTransfer && { direction: state.massTransfer.direction, tick: Math.round(state.massTransfer.t * 12) }, massProgress: ['water', 'electro', 'titration', 'thermite', 'displacement', 'starchleaf', 'lipase', 'osmosis', 'potometer', 'ripple', 'electromagnet', 'convection', 'conduction', 'thermal', 'hooke', 'specificheat', 'wirelength', 'fieldlines'].includes(p.id) ? 0 : Math.round((state.progress || 0) * 20), electroWeighing: !!state.electroWeighing, electroRecorded: !!state.electroRecorded, hydrogenStage: state.hydrogenStage, hydrogenTick: Math.round((state.hydrogenTimer || 0) * 6), hydrogenGas: Math.round((state.hydrogenGas || 0) / 2), saltsStage: state.saltsStage, saltsTick: Math.round((state.saltsTimer || 0) * 10), flameTestStage: state.flameTestStage, flameTestSalt: state.flameTestSalt, flameTestTested: state.flameTestTested, titrationStage: state.titrationStage, titrationIndicator: state.titrationIndicator, titrationIndicatorAdding: (state.titrationIndicatorTimer || 0) > 0, titrationComplete: p.id === 'titration' && !!state.complete, titrationDropping: (state.titrationDropTimer || 0) > 0, titrationReading: p.id === 'titration' && !state.running ? Math.round((state.titrationVolume || 0) * 20) : 0, displacementStage: state.displacementStage, thermiteComplete: p.id === 'thermite' && !!state.complete, starchStage: state.starchStage, lipaseStage: state.lipaseStage, lipaseTarget: state.lipaseTargetTemp, lipaseConditioning: !!state.lipaseConditioning, osmosisStage: state.osmosisStage, osmosisConcentration: state.osmosisConcentration, potometerStage: state.potometerStage, potometerWindSpeed: state.potometerWindSpeed, pondweedDistance: state.pondweedDistance, pondweedLampOn: state.pondweedLampOn, newtonForce: state.newtonForce, newtonMass: state.newtonMass, newtonPos: Math.round((state.newtonPos || 0) * 50), newtonGate1Velocity: state.newtonGate1Velocity, newtonGate2Velocity: state.newtonGate2Velocity, electromagnetStage: state.electromagnetStage, electromagnetTurns: state.electromagnetTurns, convectionStage: state.convectionStage, conductionStage: state.conductionStage, thermalStage: state.thermalStage, densityStage: state.densityStage, densitySample: state.densitySample, densityTick: 0, hookeStage: state.hookeStage, hookeTrialIndex: state.hookeTrialIndex, hookeForceN: state.hookeForceN, shcStage: state.shcStage, wireStage: state.wireStage, wireLengthCm: state.wireLengthCm, wireTrialIndex: state.wireTrialIndex, fieldStage: state.fieldStage, fieldConfigIndex: state.fieldConfigIndex });
     if (signature !== this.signature) { this.signature = signature; this.rebuild(state, p); this.sceneNeedsCompile = true; this.sceneWarmupFrames = 3 }
   }
@@ -3429,7 +3657,7 @@ export class LabRenderer3D {
       }
       else if (d.kind === 'specificHeat') {
         const stage = state.shcStage || 0, t = Math.max(0, state.shcTimer || 0), clamp = q => Math.max(0, Math.min(1, q)), smooth = q => { q = clamp(q); return q * q * (3 - 2 * q) };
-        const syringeRest = new THREE.Vector3(-2.02, .25, .93), heaterPastePose = new THREE.Vector3(d.heaterBore.x, d.blockTopY + .47, d.heaterBore.z), thermometerPastePose = new THREE.Vector3(d.thermometerBore.x, d.blockTopY + .47, d.thermometerBore.z);
+        const syringeRest = new THREE.Vector3(-3.12, .25, .93), heaterPastePose = new THREE.Vector3(d.heaterBore.x, d.blockTopY + .47, d.heaterBore.z), thermometerPastePose = new THREE.Vector3(d.thermometerBore.x, d.blockTopY + .47, d.thermometerBore.z);
         const arcLerp = (object, from, to, q, arc = 0) => { object.position.lerpVectors(from, to, q); object.position.y += Math.sin(Math.PI * q) * arc };
         d.syringe.visible = stage < 2;
         if (stage === 1) {
@@ -3454,8 +3682,8 @@ export class LabRenderer3D {
         d.heaterBlackLead.points[d.heaterBlackLead.points.length - 1].copy(heaterConnector).add(new THREE.Vector3(.035, 0, .035));
         d.thermometerLead.points[d.thermometerLead.points.length - 1].copy(thermometerConnector);
         d.updateFlexibleLead(d.heaterRedLead); d.updateFlexibleLead(d.heaterBlackLead); d.updateFlexibleLead(d.thermometerLead);
-        const active = stage === 3, prepared = stage >= 2, energyJ = Math.max(0, Math.min(18000, Number(state.shcEnergyJ) || 0)), temperatureC = Math.max(20, Math.min(40, Number(state.shcTemperatureC) || 20));
-        const heatFraction = (temperatureC - 20) / 20, heatRamp = active ? smooth(t / 1.05) : 0, pulse = .9 + .1 * Math.sin(time * .011);
+        const active = stage === 3, prepared = stage >= 2, energyJ = Math.max(0, Math.min(18000, Number(state.shcEnergyJ) || 0)), maximumTemperature = state.shcMaterial === 'copper' ? 66.2 : 40, temperatureC = Math.max(20, Math.min(maximumTemperature, Number(state.shcTemperatureC) || 20));
+        const heatFraction = clamp((temperatureC - 20) / (maximumTemperature - 20)), heatRamp = active ? smooth(t / 1.05) : 0, pulse = .9 + .1 * Math.sin(time * .011);
         d.heaterCoreMaterial.emissiveIntensity = active ? (2.05 + .75 * pulse) * heatRamp : 0;
         d.heatLight.intensity = active ? (2.25 + .55 * pulse) * heatRamp : 0;
         d.aluminium.emissiveIntensity = .015 + heatFraction * .24;
@@ -3576,6 +3804,55 @@ export class LabRenderer3D {
         { const { canvas, context: dc, texture } = d.supplyDisplay; dc.clearRect(0, 0, canvas.width, canvas.height); dc.fillStyle = '#071c22'; dc.fillRect(0, 0, canvas.width, canvas.height); dc.shadowColor = switchQ > .02 ? '#75ffe0' : '#6f8589'; dc.shadowBlur = 18; dc.fillStyle = switchQ > .02 ? '#8affdf' : '#9badaf'; dc.font = '800 70px ui-monospace, Menlo, monospace'; dc.textAlign = 'center'; dc.textBaseline = 'middle'; dc.fillText(switchQ > .02 ? '1.50 V' : '0.00 V', 256, 72); dc.shadowBlur = 0; dc.fillStyle = '#b4c3c5'; dc.font = '700 26px Inter, sans-serif'; dc.fillText(switchQ > .02 ? 'OUTPUT ON' : 'OUTPUT ISOLATED', 256, 136); texture.needsUpdate = true }
         for (const particle of d.chargeParticles) { particle.mesh.visible = switchQ > .05; if (particle.mesh.visible) { const phase = (particle.phase + time * .00018 * (.5 + targetCurrent)) % 1; particle.mesh.position.set(THREE.MathUtils.lerp(d.rulerStartX, clipX, phase), .286, d.rulerZ); particle.mesh.material.opacity = .36 + .58 * Math.sin(Math.PI * phase); particle.mesh.scale.setScalar(.72 + .25 * Math.sin(time * .01 + particle.phase * 12)) } }
       }
+      else if (d.kind === 'nuclearRadiation') {
+        const clamp = q => Math.max(0, Math.min(1, q)), smooth = q => { q = clamp(q); return q * q * (3 - 2 * q) }, sourceQ = smooth(state.nuclearSourceTransition ?? 1), absorberQ = smooth(state.nuclearAnimProgress ?? 1);
+        const activePosition = new THREE.Vector3(d.sourceX - .07, d.sourceY, d.beamZ), liftArc = q => Math.sin(Math.PI * q) * .66;
+        if (d.activeSource && d.sourceType > 0) {
+          const home = d.storePositions[d.sourceType], q = sourceQ; d.activeSource.position.lerpVectors(home, activePosition, q); d.activeSource.position.y += liftArc(q); d.activeSource.rotation.y = THREE.MathUtils.lerp(-.42, 0, q); d.activeSource.visible = q > .015
+        }
+        if (d.returningSource && d.previousSourceType > 0) {
+          const home = d.storePositions[d.previousSourceType], q = sourceQ; d.returningSource.position.lerpVectors(activePosition, home, q); d.returningSource.position.y += liftArc(q); d.returningSource.rotation.y = THREE.MathUtils.lerp(0, .42, q); d.returningSource.visible = q < .985
+        }
+        for (let type = 1; type <= 3; type++) {
+          const stored = d.storedCarriers[type]; if (!stored) continue;
+          const movingOut = type === d.sourceType && d.sourceType > 0, movingHome = type === d.previousSourceType && d.previousSourceType !== d.sourceType;
+          stored.visible = movingOut ? sourceQ < .018 : movingHome ? sourceQ > .982 : true
+        }
+        const tongTarget = d.sourceType > 0 && d.activeSource ? d.activeSource.position : d.returningSource ? d.returningSource.position : new THREE.Vector3(-3.08, .88, -.95);
+        const tongWorking = sourceQ < .995 && (d.sourceType > 0 || d.previousSourceType > 0); d.tongs.position.copy(tongTarget).add(tongWorking ? new THREE.Vector3(.04, .24, .13) : new THREE.Vector3(0, 0, 0)); d.tongs.rotation.y = tongWorking ? -.18 + .12 * Math.sin(Math.PI * sourceQ) : -1.46; d.tongs.rotation.z = tongWorking ? -.12 + .08 * Math.sin(Math.PI * sourceQ) : -.05; d.tongs.visible = tongWorking || state.nuclearStage === 0;
+
+        const holderPosition = new THREE.Vector3(d.absorberX, .2, d.beamZ);
+        if (d.currentAbsorber && d.currentAbsorberType > 0) {
+          const home = d.absorberStorePositions[d.currentAbsorberType]; d.currentAbsorber.position.lerpVectors(home, holderPosition, absorberQ); d.currentAbsorber.position.y += Math.sin(Math.PI * absorberQ) * .72; d.currentAbsorber.rotation.y = THREE.MathUtils.lerp(-.24, 0, absorberQ); d.currentAbsorber.visible = absorberQ > .012
+        }
+        if (d.outgoingAbsorber && d.previousAbsorberType > 0) {
+          const home = d.absorberStorePositions[d.previousAbsorberType]; d.outgoingAbsorber.position.lerpVectors(holderPosition, home, absorberQ); d.outgoingAbsorber.position.y += Math.sin(Math.PI * absorberQ) * .72; d.outgoingAbsorber.rotation.y = THREE.MathUtils.lerp(0, .24, absorberQ); d.outgoingAbsorber.visible = absorberQ < .988
+        }
+        for (let type = 1; type <= 3; type++) {
+          const stored = d.storedAbsorbers[type]; if (!stored) continue;
+          const movingOut = type === d.currentAbsorberType && d.currentAbsorberType > 0, movingHome = type === d.previousAbsorberType && d.previousAbsorberType !== d.currentAbsorberType;
+          stored.visible = movingOut ? absorberQ < .014 : movingHome ? absorberQ > .986 : true
+        }
+
+        const transmission = ({ 0: 1, 1: d.sourceType === 1 ? .01 : d.sourceType === 2 ? .9 : .94, 2: d.sourceType === 1 ? 0 : d.sourceType === 2 ? .015 : .82, 3: d.sourceType === 1 ? 0 : d.sourceType === 2 ? .005 : .18 }[d.currentAbsorberType] ?? 1), radiationOn = !!state.running && d.sourceType > 0;
+        const beamStart = d.sourceX + .52, speed = d.sourceType === 1 ? .52 : d.sourceType === 2 ? .76 : .92;
+        for (let index = 0; index < d.radiationParticles.length; index++) {
+          const particle = d.radiationParticles[index], phase = (particle.phase + (state.nuclearPulseClock || 0) * speed) % 1, passes = d.currentAbsorberType === 0 || particle.survives, endX = passes ? d.detectorWindowX : d.absorberX - .035;
+          particle.mesh.visible = radiationOn; if (!radiationOn) continue;
+          particle.mesh.position.set(THREE.MathUtils.lerp(beamStart, endX, phase), d.sourceY + particle.laneY + (d.sourceType === 2 ? Math.sin(phase * 19 + index) * .025 : 0), d.beamZ + particle.laneZ);
+          const fade = Math.sin(Math.PI * Math.min(.999, phase)); particle.mesh.scale.setScalar(.7 + fade * .48); particle.mesh.rotation.x = phase * (d.sourceType === 3 ? 7 : 2.4); particle.mesh.rotation.y += d.sourceType === 3 ? .055 : .018
+        }
+        for (let index = 0; index < d.impactBursts.length; index++) {
+          const burst = d.impactBursts[index], q = ((state.nuclearPulseClock || 0) * .78 - index * .14 + 2) % 1, visible = radiationOn && d.currentAbsorberType > 0 && transmission < .96 && q < .48;
+          burst.visible = visible; if (visible) { const bq = q / .48; burst.position.set(d.absorberX - .045, d.sourceY + ((index % 3) - 1) * .09, d.beamZ + (Math.floor(index / 3) - .5) * .1); burst.scale.setScalar(.55 + bq * 2.1); burst.material.opacity = (1 - bq) * .82 }
+        }
+        const display = d.counterDisplay, dc = display.context, canvas = display.canvas, sourceLabels = ['NO SOURCE', 'α · Am-241', 'β · Sr-90', 'γ · Co-60'], absorberLabels = ['OPEN BEAM', 'PAPER', 'ALUMINIUM', 'LEAD'];
+        dc.clearRect(0, 0, canvas.width, canvas.height); dc.fillStyle = '#06191d'; dc.fillRect(0, 0, canvas.width, canvas.height); dc.fillStyle = '#0f2b31'; dc.fillRect(24, 22, 752, 286);
+        dc.shadowColor = radiationOn ? '#7cffe0' : '#7d9497'; dc.shadowBlur = radiationOn ? 24 : 8; dc.fillStyle = radiationOn ? '#8fffe3' : '#b2c2c2'; dc.font = '800 138px ui-monospace, SFMono-Regular, Menlo, monospace'; dc.textAlign = 'right'; dc.textBaseline = 'middle'; dc.fillText(String(Math.floor(state.nuclearCount || 0)).padStart(4, '0'), 750, 105); dc.shadowBlur = 0;
+        dc.fillStyle = '#b8c9ca'; dc.font = '700 34px Inter, Arial, sans-serif'; dc.textAlign = 'left'; dc.fillText('COUNTS / 10 s', 48, 188); dc.textAlign = 'right'; dc.fillStyle = radiationOn ? '#f4c94c' : '#8ba0a4'; dc.fillText(`${Math.min(10, state.nuclearTimer || 0).toFixed(1)} s`, 744, 188);
+        dc.fillStyle = '#dbe7e7'; dc.font = '800 31px Inter, Arial, sans-serif'; dc.textAlign = 'left'; dc.fillText(sourceLabels[d.sourceType], 48, 255); dc.textAlign = 'right'; dc.fillStyle = d.currentAbsorberType === 0 ? '#67d6c7' : '#f2c545'; dc.fillText(absorberLabels[d.currentAbsorberType], 744, 255); display.texture.needsUpdate = true;
+        d.pulseLed.material.emissiveIntensity = radiationOn ? 1.4 + Math.max(0, Math.sin((state.nuclearPulseClock || 0) * 31)) * 3.2 : .08; d.pulseLed.material.color.setHex(radiationOn ? 0xffcf3d : 0x486068)
+      }
       else if (d.kind === 'magneticField') {
         const stage = state.fieldStage || 0, t = Math.max(0, state.fieldTimer || 0), clamp = q => Math.max(0, Math.min(1, q)), smooth = q => { q = clamp(q); return q * q * (3 - 2 * q) };
         const sprinkleQ = stage === 1 ? clamp(t / 3.35) : stage > 1 ? 1 : 0, alignQ = stage === 3 ? smooth((t - .48) / 3.6) : stage >= 4 ? 1 : 0, clearQ = stage === 5 ? smooth(t / 1.38) : 0;
@@ -3683,10 +3960,11 @@ export class LabRenderer3D {
         d.grassUniforms.uTime.value = clock; d.grassUniforms.uWind.value = wind; d.grassUniforms.uGrow.value = grow; d.mossMaterial.opacity = smooth((clock - .28) / 1.9) * .96;
         for (const cloud of d.clouds) cloud.group.position.x = cloud.baseX + Math.sin(clock * (.055 + cloud.phase * .006) + cloud.phase) * .7;
         for (const tree of d.trees) { const gust = Math.sin(clock * .55 + tree.phase) * (.012 + tree.depthRow * .002) + Math.sin(clock * 1.35 + tree.phase * 1.7) * .004; tree.swayPivot.rotation.z = gust; tree.swayPivot.rotation.x = Math.sin(clock * .48 + tree.phase * .7) * Math.abs(gust) * .35; tree.outerLobes.forEach(lobe => { lobe.mesh.rotation.z = lobe.base.z + Math.sin(clock * 1.18 + lobe.phase) * .005; lobe.mesh.rotation.x = lobe.base.x + Math.sin(clock * .93 + lobe.phase * .74) * .003 }) }
-        if (stage === 1) { const q = clamp(timer / 3.5), tapeScale = Math.max(0.001, q); d.tapeX.scale.set(tapeScale, 1, 1); d.tapeZ.scale.set(tapeScale, 1, 1); d.tapeX.visible = true; d.tapeZ.visible = true } else if (stage > 1) { d.tapeX.scale.set(1, 1, 1); d.tapeZ.scale.set(1, 1, 1); d.tapeX.visible = true; d.tapeZ.visible = true } else { d.tapeX.visible = false; d.tapeZ.visible = false }
+        const tapeOverall = stage === 1 ? smooth(timer / 3.5) : stage > 1 ? 1 : 0, tapeXProgress = smooth(tapeOverall / .62), tapeYProgress = smooth((tapeOverall - .28) / .72);
+        d.tapeX.scale.set(Math.max(.001, tapeXProgress), 1, 1); d.tapeZ.scale.set(Math.max(.001, tapeYProgress), 1, 1); d.tapeX.visible = tapeOverall > 0; d.tapeZ.visible = tapeOverall > .28; d.tapeCorner.visible = tapeOverall > 0;
         const count = stage >= 8 ? [4, 7, 5, 3, 6][sampleIndex] : Math.max(0, state.quadratCurrentCount || 0), highlighting = stage === 7 || stage === 8;
         for (let i = 0; i < d.daisies.length; i++) { const plant = d.daisies[i], delay = .18 + (i % 17) * .035, flowerGrow = smooth((clock - delay) / 2.25), gust = Math.sin(clock * 1.8 + i * .61) * (.022 + .018 * wind) + Math.sin(clock * .63 + i) * .012; plant.scale.set(1, Math.max(.001, flowerGrow), 1); plant.rotation.z = gust; plant.rotation.x = Math.sin(clock * 1.27 + i * .43) * .018; const included = plant.userData.sampleIndex === sampleIndex && plant.userData.localIndex < count && highlighting; plant.userData.highlight.visible = included; plant.userData.discMat.emissiveIntensity = included ? .75 + .25 * Math.sin(clock * 5 + i) : .08; plant.userData.head.scale.setScalar(included ? 1.08 + .08 * Math.sin(clock * 5 + i) : 1) }
-        const [tx, tz] = d.targets[sampleIndex], start = new THREE.Vector3(-4.02, .43, 4.5), target = new THREE.Vector3(tx, .39, tz), q = stage === 5 ? clamp(timer / 2.4) : stage > 5 ? 1 : 0, eased = smooth(q), rotations = [-.18, .14, -.08, .2, -.12];
+        const [tx, tz] = d.targets[sampleIndex], start = new THREE.Vector3(-2.75, .43, 1.2), target = new THREE.Vector3(tx, .39, tz), q = stage === 5 ? clamp(timer / 2.4) : stage > 5 ? 1 : 0, eased = smooth(q), rotations = [-.18, .14, -.08, .2, -.12];
         if (stage < 5) d.quadrat.position.copy(start); else d.quadrat.position.lerpVectors(start, target, eased);
         if (stage === 5) { d.quadrat.position.y += Math.sin(Math.PI * eased) * 1.78; if (q > .76) d.quadrat.position.y += Math.abs(Math.sin((q - .76) * Math.PI * 7)) * (1 - q) * .24; d.quadrat.rotation.set(Math.sin(Math.PI * q) * .18, (1 - eased) * Math.PI * 2.15 + rotations[sampleIndex], Math.sin(Math.PI * q * 2) * .13) } else d.quadrat.rotation.set(0, stage >= 6 ? rotations[sampleIndex] : -.12, 0);
         if (d.display) { const { canvas, context: dc, texture } = d.display, cycling = stage === 3, cx = cycling ? (Math.floor(clock * 8) % 10) + 1 : [2, 8, 5, 1, 7][sampleIndex], cy = cycling ? (Math.floor(clock * 13 + 3) % 10) + 1 : [7, 3, 5, 2, 8][sampleIndex]; dc.clearRect(0, 0, canvas.width, canvas.height); dc.fillStyle = '#071d20'; dc.fillRect(0, 0, canvas.width, canvas.height); dc.fillStyle = cycling ? '#fff07b' : '#85f3d2'; dc.shadowColor = cycling ? '#f9cf43' : '#57e8c1'; dc.shadowBlur = 18; dc.font = '800 90px ui-monospace, SFMono-Regular, Menlo, monospace'; dc.textAlign = 'center'; dc.textBaseline = 'middle'; dc.fillText(`X ${cx}   Y ${cy}`, 256, 91); dc.shadowBlur = 0; dc.fillStyle = '#bed3d3'; dc.font = '700 29px Inter, sans-serif'; dc.fillText(cycling ? 'RANDOMISING COORDINATES' : 'UNBIASED GRID POINT', 256, 174); texture.needsUpdate = true }

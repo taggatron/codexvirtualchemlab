@@ -9,6 +9,7 @@ const browser = await chromium.launch({
   args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist']
 });
 const errors = [];
+const baseUrl = process.env.LAB_URL || 'http://127.0.0.1:4173';
 const subjects = [
   { id: 'chemistry', tabX: 206, count: 15 },
   { id: 'biology', tabX: 320, count: 7 },
@@ -20,7 +21,7 @@ async function scan(viewport, mobile) {
   const page = await context.newPage();
   page.on('console', message => { if (message.type() === 'error') errors.push(`${viewport.width}×${viewport.height} console: ${message.text()}`); });
   page.on('pageerror', error => errors.push(`${viewport.width}×${viewport.height} page: ${error.message}`));
-  await page.goto(`http://127.0.0.1:4173/?all-sidebars=${viewport.width}-${Date.now()}`, { waitUntil: 'networkidle' });
+  await page.goto(`${baseUrl}/?all-sidebars=${viewport.width}-${Date.now()}`, { waitUntil: 'networkidle' });
   await page.waitForFunction(() => typeof window.render_game_to_text === 'function');
   const state = () => page.evaluate(() => JSON.parse(window.render_game_to_text()));
   const selectPractical = async index => {
@@ -48,7 +49,9 @@ async function scan(viewport, mobile) {
     await page.waitForTimeout(80);
     for (let index = 0; index < subject.count; index++) {
       const snapshot = await selectPractical(index), layout = snapshot.right_sidebar_layout;
-      results.push({ subject: subject.id, practical: snapshot.practical, overflow: layout.overflow_vertical_space_px, unused: layout.unused_vertical_space_px, all_visible: layout.all_sidebar_components_visible, drag_enabled: snapshot.reactant_interaction.drag_enabled });
+      const controlLabels = snapshot.control_label_layout;
+      results.push({ subject: subject.id, practical: snapshot.practical, overflow: layout.overflow_vertical_space_px, unused: layout.unused_vertical_space_px, all_visible: layout.all_sidebar_components_visible, control_labels_fit: controlLabels?.all_visible_button_labels_fit, wrapped_controls: controlLabels?.wrapped_button_labels?.map(item => item.label) || [], drag_enabled: snapshot.reactant_interaction.drag_enabled });
+      if (!controlLabels?.all_visible_button_labels_fit || !controlLabels.visible_button_count) throw new Error(`${viewport.width}×${viewport.height}: ${snapshot.practical} has a control label outside its button.`);
       if (snapshot.practical === 'Free workspace') {
         if (!snapshot.reactant_interaction.drag_enabled || !snapshot.reactant_interaction.preserved_for_chemistry_free_workspace) throw new Error(`${viewport.width}×${viewport.height}: Free Workspace reactant setup was not preserved.`);
         continue;

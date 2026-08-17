@@ -137,8 +137,10 @@ try {
   assert(quadratInitial.random_quadrat_sampling_practical.environment.full_height_meadow_scene, 'Meadow does not fill the former lab-bench and cupboard arena.');
   assert(quadratInitial.random_quadrat_sampling_practical.environment.laboratory_worktop_visible === false, 'Laboratory worktop is still visible in the meadow.');
   assert(quadratInitial.random_quadrat_sampling_practical.environment.laboratory_cupboards_visible === false, 'Laboratory cupboards are still visible in the meadow.');
-  assert(quadratInitial.random_quadrat_sampling_practical.habitat.grass_blade_count === 1520, 'Expanded meadow grass population is missing.');
-  assert(quadratInitial.random_quadrat_sampling_practical.habitat.moss_patch_count === 240 && quadratInitial.random_quadrat_sampling_practical.habitat.moss_between_grass_blades, 'Moss patches were not added between grass blades.');
+  assert(quadratInitial.random_quadrat_sampling_practical.habitat.grass_blade_count === 26720, 'Expanded high-density meadow grass population is missing.');
+  assert(quadratInitial.random_quadrat_sampling_practical.habitat.grass_blade_density_per_rendered_m2 >= 78 && quadratInitial.random_quadrat_sampling_practical.habitat.grass_blade_geometry.includes('tapered'), 'Short tapered meadow grass geometry is missing.');
+  assert(quadratInitial.random_quadrat_sampling_practical.habitat.rendered_meadow_extends_beyond_visible_view && quadratInitial.random_quadrat_sampling_practical.habitat.rendered_meadow_bounds_world.x[0] <= -14 && quadratInitial.random_quadrat_sampling_practical.habitat.rendered_meadow_bounds_world.x[1] >= 14, 'Meadow lateral overscan is missing.');
+  assert(quadratInitial.random_quadrat_sampling_practical.habitat.moss_patch_count === 900 && quadratInitial.random_quadrat_sampling_practical.habitat.moss_between_grass_blades, 'Moss patches were not extended between grass blades.');
   assert(quadratGrowing.random_quadrat_sampling_practical.environment.grass_growth_fraction > 0 && quadratGrowing.random_quadrat_sampling_practical.environment.grass_growth_fraction < 1, 'Mid-growth turf state was not reached.');
   assert(quadratReady.random_quadrat_sampling_practical.environment.grass_growth_fraction === 1, 'Turf did not finish growing.');
   assert(quadratRandomising.random_quadrat_sampling_practical.stage === 1 && quadratRandomising.random_quadrat_sampling_practical.animation.coordinate_generator_spins, 'Random-coordinate animation did not run.');

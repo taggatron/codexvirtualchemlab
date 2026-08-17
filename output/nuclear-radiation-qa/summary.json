@@ -1,0 +1,641 @@
+{
+  "errors": [],
+  "renderer": {
+    "enabled": true,
+    "renderer": "WebGL / Three.js",
+    "objects": 1,
+    "context_lost": false,
+    "scene_compiling": false,
+    "scene_warmup_frames": 2,
+    "canvas_visible": true,
+    "legacy_2d_apparatus": false
+  },
+  "initial": {
+    "stage": 0,
+    "phase": "shielded store ready",
+    "source": {
+      "id": "none",
+      "isotope": "background",
+      "radiation": "—",
+      "sealed": false
+    },
+    "absorber": {
+      "id": "none",
+      "label": "none",
+      "transition_progress": 1
+    },
+    "source_transfer_progress": 1,
+    "timer_s": 0,
+    "displayed_count": 0,
+    "target_count_10s": 4,
+    "equivalent_count_rate_cpm": null,
+    "transmission_fraction_relative_to_open_beam": 0,
+    "counting": false,
+    "readings_saved": [],
+    "canonical_comparisons_complete": false,
+    "apparatus": {
+      "optical_rail": "fixed source–absorber–GM-tube alignment with centimetre scale",
+      "source_handling": "three sealed carriers, labelled lead-lined store and long-handled tongs",
+      "absorbers": [
+        "paper 0.10 mm",
+        "aluminium 3 mm",
+        "lead 10 mm"
+      ],
+      "detector": "cylindrical Geiger–Müller tube with thin mica window facing the source",
+      "scaler": "single cabled digital counter with count and elapsed-time display"
+    },
+    "educational_radiation_tracks": {
+      "visible_only_while_counting": true,
+      "types": [
+        "clustered alpha particles",
+        "deflected beta electrons",
+        "gamma photon rings"
+      ],
+      "visible_in_reality": false
+    },
+    "safety": {
+      "simulation_only": true,
+      "time_distance_shielding": true,
+      "sources_never_touched": true,
+      "store_sources_when_not_in_use": true
+    }
+  },
+  "alpha_transfer": {
+    "stage": 1,
+    "phase": "sealed source moving with remote tongs",
+    "source": {
+      "id": "alpha",
+      "isotope": "Am-241",
+      "radiation": "α",
+      "sealed": true
+    },
+    "absorber": {
+      "id": "none",
+      "label": "none",
+      "transition_progress": 1
+    },
+    "source_transfer_progress": 0.5,
+    "timer_s": 0,
+    "displayed_count": 0,
+    "target_count_10s": 468,
+    "equivalent_count_rate_cpm": null,
+    "transmission_fraction_relative_to_open_beam": 1,
+    "counting": false,
+    "readings_saved": [],
+    "canonical_comparisons_complete": false,
+    "apparatus": {
+      "optical_rail": "fixed source–absorber–GM-tube alignment with centimetre scale",
+      "source_handling": "three sealed carriers, labelled lead-lined store and long-handled tongs",
+      "absorbers": [
+        "paper 0.10 mm",
+        "aluminium 3 mm",
+        "lead 10 mm"
+      ],
+      "detector": "cylindrical Geiger–Müller tube with thin mica window facing the source",
+      "scaler": "single cabled digital counter with count and elapsed-time display"
+    },
+    "educational_radiation_tracks": {
+      "visible_only_while_counting": true,
+      "types": [
+        "clustered alpha particles",
+        "deflected beta electrons",
+        "gamma photon rings"
+      ],
+      "visible_in_reality": false
+    },
+    "safety": {
+      "simulation_only": true,
+      "time_distance_shielding": true,
+      "sources_never_touched": true,
+      "store_sources_when_not_in_use": true
+    }
+  },
+  "alpha_open": {
+    "stage": 6,
+    "phase": "reading held for comparison",
+    "source": {
+      "id": "alpha",
+      "isotope": "Am-241",
+      "radiation": "α",
+      "sealed": true
+    },
+    "absorber": {
+      "id": "none",
+      "label": "none",
+      "transition_progress": 1
+    },
+    "source_transfer_progress": 1,
+    "timer_s": 10,
+    "displayed_count": 468,
+    "target_count_10s": 468,
+    "equivalent_count_rate_cpm": 2808,
+    "transmission_fraction_relative_to_open_beam": 1,
+    "counting": false,
+    "readings_saved": [
+      {
+        "source": "alpha",
+        "isotope": "Am-241",
+        "radiation": "α",
+        "absorber": "none",
+        "count_10s": 468,
+        "count_rate_cpm": 2808,
+        "transmission_fraction": 1
+      }
+    ],
+    "canonical_comparisons_complete": false,
+    "apparatus": {
+      "optical_rail": "fixed source–absorber–GM-tube alignment with centimetre scale",
+      "source_handling": "three sealed carriers, labelled lead-lined store and long-handled tongs",
+      "absorbers": [
+        "paper 0.10 mm",
+        "aluminium 3 mm",
+        "lead 10 mm"
+      ],
+      "detector": "cylindrical Geiger–Müller tube with thin mica window facing the source",
+      "scaler": "single cabled digital counter with count and elapsed-time display"
+    },
+    "educational_radiation_tracks": {
+      "visible_only_while_counting": true,
+      "types": [
+        "clustered alpha particles",
+        "deflected beta electrons",
+        "gamma photon rings"
+      ],
+      "visible_in_reality": false
+    },
+    "safety": {
+      "simulation_only": true,
+      "time_distance_shielding": true,
+      "sources_never_touched": true,
+      "store_sources_when_not_in_use": true
+    }
+  },
+  "alpha_paper": {
+    "stage": 6,
+    "phase": "reading held for comparison",
+    "source": {
+      "id": "alpha",
+      "isotope": "Am-241",
+      "radiation": "α",
+      "sealed": true
+    },
+    "absorber": {
+      "id": "paper",
+      "label": "paper",
+      "transition_progress": 1
+    },
+    "source_transfer_progress": 1,
+    "timer_s": 10,
+    "displayed_count": 5,
+    "target_count_10s": 5,
+    "equivalent_count_rate_cpm": 30,
+    "transmission_fraction_relative_to_open_beam": 0.002,
+    "counting": false,
+    "readings_saved": [
+      {
+        "source": "alpha",
+        "isotope": "Am-241",
+        "radiation": "α",
+        "absorber": "none",
+        "count_10s": 468,
+        "count_rate_cpm": 2808,
+        "transmission_fraction": 1
+      },
+      {
+        "source": "alpha",
+        "isotope": "Am-241",
+        "radiation": "α",
+        "absorber": "paper",
+        "count_10s": 5,
+        "count_rate_cpm": 30,
+        "transmission_fraction": 0.002
+      }
+    ],
+    "canonical_comparisons_complete": false,
+    "apparatus": {
+      "optical_rail": "fixed source–absorber–GM-tube alignment with centimetre scale",
+      "source_handling": "three sealed carriers, labelled lead-lined store and long-handled tongs",
+      "absorbers": [
+        "paper 0.10 mm",
+        "aluminium 3 mm",
+        "lead 10 mm"
+      ],
+      "detector": "cylindrical Geiger–Müller tube with thin mica window facing the source",
+      "scaler": "single cabled digital counter with count and elapsed-time display"
+    },
+    "educational_radiation_tracks": {
+      "visible_only_while_counting": true,
+      "types": [
+        "clustered alpha particles",
+        "deflected beta electrons",
+        "gamma photon rings"
+      ],
+      "visible_in_reality": false
+    },
+    "safety": {
+      "simulation_only": true,
+      "time_distance_shielding": true,
+      "sources_never_touched": true,
+      "store_sources_when_not_in_use": true
+    }
+  },
+  "beta_paper_mid": {
+    "stage": 5,
+    "phase": "ten-second GM count running",
+    "source": {
+      "id": "beta",
+      "isotope": "Sr-90",
+      "radiation": "β",
+      "sealed": true
+    },
+    "absorber": {
+      "id": "paper",
+      "label": "paper",
+      "transition_progress": 1
+    },
+    "source_transfer_progress": 1,
+    "timer_s": 5,
+    "displayed_count": 274,
+    "target_count_10s": 548,
+    "equivalent_count_rate_cpm": null,
+    "transmission_fraction_relative_to_open_beam": 0.895,
+    "counting": true,
+    "readings_saved": [
+      {
+        "source": "alpha",
+        "isotope": "Am-241",
+        "radiation": "α",
+        "absorber": "none",
+        "count_10s": 468,
+        "count_rate_cpm": 2808,
+        "transmission_fraction": 1
+      },
+      {
+        "source": "alpha",
+        "isotope": "Am-241",
+        "radiation": "α",
+        "absorber": "paper",
+        "count_10s": 5,
+        "count_rate_cpm": 30,
+        "transmission_fraction": 0.002
+      }
+    ],
+    "canonical_comparisons_complete": false,
+    "apparatus": {
+      "optical_rail": "fixed source–absorber–GM-tube alignment with centimetre scale",
+      "source_handling": "three sealed carriers, labelled lead-lined store and long-handled tongs",
+      "absorbers": [
+        "paper 0.10 mm",
+        "aluminium 3 mm",
+        "lead 10 mm"
+      ],
+      "detector": "cylindrical Geiger–Müller tube with thin mica window facing the source",
+      "scaler": "single cabled digital counter with count and elapsed-time display"
+    },
+    "educational_radiation_tracks": {
+      "visible_only_while_counting": true,
+      "types": [
+        "clustered alpha particles",
+        "deflected beta electrons",
+        "gamma photon rings"
+      ],
+      "visible_in_reality": false
+    },
+    "safety": {
+      "simulation_only": true,
+      "time_distance_shielding": true,
+      "sources_never_touched": true,
+      "store_sources_when_not_in_use": true
+    }
+  },
+  "beta_aluminium": {
+    "stage": 6,
+    "phase": "reading held for comparison",
+    "source": {
+      "id": "beta",
+      "isotope": "Sr-90",
+      "radiation": "β",
+      "sealed": true
+    },
+    "absorber": {
+      "id": "aluminium",
+      "label": "aluminium",
+      "transition_progress": 1
+    },
+    "source_transfer_progress": 1,
+    "timer_s": 10,
+    "displayed_count": 11,
+    "target_count_10s": 11,
+    "equivalent_count_rate_cpm": 66,
+    "transmission_fraction_relative_to_open_beam": 0.012,
+    "counting": false,
+    "readings_saved": [
+      {
+        "source": "alpha",
+        "isotope": "Am-241",
+        "radiation": "α",
+        "absorber": "none",
+        "count_10s": 468,
+        "count_rate_cpm": 2808,
+        "transmission_fraction": 1
+      },
+      {
+        "source": "alpha",
+        "isotope": "Am-241",
+        "radiation": "α",
+        "absorber": "paper",
+        "count_10s": 5,
+        "count_rate_cpm": 30,
+        "transmission_fraction": 0.002
+      },
+      {
+        "source": "beta",
+        "isotope": "Sr-90",
+        "radiation": "β",
+        "absorber": "paper",
+        "count_10s": 548,
+        "count_rate_cpm": 3288,
+        "transmission_fraction": 0.895
+      },
+      {
+        "source": "beta",
+        "isotope": "Sr-90",
+        "radiation": "β",
+        "absorber": "aluminium",
+        "count_10s": 11,
+        "count_rate_cpm": 66,
+        "transmission_fraction": 0.012
+      }
+    ],
+    "canonical_comparisons_complete": false,
+    "apparatus": {
+      "optical_rail": "fixed source–absorber–GM-tube alignment with centimetre scale",
+      "source_handling": "three sealed carriers, labelled lead-lined store and long-handled tongs",
+      "absorbers": [
+        "paper 0.10 mm",
+        "aluminium 3 mm",
+        "lead 10 mm"
+      ],
+      "detector": "cylindrical Geiger–Müller tube with thin mica window facing the source",
+      "scaler": "single cabled digital counter with count and elapsed-time display"
+    },
+    "educational_radiation_tracks": {
+      "visible_only_while_counting": true,
+      "types": [
+        "clustered alpha particles",
+        "deflected beta electrons",
+        "gamma photon rings"
+      ],
+      "visible_in_reality": false
+    },
+    "safety": {
+      "simulation_only": true,
+      "time_distance_shielding": true,
+      "sources_never_touched": true,
+      "store_sources_when_not_in_use": true
+    }
+  },
+  "gamma_aluminium_mid": {
+    "stage": 5,
+    "phase": "ten-second GM count running",
+    "source": {
+      "id": "gamma",
+      "isotope": "Co-60",
+      "radiation": "γ",
+      "sealed": true
+    },
+    "absorber": {
+      "id": "aluminium",
+      "label": "aluminium",
+      "transition_progress": 1
+    },
+    "source_transfer_progress": 1,
+    "timer_s": 5,
+    "displayed_count": 159,
+    "target_count_10s": 318,
+    "equivalent_count_rate_cpm": null,
+    "transmission_fraction_relative_to_open_beam": 0.826,
+    "counting": true,
+    "readings_saved": [
+      {
+        "source": "alpha",
+        "isotope": "Am-241",
+        "radiation": "α",
+        "absorber": "none",
+        "count_10s": 468,
+        "count_rate_cpm": 2808,
+        "transmission_fraction": 1
+      },
+      {
+        "source": "alpha",
+        "isotope": "Am-241",
+        "radiation": "α",
+        "absorber": "paper",
+        "count_10s": 5,
+        "count_rate_cpm": 30,
+        "transmission_fraction": 0.002
+      },
+      {
+        "source": "beta",
+        "isotope": "Sr-90",
+        "radiation": "β",
+        "absorber": "paper",
+        "count_10s": 548,
+        "count_rate_cpm": 3288,
+        "transmission_fraction": 0.895
+      },
+      {
+        "source": "beta",
+        "isotope": "Sr-90",
+        "radiation": "β",
+        "absorber": "aluminium",
+        "count_10s": 11,
+        "count_rate_cpm": 66,
+        "transmission_fraction": 0.012
+      }
+    ],
+    "canonical_comparisons_complete": false,
+    "apparatus": {
+      "optical_rail": "fixed source–absorber–GM-tube alignment with centimetre scale",
+      "source_handling": "three sealed carriers, labelled lead-lined store and long-handled tongs",
+      "absorbers": [
+        "paper 0.10 mm",
+        "aluminium 3 mm",
+        "lead 10 mm"
+      ],
+      "detector": "cylindrical Geiger–Müller tube with thin mica window facing the source",
+      "scaler": "single cabled digital counter with count and elapsed-time display"
+    },
+    "educational_radiation_tracks": {
+      "visible_only_while_counting": true,
+      "types": [
+        "clustered alpha particles",
+        "deflected beta electrons",
+        "gamma photon rings"
+      ],
+      "visible_in_reality": false
+    },
+    "safety": {
+      "simulation_only": true,
+      "time_distance_shielding": true,
+      "sources_never_touched": true,
+      "store_sources_when_not_in_use": true
+    }
+  },
+  "gamma_lead_complete": {
+    "stage": 6,
+    "phase": "reading held for comparison",
+    "source": {
+      "id": "gamma",
+      "isotope": "Co-60",
+      "radiation": "γ",
+      "sealed": true
+    },
+    "absorber": {
+      "id": "lead",
+      "label": "lead",
+      "transition_progress": 1
+    },
+    "source_transfer_progress": 1,
+    "timer_s": 10,
+    "displayed_count": 74,
+    "target_count_10s": 74,
+    "equivalent_count_rate_cpm": 444,
+    "transmission_fraction_relative_to_open_beam": 0.184,
+    "counting": false,
+    "readings_saved": [
+      {
+        "source": "alpha",
+        "isotope": "Am-241",
+        "radiation": "α",
+        "absorber": "none",
+        "count_10s": 468,
+        "count_rate_cpm": 2808,
+        "transmission_fraction": 1
+      },
+      {
+        "source": "alpha",
+        "isotope": "Am-241",
+        "radiation": "α",
+        "absorber": "paper",
+        "count_10s": 5,
+        "count_rate_cpm": 30,
+        "transmission_fraction": 0.002
+      },
+      {
+        "source": "beta",
+        "isotope": "Sr-90",
+        "radiation": "β",
+        "absorber": "paper",
+        "count_10s": 548,
+        "count_rate_cpm": 3288,
+        "transmission_fraction": 0.895
+      },
+      {
+        "source": "beta",
+        "isotope": "Sr-90",
+        "radiation": "β",
+        "absorber": "aluminium",
+        "count_10s": 11,
+        "count_rate_cpm": 66,
+        "transmission_fraction": 0.012
+      },
+      {
+        "source": "gamma",
+        "isotope": "Co-60",
+        "radiation": "γ",
+        "absorber": "aluminium",
+        "count_10s": 318,
+        "count_rate_cpm": 1908,
+        "transmission_fraction": 0.826
+      },
+      {
+        "source": "gamma",
+        "isotope": "Co-60",
+        "radiation": "γ",
+        "absorber": "lead",
+        "count_10s": 74,
+        "count_rate_cpm": 444,
+        "transmission_fraction": 0.184
+      }
+    ],
+    "canonical_comparisons_complete": true,
+    "apparatus": {
+      "optical_rail": "fixed source–absorber–GM-tube alignment with centimetre scale",
+      "source_handling": "three sealed carriers, labelled lead-lined store and long-handled tongs",
+      "absorbers": [
+        "paper 0.10 mm",
+        "aluminium 3 mm",
+        "lead 10 mm"
+      ],
+      "detector": "cylindrical Geiger–Müller tube with thin mica window facing the source",
+      "scaler": "single cabled digital counter with count and elapsed-time display"
+    },
+    "educational_radiation_tracks": {
+      "visible_only_while_counting": true,
+      "types": [
+        "clustered alpha particles",
+        "deflected beta electrons",
+        "gamma photon rings"
+      ],
+      "visible_in_reality": false
+    },
+    "safety": {
+      "simulation_only": true,
+      "time_distance_shielding": true,
+      "sources_never_touched": true,
+      "store_sources_when_not_in_use": true
+    }
+  },
+  "focus_mode": true,
+  "reset": {
+    "stage": 0,
+    "phase": "shielded store ready",
+    "source": {
+      "id": "none",
+      "isotope": "background",
+      "radiation": "—",
+      "sealed": false
+    },
+    "absorber": {
+      "id": "none",
+      "label": "none",
+      "transition_progress": 1
+    },
+    "source_transfer_progress": 1,
+    "timer_s": 0,
+    "displayed_count": 0,
+    "target_count_10s": 4,
+    "equivalent_count_rate_cpm": null,
+    "transmission_fraction_relative_to_open_beam": 0,
+    "counting": false,
+    "readings_saved": [],
+    "canonical_comparisons_complete": false,
+    "apparatus": {
+      "optical_rail": "fixed source–absorber–GM-tube alignment with centimetre scale",
+      "source_handling": "three sealed carriers, labelled lead-lined store and long-handled tongs",
+      "absorbers": [
+        "paper 0.10 mm",
+        "aluminium 3 mm",
+        "lead 10 mm"
+      ],
+      "detector": "cylindrical Geiger–Müller tube with thin mica window facing the source",
+      "scaler": "single cabled digital counter with count and elapsed-time display"
+    },
+    "educational_radiation_tracks": {
+      "visible_only_while_counting": true,
+      "types": [
+        "clustered alpha particles",
+        "deflected beta electrons",
+        "gamma photon rings"
+      ],
+      "visible_in_reality": false
+    },
+    "safety": {
+      "simulation_only": true,
+      "time_distance_shielding": true,
+      "sources_never_touched": true,
+      "store_sources_when_not_in_use": true
+    }
+  }
+}

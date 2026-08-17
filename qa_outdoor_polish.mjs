@@ -32,7 +32,9 @@ try {
   assert(meadow.random_quadrat_sampling_practical.environment.canopy_lobes_per_tree === 11, 'Tree canopy detail is incorrect.');
   assert(meadow.random_quadrat_sampling_practical.environment.visible_root_flares && meadow.random_quadrat_sampling_practical.environment.low_polygon_background_branches, 'Tree root or optimised branch contract failed.');
   assert(meadow.random_quadrat_sampling_practical.animation.upper_tree_canopies_sway_from_fixed_lower_trunks, 'Tree wind pivot contract failed.');
-  assert(meadow.random_quadrat_sampling_practical.habitat.moss_patch_count === 240, 'Moss patch count is incorrect.');
+  assert(meadow.random_quadrat_sampling_practical.habitat.grass_blade_count === 26720 && meadow.random_quadrat_sampling_practical.habitat.grass_blade_geometry.includes('tapered'), 'Dense tapered meadow grass contract failed.');
+  assert(meadow.random_quadrat_sampling_practical.habitat.rendered_meadow_extends_beyond_visible_view && meadow.random_quadrat_sampling_practical.habitat.rendered_meadow_bounds_world.x[0] <= -14 && meadow.random_quadrat_sampling_practical.habitat.rendered_meadow_bounds_world.x[1] >= 14, 'Meadow lateral overscan contract failed.');
+  assert(meadow.random_quadrat_sampling_practical.habitat.moss_patch_count === 900, 'Moss patch count is incorrect.');
   assert(meadow.lab_bench_front.drawers_hidden_for_this_practical_only, 'Lab frontage remains in the meadow.');
   assert(Math.abs(meadowBounds.bottom - 900) < 2, `Meadow WebGL canvas stops at ${meadowBounds.bottom}px instead of the viewport bottom.`);
 
