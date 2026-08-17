@@ -1,0 +1,289 @@
+{
+  "errors": [],
+  "renderer": {
+    "enabled": true,
+    "renderer": "WebGL / Three.js",
+    "objects": 1,
+    "context_lost": false,
+    "scene_compiling": false,
+    "scene_warmup_frames": 2,
+    "canvas_visible": true,
+    "legacy_2d_apparatus": false
+  },
+  "paraffin": {
+    "plateau_temperature_c": 55,
+    "heating_readings": [
+      {
+        "time_s": 0,
+        "temperature_c": 20,
+        "phase": "solid"
+      },
+      {
+        "time_s": 40,
+        "temperature_c": 25.9,
+        "phase": "solid"
+      },
+      {
+        "time_s": 80,
+        "temperature_c": 38.6,
+        "phase": "solid"
+      },
+      {
+        "time_s": 120,
+        "temperature_c": 50.7,
+        "phase": "solid"
+      },
+      {
+        "time_s": 160,
+        "temperature_c": 55,
+        "phase": "solid"
+      },
+      {
+        "time_s": 200,
+        "temperature_c": 55.2,
+        "phase": "melting"
+      },
+      {
+        "time_s": 240,
+        "temperature_c": 55.5,
+        "phase": "melting"
+      },
+      {
+        "time_s": 280,
+        "temperature_c": 55.8,
+        "phase": "liquid"
+      },
+      {
+        "time_s": 320,
+        "temperature_c": 56.9,
+        "phase": "liquid"
+      },
+      {
+        "time_s": 360,
+        "temperature_c": 62.9,
+        "phase": "liquid"
+      },
+      {
+        "time_s": 400,
+        "temperature_c": 71.3,
+        "phase": "liquid"
+      },
+      {
+        "time_s": 440,
+        "temperature_c": 78.8,
+        "phase": "liquid"
+      },
+      {
+        "time_s": 480,
+        "temperature_c": 82,
+        "phase": "liquid"
+      }
+    ],
+    "cooling_readings": [
+      {
+        "time_s": 0,
+        "temperature_c": 82,
+        "phase": "liquid"
+      },
+      {
+        "time_s": 40,
+        "temperature_c": 76.4,
+        "phase": "liquid"
+      },
+      {
+        "time_s": 80,
+        "temperature_c": 65.1,
+        "phase": "liquid"
+      },
+      {
+        "time_s": 120,
+        "temperature_c": 56.5,
+        "phase": "liquid"
+      },
+      {
+        "time_s": 160,
+        "temperature_c": 55.6,
+        "phase": "liquid"
+      },
+      {
+        "time_s": 200,
+        "temperature_c": 55.2,
+        "phase": "freezing"
+      },
+      {
+        "time_s": 240,
+        "temperature_c": 54.8,
+        "phase": "freezing"
+      },
+      {
+        "time_s": 280,
+        "temperature_c": 54.4,
+        "phase": "solid"
+      },
+      {
+        "time_s": 320,
+        "temperature_c": 53.8,
+        "phase": "solid"
+      },
+      {
+        "time_s": 360,
+        "temperature_c": 47.5,
+        "phase": "solid"
+      },
+      {
+        "time_s": 400,
+        "temperature_c": 37.5,
+        "phase": "solid"
+      },
+      {
+        "time_s": 440,
+        "temperature_c": 28.1,
+        "phase": "solid"
+      },
+      {
+        "time_s": 480,
+        "temperature_c": 24,
+        "phase": "solid"
+      }
+    ]
+  },
+  "stearic": {
+    "plateau_temperature_c": 69,
+    "heating_readings": [
+      {
+        "time_s": 0,
+        "temperature_c": 20,
+        "phase": "solid"
+      },
+      {
+        "time_s": 40,
+        "temperature_c": 28.2,
+        "phase": "solid"
+      },
+      {
+        "time_s": 80,
+        "temperature_c": 46,
+        "phase": "solid"
+      },
+      {
+        "time_s": 120,
+        "temperature_c": 63,
+        "phase": "solid"
+      },
+      {
+        "time_s": 160,
+        "temperature_c": 69,
+        "phase": "solid"
+      },
+      {
+        "time_s": 200,
+        "temperature_c": 69.2,
+        "phase": "melting"
+      },
+      {
+        "time_s": 240,
+        "temperature_c": 69.5,
+        "phase": "melting"
+      },
+      {
+        "time_s": 280,
+        "temperature_c": 69.8,
+        "phase": "liquid"
+      },
+      {
+        "time_s": 320,
+        "temperature_c": 70.6,
+        "phase": "liquid"
+      },
+      {
+        "time_s": 360,
+        "temperature_c": 74.7,
+        "phase": "liquid"
+      },
+      {
+        "time_s": 400,
+        "temperature_c": 80.6,
+        "phase": "liquid"
+      },
+      {
+        "time_s": 440,
+        "temperature_c": 85.8,
+        "phase": "liquid"
+      },
+      {
+        "time_s": 480,
+        "temperature_c": 88,
+        "phase": "liquid"
+      }
+    ],
+    "cooling_readings": [
+      {
+        "time_s": 0,
+        "temperature_c": 88,
+        "phase": "liquid"
+      },
+      {
+        "time_s": 40,
+        "temperature_c": 84.1,
+        "phase": "liquid"
+      },
+      {
+        "time_s": 80,
+        "temperature_c": 76.3,
+        "phase": "liquid"
+      },
+      {
+        "time_s": 120,
+        "temperature_c": 70.3,
+        "phase": "liquid"
+      },
+      {
+        "time_s": 160,
+        "temperature_c": 69.6,
+        "phase": "liquid"
+      },
+      {
+        "time_s": 200,
+        "temperature_c": 69.2,
+        "phase": "freezing"
+      },
+      {
+        "time_s": 240,
+        "temperature_c": 68.8,
+        "phase": "freezing"
+      },
+      {
+        "time_s": 280,
+        "temperature_c": 68.4,
+        "phase": "solid"
+      },
+      {
+        "time_s": 320,
+        "temperature_c": 67.6,
+        "phase": "solid"
+      },
+      {
+        "time_s": 360,
+        "temperature_c": 58.4,
+        "phase": "solid"
+      },
+      {
+        "time_s": 400,
+        "temperature_c": 43.7,
+        "phase": "solid"
+      },
+      {
+        "time_s": 440,
+        "temperature_c": 30,
+        "phase": "solid"
+      },
+      {
+        "time_s": 480,
+        "temperature_c": 24,
+        "phase": "solid"
+      }
+    ]
+  },
+  "graph_modal_kind": "latent-heat-dual-curve",
+  "control_labels_fit": true
+}

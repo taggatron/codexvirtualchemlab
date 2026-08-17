@@ -1,4 +1,4 @@
-import { LabRenderer3D } from './lab3d.js?v=20260817-108';
+import { LabRenderer3D } from './lab3d.js?v=20260817-112';
 import { drawThermalBenchScene } from './thermalview.js';
 const canvas = document.getElementById('lab'), visibleCtx = canvas.getContext('2d'), buffer = document.createElement('canvas'), webglCanvas = document.getElementById('webgl'), lab3d = new LabRenderer3D(webglCanvas); let ctx = buffer.getContext('2d');
 webglCanvas.addEventListener('lab3dneedsredraw',()=>requestAnimationFrame(()=>draw()));
@@ -35,9 +35,10 @@ const practicals = [
   { id: 'thermal', subject: 'physics', icon: '◩', color: '#b7376d', title: 'Thermal radiation', sub: 'False-colour camera view', objective: 'Compare infrared radiation from hot surfaces using a thermal-imaging camera and heated Leslie cube.', eq: 'radiated power P = εσA(T⁴ − T₀⁴)', word: 'hotter, dull black surfaces emit infrared radiation more effectively than shiny surfaces', steps: ['Fill the Leslie cube with hot water', 'Aim the thermal camera at the scene', 'Bring the camera display toward you', 'Capture and compare the false-colour image'], gear: ['Thermal-imaging camera', 'Leslie cube', 'Insulated hot-water flask', 'Temperature scale'], reactants: ['Hot water', 'Matt-black & polished surfaces'] },
   { id: 'density', subject: 'physics', icon: '⚖', color: '#00897b', title: 'Density of solids', sub: 'Eureka can & balance', objective: 'Determine the density of an irregular solid object using a Eureka can and measuring cylinder.', eq: 'ρ = m / V', word: 'density (g/cm³) = mass (g) ÷ volume (cm³)', steps: ['Weigh irregular object on balance', 'Fill Eureka can up to spout', 'Lower object into Eureka can', 'Measure displaced water volume'], gear: ['Eureka can', 'Measuring cylinder', 'Electronic balance', 'Irregular solid'], reactants: ['Granite stone', 'Brass weight', 'Aluminum block', 'Steel nut'] },
   { id: 'hooke', subject: 'physics', icon: '↕', color: '#9b4f87', title: 'Force and extension of a spring', sub: 'Hooke’s law & proportionality', objective: 'Measure how a spring extends under increasing force, determine its spring constant and identify where proportionality ends.', eq: 'F = kx', word: 'force (N) = spring constant (N m⁻¹) × extension (m)', steps: ['Record the unloaded pointer position as zero extension', 'Add one 100 g slotted mass and wait for the spring to settle', 'Read total length at eye level and calculate extension', 'Repeat to 6 N, plot force against extension and find the linear gradient'], gear: ['Heavy clamp stand + boss', 'Steel helical spring', 'Vertical ruler + fiducial pointer', 'Mass hanger + safety tray'], reactants: ['Steel spring', '100 g slotted masses', 'Mass hanger and safety tray'] },
-  { id: 'specificheat', subject: 'physics', icon: 'ΔT', color: '#d06b38', title: 'Specific heat capacity', sub: 'Electrically heated aluminium', objective: 'Determine the specific heat capacity of a 1.00 kg aluminium block from electrical energy transferred and temperature rise.', eq: 'c = ΔE / (mΔθ)', word: 'specific heat capacity = energy transferred ÷ (mass × temperature change)', steps: ['Add thermal paste and insert the heater and temperature probe', 'Close the insulation, zero the joulemeter and record the initial temperature', 'Switch on the low-voltage heater and record energy and temperature', 'Calculate c from ΔE ÷ (mΔθ) and evaluate heat loss'], gear: ['1.00 kg aluminium block', 'Immersion heater + probe', 'Insulating jacket', '12 V supply + joulemeter'], reactants: ['Aluminium block', 'Thermal paste', 'Low-voltage electrical energy'] },
+  { id: 'specificheat', subject: 'physics', icon: 'ΔT', color: '#d06b38', title: 'Specific heat capacity', sub: 'Compare heated metal blocks', objective: 'Determine and compare the specific heat capacities of 1.00 kg aluminium and copper blocks from electrical energy transferred and temperature rise.', eq: 'c = ΔE / (mΔθ)', word: 'specific heat capacity = energy transferred ÷ (mass × temperature change)', steps: ['Choose a metal, add thermal paste and insert the heater and temperature probe', 'Close the insulation, zero the joulemeter and record the initial temperature', 'Switch on the low-voltage heater and record energy and temperature', 'Calculate c from ΔE ÷ (mΔθ), then compare the other metal'], gear: ['1.00 kg metal block', 'Immersion heater + probe', 'Insulating jacket', '12 V supply + joulemeter'], reactants: ['Aluminium or copper block', 'Thermal paste', 'Low-voltage electrical energy'] },
   { id: 'latentheat', subject: 'physics', icon: '⇡⇣', color: '#c66a43', title: 'Heating & cooling curves', sub: 'Latent heat and change of state', objective: 'Plot heating and cooling curves for paraffin wax or stearic acid and identify the constant-temperature change-of-state region.', eq: 'E = mL   during a change of state', word: 'energy is transferred while intermolecular bonds change, so temperature stays nearly constant during melting or freezing', steps: ['Clamp the boiling tube in the water bath and lower the thermometer into the solid sample', 'Heat gently and record temperature at equal time intervals through the melting plateau', 'Turn off the Bunsen and continue recording as the liquid cools and solidifies', 'Plot both curves and identify the plateau where latent heat is absorbed or released'], gear: ['Clamped 500 cm³ beaker water bath', 'Boiling tube + thermometer', 'Bunsen burner + heatproof mat', 'Clamp stand + timer'], reactants: ['Paraffin wax pellets', 'Stearic acid flakes', 'Hot water bath'] },
   { id: 'wirelength', subject: 'physics', icon: 'Ω', color: '#7a4eb0', title: 'Resistance of a wire', sub: 'Length of nichrome wire', objective: 'Investigate how the resistance of a uniform wire changes as its measured length increases.', eq: 'R = V / I   and   R = ρL / A', word: 'resistance = potential difference ÷ current; for one uniform wire, resistance increases with length', steps: ['Set the sliding contact to a measured length', 'Close the switch briefly and read V and I', 'Calculate resistance using R = V ÷ I', 'Repeat for five lengths and plot R against L'], gear: ['100 cm metre ruler', 'Nichrome wire + crocodile clips', '1.5 V DC supply + switch', 'Ammeter + voltmeter'], reactants: ['20–100 cm wire lengths', 'Constant wire material & diameter', 'Low fixed potential difference'] },
+  { id: 'ivdevices', subject: 'physics', icon: 'I–V', color: '#c94f72', title: 'Ohmic & non-ohmic devices', sub: 'Resistor, filament lamp & LED', objective: 'Compare current–potential difference characteristics for an ohmic resistor, a filament lamp and a light-emitting diode.', eq: 'R = V / I', word: 'current is proportional to potential difference only for an ohmic conductor at constant temperature', steps: ['Connect the ammeter in series and the voltmeter in parallel across the selected device', 'Sweep the supply from 0 to +6 V and save each settled current and potential difference', 'Switch off, reverse the polarity and repeat the sweep from 0 to −6 V', 'Compare the resistor, filament-lamp and LED I–V curves'], gear: ['Variable ±6 V DC power pack', 'Digital ammeter in series', 'Digital voltmeter in parallel', 'Switch + component test socket'], reactants: ['100 Ω fixed resistor', '6 V laboratory filament lamp', 'Red LED + 220 Ω protection resistor'] },
   { id: 'fieldlines', subject: 'physics', icon: '⌁', color: '#d45757', title: 'Magnetic field patterns', sub: 'Iron filings over magnets', objective: 'Reveal and compare magnetic-field patterns around one or two bar magnets using iron filings above paper.', eq: 'magnetic field direction outside a magnet: N → S', word: 'iron filings become temporary magnets and align along the local magnetic field', steps: ['Place the magnet configuration below the paper', 'Sprinkle a thin, even layer of iron filings', 'Tap the paper gently so the filings can rotate', 'Record single, attraction and repulsion patterns'], gear: ['Bar magnet(s)', 'White paper on clear support', 'Perforated filings shaker', 'Gentle tapping tool'], reactants: ['Fine iron filings (sealed simulation)', 'Single N–S bar magnet', 'Unlike-pole & like-pole pairs'] },
   { id: 'nuclear', subject: 'physics', icon: '☢', color: '#ffcc00', title: 'Nuclear radiation', sub: 'Alpha, Beta & Gamma', objective: 'Compare the penetrating power of alpha, beta and gamma radiation at a fixed source–detector distance using paper, aluminium and lead absorbers.', eq: 'count rate (counts min⁻¹) = corrected count ÷ time (min)', word: 'alpha is stopped by paper, beta by aluminium, gamma is reduced by thick lead', steps: ['Use tongs to place one sealed source at the fixed distance', 'Choose an absorber and lower it into the holder', 'Measure for 10 s and note the count and equivalent count rate', 'Compare α with paper, β with aluminium and γ with lead'], gear: ['Geiger–Müller tube + clamp', 'Digital scaler / counter', 'Lead-lined source store + tongs', 'Paper, aluminium and lead absorbers'], reactants: ['Americium-241 sealed source (Alpha)', 'Strontium-90 sealed source (Beta)', 'Cobalt-60 sealed source (Gamma)'] }
 ];
@@ -63,14 +64,17 @@ const graphSpecs = {
   hooke: { xLabel: 'extension / m', yLabel: 'force / N', xMin: 0, xMax: 0.14, yMin: 0, yMax: 7, xDp: 2, yDp: 1 },
   specificheat: { xLabel: 'temperature rise / °C', yLabel: 'energy transferred / kJ', xMin: 0, xMax: 20, yMin: 0, yMax: 18, yDp: 1 },
   latentheat: { xLabel: 'time from start of stage / s', yLabel: 'sample temperature / °C', xMin: 0, xMax: 480, yMin: 20, yMax: 90, xDp: 0, yDp: 0 },
-  wirelength: { xLabel: 'wire length / cm', yLabel: 'resistance / Ω', xMin: 0, xMax: 100, yMin: 0, yMax: 10, yDp: 1 }
+  wirelength: { xLabel: 'wire length / cm', yLabel: 'resistance / Ω', xMin: 0, xMax: 100, yMin: 0, yMax: 10, yDp: 1 },
+  ivdevices: { xLabel: 'potential difference across device / V', yLabel: 'current / A', xMin: -6, xMax: 6, yMin: -.22, yMax: .22, xDp: 0, yDp: 2 }
 };
-const nonGraphResultIds = new Set(['free', 'titration', 'salts', 'mass', 'co2', 'electro', 'flame', 'displacement', 'chrom', 'starchleaf', 'quadrats', 'capture', 'shoretransect', 'ripple', 'convection', 'conduction', 'thermal', 'fieldlines', 'nuclear']);
+const nonGraphResultIds = new Set(['free', 'titration', 'salts', 'mass', 'co2', 'electro', 'flame', 'displacement', 'chrom', 'starchleaf', 'quadrats', 'capture', 'shoretransect', 'ripple', 'convection', 'conduction', 'thermal', 'fieldlines', 'nuclear', 'ivdevices']);
 nonGraphResultIds.add('alkali');
 const GRAPH_SIDEBAR_HEADER_Y = 134, GRAPH_SIDEBAR_DESCRIPTION_OFFSET = 32;
 function currentGraphModalKind(id = practicals[state.selected]?.id) {
   if (id === 'rates') return 'temperature-bar-chart';
   if (id === 'lipase') return 'lipase-bar-chart';
+  if (id === 'latentheat') return 'latent-heat-dual-curve';
+  if (id === 'ivdevices') return 'iv-device-curves';
   return graphSpecs[id] && !nonGraphResultIds.has(id) ? 'line-graph' : null;
 }
 function graphSidebarContentY(id = practicals[state.selected]?.id) {
@@ -414,6 +418,16 @@ const practicalEvaluations = {
       'Repeat each length at least three times, calculate a mean resistance and use more length intervals before drawing a best-fit line.'
     ]
   },
+  ivdevices: {
+    iv: 'Potential difference across the selected component, including both positive and negative polarity',
+    dv: 'Current through the component measured by the series ammeter',
+    cvs: 'The same meters, leads, voltage intervals and settling time; keep the resistor temperature controlled and use the LED protection resistor.',
+    improvements: [
+      'Use a data logger to sample voltage and current simultaneously at smaller intervals, especially around the LED turn-on voltage.',
+      'Switch off between filament-lamp readings and repeat the sweep in both directions to investigate heating and thermal lag.',
+      'Repeat each sweep, identify anomalous readings and plot a smooth curve of best fit instead of joining noisy points mechanically.'
+    ]
+  },
   fieldlines: {
     iv: 'Bar-magnet arrangement: one magnet, unlike poles facing or like poles facing',
     dv: 'Shape, direction and relative concentration of the iron-filings pattern above the paper',
@@ -490,8 +504,10 @@ const freeReactionRules = [
   { id: 'h2so4-lime', reactants: ['h2so4', 'lime'], symbol: 'H₂SO₄(aq) + Ca(OH)₂(aq) → CaSO₄(s) + 2H₂O(l)', word: 'sulfuric acid + limewater → calcium sulfate + water', kind: 'precipitate', precipitate: true, product: 'calcium sulfate precipitate', productColor: 0xd9d4bd, heat: 6, duration: 3 },
   { id: 'lime-co2', reactants: ['lime', 'CO₂'], symbol: 'Ca(OH)₂(aq) + CO₂(g) → CaCO₃(s) + H₂O(l)', word: 'limewater + carbon dioxide → calcium carbonate + water', kind: 'precipitate', precipitate: true, product: 'milky calcium carbonate', productColor: 0xe8e6d9, duration: 3 }
 ];
-const state = { selected: 0, subject: 'chemistry', subjectTabX: 149, subjectTabW: 114, sidebarScroll: { chemistry: 0, biology: 0, physics: 0 }, running: false, complete: false, temp: 20, ph: 7, time: 0, volume: 0, progress: 0, tab: 'equipment', graphModal: false, evaluationModal: false, focusMode: false, methodDropdown: false, reactantSafety: null, points: [], hover: null, drag: null, pour: null, burner: false, coolingWater: false, particles: [], layout: null, flamePhase: 0, transferred: 0, workspace: [], nextItem: 1, dose: null, reaction: null, massStage: 0, massLidOn: true, massTransfer: null, massBefore: 4.01, massAfter: null, hydrogenStage: 0, hydrogenTimer: 0, hydrogenAudioPlayed: false, hydrogenGas: 0, saltsStage: 0, saltsTimer: 0, chromSelectedDye: null, electroRecorded: false, electroWeighing: false, electroWeighTimer: 0, titrationStage: 0, titrationVolume: 0, titrationDropTimer: 0, titrationDrops: 0, titrationIndicator: false, titrationIndicatorTimer: 0, titrationRecorded: false, ratesStage: 0, ratesStageTimer: 0, ratesTrialIndex: 0, ratesTargetTemp: 20, ratesBathTemp: 20, ratesConditioning: false, ratesResults: [], thermiteTimer: 0, thermiteAudioPlayed: false, displacementStage: 0, displacementTimer: 0, displacementRecorded: false, flameTestStage: 0, flameTestTimer: 0, flameTestSalt: 0, flameTestTested: [], starchStage: 0, starchTimer: 0, lipaseStage: 0, lipaseTimer: 0, lipaseTrialIndex: 0, lipaseTargetTemp: 20, lipaseBathTemp: 20, lipaseConditioning: false, lipaseResults: [], osmosisStage: 0, osmosisTimer: 0, osmosisTrialIndex: 0, osmosisConcentration: 0, osmosisResults: [], potometerStage: 0, potometerTimer: 0, potometerTrialIndex: 0, potometerWindSpeed: 0, potometerBubbleMm: 0, potometerResults: [], pondweedDistance: 20, pondweedLampOn: true, pondweedTimer: 0, pondweedBubbles: 0, pondweedResults: [], quadratStage: 0, quadratTimer: 0, quadratSampleIndex: 0, quadratCurrentCount: 0, quadratResults: [], captureStage: 0, captureTimer: 0, captureFirstCatch: 15, captureSecondCatch: 18, captureRecaptured: 6, meadowWindClock: 0, transectStage: 0, transectTimer: 0, transectStationIndex: 0, transectDistanceM: 0, transectCurrentObservation: null, transectResults: [], shoreTideClock: 0, shoreTideProgress: 0, rippleStage: 0, rippleTimer: 0, rippleTrialIndex: 0, rippleFrequencyHz: 4, rippleTenWavelengthCm: 0, rippleWavelengthCm: 0, rippleSpeedMs: 0, rippleResults: [], rippleWaveClock: 0, newtonForce: 0.2, newtonMass: 1.0, newtonPos: 0, newtonVel: 0, newtonAcc: 0.2, newtonTimer: 0, newtonRunning: false, newtonGate1Time: null, newtonGate2Time: null, newtonGate1Velocity: null, newtonGate2Velocity: null, newtonResults: [], electromagnetStage: 0, electromagnetTimer: 0, electromagnetTrialIndex: 0, electromagnetTurns: 10, electromagnetClips: 0, electromagnetResults: [], convectionStage: 0, convectionTimer: 0, conductionStage: 0, conductionTimer: 0, thermalStage: 0, thermalTimer: 0, thermalCaptured: false, densityStage: 0, densitySample: 0, densityTimer: 0, densityRecorded: false, densityResults: [], hookeStage: 0, hookeTimer: 0, hookeTrialIndex: 0, hookeForceN: 0, hookeResults: [], shcStage: 0, shcTimer: 0, shcEnergyJ: 0, shcTemperatureC: 20, shcResults: [], wireStage: 0, wireTimer: 0, wireTrialIndex: 0, wireLengthCm: 20, wireVoltageV: 1.5, wireResults: [], fieldStage: 0, fieldTimer: 0, fieldConfigIndex: 0, fieldResults: [], nuclearStage: 0, nuclearTimer: 0, nuclearSource: 0, nuclearPreviousSource: 0, nuclearSourceTransition: 1, nuclearAbsorber: 0, nuclearCount: 0, nuclearAnimAbsorber: 0, nuclearAnimProgress: 1, nuclearResults: [], nuclearPulseClock: 0 };
+const state = { selected: 0, subject: 'chemistry', subjectTabX: 149, subjectTabW: 114, sidebarScroll: { chemistry: 0, biology: 0, physics: 0 }, running: false, complete: false, temp: 20, ph: 7, time: 0, volume: 0, progress: 0, tab: 'equipment', graphModal: false, evaluationModal: false, focusMode: false, methodDropdown: false, reactantSafety: null, points: [], hover: null, drag: null, pour: null, burner: false, coolingWater: false, particles: [], layout: null, flamePhase: 0, transferred: 0, workspace: [], nextItem: 1, dose: null, reaction: null, massStage: 0, massLidOn: true, massTransfer: null, massBefore: 4.01, massAfter: null, hydrogenStage: 0, hydrogenTimer: 0, hydrogenAudioPlayed: false, hydrogenGas: 0, saltsStage: 0, saltsTimer: 0, chromSelectedDye: null, electroRecorded: false, electroWeighing: false, electroWeighTimer: 0, titrationStage: 0, titrationVolume: 0, titrationDropTimer: 0, titrationDrops: 0, titrationIndicator: false, titrationIndicatorTimer: 0, titrationRecorded: false, ratesStage: 0, ratesStageTimer: 0, ratesTrialIndex: 0, ratesTargetTemp: 20, ratesBathTemp: 20, ratesConditioning: false, ratesResults: [], thermiteTimer: 0, thermiteAudioPlayed: false, displacementStage: 0, displacementTimer: 0, displacementRecorded: false, flameTestStage: 0, flameTestTimer: 0, flameTestSalt: 0, flameTestTested: [], starchStage: 0, starchTimer: 0, lipaseStage: 0, lipaseTimer: 0, lipaseTrialIndex: 0, lipaseTargetTemp: 20, lipaseBathTemp: 20, lipaseConditioning: false, lipaseResults: [], osmosisStage: 0, osmosisTimer: 0, osmosisTrialIndex: 0, osmosisConcentration: 0, osmosisResults: [], potometerStage: 0, potometerTimer: 0, potometerTrialIndex: 0, potometerWindSpeed: 0, potometerBubbleMm: 0, potometerResults: [], pondweedDistance: 20, pondweedLampOn: true, pondweedTimer: 0, pondweedBubbles: 0, pondweedResults: [], quadratStage: 0, quadratTimer: 0, quadratSampleIndex: 0, quadratCurrentCount: 0, quadratResults: [], captureStage: 0, captureTimer: 0, captureFirstCatch: 16, captureSecondCatch: 20, captureRecaptured: 6, meadowWindClock: 0, transectStage: 0, transectTimer: 0, transectStationIndex: 0, transectDistanceM: 0, transectCurrentObservation: null, transectResults: [], shoreTideClock: 0, shoreTideProgress: 0, rippleStage: 0, rippleTimer: 0, rippleTrialIndex: 0, rippleFrequencyHz: 4, rippleTenWavelengthCm: 0, rippleWavelengthCm: 0, rippleSpeedMs: 0, rippleResults: [], rippleWaveClock: 0, newtonForce: 0.2, newtonMass: 1.0, newtonPos: 0, newtonVel: 0, newtonAcc: 0.2, newtonTimer: 0, newtonRunning: false, newtonGate1Time: null, newtonGate2Time: null, newtonGate1Velocity: null, newtonGate2Velocity: null, newtonResults: [], electromagnetStage: 0, electromagnetTimer: 0, electromagnetTrialIndex: 0, electromagnetTurns: 10, electromagnetClips: 0, electromagnetResults: [], convectionStage: 0, convectionTimer: 0, conductionStage: 0, conductionTimer: 0, thermalStage: 0, thermalTimer: 0, thermalCaptured: false, densityStage: 0, densitySample: 0, densityTimer: 0, densityRecorded: false, densityResults: [], hookeStage: 0, hookeTimer: 0, hookeTrialIndex: 0, hookeForceN: 0, hookeResults: [], shcStage: 0, shcTimer: 0, shcEnergyJ: 0, shcTemperatureC: 20, shcResults: [], wireStage: 0, wireTimer: 0, wireTrialIndex: 0, wireLengthCm: 20, wireVoltageV: 1.5, wireResults: [], fieldStage: 0, fieldTimer: 0, fieldConfigIndex: 0, fieldResults: [], nuclearStage: 0, nuclearTimer: 0, nuclearSource: 0, nuclearPreviousSource: 0, nuclearSourceTransition: 1, nuclearAbsorber: 0, nuclearCount: 0, nuclearAnimAbsorber: 0, nuclearAnimProgress: 1, nuclearResults: [], nuclearPulseClock: 0 };
 state.shcMaterial = 'aluminium';
+Object.assign(state, { latentStage: 0, latentTimer: 0, latentMaterial: 'paraffin', latentTemperatureC: 20, latentPhaseFraction: 0, latentHeatingResults: [], latentCoolingResults: [] });
+Object.assign(state, { ivStage: 0, ivTimer: 0, ivDeviceIndex: 0, ivPreviousDeviceIndex: 0, ivDeviceTransition: 1, ivSupplyV: 0, ivDeviceV: 0, ivCurrentA: 0, ivLastSampleIndex: 0, ivSweepReadings: [], ivResults: [], ivPulseClock: 0 });
 state.toast = 'Click equipment to add it, or drag it onto the bench.';
 state.hookeFocusModal = false;
 state.hookeFocusProgress = 0;
@@ -562,6 +578,17 @@ function currentQuadratSample() { return quadratSamples[Math.min(quadratSamples.
 function quadratStageProgress() { const duration = quadratStageDurations[state.quadratStage]; return duration ? Math.max(0, Math.min(1, state.quadratTimer / duration)) : 0 }
 function quadratMean() { return state.quadratResults.length ? state.quadratResults.reduce((sum, result) => sum + result.daisies, 0) / state.quadratResults.length : 0 }
 function quadratPopulationEstimate() { return Math.round(quadratMean() * 100) }
+const captureStageDurations = { 1: 5.2, 3: 6.4, 5: 6.2, 7: 5.8 };
+function captureStageProgress() { const duration = captureStageDurations[state.captureStage]; return duration ? Math.max(0, Math.min(1, state.captureTimer / duration)) : 0 }
+function captureVisibleCounts() {
+  const stage = state.captureStage || 0, q = captureStageProgress(), smooth = value => { value = Math.max(0, Math.min(1, value)); return value * value * (3 - 2 * value) };
+  const firstCaught = stage < 1 ? 0 : stage === 1 ? Math.floor(smooth((q - .45) / .5) * state.captureFirstCatch + .001) : state.captureFirstCatch;
+  const firstMarked = stage < 3 ? 0 : stage === 3 ? Math.floor(smooth((q - .43) / .47) * state.captureFirstCatch + .001) : state.captureFirstCatch;
+  const released = stage < 5 ? 0 : stage === 5 ? Math.floor(smooth((q - .08) / .58) * state.captureFirstCatch + .001) : state.captureFirstCatch;
+  const secondCaught = stage < 5 ? 0 : stage === 5 ? Math.floor(smooth((q - .7) / .3) * state.captureSecondCatch + .001) : stage === 7 ? Math.floor(smooth(q / .42) * state.captureSecondCatch + .001) : stage >= 6 ? state.captureSecondCatch : 0;
+  const secondMarked = stage < 6 ? 0 : stage === 7 ? Math.floor(smooth((q - .38) / .5) * state.captureRecaptured + .001) : state.captureRecaptured;
+  return { firstCaught, firstMarked, released, secondCaught, secondMarked }
+}
 const transectStations = [
   { distanceM: 0, zone: 'UPPER', limpets: 8, barnacleCover: 68, seaweedCover: 2 },
   { distanceM: 2, zone: 'UPPER', limpets: 10, barnacleCover: 59, seaweedCover: 5 },
@@ -617,12 +644,70 @@ function shcStepIndex() {
   if (state.shcStage === 1) return state.shcTimer / shcStageDurations[1] < .65 ? 0 : 1;
   return 0;
 }
+const latentMaterials = {
+  paraffin: { label: 'PARAFFIN WAX', short: 'PARAFFIN', meltingPointC: 55, highTemperatureC: 82, solidColour: 0xf3eee0, liquidColour: 0xffe1a1, sampleForm: 'rounded translucent pellets' },
+  stearic: { label: 'STEARIC ACID', short: 'STEARIC ACID', meltingPointC: 69, highTemperatureC: 88, solidColour: 0xf6f4e9, liquidColour: 0xffefc6, sampleForm: 'thin pearly flakes' }
+};
+const latentStageDurations = { 1: 3.8, 3: 12, 5: 10.5 };
+const latentSimulatedStageSeconds = 480;
+const latentSampleTimesS = Array.from({ length: 13 }, (_, index) => index * 40);
+function currentLatentMaterial() { return latentMaterials[state.latentMaterial] || latentMaterials.paraffin }
+function latentClamp(value) { return Math.max(0, Math.min(1, value)) }
+function latentSmooth(value) { const q = latentClamp(value); return q * q * (3 - 2 * q) }
+function latentHeatingTemperature(progress) {
+  const q = latentClamp(progress), material = currentLatentMaterial(), mp = material.meltingPointC;
+  if (q < .32) return 20 + (mp - 20) * latentSmooth(q / .32);
+  if (q < .62) return mp + .8 * latentSmooth((q - .32) / .3);
+  return mp + .8 + (material.highTemperatureC - mp - .8) * latentSmooth((q - .62) / .38);
+}
+function latentCoolingTemperature(progress) {
+  const q = latentClamp(progress), material = currentLatentMaterial(), mp = material.meltingPointC, high = material.highTemperatureC;
+  if (q < .28) return high + (mp + .7 - high) * latentSmooth(q / .28);
+  if (q < .64) return mp + .7 - 1.4 * latentSmooth((q - .28) / .36);
+  return mp - .7 + (24 - mp + .7) * latentSmooth((q - .64) / .36);
+}
+function latentPhaseFractionFor(stage = state.latentStage, progress = 0) {
+  if (stage < 3) return 0;
+  if (stage === 3) return latentSmooth((progress - .32) / .3);
+  if (stage === 4) return 1;
+  if (stage === 5) return 1 - latentSmooth((progress - .28) / .36);
+  return 0;
+}
+function syncLatentHeatGraphPoints() {
+  const normalise = (item, series) => ({ x: item.time_s / latentSimulatedStageSeconds, y: (item.temperature_c - 20) / 70, xValue: item.time_s, yValue: item.temperature_c, t: item.time_s, series });
+  state.points = [...state.latentHeatingResults.map(item => normalise(item, 'heating')), ...state.latentCoolingResults.map(item => normalise(item, 'cooling'))];
+}
+function latentStepIndex() { return state.complete ? 3 : state.latentStage < 2 ? 0 : state.latentStage < 4 ? 1 : state.latentStage < 6 ? 2 : 3 }
 const wireLengthsCm = [20, 40, 60, 80, 100];
 const wireResistanceOhms = [1.8, 3.6, 5.4, 7.2, 9.0];
 const wireStageDurations = { 1: 1.45, 4: 2.45 };
 function wireResistance(length = state.wireLengthCm) { const index = wireLengthsCm.indexOf(length); return wireResistanceOhms[index < 0 ? 0 : index] }
 function wireCurrent(length = state.wireLengthCm) { return +(state.wireVoltageV / wireResistance(length)).toFixed(2) }
 function wireStepIndex() { return state.complete ? 3 : state.wireStage >= 3 ? 2 : state.wireStage >= 1 ? 1 : 0 }
+const ivDeviceDefinitions = [
+  { id: 'resistor', label: '100 Ω RESISTOR', short: 'RESISTOR', colour: '#3a9d8f', conclusion: 'A straight line through the origin: current is proportional to potential difference at constant temperature.' },
+  { id: 'lamp', label: '6 V FILAMENT LAMP', short: 'FILAMENT LAMP', colour: '#e58b38', conclusion: 'The curve becomes shallower as the filament heats and its resistance increases.' },
+  { id: 'led', label: 'RED LED + 220 Ω', short: 'RED LED', colour: '#d94a61', conclusion: 'Almost no reverse current; forward current rises only after the LED turn-on potential difference.' }
+];
+const ivSweepLevelsV = [0, 1, 2, 3, 4, 5, 6, 6, 0, 0, -1, -2, -3, -4, -5, -6];
+const ivSweepIntervalS = .9, ivSweepDurationS = (ivSweepLevelsV.length - 1) * ivSweepIntervalS, ivDeviceChangeDurationS = 2.1;
+function currentIvDevice() { return ivDeviceDefinitions[Math.max(0, Math.min(ivDeviceDefinitions.length - 1, state.ivDeviceIndex || 0))] }
+function ivElectricalReading(deviceId = currentIvDevice().id, supplyV = state.ivSupplyV) {
+  const supply = Math.max(-6, Math.min(6, Number(supplyV) || 0)), magnitude = Math.abs(supply), sign = Math.sign(supply);
+  let voltage = supply, current = 0;
+  if (deviceId === 'resistor') current = supply / 100;
+  else if (deviceId === 'lamp') current = sign * .21 * Math.sqrt(magnitude / 6);
+  else if (deviceId === 'led') {
+    if (supply > 1.55) { current = (supply - 1.55) / 220; voltage = Math.min(supply, 1.55 + current * 18) }
+    else if (supply < 0) current = -.00002;
+  }
+  return { supply_v: +supply.toFixed(3), voltage_v: +voltage.toFixed(3), current_a: +current.toFixed(5) };
+}
+function ivSweepSupply(timer = state.ivTimer) {
+  const position = Math.max(0, Math.min(ivSweepLevelsV.length - 1, timer / ivSweepIntervalS)), index = Math.min(ivSweepLevelsV.length - 2, Math.floor(position)), local = position - index, eased = local * local * (3 - 2 * local);
+  return ivSweepLevelsV[index] + (ivSweepLevelsV[index + 1] - ivSweepLevelsV[index]) * eased;
+}
+function ivStepIndex() { if (state.complete || state.ivStage === 5) return 3; if (state.ivStage >= 2) return 3; if (state.ivTimer >= ivSweepIntervalS * 8) return 2; if (state.ivStage === 1) return 1; return 0 }
 const fieldConfigurations = [
   { id: 'single', label: 'SINGLE BAR MAGNET', short: 'single N–S', observation: 'Curved, symmetric loops spread from the north pole to the south pole.' },
   { id: 'attraction', label: 'UNLIKE POLES FACING', short: 'N facing S', observation: 'Dense, nearly straight filing chains bridge the gap between unlike poles.' },
@@ -801,6 +886,7 @@ function guidedReactantSafety(name, practicalId = practicals[state.selected]?.id
   const key = String(name).toLowerCase(), practical = practicals.find(item => item.id === practicalId);
   const detail = (rating, color, summary, handling, response, disposal) => ({ name, practicalId, practicalTitle: practical?.title || '', rating, color, summary, handling, response, disposal });
   if (practicalId === 'nuclear') return detail('IONISING RADIATION — SEALED SOURCE', '#c99500', 'A radioactive source emits ionising radiation. The simulation shows sealed school sources; the animated tracks are an explanatory model and are not visible in a real experiment.', 'Teacher-controlled use only. Keep exposure time short, maximise distance, use the long-handled tongs, never touch a source and keep it in the lead-lined store whenever it is not clamped in the holder.', 'Do not approach or pick up a dropped or damaged source. Clear the area, prevent access and alert the responsible teacher or radiation-protection supervisor immediately.', 'Never discard a source. Use tongs to return an intact source to its labelled shielded store under the school’s local rules and source-accounting procedure.');
+  if (practicalId === 'ivdevices') return detail('LOW VOLTAGE / HOT LAMP', '#b96b38', 'The school power pack is low voltage, but a filament lamp can become hot and an LED can be damaged by excessive forward current or reverse voltage.', 'Keep the supply off while changing devices or polarity. Use the LED protection resistor, begin at 0 V and do not touch the lamp until it has cooled.', 'Switch off and disconnect the power pack if a component overheats, smells unusual or a lead becomes damaged; report it to the teacher.', 'Allow the lamp to cool. Return intact components and leads to the electrical-equipment tray; damaged electronic parts follow the school e-waste route.');
   if (practicalId === 'alkali') return detail('HIGHLY REACTIVE — SIMULATION ONLY', '#944f8f', 'Lithium, sodium and potassium react exothermically with water, releasing flammable hydrogen and strongly alkaline hydroxide solution.', 'Do not carry out this comparison as a student practical. The screen, tiny stored-under-oil samples and remote forceps are represented only in this simulation or an approved teacher demonstration.', 'Keep clear of any real reaction and alert staff immediately for a spill, fire or splash. Never add water to an alkali-metal fire.', 'Only trained staff may quench and dispose of alkali-metal residues using the current school procedure; never put residues or contaminated water into a normal sink.');
   if (key.includes('thermite')) return detail('DEMONSTRATION ONLY', '#b53f32', 'The sealed charge can produce molten iron, intense heat, sparks and very bright light.', 'Teacher-controlled demonstration only. Keep the safety screen and sand containment in place and observe from the marked distance.', 'Do not approach until the teacher confirms the products are completely cool. Follow the laboratory emergency procedure for fire or burns.', 'Leave all charge residue and hot products for trained staff to dispose of.');
   if (key.includes('potassium dichromate')) return detail('TOXIC — SIMULATION ONLY', '#9d3b63', 'Potassium dichromate is toxic, carcinogenic, oxidising and environmentally hazardous; it is represented only as a simulation here.', 'Do not use this material in a student practical. A teacher should select a safer approved convection tracer for any real investigation.', 'Avoid all contact. If exposure occurs, alert staff immediately and follow the current SDS and school emergency procedure.', 'Treat as hazardous chemical waste; never pour it into a sink.');
@@ -1038,6 +1124,7 @@ function drawChemicalTags(id) {
     convection: [['ORANGE TRACER · SIMULATION', [-2.35, .08, .52], 17, { size: 7.9, minWidth: 132 }]],
     conduction: [['COPPER', [1.45, .91, -.86], 10, { size: 7.8, minWidth: 56 }], ['ALUMINIUM', [1.45, .91, 0], 10, { size: 7.8, minWidth: 70 }], ['STEEL', [1.45, .91, .86], 10, { size: 7.8, minWidth: 52 }]],
     thermal: state.thermalStage >= 3 ? [] : [['LESLIE CUBE', [0, .15, -.08], 22, { size: 8.2, minWidth: 82 }], ['THERMAL CAMERA', [2.52, .18, 1.1], 22, { size: 8.2, minWidth: 102 }]],
+    latentheat: [...state.latentStage === 0 ? [[currentLatentMaterial().label, [2.05, .62, 1.25], 24, { size: 8.1, minWidth: 112 }]] : [], ['WATER BATH', [.32, .25, .08], 36, { size: 8, minWidth: 86 }]],
     wirelength: [],
     fieldlines: [[fieldConfigurations[state.fieldConfigIndex].label, [0, .22, .16], 33, { size: 8.1, minWidth: 142 }]]
   }[id] || [];
@@ -1103,17 +1190,18 @@ function drawQuadratControls(x, benchY) {
 }
 function capturePrimaryLabel() {
   if (state.captureStage === 9) return state.complete ? 'VIEW RESULTS' : 'RECORD';
-  return ['SET TRAPS', 'WAITING OVERNIGHT…', 'FIRST CAPTURE', 'MARKING BUGS…', 'RELEASE & WAIT', 'WAITING 24H…', 'SECOND CAPTURE', 'COUNTING…', 'RECORD'][state.captureStage] || 'SET TRAPS';
+  return ['SET TRAPS', 'SETTING + CAPTURING…', 'FIRST CAPTURE', 'COUNTING + MARKING…', 'RELEASE & WAIT', 'RELEASING + MIXING…', 'SECOND CAPTURE', 'RECAPTURE COUNT…', 'RECORD'][state.captureStage] || 'SET TRAPS';
 }
-function drawCaptureControls(x, benchY) {
+function drawCaptureControls(x, benchY, w) {
   const busy = [1, 3, 5, 7].includes(state.captureStage);
-  const prog = (state.captureStage % 2 !== 0 && state.captureStage < 8) ? Math.min(1, state.captureTimer / 2) : 0;
-  progressButton(capturePrimaryLabel(), x + 20, benchY + 46, 180, 38, prog, busy);
-  button('RESULTS', x + 316, benchY + 46, 88, 38, state.tab === 'graph');
+  const compact = w < 650, primaryW = compact ? 138 : 180, resetX = x + (compact ? 158 : 210), resetW = compact ? 82 : 96, resultsX = x + (compact ? 248 : 316), resultsW = compact ? 52 : 88;
+  progressButton(capturePrimaryLabel(), x + (compact ? 12 : 20), benchY + 46, primaryW, 38, captureStageProgress(), busy);
+  button(compact ? 'RESET' : 'RESET STUDY', resetX, benchY + 46, resetW, 38, false);
+  button(compact ? 'DATA' : 'RESULTS', resultsX, benchY + 46, resultsW, 38, state.tab === 'graph');
   let info = 'AWAITING TRAPS';
   if (state.captureStage >= 4) info = `MARKED: ${state.captureFirstCatch}`;
   if (state.captureStage >= 8) info = `RECAPTURE: ${state.captureSecondCatch} (MARKED: ${state.captureRecaptured})`;
-  text(`LINCOLN INDEX ESTIMATE  ·  ${info}`, x + 20, benchY + 31, 8.6, '#d8e8ed', 750);
+  text(`LINCOLN INDEX  ·  ${info}`, x + (compact ? 12 : 20), benchY + 31, compact ? 7.7 : 8.6, '#d8e8ed', 750);
 }
 function transectPrimaryLabel() {
   if (state.transectStage === 7) return state.complete ? 'VIEW ZONATION' : 'NEXT POSITION';
@@ -1187,7 +1275,7 @@ function drawMethodDropdownPanel() {
   const p = practicals[state.selected];
   const steps = p.steps || [];
   const x = 120, y = 54, w = 440;
-  const activeStep = state.complete ? steps.length - 1 : Math.min(steps.length - 1, Math.floor((state.progress || 0) * steps.length));
+  const activeStep = state.complete ? steps.length - 1 : p.id === 'ivdevices' ? ivStepIndex() : Math.min(steps.length - 1, Math.floor((state.progress || 0) * steps.length));
   
   ctx.save();
   ctx.font = '650 11px Inter, sans-serif';
@@ -1238,7 +1326,7 @@ function drawMethodDropdownPanel() {
 }
 
 function main() {
-  const L = state.focusMode ? 0 : 270, R = state.focusMode ? 0 : Math.max(260, Math.min(330, W * .23)), x = L, w = W - L - R, p = practicals[state.selected], free = p.id === 'free', wrappedObjective = ['titration', 'displacement', 'alkali', 'starchleaf', 'lipase', 'osmosis', 'potometer', 'quadrats', 'shoretransect', 'ripple', 'electromagnet', 'convection', 'conduction', 'thermal', 'hooke', 'specificheat', 'wirelength', 'fieldlines'].includes(p.id), equationY = wrappedObjective ? 151 : 143;
+  const L = state.focusMode ? 0 : 270, R = state.focusMode ? 0 : Math.max(260, Math.min(330, W * .23)), x = L, w = W - L - R, p = practicals[state.selected], free = p.id === 'free', wrappedObjective = ['titration', 'displacement', 'alkali', 'starchleaf', 'lipase', 'osmosis', 'potometer', 'quadrats', 'capture', 'shoretransect', 'ripple', 'electromagnet', 'convection', 'conduction', 'thermal', 'hooke', 'specificheat', 'latentheat', 'wirelength', 'ivdevices', 'fieldlines'].includes(p.id), equationY = wrappedObjective ? 151 : 143;
   if (!state.focusMode) {
     ctx.fillStyle = '#fff'; ctx.fillRect(x, 64, w, H - 64); text(p.title.toUpperCase(), x + 28, 91, 11, p.color || C.teal, 800); if (wrappedObjective) wrappedText(p.objective, x + 28, 113, Math.min(w - 56, 700), 17, C.ink, 650, 21, 2); else text(p.objective, x + 28, 119, 17, C.ink, 650); if (free) { if (state.reaction) drawFreeReactionCard(x, w); else { rr(x + 26, 143, w - 52, 54, 8, '#f1eefb'); text('QUICK START', x + 40, 158, 9, C.muted, 800); text(p.eq, x + 40, 179, 13, C.ink, 600) } } else { rr(x + 26, equationY, w - 52, 72, 8, '#f2f6f5'); text('SYMBOL EQUATION', x + 40, equationY + 17, 8.5, C.muted, 800); text(p.eq, x + 145, equationY + 17, 12, C.ink, 650); text('WORD EQUATION', x + 40, equationY + 47, 8.5, C.muted, 800); wrappedText(p.word, x + 145, equationY + 47, w - 190, 10.2, C.ink, 600, 12, 2) }
   }
@@ -1246,7 +1334,7 @@ function main() {
   // glazed laboratory tiles
   ctx.strokeStyle = 'rgba(155,174,179,.24)'; ctx.lineWidth = 1; for (let gx = x; gx < x + w; gx += 42) { ctx.beginPath(); ctx.moveTo(gx, arenaTop); ctx.lineTo(gx, benchY); ctx.stroke() } for (let gy = arenaTop; gy < benchY; gy += 42) { ctx.beginPath(); ctx.moveTo(x, gy); ctx.lineTo(x + w, gy); ctx.stroke() } const glow = ctx.createRadialGradient(x + w * .53, benchY - 115, 0, x + w * .53, benchY - 115, w * .45); glow.addColorStop(0, state.burner ? 'rgba(71,179,255,.15)' : 'rgba(255,255,255,.62)'); glow.addColorStop(1, 'rgba(255,255,255,0)'); ctx.fillStyle = glow; ctx.fillRect(x, arenaTop, w, benchY - arenaTop);
   // blue resin worktop edge over a dark enamel cabinet frontage
-  const shoreScene = p.id === 'shoretransect', meadowScene = p.id === 'quadrats', immersiveOutdoor = shoreScene || meadowScene;
+  const shoreScene = p.id === 'shoretransect', meadowScene = p.id === 'quadrats' || p.id === 'capture', immersiveOutdoor = shoreScene || meadowScene;
   let topg = ctx.createLinearGradient(x, benchY, x, benchY + 25); topg.addColorStop(0, meadowScene ? '#376c35' : '#789aaa'); topg.addColorStop(.18, meadowScene ? '#294f2c' : '#4f788b'); topg.addColorStop(1, meadowScene ? '#183923' : '#244f66'); ctx.fillStyle = topg; ctx.fillRect(x, benchY, w, 25);
   const cabinetTop = benchY + 25, cabinetBottom = H - 5, cabinetHeight = cabinetBottom - cabinetTop;
   let frontg = ctx.createLinearGradient(x, cabinetTop, x, H); frontg.addColorStop(0, shoreScene ? '#174f63' : meadowScene ? '#264c2e' : '#454d52'); frontg.addColorStop(.42, shoreScene ? '#0d3a52' : meadowScene ? '#183b25' : '#343c41'); frontg.addColorStop(1, shoreScene ? '#071f34' : meadowScene ? '#0d2719' : '#20272b'); ctx.fillStyle = frontg; ctx.fillRect(x, cabinetTop, w, H - cabinetTop);
@@ -1271,11 +1359,11 @@ function main() {
   if (p.id === 'alkali') {
     drawAlkaliControls(x, benchY);
   } else {
-  if (free) { button('CLEAR BENCH', x + 30, benchY + 46, 112, 38, false); button('UNDO LAST', x + 152, benchY + 46, 105, 38, false); text(`${state.workspace.length} item${state.workspace.length === 1 ? '' : 's'} on bench`, x + 278, benchY + 65, 11, '#d8e8ed', 650) } else if (p.id === 'rates') drawRatesControls(x, benchY); else if (p.id === 'mass') drawMassControls(x, benchY); else if (p.id === 'hydrogen') drawHydrogenControls(x, benchY); else if (p.id === 'titration') drawTitrationControls(x, benchY); else if (p.id === 'salts') drawSaltsControls(x, benchY); else if (p.id === 'water') drawWaterControls(x, benchY); else if (p.id === 'electro') drawElectroControls(x, benchY); else if (p.id === 'flame') drawFlameTestControls(x, benchY); else if (p.id === 'displacement') drawDisplacementControls(x, benchY); else if (p.id === 'thermite') drawThermiteControls(x, benchY); else if (p.id === 'starchleaf') drawStarchControls(x, benchY); else if (p.id === 'lipase') drawLipaseControls(x, benchY); else if (p.id === 'osmosis') drawOsmosisControls(x, benchY); else if (p.id === 'potometer') drawPotometerControls(x, benchY); else if (p.id === 'pondweed') drawPondweedControls(x, benchY, w); else if (p.id === 'quadrats') drawQuadratControls(x, benchY); else if (p.id === 'capture') drawCaptureControls(x, benchY); else if (p.id === 'shoretransect') drawShoreTransectControls(x, benchY); else if (p.id === 'ripple') drawRippleControls(x, benchY); else if (p.id === 'newton2') drawNewton2Controls(x, benchY, w); else if (p.id === 'electromagnet') drawElectromagnetControls(x, benchY); else if (p.id === 'convection') drawConvectionControls(x, benchY); else if (p.id === 'conduction') drawConductionControls(x, benchY); else if (p.id === 'thermal') drawThermalControls(x, benchY); else if (p.id === 'density') drawDensityControls(x, benchY); else if (p.id === 'hooke') drawHookeControls(x, benchY); else if (p.id === 'specificheat') drawSpecificHeatControls(x, benchY); else if (p.id === 'wirelength') drawWireLengthControls(x, benchY); else if (p.id === 'fieldlines') drawFieldLineControls(x, benchY); else if (p.id === 'nuclear') drawNuclearControls(x, benchY); else { progressButton(state.running ? 'RESET' : 'START', x + 30, benchY + 46, 112, 38, state.progress, state.running); progressButton('ADD REAGENT', x + 152, benchY + 46, 120, 38, state.pour ? timedRatio(state.pour.t, 3.6) : 0, !!state.pour); button('RECORD', x + 282, benchY + 46, 90, 38, false) }
+  if (free) { button('CLEAR BENCH', x + 30, benchY + 46, 112, 38, false); button('UNDO LAST', x + 152, benchY + 46, 105, 38, false); text(`${state.workspace.length} item${state.workspace.length === 1 ? '' : 's'} on bench`, x + 278, benchY + 65, 11, '#d8e8ed', 650) } else if (p.id === 'rates') drawRatesControls(x, benchY); else if (p.id === 'mass') drawMassControls(x, benchY); else if (p.id === 'hydrogen') drawHydrogenControls(x, benchY); else if (p.id === 'titration') drawTitrationControls(x, benchY); else if (p.id === 'salts') drawSaltsControls(x, benchY); else if (p.id === 'water') drawWaterControls(x, benchY); else if (p.id === 'electro') drawElectroControls(x, benchY); else if (p.id === 'flame') drawFlameTestControls(x, benchY); else if (p.id === 'displacement') drawDisplacementControls(x, benchY); else if (p.id === 'thermite') drawThermiteControls(x, benchY); else if (p.id === 'starchleaf') drawStarchControls(x, benchY); else if (p.id === 'lipase') drawLipaseControls(x, benchY); else if (p.id === 'osmosis') drawOsmosisControls(x, benchY); else if (p.id === 'potometer') drawPotometerControls(x, benchY); else if (p.id === 'pondweed') drawPondweedControls(x, benchY, w); else if (p.id === 'quadrats') drawQuadratControls(x, benchY); else if (p.id === 'capture') drawCaptureControls(x, benchY, w); else if (p.id === 'shoretransect') drawShoreTransectControls(x, benchY); else if (p.id === 'ripple') drawRippleControls(x, benchY); else if (p.id === 'newton2') drawNewton2Controls(x, benchY, w); else if (p.id === 'electromagnet') drawElectromagnetControls(x, benchY); else if (p.id === 'convection') drawConvectionControls(x, benchY); else if (p.id === 'conduction') drawConductionControls(x, benchY); else if (p.id === 'thermal') drawThermalControls(x, benchY); else if (p.id === 'density') drawDensityControls(x, benchY); else if (p.id === 'hooke') drawHookeControls(x, benchY); else if (p.id === 'specificheat') drawSpecificHeatControls(x, benchY); else if (p.id === 'latentheat') drawLatentHeatControls(x, benchY); else if (p.id === 'wirelength') drawWireLengthControls(x, benchY); else if (p.id === 'ivdevices') drawIvDeviceControls(x, benchY); else if (p.id === 'fieldlines') drawFieldLineControls(x, benchY); else if (p.id === 'nuclear') drawNuclearControls(x, benchY); else { progressButton(state.running ? 'RESET' : 'START', x + 30, benchY + 46, 112, 38, state.progress, state.running); progressButton('ADD REAGENT', x + 152, benchY + 46, 120, 38, state.pour ? timedRatio(state.pour.t, 3.6) : 0, !!state.pour); button('RECORD', x + 282, benchY + 46, 90, 38, false) }
   }
   // meters
   rr(x + w - 190, benchY + 35, 164, 58, 8, '#f5f7f6');
-  text(p.id === 'thermite' ? 'SIMULATED CORE' : p.id === 'displacement' ? 'SERIES STATUS' : p.id === 'flame' ? 'ACTIVE SAMPLE' : p.id === 'starchleaf' ? 'LEAF TEST' : p.id === 'lipase' ? 'ENZYME TRIAL' : p.id === 'osmosis' ? 'OSMOSIS TRIAL' : p.id === 'potometer' ? 'WATER UPTAKE' : p.id === 'pondweed' ? 'PHOTOSYNTHESIS' : p.id === 'quadrats' ? 'QUADRAT SAMPLE' : p.id === 'shoretransect' ? 'SHORE ZONATION' : p.id === 'ripple' ? 'WAVE SPEED' : p.id === 'newton2' ? 'ACCELERATION' : p.id === 'electromagnet' ? 'MAGNETIC LIFT' : p.id === 'convection' ? 'WATER FLOW' : p.id === 'conduction' ? 'PIN FALL TEST' : p.id === 'thermal' ? 'INFRARED VIEW' : p.id === 'density' ? 'DENSITY MEASURE' : p.id === 'hooke' ? 'FORCE / EXTENSION' : p.id === 'specificheat' ? 'ENERGY / TEMPERATURE' : p.id === 'wirelength' ? 'ELECTRICAL READING' : p.id === 'fieldlines' ? 'FIELD PATTERN' : p.id === 'nuclear' ? 'RADIATION COUNT' : 'LIVE READINGS', x + w - 177, benchY + 49, 9, C.muted, 800);
+  text(p.id === 'thermite' ? 'SIMULATED CORE' : p.id === 'displacement' ? 'SERIES STATUS' : p.id === 'flame' ? 'ACTIVE SAMPLE' : p.id === 'starchleaf' ? 'LEAF TEST' : p.id === 'lipase' ? 'ENZYME TRIAL' : p.id === 'osmosis' ? 'OSMOSIS TRIAL' : p.id === 'potometer' ? 'WATER UPTAKE' : p.id === 'pondweed' ? 'PHOTOSYNTHESIS' : p.id === 'quadrats' ? 'QUADRAT SAMPLE' : p.id === 'capture' ? 'CAPTURE COUNTS' : p.id === 'shoretransect' ? 'SHORE ZONATION' : p.id === 'ripple' ? 'WAVE SPEED' : p.id === 'newton2' ? 'ACCELERATION' : p.id === 'electromagnet' ? 'MAGNETIC LIFT' : p.id === 'convection' ? 'WATER FLOW' : p.id === 'conduction' ? 'PIN FALL TEST' : p.id === 'thermal' ? 'INFRARED VIEW' : p.id === 'density' ? 'DENSITY MEASURE' : p.id === 'hooke' ? 'FORCE / EXTENSION' : p.id === 'specificheat' ? 'ENERGY / TEMPERATURE' : p.id === 'latentheat' ? 'PHASE / TEMPERATURE' : p.id === 'wirelength' ? 'ELECTRICAL READING' : p.id === 'ivdevices' ? 'LIVE I–V READING' : p.id === 'fieldlines' ? 'FIELD PATTERN' : p.id === 'nuclear' ? 'RADIATION COUNT' : 'LIVE READINGS', x + w - 177, benchY + 49, 9, C.muted, 800);
   if (p.id === 'titration') {
     text(`${state.titrationVolume.toFixed(2)} cm³`, x + w - 177, benchY + 72, 15, '#b23678', 750);
     text(`pH ${state.ph.toFixed(1)}`, x + w - 78, benchY + 72, 14, C.blue, 700);
@@ -1309,9 +1397,15 @@ function main() {
     text(`${distance.toFixed(1)} mm`, x + w - 177, benchY + 72, 14.5, '#2f8d73', 800);
     text(`${state.potometerWindSpeed.toFixed(1)} m/s`, x + w - 74, benchY + 72, 9.5, C.teal, 800, 'center');
   } else if (p.id === 'quadrats') {
-    const sample = currentQuadratSample(), visibleCount = state.quadratStage >= 6 ? sample.daisies : state.quadratCurrentCount;
+    const sample = currentQuadratSample(), visibleCount = state.quadratStage >= 8 ? sample.daisies : state.quadratCurrentCount;
     text(`${visibleCount || 0} daisies`, x + w - 177, benchY + 72, 13.2, '#3b8b52', 800);
     text(`${state.quadratResults.length}/5 saved`, x + w - 74, benchY + 72, 9.2, C.teal, 800, 'center');
+  } else if (p.id === 'capture') {
+    const counts = captureVisibleCounts();
+    const firstLabel = state.complete ? `N ≈ ${Math.round(state.captureFirstCatch * state.captureSecondCatch / state.captureRecaptured)}` : state.captureStage >= 3 ? `${counts.firstMarked} MARKED` : `${counts.firstCaught} CAUGHT`;
+    const secondLabel = state.captureStage >= 6 ? `${counts.secondMarked}/${counts.secondCaught} MARKS` : state.captureStage >= 5 ? `${counts.released} RELEASED` : 'SAMPLE 1';
+    text(firstLabel, x + w - 177, benchY + 72, state.complete ? 14.5 : 10.2, '#8b5a2b', 800);
+    text(secondLabel, x + w - 69, benchY + 72, 7.8, C.teal, 800, 'center');
   } else if (p.id === 'shoretransect') {
     const station = currentTransectStation();
     text(`${station.distanceM} m`, x + w - 177, benchY + 72, 15, '#297f86', 800);
@@ -1354,10 +1448,17 @@ function main() {
   } else if (p.id === 'specificheat') {
     text(`${state.shcTemperatureC.toFixed(1)} °C`, x + w - 177, benchY + 72, 13.5, '#d06b38', 800);
     text(`${(state.shcEnergyJ / 1000).toFixed(1)} kJ`, x + w - 74, benchY + 72, 10.5, C.teal, 800, 'center');
+  } else if (p.id === 'latentheat') {
+    const phaseLabel = state.latentPhaseFraction < .08 ? 'SOLID' : state.latentPhaseFraction > .92 ? 'LIQUID' : state.latentStage === 5 ? 'FREEZING' : 'MELTING';
+    text(`${state.latentTemperatureC.toFixed(1)} °C`, x + w - 177, benchY + 72, 13.5, '#c66a43', 800);
+    text(phaseLabel, x + w - 74, benchY + 72, 9.2, state.latentPhaseFraction > .08 && state.latentPhaseFraction < .92 ? '#d18b35' : C.teal, 800, 'center');
   } else if (p.id === 'wirelength') {
     const live = state.wireStage >= 1 && state.wireStage <= 2;
     text(live ? `${state.wireVoltageV.toFixed(2)} V` : '0.00 V', x + w - 177, benchY + 72, 14, '#7a4eb0', 800);
     text(live ? `${wireCurrent().toFixed(2)} A` : `${wireResistance().toFixed(1)} Ω`, x + w - 74, benchY + 72, 11, live ? '#d45757' : C.ink, 800, 'center');
+  } else if (p.id === 'ivdevices') {
+    text(`${state.ivDeviceV >= 0 ? '+' : ''}${state.ivDeviceV.toFixed(2)} V`, x + w - 177, benchY + 72, 12.6, '#8c58a5', 800);
+    text(`${(state.ivCurrentA * 1000).toFixed(1)} mA`, x + w - 74, benchY + 72, 9.8, currentIvDevice().colour, 800, 'center');
   } else if (p.id === 'fieldlines') {
     const aligned = state.fieldStage >= 4;
     text(`${state.fieldResults.length} / 3`, x + w - 177, benchY + 72, 15, '#d45757', 800);
@@ -1465,6 +1566,28 @@ function drawSpecificHeatControls(x, benchY) {
   const power = state.shcStage === 3 ? '24.0 W ON' : 'SUPPLY OFF', prepared = state.shcStage >= 2 ? 'PROBES SEATED' : 'BLOCK READY';
   text(`1.00 kg ${currentShcMaterial().label}  ·  ${prepared}  ·  ${power}  ·  ${(state.shcEnergyJ / 1000).toFixed(1)} kJ`, x + 20, benchY + 31, 8.9, '#d8e8ed', 750);
 }
+function latentHeatPrimaryLabel() {
+  if (state.complete) return 'VIEW CURVES';
+  return ['ASSEMBLE BATH', 'ASSEMBLING…', 'START HEATING', 'HEATING + LOGGING…', 'START COOLING', 'COOLING + LOGGING…', 'VIEW CURVES'][state.latentStage] || 'ASSEMBLE BATH';
+}
+function latentHeatControlLayout(x, w) {
+  const rowLeft = x + 20, readingLeft = x + w - 190, gap = 10, ideal = [176, 154, 72, 78];
+  const scale = Math.max(.76, Math.min(1, (readingLeft - 16 - rowLeft - gap * 3) / ideal.reduce((sum, width) => sum + width, 0)));
+  const widths = ideal.map(width => Math.floor(width * scale)), positions = [rowLeft];
+  for (let index = 1; index < widths.length; index++) positions.push(positions[index - 1] + widths[index - 1] + gap);
+  return { positions, widths, readingLeft, readingGap: readingLeft - (positions[3] + widths[3]) };
+}
+function drawLatentHeatControls(x, benchY, w = W - x - (state.focusMode ? 0 : Math.max(260, Math.min(330, W * .23)))) {
+  const busy = state.latentStage === 1 || state.latentStage === 3 || state.latentStage === 5;
+  const layout = latentHeatControlLayout(x, w);
+  progressButton(latentHeatPrimaryLabel(), layout.positions[0], benchY + 46, layout.widths[0], 38, timedRatio(state.latentTimer, latentStageDurations[state.latentStage], busy), busy);
+  button(`SAMPLE: ${currentLatentMaterial().short}`, layout.positions[1], benchY + 46, layout.widths[1], 38, busy || state.latentStage > 2 && !state.complete);
+  button('RESET', layout.positions[2], benchY + 46, layout.widths[2], 38, false);
+  button('CURVES', layout.positions[3], benchY + 46, layout.widths[3], 38, state.tab === 'graph');
+  const stageTime = [3, 5].includes(state.latentStage) ? Math.min(latentSimulatedStageSeconds, state.latentTimer / latentStageDurations[state.latentStage] * latentSimulatedStageSeconds) : state.latentStage >= 4 ? latentSimulatedStageSeconds : 0;
+  const phase = state.latentPhaseFraction < .08 ? 'SOLID' : state.latentPhaseFraction > .92 ? 'LIQUID' : state.latentStage === 5 ? 'FREEZING PLATEAU' : 'MELTING PLATEAU';
+  text(`${currentLatentMaterial().label}  ·  ${phase}  ·  ${stageTime.toFixed(0)} s  ·  ${state.latentTemperatureC.toFixed(1)} °C`, x + 20, benchY + 31, 8.8, '#d8e8ed', 750);
+}
 function wirePrimaryLabel() {
   if (state.complete) return 'VIEW GRAPH';
   return ['CLOSE SWITCH', 'READING SETTLING…', 'RECORD READING', 'NEXT LENGTH', 'MOVING CONTACT…'][state.wireStage] || 'CLOSE SWITCH';
@@ -1476,6 +1599,23 @@ function drawWireLengthControls(x, benchY) {
   button('GRAPH', x + 312, benchY + 46, 78, 38, state.tab === 'graph');
   const live = state.wireStage >= 1 && state.wireStage <= 2;
   text(`TRIAL ${Math.min(5, state.wireTrialIndex + 1)} / 5  ·  ${state.wireLengthCm} cm  ·  ${live ? `${wireCurrent().toFixed(2)} A` : 'SWITCH OPEN'}`, x + 20, benchY + 31, 9.1, '#d8e8ed', 750);
+}
+function ivPrimaryLabel() {
+  if (state.ivStage === 1) return 'SWEEP RUNNING…';
+  if (state.ivStage === 2) return 'SAVE CURVE';
+  if (state.ivStage === 3) return state.ivResults.length >= ivDeviceDefinitions.length ? 'VIEW CURVES' : 'NEXT DEVICE';
+  if (state.ivStage === 4) return 'CHANGING DEVICE…';
+  if (state.ivStage === 5 || state.complete) return 'VIEW CURVES';
+  return 'RUN I–V SWEEP';
+}
+function drawIvDeviceControls(x, benchY) {
+  const busy = state.ivStage === 1 || state.ivStage === 4, sweepQ = state.ivStage === 1 ? state.ivTimer / ivSweepDurationS : state.ivStage === 4 ? state.ivDeviceTransition : 0;
+  progressButton(ivPrimaryLabel(), x + 20, benchY + 46, 154, 38, sweepQ, busy);
+  button(`DEVICE · ${currentIvDevice().short}`, x + 184, benchY + 46, 148, 38, busy || state.ivStage > 0 && state.ivStage < 4);
+  button('RESET', x + 342, benchY + 46, 70, 38, false);
+  button('CURVES', x + 422, benchY + 46, 78, 38, state.tab === 'graph');
+  const polarity = state.ivStage === 1 && state.ivTimer >= ivSweepIntervalS * 8 ? 'REVERSED POLARITY' : state.ivStage === 1 ? 'FORWARD SWEEP' : 'SUPPLY AT ZERO';
+  text(`${state.ivResults.length} / 3 CURVES SAVED  ·  ${currentIvDevice().short}  ·  ${polarity}`, x + 20, benchY + 31, 8.7, '#d8e8ed', 750);
 }
 function fieldPrimaryLabel() {
   if (state.complete) return 'VIEW PATTERNS';
@@ -1552,7 +1692,7 @@ function rightbar() {
   ctx.fillStyle = '#f4f6f5';
   ctx.fillRect(x, 64, R, H - 64);
 
-  const resultLabel = p.id === 'flame' ? 'SPECTRA' : p.id === 'starchleaf' ? 'RESULT' : p.id === 'shoretransect' ? 'ZONATION' : ['quadrats', 'ripple', 'alkali'].includes(p.id) ? 'RESULTS' : p.id === 'convection' ? 'OBSERVATION' : p.id === 'thermal' ? 'THERMAL VIEW' : p.id === 'fieldlines' ? 'PATTERNS' : ['mass', 'electro', 'titration', 'displacement', 'conduction'].includes(p.id) ? 'RESULTS' : p.id === 'chrom' ? 'MEASURE' : p.id === 'salts' ? 'VIEW RESULTS' : p.id === 'co2' ? "BIRD'S EYE" : 'GRAPH';
+  const resultLabel = p.id === 'flame' ? 'SPECTRA' : p.id === 'starchleaf' ? 'RESULT' : p.id === 'shoretransect' ? 'ZONATION' : ['quadrats', 'capture', 'ripple', 'alkali'].includes(p.id) ? 'RESULTS' : p.id === 'convection' ? 'OBSERVATION' : p.id === 'thermal' ? 'THERMAL VIEW' : p.id === 'fieldlines' ? 'PATTERNS' : ['latentheat', 'ivdevices'].includes(p.id) ? 'CURVES' : ['mass', 'electro', 'titration', 'displacement', 'conduction'].includes(p.id) ? 'RESULTS' : p.id === 'chrom' ? 'MEASURE' : p.id === 'salts' ? 'VIEW RESULTS' : p.id === 'co2' ? "BIRD'S EYE" : 'GRAPH';
   if (p.id === 'rates') {
     if (mobileLandscapeLayout && state.tab === 'graph') {
       button('METHOD', x + 10, 82, 60, 32, state.tab === 'bench');
@@ -1572,39 +1712,48 @@ function rightbar() {
   const graphContentY = graphSidebarContentY(p.id);
   if (state.tab === 'bench') {
     const compact = mobileLandscapeLayout || UI_SCALE < .995 || H < 790, contentTop = compact ? 122 : 126, contentBottom = H - (compact ? 9 : 14), cardX = x + 18, cardW = R - 36;
-    const activeStep = state.complete ? p.steps.length - 1 : p.id === 'rates' ? ratesStepIndex() : p.id === 'mass' ? massStepIndex() : p.id === 'hydrogen' ? hydrogenStepIndex() : p.id === 'titration' ? titrationStepIndex() : p.id === 'salts' ? saltsStepIndex() : p.id === 'flame' ? flameTestStepIndex() : p.id === 'displacement' ? displacementStepIndex() : p.id === 'alkali' ? alkaliStepIndex() : p.id === 'thermite' ? thermiteStepIndex() : p.id === 'starchleaf' ? starchStepIndex() : p.id === 'lipase' ? lipaseStepIndex() : p.id === 'osmosis' ? osmosisStepIndex() : p.id === 'potometer' ? potometerStepIndex() : p.id === 'quadrats' ? quadratStepIndex() : p.id === 'capture' ? captureStepIndex() : p.id === 'shoretransect' ? transectStepIndex() : p.id === 'ripple' ? rippleStepIndex() : p.id === 'electromagnet' ? electromagnetStepIndex() : p.id === 'convection' ? convectionStepIndex() : p.id === 'conduction' ? conductionStepIndex() : p.id === 'thermal' ? thermalStepIndex() : p.id === 'density' ? densityStepIndex() : p.id === 'hooke' ? hookeStepIndex() : p.id === 'specificheat' ? shcStepIndex() : p.id === 'wirelength' ? wireStepIndex() : p.id === 'fieldlines' ? fieldStepIndex() : p.id === 'nuclear' ? nuclearStepIndex() : Math.floor(state.progress * 3);
+    const activeStep = state.complete ? p.steps.length - 1 : p.id === 'rates' ? ratesStepIndex() : p.id === 'mass' ? massStepIndex() : p.id === 'hydrogen' ? hydrogenStepIndex() : p.id === 'titration' ? titrationStepIndex() : p.id === 'salts' ? saltsStepIndex() : p.id === 'flame' ? flameTestStepIndex() : p.id === 'displacement' ? displacementStepIndex() : p.id === 'alkali' ? alkaliStepIndex() : p.id === 'thermite' ? thermiteStepIndex() : p.id === 'starchleaf' ? starchStepIndex() : p.id === 'lipase' ? lipaseStepIndex() : p.id === 'osmosis' ? osmosisStepIndex() : p.id === 'potometer' ? potometerStepIndex() : p.id === 'quadrats' ? quadratStepIndex() : p.id === 'capture' ? captureStepIndex() : p.id === 'shoretransect' ? transectStepIndex() : p.id === 'ripple' ? rippleStepIndex() : p.id === 'electromagnet' ? electromagnetStepIndex() : p.id === 'convection' ? convectionStepIndex() : p.id === 'conduction' ? conductionStepIndex() : p.id === 'thermal' ? thermalStepIndex() : p.id === 'density' ? densityStepIndex() : p.id === 'hooke' ? hookeStepIndex() : p.id === 'specificheat' ? shcStepIndex() : p.id === 'latentheat' ? latentStepIndex() : p.id === 'wirelength' ? wireStepIndex() : p.id === 'ivdevices' ? ivStepIndex() : p.id === 'fieldlines' ? fieldStepIndex() : p.id === 'nuclear' ? nuclearStepIndex() : Math.floor(state.progress * 3);
     const headingHeight = compact ? 12 : 15, headingToContentGap = compact ? 3 : 7, baseSectionGap = compact ? 4 : 9, headingSize = compact ? 10.1 : 10.8;
     const methodSize = compact ? 9.2 : 10.6, methodLineHeight = compact ? 11.2 : 13.4, methodTextWidth = cardW - 58, methodCardGap = compact ? 3 : 5;
-    const methodCards = p.steps.map(step => { const lines = wrapTextLines(step, methodTextWidth, methodSize, 650); return { step, lines, baseHeight: Math.max(compact ? 28 : 42, lines.length * methodLineHeight + (compact ? 7 : 16)) } });
+    const methodCards = p.steps.map(step => { const lines = wrapTextLines(step, methodTextWidth, methodSize, 650); return { step, lines, baseHeight: Math.max(compact ? 28 : 42, lines.length * methodLineHeight + (compact ? 7 : 16)), minHeight: Math.max(compact ? 24 : 42, lines.length * methodLineHeight + (compact ? 3 : 16)) } });
     const reactSize = compact ? 9.4 : 10.3, reactLineHeight = compact ? 10.8 : 12.6, reactRowGap = compact ? 2 : 4, reactTextWidth = R - 101;
-    const reactantCards = p.reactants.map(name => { const lines = wrapTextLines(name, reactTextWidth, reactSize, 650); return { name, lines, baseHeight: Math.max(compact ? 20 : 28, lines.length * reactLineHeight + (compact ? 6 : 14)) } });
+    const reactantCards = p.reactants.map(name => { const lines = wrapTextLines(name, reactTextWidth, reactSize, 650); return { name, lines, baseHeight: Math.max(compact ? 20 : 28, lines.length * reactLineHeight + (compact ? 6 : 14)), minHeight: Math.max(compact ? 18 : 28, lines.length * reactLineHeight + (compact ? 3 : 14)) } });
     const gearGap = 8, gearW = (R - 48 - gearGap) / 2, gearSize = compact ? 8.1 : 9.3, gearLineHeight = compact ? 9.4 : 11.2, gearRowGap = compact ? 3 : 5;
     const gearCards = p.gear.slice(0, 4).map(name => ({ name, lines: wrapTextLines(name, gearW - 18, gearSize, 600) })), gearRows = Math.ceil(gearCards.length / 2);
-    const gearRowCards = Array.from({ length: gearRows }, (_, row) => { const cards = gearCards.slice(row * 2, row * 2 + 2); return { cards, baseHeight: Math.max(compact ? 20 : 28, ...cards.map(card => card.lines.length * gearLineHeight + (compact ? 6 : 12))) } });
-    const guideSize = compact ? 8.9 : 10, guideLineHeight = compact ? 10.6 : 12.2, guideLines = wrapTextLines(state.toast, R - 64, guideSize, 600), guideBaseHeight = Math.max(compact ? 42 : 62, guideLines.length * guideLineHeight + (compact ? 14 : 20)), evaluationBaseHeight = compact ? 40 : 50;
+    const gearRowCards = Array.from({ length: gearRows }, (_, row) => { const cards = gearCards.slice(row * 2, row * 2 + 2); return { cards, baseHeight: Math.max(compact ? 20 : 28, ...cards.map(card => card.lines.length * gearLineHeight + (compact ? 6 : 12))), minHeight: Math.max(compact ? 18 : 28, ...cards.map(card => card.lines.length * gearLineHeight + (compact ? 3 : 12))) } });
+    const guideSize = compact ? 8.9 : 10, guideLineHeight = compact ? 10.6 : 12.2, guideLines = wrapTextLines(state.toast, R - 64, guideSize, 600), guideBaseHeight = Math.max(compact ? 42 : 62, guideLines.length * guideLineHeight + (compact ? 14 : 20)), guideMinHeight = compact ? Math.max(34, guideLines.length * guideLineHeight + 8) : guideBaseHeight, evaluationBaseHeight = compact ? 40 : 50, evaluationMinHeight = compact ? 36 : evaluationBaseHeight;
     const sectionHeadingBlock = headingHeight + headingToContentGap;
     const methodBaseHeight = sectionHeadingBlock + methodCards.reduce((sum, card) => sum + card.baseHeight, 0) + Math.max(0, methodCards.length - 1) * methodCardGap;
     const reactBaseHeight = sectionHeadingBlock + reactantCards.reduce((sum, card) => sum + card.baseHeight, 0) + Math.max(0, reactantCards.length - 1) * reactRowGap;
     const apparatusBaseHeight = sectionHeadingBlock + gearRowCards.reduce((sum, row) => sum + row.baseHeight, 0) + Math.max(0, gearRows - 1) * gearRowGap;
     const guidanceBaseHeight = sectionHeadingBlock + guideBaseHeight, evaluationBaseSectionHeight = sectionHeadingBlock + evaluationBaseHeight;
     const naturalHeight = methodBaseHeight + reactBaseHeight + apparatusBaseHeight + guidanceBaseHeight + evaluationBaseSectionHeight + baseSectionGap * 4;
-    const surplus = Math.max(0, contentBottom - contentTop - naturalHeight), methodCardExtra = methodCards.length ? surplus * .38 / methodCards.length : 0, reactRowExtra = reactantCards.length ? surplus * .14 / reactantCards.length : 0, gearRowExtra = gearRows ? surplus * .1 / gearRows : 0, guideExtra = surplus * .2, evaluationExtra = surplus * .12, sectionGap = baseSectionGap + surplus * .06 / 4;
+    const minSectionGap = compact ? 1 : baseSectionGap;
+    const minimumHeight = sectionHeadingBlock * 5 + methodCards.reduce((sum, card) => sum + card.minHeight, 0) + Math.max(0, methodCards.length - 1) * methodCardGap + reactantCards.reduce((sum, card) => sum + card.minHeight, 0) + Math.max(0, reactantCards.length - 1) * reactRowGap + gearRowCards.reduce((sum, row) => sum + row.minHeight, 0) + Math.max(0, gearRows - 1) * gearRowGap + guideMinHeight + evaluationMinHeight + minSectionGap * 4;
+    const availableHeight = contentBottom - contentTop, compressionCapacity = Math.max(0, naturalHeight - minimumHeight), compressionRatio = compressionCapacity ? Math.min(1, Math.max(0, naturalHeight - availableHeight) / compressionCapacity) : 0;
+    const compressHeight = (base, minimum) => base - (base - minimum) * compressionRatio;
+    methodCards.forEach(card => { card.layoutHeight = compressHeight(card.baseHeight, card.minHeight) });
+    reactantCards.forEach(card => { card.layoutHeight = compressHeight(card.baseHeight, card.minHeight) });
+    gearRowCards.forEach(row => { row.layoutHeight = compressHeight(row.baseHeight, row.minHeight) });
+    const compressedGuideHeight = compressHeight(guideBaseHeight, guideMinHeight), compressedEvaluationHeight = compressHeight(evaluationBaseHeight, evaluationMinHeight), compressedSectionGap = compressHeight(baseSectionGap, minSectionGap);
+    const compressedNaturalHeight = naturalHeight - compressionCapacity * compressionRatio;
+    const surplus = Math.max(0, availableHeight - compressedNaturalHeight), methodCardExtra = methodCards.length ? surplus * .38 / methodCards.length : 0, reactRowExtra = reactantCards.length ? surplus * .14 / reactantCards.length : 0, gearRowExtra = gearRows ? surplus * .1 / gearRows : 0, guideExtra = surplus * .2, evaluationExtra = surplus * .12, sectionGap = compressedSectionGap + surplus * .06 / 4;
     let cursorY = contentTop;
 
     text('METHOD', x + 22, cursorY + headingHeight / 2, headingSize, C.muted, 800); cursorY += sectionHeadingBlock;
     methodCards.forEach((card, i) => {
-      const cardHeight = card.baseHeight + methodCardExtra, current = i === activeStep, complete = i < activeStep || state.complete && i === activeStep, fill = current ? '#e6f5f2' : complete ? '#f0f7f5' : '#ffffff', border = current ? C.teal : complete ? '#a9d4cc' : C.line;
+      const cardHeight = card.layoutHeight + methodCardExtra, current = i === activeStep, complete = i < activeStep || state.complete && i === activeStep, fill = current ? '#e6f5f2' : complete ? '#f0f7f5' : '#ffffff', border = current ? C.teal : complete ? '#a9d4cc' : C.line;
       ctx.save(); if (current) { ctx.shadowColor = 'rgba(8,127,117,.16)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 2 } rr(cardX, cursorY, cardW, cardHeight, 8, fill, border); ctx.restore();
       if (current) { ctx.fillStyle = C.teal; ctx.fillRect(cardX, cursorY + 7, 3, cardHeight - 14) }
       const centreY = cursorY + cardHeight / 2; ctx.fillStyle = i <= activeStep ? C.teal : '#d8e0e2'; ctx.beginPath(); ctx.arc(cardX + 20, centreY, compact ? 9 : 10, 0, Math.PI * 2); ctx.fill(); text(String(i + 1), cardX + 20, centreY, compact ? 8 : 8.5, '#fff', 800, 'center');
       drawTextLines(card.lines, cardX + 40, centreY, methodSize, C.ink, current ? 700 : 625, methodLineHeight); cursorY += cardHeight + (i < methodCards.length - 1 ? methodCardGap : 0)
     });
 
-    const safetyHeading = ['quadrats', 'shoretransect'].includes(p.id) ? 'BIOLOGICAL SAMPLES — CLICK FOR SAFETY' : ['ripple', 'hooke', 'specificheat'].includes(p.id) ? 'MATERIALS — CLICK FOR SAFETY' : p.id === 'nuclear' ? 'SEALED SOURCES — CLICK FOR SAFETY' : 'REACTANTS — CLICK FOR SAFETY';
+    const safetyHeading = ['quadrats', 'shoretransect'].includes(p.id) ? 'BIOLOGICAL SAMPLES — CLICK FOR SAFETY' : ['ripple', 'hooke', 'specificheat', 'latentheat', 'ivdevices'].includes(p.id) ? 'MATERIALS — CLICK FOR SAFETY' : p.id === 'nuclear' ? 'SEALED SOURCES — CLICK FOR SAFETY' : 'REACTANTS — CLICK FOR SAFETY';
     cursorY += sectionGap; text(safetyHeading, x + 22, cursorY + headingHeight / 2, headingSize, C.muted, 800); cursorY += sectionHeadingBlock;
     const reactantRows = [];
     reactantCards.forEach((card, i) => {
-      const rowHeight = card.baseHeight + reactRowExtra, selectedSalt = p.id === 'flame' && state.flameTestSalt === i;
+      const rowHeight = card.layoutHeight + reactRowExtra, selectedSalt = p.id === 'flame' && state.flameTestSalt === i;
       rr(x + 20, cursorY, R - 40, rowHeight, 6, selectedSalt ? '#fff4ef' : '#fff', selectedSalt ? flameTestSalts[i].flameHex : C.line);
       ctx.fillStyle = p.id === 'flame' ? flameTestSalts[i].flameHex : p.color;
       ctx.beginPath();
@@ -1620,7 +1769,7 @@ function rightbar() {
     cursorY += sectionGap; text('APPARATUS', x + 22, cursorY + headingHeight / 2, headingSize, C.muted, 800); cursorY += sectionHeadingBlock;
     let gearCursorY = cursorY;
     gearRowCards.forEach((row, rowIndex) => {
-      const rowHeight = row.baseHeight + gearRowExtra;
+      const rowHeight = row.layoutHeight + gearRowExtra;
       row.cards.forEach((card, column) => {
         const gx = x + 20 + column * (gearW + gearGap);
         rr(gx, gearCursorY, gearW, rowHeight, 6, '#fff', C.line);
@@ -1631,7 +1780,7 @@ function rightbar() {
     cursorY = gearCursorY;
 
     cursorY += sectionGap; text('GUIDANCE', x + 22, cursorY + headingHeight / 2, headingSize, C.muted, 800); cursorY += sectionHeadingBlock;
-    const guideHeight = guideBaseHeight + guideExtra; rr(x + 20, cursorY, R - 40, guideHeight, 7, '#e8efed'); drawTextLines(guideLines, x + 32, cursorY + guideHeight / 2, guideSize, C.ink, 600, guideLineHeight);
+    const guideHeight = compressedGuideHeight + guideExtra; rr(x + 20, cursorY, R - 40, guideHeight, 7, '#e8efed'); drawTextLines(guideLines, x + 32, cursorY + guideHeight / 2, guideSize, C.ink, 600, guideLineHeight);
     if (p.id === 'hooke') {
       const iconX = x + R - 39, iconY = cursorY + guideHeight - 18;
       ctx.strokeStyle = p.color; ctx.lineWidth = 1.8; ctx.beginPath(); ctx.arc(iconX - 2, iconY - 2, 5, 0, Math.PI * 2); ctx.moveTo(iconX + 2, iconY + 2); ctx.lineTo(iconX + 7, iconY + 7); ctx.stroke();
@@ -1640,9 +1789,9 @@ function rightbar() {
     }
     cursorY += guideHeight;
     cursorY += sectionGap; text('PRACTICAL EVALUATION', x + 22, cursorY + headingHeight / 2, headingSize, C.muted, 800); cursorY += sectionHeadingBlock;
-    const evaluationHeight = evaluationBaseHeight + evaluationExtra; drawPracticalEvaluationButton(x + 20, cursorY, R - 40, evaluationHeight);
+    const evaluationHeight = compressedEvaluationHeight + evaluationExtra; drawPracticalEvaluationButton(x + 20, cursorY, R - 40, evaluationHeight);
     const finalBottom = cursorY + evaluationHeight;
-    rightSidebarLayoutSnapshot = { content_top_y: +contentTop.toFixed(2), content_bottom_y: +finalBottom.toFixed(2), available_bottom_y: +contentBottom.toFixed(2), evaluation_button_top_y: +cursorY.toFixed(2), evaluation_button_bottom_y: +finalBottom.toFixed(2), unused_vertical_space_px: +Math.max(0, contentBottom - finalBottom).toFixed(2), overflow_vertical_space_px: +Math.max(0, finalBottom - contentBottom).toFixed(2), method_stage_count: methodCards.length, method_stage_line_counts: methodCards.map(card => card.lines.length), reactant_rows: reactantRows, heading_to_content_gap_px: headingToContentGap, method_font_size_px: methodSize, reactant_font_size_px: reactSize, guidance_font_size_px: guideSize, all_method_stage_text_visible: true, all_reactant_text_visible: true, all_apparatus_text_visible: true, all_sidebar_components_visible: finalBottom <= contentBottom + .5, compact };
+    rightSidebarLayoutSnapshot = { content_top_y: +contentTop.toFixed(2), content_bottom_y: +finalBottom.toFixed(2), available_bottom_y: +contentBottom.toFixed(2), evaluation_button_top_y: +cursorY.toFixed(2), evaluation_button_bottom_y: +finalBottom.toFixed(2), unused_vertical_space_px: +Math.max(0, contentBottom - finalBottom).toFixed(2), overflow_vertical_space_px: +Math.max(0, finalBottom - contentBottom).toFixed(2), compression_ratio: +compressionRatio.toFixed(3), method_stage_count: methodCards.length, method_stage_line_counts: methodCards.map(card => card.lines.length), reactant_rows: reactantRows, heading_to_content_gap_px: headingToContentGap, method_font_size_px: methodSize, reactant_font_size_px: reactSize, guidance_font_size_px: guideSize, all_method_stage_text_visible: true, all_reactant_text_visible: true, all_apparatus_text_visible: true, all_sidebar_components_visible: finalBottom <= contentBottom + .5, compact };
   } else if (p.id === 'rates' && state.tab === 'birdseye') drawRatesBirdsEye(x + 18, graphContentY, R - 36);
   else if (p.id === 'rates') drawRatesBarChart(x + 18, graphContentY, R - 36, 320);
   else if (p.id === 'co2' && state.tab === 'birdseye') drawCo2BirdsEye(x + 18, graphContentY, R - 36);
@@ -1666,6 +1815,8 @@ function rightbar() {
   else if (p.id === 'thermal') drawThermalResults(x + 18, graphContentY, R - 36);
   else if (p.id === 'hooke') drawHookeResults(x + 18, graphContentY, R - 36);
   else if (p.id === 'specificheat') drawSpecificHeatResults(x + 18, graphContentY, R - 36);
+  else if (p.id === 'latentheat') drawLatentHeatResults(x + 18, graphContentY, R - 36);
+  else if (p.id === 'ivdevices') drawIvDeviceResults(x + 18, graphContentY, R - 36);
   else if (p.id === 'fieldlines') drawFieldPatternResults(x + 18, graphContentY, R - 36);
   else drawGraph(x + 18, graphContentY, R - 36, 280);
   if (state.tab === 'graph' && currentGraphModalKind(p.id)) drawGraphExpandButton(x, R);
@@ -2484,6 +2635,98 @@ function drawSpecificHeatResults(x, y, w) {
   text(state.complete ? `${shcCalculatedSpecificHeat()} J kg⁻¹ °C⁻¹` : 'calculate after heating', x + 12, summaryY + 36, 11.4, '#c05f31', 800);
   wrappedText(state.complete ? `18,000 J ÷ (1.00 kg × ${shcTemperatureRiseC().toFixed(1)} °C) · ${currentShcMaterial().label}` : 'The gradient of E against Δθ equals mc.', x + 12, summaryY + 53, w - 24, 7.8, C.ink, 600, 9, 2);
 }
+function drawLatentCurvePlot(x, y, w, h, expanded = false) {
+  const material = currentLatentMaterial(), left = x + (expanded ? 86 : 52), right = x + w - (expanded ? 32 : 12), top = y + (expanded ? 42 : 34), bottom = y + h - (expanded ? 66 : 48), gw = right - left, gh = bottom - top;
+  rr(x, y, w, h, expanded ? 10 : 7, '#ffffff', C.line);
+  const temperatureY = value => bottom - (value - 20) / 70 * gh, timeX = value => left + value / latentSimulatedStageSeconds * gw;
+  ctx.fillStyle = 'rgba(211,143,55,.1)';
+  const bandTop = temperatureY(material.meltingPointC + 1.35), bandBottom = temperatureY(material.meltingPointC - 1.35);
+  ctx.fillRect(left, bandTop, gw, bandBottom - bandTop);
+  ctx.strokeStyle = '#d8e1e3'; ctx.lineWidth = 1;
+  const yTicks = [20, 34, 48, 62, 76, 90];
+  yTicks.forEach(value => { const yy = temperatureY(value); ctx.beginPath(); ctx.moveTo(left, yy); ctx.lineTo(right, yy); ctx.stroke(); text(String(value), left - (expanded ? 14 : 7), yy, expanded ? 11 : 7.5, C.muted, 600, 'right') });
+  [0, 120, 240, 360, 480].forEach(value => text(String(value), timeX(value), bottom + (expanded ? 21 : 13), expanded ? 11 : 7.5, C.muted, 600, 'center'));
+  ctx.strokeStyle = C.ink; ctx.lineWidth = expanded ? 2.6 : 2; ctx.beginPath(); ctx.moveTo(left, top); ctx.lineTo(left, bottom); ctx.lineTo(right, bottom); ctx.stroke();
+  const series = [
+    { id: 'heating', label: 'HEATING', colour: '#d87436', results: state.latentHeatingResults },
+    { id: 'cooling', label: 'COOLING', colour: '#3c82ad', results: state.latentCoolingResults }
+  ];
+  series.forEach(entry => {
+    if (!entry.results.length) return;
+    ctx.strokeStyle = entry.colour; ctx.lineWidth = expanded ? 4 : 3; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.beginPath();
+    entry.results.forEach((point, index) => { const px = timeX(point.time_s), py = temperatureY(point.temperature_c); index ? ctx.lineTo(px, py) : ctx.moveTo(px, py) }); ctx.stroke();
+    entry.results.forEach(point => { const px = timeX(point.time_s), py = temperatureY(point.temperature_c); ctx.fillStyle = '#ffffff'; ctx.strokeStyle = entry.colour; ctx.lineWidth = expanded ? 2.5 : 1.8; ctx.beginPath(); ctx.arc(px, py, expanded ? 5 : 3, 0, Math.PI * 2); ctx.fill(); ctx.stroke() });
+  });
+  ctx.lineJoin = 'miter'; ctx.lineCap = 'butt';
+  if (expanded) {
+    ctx.save(); ctx.translate(x + 22, top + gh / 2); ctx.rotate(-Math.PI / 2); text('sample temperature / °C', 0, 0, 12.5, C.muted, 700, 'center'); ctx.restore();
+    text('time from start of stage / s', left + gw / 2, bottom + 51, 12.5, C.muted, 700, 'center');
+    rr(right - 255, top + 10, 245, 36, 7, 'rgba(248,250,249,.94)', C.line);
+    ctx.strokeStyle = '#d87436'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(right - 238, top + 28); ctx.lineTo(right - 205, top + 28); ctx.stroke(); text('HEATING', right - 196, top + 28, 10.5, C.ink, 750);
+    ctx.strokeStyle = '#3c82ad'; ctx.beginPath(); ctx.moveTo(right - 112, top + 28); ctx.lineTo(right - 79, top + 28); ctx.stroke(); text('COOLING', right - 70, top + 28, 10.5, C.ink, 750);
+    text(`${material.meltingPointC} °C phase-change band`, left + 12, bandTop - 11, 10.5, '#a8652e', 750);
+  } else {
+    text('temperature / °C', x + 7, top - 18, 7.5, C.muted, 700);
+    text('time / s', right, bottom + 34, 7.5, C.muted, 700, 'right');
+    ctx.strokeStyle = '#d87436'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(left + 5, top + 12); ctx.lineTo(left + 25, top + 12); ctx.stroke(); text('HEAT', left + 30, top + 12, 7.2, C.ink, 750);
+    ctx.strokeStyle = '#3c82ad'; ctx.beginPath(); ctx.moveTo(left + 72, top + 12); ctx.lineTo(left + 92, top + 12); ctx.stroke(); text('COOL', left + 97, top + 12, 7.2, C.ink, 750);
+  }
+}
+function drawLatentHeatResults(x, y, w) {
+  const compact = H < 700, descriptionY = graphSidebarDescriptionY(y), chartY = descriptionY + (compact ? 26 : 32), chartH = compact ? 205 : 245, material = currentLatentMaterial();
+  text('HEATING + COOLING CURVES', x, y, 9.4, C.muted, 800);
+  wrappedText(`${material.label} · separate time axes for heating and cooling`, x, descriptionY, w, 8.4, C.ink, 600, 10, 2);
+  drawLatentCurvePlot(x, chartY, w, chartH, false);
+  const summaryY = chartY + chartH + 12;
+  rr(x, summaryY, w, compact ? 74 : 88, 7, state.complete ? '#faefe8' : '#eef3f2', state.complete ? '#dda17e' : C.line);
+  text('CHANGE OF STATE', x + 12, summaryY + 17, 7.8, C.muted, 800);
+  text(state.complete ? `${material.meltingPointC} °C plateau` : 'complete both stages', x + 12, summaryY + 37, 11.5, '#b85f39', 800);
+  wrappedText(state.complete ? 'Temperature stays nearly constant while latent heat changes the arrangement of particles, not their mean kinetic energy.' : `${state.latentHeatingResults.length} heating and ${state.latentCoolingResults.length} cooling readings logged.`, x + 12, summaryY + 55, w - 24, compact ? 7.5 : 8.2, C.ink, 600, compact ? 8.8 : 10, 3);
+}
+function drawExpandedLatentHeatGraph(x, y, w, h) {
+  const material = currentLatentMaterial(), cardY = y + 48, cardH = h - 48;
+  text('HEATING AND COOLING CURVES', x, y + 6, 13, C.muted, 850);
+  text(`${material.label} · ${state.latentHeatingResults.length + state.latentCoolingResults.length} readings`, x + w, y + 6, 12, '#c66a43', 750, 'right');
+  text(`Plateaux centre on ${material.meltingPointC} °C while latent heat is absorbed during melting and released during freezing.`, x, y + 28, 11, C.ink, 600);
+  drawLatentCurvePlot(x, cardY, w, cardH, true);
+}
+function drawIvCurvePlot(x, y, w, h, expanded = false) {
+  const left = x + (expanded ? 92 : 47), right = x + w - (expanded ? 32 : 12), top = y + (expanded ? 56 : 43), bottom = y + h - (expanded ? 70 : 42), gw = right - left, gh = bottom - top;
+  const px = voltage => left + (voltage + 6) / 12 * gw, py = current => bottom - (current + .22) / .44 * gh;
+  rr(x, y, w, h, expanded ? 10 : 7, '#ffffff', C.line);
+  ctx.strokeStyle = '#dce4e5'; ctx.lineWidth = 1;
+  [-6, -3, 0, 3, 6].forEach(value => { const xx = px(value); ctx.beginPath(); ctx.moveTo(xx, top); ctx.lineTo(xx, bottom); ctx.stroke(); text(String(value), xx, bottom + (expanded ? 22 : 13), expanded ? 11 : 7.4, C.muted, 650, 'center') });
+  [-.2, -.1, 0, .1, .2].forEach(value => { const yy = py(value); ctx.beginPath(); ctx.moveTo(left, yy); ctx.lineTo(right, yy); ctx.stroke(); text(value.toFixed(1), left - (expanded ? 14 : 7), yy, expanded ? 11 : 7.2, C.muted, 650, 'right') });
+  ctx.strokeStyle = C.ink; ctx.lineWidth = expanded ? 2.5 : 1.8; ctx.beginPath(); ctx.moveTo(left, py(0)); ctx.lineTo(right, py(0)); ctx.moveTo(px(0), top); ctx.lineTo(px(0), bottom); ctx.stroke();
+  const series = ivDeviceDefinitions.map((definition, index) => ({ definition, readings: state.ivResults.find(result => result.device === definition.id)?.readings || (state.ivDeviceIndex === index ? state.ivSweepReadings : []), saved: state.ivResults.some(result => result.device === definition.id) }));
+  series.forEach(({ definition, readings, saved }) => {
+    if (!readings.length) return;
+    const ordered = [...readings].sort((a, b) => a.voltage_v - b.voltage_v);
+    ctx.strokeStyle = definition.colour; ctx.lineWidth = expanded ? 4 : 2.7; ctx.globalAlpha = saved ? 1 : .5; ctx.setLineDash(saved ? [] : [5, 4]); ctx.beginPath();
+    ordered.forEach((reading, index) => { const xValue = px(reading.voltage_v), yValue = py(reading.current_a); index ? ctx.lineTo(xValue, yValue) : ctx.moveTo(xValue, yValue) }); ctx.stroke(); ctx.setLineDash([]);
+    ordered.forEach(reading => { ctx.fillStyle = '#fff'; ctx.strokeStyle = definition.colour; ctx.lineWidth = expanded ? 2.4 : 1.6; ctx.beginPath(); ctx.arc(px(reading.voltage_v), py(reading.current_a), expanded ? 4.8 : 2.8, 0, Math.PI * 2); ctx.fill(); ctx.stroke() }); ctx.globalAlpha = 1;
+  });
+  const legendY = y + (expanded ? 27 : 20), slot = (right - left) / 3;
+  ivDeviceDefinitions.forEach((definition, index) => { const lx = left + slot * index; ctx.strokeStyle = definition.colour; ctx.lineWidth = expanded ? 4 : 3; ctx.beginPath(); ctx.moveTo(lx, legendY); ctx.lineTo(lx + (expanded ? 34 : 18), legendY); ctx.stroke(); text(definition.short, lx + (expanded ? 42 : 23), legendY, expanded ? 10.5 : 6.8, C.ink, 750) });
+  if (expanded) { ctx.save(); ctx.translate(x + 23, top + gh / 2); ctx.rotate(-Math.PI / 2); text('current / A', 0, 0, 12.5, C.muted, 700, 'center'); ctx.restore(); text('potential difference across device / V', left + gw / 2, bottom + 53, 12.5, C.muted, 700, 'center') }
+  else { text('current / A', x + 6, top - 13, 7.2, C.muted, 700); text('p.d. / V', right, bottom + 29, 7.2, C.muted, 700, 'right') }
+}
+function drawIvDeviceResults(x, y, w) {
+  const compact = H < 700, descriptionY = graphSidebarDescriptionY(y), chartY = descriptionY + 31, chartH = compact ? 224 : 270;
+  text('DEVICE I–V CHARACTERISTICS', x, y, 9.4, C.muted, 800);
+  wrappedText(`${state.ivResults.length} of 3 curves saved · voltage reversed through zero`, x, descriptionY, w, 8.4, C.ink, 600, 10, 2);
+  drawIvCurvePlot(x, chartY, w, chartH, false);
+  const summaryY = chartY + chartH + 11, current = currentIvDevice(); rr(x, summaryY, w, compact ? 78 : 94, 7, state.complete ? '#f8eaf0' : '#eef3f2', state.complete ? '#d79ab0' : C.line);
+  text(state.complete ? 'THREE CURVES COMPLETE' : current.label, x + 12, summaryY + 17, 7.7, state.complete ? '#b7466a' : C.muted, 800);
+  wrappedText(state.complete ? 'Resistor: straight line. Lamp: decreasing gradient as it heats. LED: one-way current after its threshold.' : current.conclusion, x + 12, summaryY + 38, w - 24, compact ? 7.5 : 8.3, C.ink, 620, compact ? 9 : 10.5, 4);
+}
+function drawExpandedIvDeviceGraph(x, y, w, h) {
+  const cardY = y + 48, cardH = h - 48;
+  text('OHMIC AND NON-OHMIC I–V CURVES', x, y + 6, 13, C.muted, 850);
+  text(`${state.ivResults.length} of 3 devices recorded`, x + w, y + 6, 12, '#c94f72', 750, 'right');
+  text('Ammeter in series; voltmeter in parallel. Positive and negative supply polarities are plotted.', x, y + 28, 11, C.ink, 600);
+  drawIvCurvePlot(x, cardY, w, cardH, true);
+}
 function drawExpandedLineGraph(x, y, w, h) {
   const s = currentGraphSpec(), cardY = y + 38, cardH = h - 38, left = x + 98, right = x + w - 34, top = cardY + 36, bottom = cardY + cardH - 72, gw = right - left, gh = bottom - top;
   const fmt = (value, dp = 0) => Number(value).toFixed(dp);
@@ -2588,7 +2831,9 @@ function drawGraphModal() {
   text('✕', x + w - 35, y + 37, 15, '#ffffff', 850, 'center');
   hit('close-graph-modal', x + w - 52, y + 20, 34, 34);
   const contentX = x + 32, contentY = y + 88, contentW = w - 64, contentH = h - 112;
-  if (kind === 'line-graph') drawExpandedLineGraph(contentX, contentY, contentW, contentH);
+  if (p.id === 'latentheat') drawExpandedLatentHeatGraph(contentX, contentY, contentW, contentH);
+  else if (p.id === 'ivdevices') drawExpandedIvDeviceGraph(contentX, contentY, contentW, contentH);
+  else if (kind === 'line-graph') drawExpandedLineGraph(contentX, contentY, contentW, contentH);
   else drawExpandedTemperatureBarChart(contentX, contentY, contentW, contentH, kind);
 }
 function hookeFocusViewport() {
@@ -2773,9 +3018,9 @@ function activateCapture(label) {
     state.captureStage = 9; state.running = false; state.progress = 1;
     state.complete = true;
     state.toast = `Study complete: First catch ${state.captureFirstCatch}, Second catch ${state.captureSecondCatch}, Recaptured ${state.captureRecaptured}.`;
-  } else if (label === 'VIEW RESULTS' || label === 'RESULTS') {
+  } else if (label === 'VIEW RESULTS' || label === 'RESULTS' || label === 'DATA') {
     state.tab = 'graph'; state.toast = `Lincoln Index population estimate calculated.`;
-  } else if (label === 'RESET STUDY') resetCapturePractical();
+  } else if (label === 'RESET STUDY' || label === 'RESET') resetCapturePractical();
 }
 function resetShoreTransectPractical() {
   state.running = false; state.complete = false; state.time = 0; state.progress = 0; state.points = [];
@@ -3233,6 +3478,32 @@ function activateSpecificHeat(label) {
     state.toast = state.complete ? 'The energy–temperature-rise graph has gradient mc = 0.900 kJ °C⁻¹; dividing by 1.00 kg gives c = 900 J kg⁻¹ °C⁻¹.' : 'Complete the heating run before calculating specific heat capacity.';
   } else if (label === 'RESET PRACTICAL' || label === 'RESET') resetSpecificHeatPractical();
 }
+function resetLatentHeatPractical() {
+  state.running = false; state.complete = false; state.time = 0; state.progress = 0; state.points = [];
+  state.temp = 20; state.burner = false; state.latentStage = 0; state.latentTimer = 0; state.latentTemperatureC = 20; state.latentPhaseFraction = 0;
+  state.latentHeatingResults = []; state.latentCoolingResults = []; state.tab = 'bench';
+  state.toast = `${currentLatentMaterial().label} is solid at room temperature. Clamp the boiling tube in the 500 cm³ beaker water bath and position the thermometer bulb centrally in the sample.`;
+}
+function activateLatentHeat(label) {
+  const stage = state.latentStage || 0;
+  if (label === 'ASSEMBLE BATH' && stage === 0) {
+    state.latentStage = 1; state.latentTimer = 0; state.running = true; state.complete = false; state.progress = 0;
+    state.toast = 'The boiling tube arcs into the water bath, the upper clamp closes, and the thermometer lowers until its bulb is surrounded by the solid sample.';
+  } else if (label === 'START HEATING' && stage === 2) {
+    state.latentStage = 3; state.latentTimer = 0; state.running = true; state.complete = false; state.burner = true; state.time = 0; state.latentTemperatureC = 20; state.latentPhaseFraction = 0;
+    state.latentHeatingResults = [{ time_s: 0, temperature_c: 20, phase: 'solid' }]; state.latentCoolingResults = []; syncLatentHeatGraphPoints();
+    state.toast = 'The Bunsen changes to a blue heating flame. Temperature is logged every 40 simulated seconds as the solid warms and melts.';
+  } else if (label === 'START COOLING' && stage === 4) {
+    state.latentStage = 5; state.latentTimer = 0; state.running = true; state.burner = false; state.time = 0; state.latentCoolingResults = [{ time_s: 0, temperature_c: +currentLatentMaterial().highTemperatureC.toFixed(1), phase: 'liquid' }]; syncLatentHeatGraphPoints();
+    state.toast = 'The gas tap closes and the flame goes out. Equal-interval logging continues while the liquid cools and freezes.';
+  } else if (label.startsWith('SAMPLE:') && !state.running && stage <= 2) {
+    state.latentMaterial = state.latentMaterial === 'paraffin' ? 'stearic' : 'paraffin'; resetLatentHeatPractical(); lab3d.signature = '';
+    state.toast = `Changed to ${currentLatentMaterial().label.toLowerCase()} (${currentLatentMaterial().sampleForm}); its phase-change plateau is near ${currentLatentMaterial().meltingPointC} °C.`;
+  } else if (label === 'VIEW CURVES' || label === 'CURVES' || label === 'GRAPH') {
+    state.tab = 'graph';
+    state.toast = state.complete ? `Both curves flatten near ${currentLatentMaterial().meltingPointC} °C because energy changes intermolecular bonding during the phase change rather than temperature.` : 'Complete heating and cooling to reveal both change-of-state plateaux.';
+  } else if (label === 'RESET' || label === 'RESET PRACTICAL') resetLatentHeatPractical();
+}
 function resetWireLengthPractical() {
   state.running = false;
   state.complete = false;
@@ -3270,6 +3541,36 @@ function activateWireLength(label) {
     state.toast = 'The resistance–length graph is linear because material and cross-sectional area remained constant.';
   } else if (label === 'RESET SERIES') resetWireLengthPractical();
 }
+function resetIvDevicePractical() {
+  state.running = false; state.complete = false; state.time = 0; state.progress = 0; state.points = []; state.tab = 'bench';
+  state.ivStage = 0; state.ivTimer = 0; state.ivDeviceIndex = 0; state.ivPreviousDeviceIndex = 0; state.ivDeviceTransition = 1;
+  state.ivSupplyV = 0; state.ivDeviceV = 0; state.ivCurrentA = 0; state.ivLastSampleIndex = 0; state.ivSweepReadings = []; state.ivResults = []; state.ivPulseClock = 0;
+  state.toast = 'The 100 Ω resistor is seated in the test socket. Trace the red series path through the ammeter and the violet voltmeter branch across the device, then run the I–V sweep.';
+}
+function activateIvDevices(label) {
+  if (label === 'RESET') { resetIvDevicePractical(); return }
+  if (label === 'CURVES' || label === 'VIEW CURVES' || label === 'GRAPH') { state.tab = 'graph'; state.toast = state.complete ? 'Compare all three curves: linear resistor, heating filament and one-way LED conduction.' : 'Saved curves are shown as solid lines; the current unsaved sweep is shown as a dashed line.'; return }
+  if (label.startsWith('DEVICE · ') && state.ivStage === 0 && !state.ivResults.length) {
+    state.ivPreviousDeviceIndex = state.ivDeviceIndex; state.ivDeviceIndex = (state.ivDeviceIndex + 1) % ivDeviceDefinitions.length; state.ivDeviceTransition = 0; state.ivStage = 4; state.running = false;
+    state.toast = `The ${currentIvDevice().label.toLowerCase()} enters from beyond the right edge and settles into the central test socket while the supply remains at 0 V.`; return
+  }
+  if (label === 'RUN I–V SWEEP' && state.ivStage === 0) {
+    state.ivStage = 1; state.ivTimer = 0; state.ivLastSampleIndex = 0; state.ivSupplyV = 0; state.ivSweepReadings = [ivElectricalReading(currentIvDevice().id, 0)]; state.running = false; state.complete = false; state.tab = 'bench';
+    state.toast = `Starting the ${currentIvDevice().short.toLowerCase()} sweep at 0 V. The switch closes and the power-pack dial rises in one-volt intervals.`; return
+  }
+  if (label === 'SAVE CURVE' && state.ivStage === 2) {
+    const result = { device: currentIvDevice().id, label: currentIvDevice().label, readings: [...state.ivSweepReadings].sort((a, b) => a.voltage_v - b.voltage_v), conclusion: currentIvDevice().conclusion };
+    const existing = state.ivResults.findIndex(item => item.device === result.device); if (existing >= 0) state.ivResults[existing] = result; else state.ivResults.push(result);
+    state.progress = state.ivResults.length / ivDeviceDefinitions.length; state.ivStage = state.ivResults.length === ivDeviceDefinitions.length ? 5 : 3; state.complete = state.ivStage === 5; state.running = false;
+    if (state.complete) state.tab = 'graph';
+    state.toast = state.complete ? 'All three curves are saved. The resistor is ohmic; the hot filament and LED are non-ohmic in different ways.' : `${currentIvDevice().short} curve saved with ${result.readings.length} settled readings. Change to the next device while the supply is isolated.`; return
+  }
+  if (label === 'NEXT DEVICE' && state.ivStage === 3) {
+    const nextIndex = ivDeviceDefinitions.findIndex(definition => !state.ivResults.some(result => result.device === definition.id));
+    state.ivPreviousDeviceIndex = state.ivDeviceIndex; state.ivDeviceIndex = nextIndex < 0 ? state.ivDeviceIndex : nextIndex; state.ivDeviceTransition = 0; state.ivStage = 4; state.ivTimer = 0; state.ivSupplyV = 0; state.ivDeviceV = 0; state.ivCurrentA = 0; state.ivSweepReadings = []; state.running = false;
+    state.toast = `The previous device exits to the left while the ${currentIvDevice().label.toLowerCase()} enters from beyond the right edge of the de-energised workbench.`;
+  }
+}
 function resetFieldLinePractical() {
   state.running = false;
   state.complete = false;
@@ -3286,7 +3587,7 @@ function resetNuclearPractical() {
   state.running = false; state.complete = false; state.progress = 0; state.time = 0; state.tab = 'bench';
   state.nuclearStage = 0; state.nuclearTimer = 0; state.nuclearSource = 0; state.nuclearPreviousSource = 0; state.nuclearSourceTransition = 1;
   state.nuclearAbsorber = 0; state.nuclearCount = 0; state.nuclearAnimAbsorber = 0; state.nuclearAnimProgress = 1; state.nuclearResults = []; state.nuclearPulseClock = 0;
-  state.toast = 'The source–absorber–detector rail is aligned at a fixed distance. Select a sealed source; it will be transferred with long-handled tongs.';
+  state.toast = 'The long-handled tongs are parked visibly beside the shielded store. Select a sealed source; the lid will open slightly before pickup.';
 }
 function activateFieldLines(label) {
   const stage = state.fieldStage || 0, configuration = fieldConfigurations[state.fieldConfigIndex];
@@ -3319,7 +3620,7 @@ function activateNuclear(label) {
     state.nuclearSource = (state.nuclearSource + 1) % nuclearSources.length;
     state.nuclearSourceTransition = 0; state.nuclearStage = 1; state.complete = false;
     const source = nuclearSources[state.nuclearSource];
-    state.toast = state.nuclearSource ? `Using remote tongs to lift the sealed ${source.isotope} ${source.symbol} source from its shielded store and clamp it at the fixed rail mark.` : 'The source is being returned to its labelled shielded store with remote tongs.';
+    state.toast = state.nuclearSource ? `The store lid is opening slightly; the visible remote tongs will then lift the sealed ${source.isotope} ${source.symbol} source and clamp it at the fixed mark.` : 'The store lid is opening slightly so the visible remote tongs can return the source safely.';
     return
   }
   if (label.startsWith('ABSORBER · ')) {
@@ -3351,7 +3652,7 @@ function activate(label) {
   if (id === 'potometer' && ['INTRODUCE BUBBLE', 'INTRODUCING…', 'ALIGN TO ZERO', 'ALIGNING…', 'START 5 MIN RUN', 'MEASURING…', 'NEXT WIND SPEED', 'VIEW GRAPH', 'RESET SERIES', 'GRAPH'].includes(label)) { activatePotometer(label); draw(); return }
   if (id === 'pondweed' && ['- 10cm', '+ 10cm', 'LAMP ON', 'LAMP OFF', 'COUNT 1 MIN', 'RESET PRACTICAL', 'METHOD', 'RESULTS', 'GRAPH'].includes(label)) { activatePondweed(label); draw(); return }
   if (id === 'quadrats' && ['LAY GRID TAPES', 'MEASURING…', 'GENERATE POINT', 'RANDOMISING…', 'PLACE QUADRAT', 'QUADRAT FALLING…', 'COUNT DAISIES', 'COUNTING…', 'RECORD SAMPLE', 'NEXT SAMPLE', 'VIEW RESULTS', 'RESET STUDY', 'RESULTS'].includes(label)) { activateQuadrat(label); draw(); return }
-  if (id === 'capture' && ['SET TRAPS', 'WAITING OVERNIGHT…', 'FIRST CAPTURE', 'MARKING BUGS…', 'RELEASE & WAIT', 'WAITING 24H…', 'SECOND CAPTURE', 'COUNTING…', 'RECORD', 'VIEW RESULTS', 'RESET STUDY', 'RESULTS'].includes(label)) { activateCapture(label); draw(); return }
+  if (id === 'capture' && ['SET TRAPS', 'SETTING + CAPTURING…', 'FIRST CAPTURE', 'COUNTING + MARKING…', 'RELEASE & WAIT', 'RELEASING + MIXING…', 'SECOND CAPTURE', 'RECAPTURE COUNT…', 'RECORD', 'VIEW RESULTS', 'RESET STUDY', 'RESET', 'RESULTS', 'DATA'].includes(label)) { activateCapture(label); draw(); return }
   if (id === 'shoretransect' && ['LAY TRANSECT', 'EXTENDING TAPE…', 'MOVE QUADRAT', 'MOVING QUADRAT…', 'SURVEY QUADRAT', 'IDENTIFYING…', 'RECORD SAMPLE', 'NEXT POSITION', 'VIEW ZONATION', 'RESET TRANSECT', 'ZONATION'].includes(label)) { activateShoreTransect(label); draw(); return }
   if (id === 'ripple' && ['LEVEL TANK', 'LEVELLING…', 'START VIBRATOR', 'WAVES FORMING…', 'MEASURE 10 WAVES', 'STROBE + RULER…', 'RECORD SPEED', 'NEXT FREQUENCY', 'VIEW RESULTS', 'RESET SERIES', 'RESULTS'].includes(label)) { activateRipple(label); draw(); return }
   if (id === 'newton2' && ['FORCE -0.1N', 'FORCE +0.1N', 'RELEASE TROLLEY', 'RESET TROLLEY', 'RESET PRACTICAL', 'METHOD', 'RESULTS', 'GRAPH'].includes(label)) { activateNewton2(label); draw(); return }
@@ -3362,7 +3663,9 @@ function activate(label) {
   if (id === 'density' && ['WEIGH OBJECT', 'FILL EUREKA CAN', 'LOWER OBJECT', 'RECORD DENSITY', 'CHANGE SAMPLE', 'RESET PRACTICAL', 'METHOD', 'RESULTS', 'GRAPH'].includes(label)) { activateDensity(label); draw(); return }
   if (id === 'hooke' && ['RECORD ZERO', 'ADDING + SETTLING…', 'RECORD READING', 'ADD 100 g MASS', 'VIEW GRAPH', 'RESET SERIES', 'GRAPH'].includes(label)) { activateHooke(label); draw(); return }
   if (id === 'specificheat' && (label.startsWith('MATERIAL:') || ['PREPARE BLOCK', 'INSERTING + INSULATING…', 'START HEATING', 'HEATING…', 'CALCULATE c', 'VIEW GRAPH', 'RESET PRACTICAL', 'RESET', 'GRAPH'].includes(label))) { activateSpecificHeat(label); draw(); return }
+  if (id === 'latentheat' && (label.startsWith('SAMPLE:') || ['ASSEMBLE BATH', 'ASSEMBLING…', 'START HEATING', 'HEATING + LOGGING…', 'START COOLING', 'COOLING + LOGGING…', 'VIEW CURVES', 'CURVES', 'RESET', 'RESET PRACTICAL', 'GRAPH'].includes(label))) { activateLatentHeat(label); draw(); return }
   if (id === 'wirelength' && ['CLOSE SWITCH', 'READING SETTLING…', 'RECORD READING', 'NEXT LENGTH', 'MOVING CONTACT…', 'VIEW GRAPH', 'RESET SERIES', 'GRAPH'].includes(label)) { activateWireLength(label); draw(); return }
+  if (id === 'ivdevices' && (label.startsWith('DEVICE · ') || ['RUN I–V SWEEP', 'SWEEP RUNNING…', 'SAVE CURVE', 'NEXT DEVICE', 'CHANGING DEVICE…', 'VIEW CURVES', 'CURVES', 'GRAPH', 'RESET'].includes(label))) { activateIvDevices(label); draw(); return }
   if (id === 'nuclear' && (label.startsWith('SOURCE · ') || label.startsWith('ABSORBER · ') || ['MEASURE 10 s', 'STOP COUNT', 'RESET'].includes(label))) { activateNuclear(label); draw(); return }
   if (id === 'fieldlines' && ['SPRINKLE FILINGS', 'SPRINKLING…', 'TAP PAPER', 'FILINGS ALIGNING…', 'RECORD PATTERN', 'CHANGING MAGNETS…', 'VIEW PATTERNS', 'RESET STUDY', 'PATTERNS'].includes(label)) { activateFieldLines(label); draw(); return }
   if (id === 'rates' && ['MOVE TO CROSS', 'MOVING FLASK…', 'ADD HCl', 'REACTION RUNNING…', 'NEXT TEMPERATURE', 'VIEW GRAPH', 'RESET SERIES', "BIRD'S EYE", 'HEATING BATH…'].includes(label)) { activateRates(label); draw(); return }
@@ -3489,6 +3792,7 @@ canvas.addEventListener('pointerdown', e => {
       else if (practicals[state.selected].id === 'osmosis') resetOsmosisPractical();
       else if (practicals[state.selected].id === 'potometer') resetPotometerPractical();
       else if (practicals[state.selected].id === 'quadrats') resetQuadratPractical();
+      else if (practicals[state.selected].id === 'capture') resetCapturePractical();
       else if (practicals[state.selected].id === 'shoretransect') resetShoreTransectPractical();
       else if (practicals[state.selected].id === 'ripple') resetRipplePractical();
     }
@@ -3502,7 +3806,7 @@ canvas.addEventListener('pointerdown', e => {
     state.pour = null; state.drag = null; state.dose = null; state.graphModal = false; state.reactantSafety = null; state.hookeFocusModal = false; state.hookeFocusProgress = 0; state.lastReactant = null; state.particles = []; state.chromSelectedDye = null; state.electroRecorded = false;
     state.tab = practicals[r.data].id === 'free' ? 'equipment' : 'bench';
     const selectedId = practicals[r.data].id;
-    if (selectedId === 'rates') resetRatesPractical(); else if (selectedId === 'mass') resetMassPractical(); else if (selectedId === 'hydrogen') resetHydrogenPractical(); else if (selectedId === 'electro') resetElectroPractical(); else if (selectedId === 'titration') resetTitrationPractical(); else if (selectedId === 'thermite') resetThermitePractical(); else if (selectedId === 'starchleaf') resetStarchPractical(); else if (selectedId === 'lipase') resetLipasePractical(); else if (selectedId === 'osmosis') resetOsmosisPractical(); else if (selectedId === 'potometer') resetPotometerPractical(); else if (selectedId === 'quadrats') resetQuadratPractical(); else if (selectedId === 'shoretransect') resetShoreTransectPractical(); else if (selectedId === 'ripple') resetRipplePractical(); else if (selectedId === 'electromagnet') resetElectromagnetPractical(); else if (selectedId === 'convection') resetConvectionPractical(); else if (selectedId === 'conduction') resetConductionPractical(); else if (selectedId === 'thermal') resetThermalPractical(); else if (selectedId === 'density') resetDensityPractical(); else if (selectedId === 'hooke') resetHookePractical(); else if (selectedId === 'specificheat') resetSpecificHeatPractical(); else if (selectedId === 'wirelength') resetWireLengthPractical(); else if (selectedId === 'fieldlines') resetFieldLinePractical(); else if (selectedId === 'nuclear') resetNuclearPractical(); else state.toast = selectedId === 'free' ? 'Click equipment to add it, or drag it onto the bench.' : selectedId === 'water' ? 'Glassware assembled. Start the cooling water before switching on the electric heating mantle.' : `${practicals[r.data].gear.join(', ')} loaded onto the bench.`;
+    if (selectedId === 'rates') resetRatesPractical(); else if (selectedId === 'mass') resetMassPractical(); else if (selectedId === 'hydrogen') resetHydrogenPractical(); else if (selectedId === 'electro') resetElectroPractical(); else if (selectedId === 'titration') resetTitrationPractical(); else if (selectedId === 'thermite') resetThermitePractical(); else if (selectedId === 'starchleaf') resetStarchPractical(); else if (selectedId === 'lipase') resetLipasePractical(); else if (selectedId === 'osmosis') resetOsmosisPractical(); else if (selectedId === 'potometer') resetPotometerPractical(); else if (selectedId === 'quadrats') resetQuadratPractical(); else if (selectedId === 'capture') resetCapturePractical(); else if (selectedId === 'shoretransect') resetShoreTransectPractical(); else if (selectedId === 'ripple') resetRipplePractical(); else if (selectedId === 'electromagnet') resetElectromagnetPractical(); else if (selectedId === 'convection') resetConvectionPractical(); else if (selectedId === 'conduction') resetConductionPractical(); else if (selectedId === 'thermal') resetThermalPractical(); else if (selectedId === 'density') resetDensityPractical(); else if (selectedId === 'hooke') resetHookePractical(); else if (selectedId === 'specificheat') resetSpecificHeatPractical(); else if (selectedId === 'latentheat') resetLatentHeatPractical(); else if (selectedId === 'wirelength') resetWireLengthPractical(); else if (selectedId === 'ivdevices') resetIvDevicePractical(); else if (selectedId === 'fieldlines') resetFieldLinePractical(); else if (selectedId === 'nuclear') resetNuclearPractical(); else state.toast = selectedId === 'free' ? 'Click equipment to add it, or drag it onto the bench.' : selectedId === 'water' ? 'Glassware assembled. Start the cooling water before switching on the electric heating mantle.' : `${practicals[r.data].gear.join(', ')} loaded onto the bench.`;
     draw()
   }
   else if (r.id === 'crucible-lid') { removeMassLid(); draw() }
@@ -3818,19 +4122,26 @@ function update(dt, skipDraw = false) {
   }
   if (id === 'capture') {
     state.meadowWindClock += dt;
-    const stage = state.captureStage || 0;
-    if (state.running) {
+    const stage = state.captureStage || 0, duration = captureStageDurations[stage];
+    if (state.running && duration) {
       state.captureTimer += dt;
-      const duration = 2;
       const q = Math.max(0, Math.min(1, state.captureTimer / duration));
       if (stage === 1) {
-        if (q >= 1) { state.captureStage = 2; state.captureTimer = 0; state.running = false; state.toast = 'Traps set overnight. Ready for first capture.' }
+        const counts = captureVisibleCounts();
+        state.toast = q < .32 ? 'Lowering five recessed pitfall cups flush with the soil and setting raised rain covers.' : q < .48 ? 'Every trap is level with the turf so walking ground beetles can enter safely.' : `Overnight capture in progress: ${counts.firstCaught} of ${state.captureFirstCatch} beetles have entered the traps.`;
+        if (q >= 1) { state.captureStage = 2; state.captureTimer = 0; state.running = false; state.toast = `${state.captureFirstCatch} ground beetles caught; ${40 - state.captureFirstCatch} remain uncaptured in the meadow. Lift the sample gently into the inspection tray.` }
       } else if (stage === 3) {
-        if (q >= 1) { state.captureStage = 4; state.captureTimer = 0; state.running = false; state.toast = `${state.captureFirstCatch} bugs caught and marked. Ready to release.` }
+        const counts = captureVisibleCounts();
+        state.toast = q < .36 ? `Moving the first catch into the shallow inspection tray: ${counts.firstCaught}/${state.captureFirstCatch}.` : `Applying one tiny spot of non-toxic white paint to the elytra: ${counts.firstMarked}/${state.captureFirstCatch} marked.`;
+        if (q >= 1) { state.captureStage = 4; state.captureTimer = 0; state.running = false; state.toast = `All ${state.captureFirstCatch} beetles carry a small white paint dot. Release them at the capture site.` }
       } else if (stage === 5) {
-        if (q >= 1) { state.captureStage = 6; state.captureTimer = 0; state.running = false; state.toast = '24 hours elapsed. Ready for second capture.' }
+        const counts = captureVisibleCounts();
+        state.toast = q < .67 ? `Marked beetles are walking back into the meadow: ${counts.released}/${state.captureFirstCatch} released.` : `After 24 hours of mixing, beetles are entering the reset traps: ${counts.secondCaught}/${state.captureSecondCatch}.`;
+        if (q >= 1) { state.captureStage = 6; state.captureTimer = 0; state.running = false; state.toast = 'Twenty beetles are in the second trap sample. Retrieve and check each one for a white mark.' }
       } else if (stage === 7) {
-        if (q >= 1) { state.captureStage = 8; state.captureTimer = 0; state.running = false; state.toast = `Second catch: ${state.captureSecondCatch} bugs total. ${state.captureRecaptured} marked recaptured.` }
+        const counts = captureVisibleCounts();
+        state.toast = q < .43 ? `Arranging the second catch in the inspection tray: ${counts.secondCaught}/${state.captureSecondCatch} counted.` : `Checking dorsal paint spots with the magnifier: ${counts.secondMarked}/${state.captureRecaptured} marked recaptures identified.`;
+        if (q >= 1) { state.captureStage = 8; state.captureTimer = 0; state.running = false; state.toast = `Second catch: ${state.captureSecondCatch} beetles total, including ${state.captureRecaptured} with retained white marks.` }
       }
     }
     if (!skipDraw) draw();
@@ -4094,6 +4405,56 @@ function update(dt, skipDraw = false) {
       }
     }
     if (!skipDraw && (state.running || state.complete || state.shcStage > 0)) draw();
+    return;
+  }
+  if (id === 'latentheat') {
+    if (state.running && state.latentStage === 1) {
+      state.latentTimer += dt; state.time = state.latentTimer;
+      const q = latentClamp(state.latentTimer / latentStageDurations[1]); state.progress = q * .12;
+      state.toast = q < .32 ? 'The filled boiling tube lifts from its rack and arcs above the water bath.' : q < .68 ? 'The tube lowers into the warm-water beaker while the rubber-lined clamp closes around its neck.' : 'The thermometer slides down centrally; its bulb stops fully inside the solid sample without touching the glass.';
+      if (q >= 1) { state.latentStage = 2; state.latentTimer = 0; state.time = 0; state.running = false; state.progress = .12; state.toast = `Apparatus ready: ${currentLatentMaterial().label.toLowerCase()} at 20.0 °C. Start gentle heating and record every 40 simulated seconds.`; }
+    } else if (state.running && state.latentStage === 3) {
+      state.latentTimer = Math.min(latentStageDurations[3], state.latentTimer + dt);
+      const q = latentClamp(state.latentTimer / latentStageDurations[3]); state.time = q * latentSimulatedStageSeconds; state.latentTemperatureC = +latentHeatingTemperature(q).toFixed(1); state.temp = state.latentTemperatureC; state.latentPhaseFraction = latentPhaseFractionFor(3, q); state.progress = .12 + q * .46;
+      latentSampleTimesS.forEach(sampleTime => { if (state.time + 1e-6 < sampleTime || state.latentHeatingResults.some(item => item.time_s === sampleTime)) return; const sampleQ = sampleTime / latentSimulatedStageSeconds, fraction = latentPhaseFractionFor(3, sampleQ); state.latentHeatingResults.push({ time_s: sampleTime, temperature_c: +latentHeatingTemperature(sampleQ).toFixed(1), phase: fraction < .08 ? 'solid' : fraction > .92 ? 'liquid' : 'melting' }) });
+      state.latentHeatingResults.sort((a, b) => a.time_s - b.time_s); syncLatentHeatGraphPoints();
+      state.toast = q < .28 ? `The solid sample is warming: ${state.latentTemperatureC.toFixed(1)} °C.` : q < .65 ? `Melting plateau near ${currentLatentMaterial().meltingPointC} °C: energy is breaking intermolecular attractions while temperature changes very little.` : `The sample is fully liquid and its temperature rises again: ${state.latentTemperatureC.toFixed(1)} °C.`;
+      if (q >= 1) { state.latentStage = 4; state.latentTimer = latentStageDurations[3]; state.time = latentSimulatedStageSeconds; state.latentTemperatureC = currentLatentMaterial().highTemperatureC; state.temp = state.latentTemperatureC; state.latentPhaseFraction = 1; state.running = false; state.progress = .58; syncLatentHeatGraphPoints(); state.toast = `Heating curve complete at ${state.latentTemperatureC.toFixed(1)} °C. Turn off the Bunsen and start the cooling record immediately.`; }
+    } else if (state.running && state.latentStage === 5) {
+      state.latentTimer = Math.min(latentStageDurations[5], state.latentTimer + dt);
+      const q = latentClamp(state.latentTimer / latentStageDurations[5]); state.time = q * latentSimulatedStageSeconds; state.latentTemperatureC = +latentCoolingTemperature(q).toFixed(1); state.temp = state.latentTemperatureC; state.latentPhaseFraction = latentPhaseFractionFor(5, q); state.progress = .58 + q * .42;
+      latentSampleTimesS.forEach(sampleTime => { if (state.time + 1e-6 < sampleTime || state.latentCoolingResults.some(item => item.time_s === sampleTime)) return; const sampleQ = sampleTime / latentSimulatedStageSeconds, fraction = latentPhaseFractionFor(5, sampleQ); state.latentCoolingResults.push({ time_s: sampleTime, temperature_c: +latentCoolingTemperature(sampleQ).toFixed(1), phase: fraction < .08 ? 'solid' : fraction > .92 ? 'liquid' : 'freezing' }) });
+      state.latentCoolingResults.sort((a, b) => a.time_s - b.time_s); syncLatentHeatGraphPoints();
+      state.toast = q < .26 ? `The liquid cools rapidly at first: ${state.latentTemperatureC.toFixed(1)} °C.` : q < .66 ? `Freezing plateau near ${currentLatentMaterial().meltingPointC} °C: latent heat is released as the sample solidifies.` : `The solid sample now cools toward room temperature: ${state.latentTemperatureC.toFixed(1)} °C.`;
+      if (q >= 1) { state.latentStage = 6; state.latentTimer = latentStageDurations[5]; state.time = latentSimulatedStageSeconds; state.latentTemperatureC = 24; state.temp = 24; state.latentPhaseFraction = 0; state.running = false; state.complete = true; state.progress = 1; state.tab = 'graph'; syncLatentHeatGraphPoints(); state.toast = `Both curves are complete. The heating and cooling plateaux centre near ${currentLatentMaterial().meltingPointC} °C, showing latent heat transfer during the change of state.`; }
+    }
+    if (!skipDraw && (state.running || state.complete || state.latentStage > 0)) draw();
+    return;
+  }
+  if (id === 'ivdevices') {
+    let visualChanged = false;
+    if (state.ivStage === 1) {
+      state.ivTimer = Math.min(ivSweepDurationS, state.ivTimer + dt); state.time += dt; state.ivPulseClock += dt;
+      state.ivSupplyV = ivSweepSupply(state.ivTimer); const live = ivElectricalReading(currentIvDevice().id, state.ivSupplyV); state.ivDeviceV = live.voltage_v; state.ivCurrentA = live.current_a;
+      const sampleIndex = Math.min(ivSweepLevelsV.length - 1, Math.floor(state.ivTimer / ivSweepIntervalS + 1e-6));
+      for (let index = state.ivLastSampleIndex + 1; index <= sampleIndex; index++) {
+        const reading = ivElectricalReading(currentIvDevice().id, ivSweepLevelsV[index]), existing = state.ivSweepReadings.findIndex(item => item.supply_v === reading.supply_v);
+        if (existing >= 0) state.ivSweepReadings[existing] = reading; else state.ivSweepReadings.push(reading);
+      }
+      state.ivLastSampleIndex = sampleIndex; const midpoint = ivSweepIntervalS * 9;
+      state.toast = state.ivTimer < ivSweepIntervalS * 7 ? `${currentIvDevice().short}: increasing the forward supply — ${state.ivDeviceV.toFixed(2)} V across the device, ${(state.ivCurrentA * 1000).toFixed(1)} mA.` : state.ivTimer < midpoint ? 'The switch opens at 0 V. The polarity plugs cross over smoothly before the reverse sweep begins.' : `${currentIvDevice().short}: reverse-polarity sweep — ${state.ivDeviceV.toFixed(2)} V, ${(state.ivCurrentA * 1000).toFixed(1)} mA.`;
+      state.progress = Math.min(.98, (state.ivResults.length + state.ivTimer / ivSweepDurationS * .82) / ivDeviceDefinitions.length); visualChanged = true;
+      if (state.ivTimer >= ivSweepDurationS) {
+        state.ivSweepReadings = Array.from({ length: 13 }, (_, index) => ivElectricalReading(currentIvDevice().id, index - 6));
+        const final = ivElectricalReading(currentIvDevice().id, -6); state.ivSupplyV = final.supply_v; state.ivDeviceV = final.voltage_v; state.ivCurrentA = final.current_a;
+        state.ivStage = 2; state.running = false; state.toast = `${currentIvDevice().short} sweep complete with 13 settled readings from −6 V to +6 V. Save this curve before changing components.`;
+      }
+    } else if (state.ivStage === 4) {
+      state.ivDeviceTransition = Math.min(1, state.ivDeviceTransition + dt / ivDeviceChangeDurationS); state.ivTimer += dt; state.ivSupplyV = 0; state.ivDeviceV = 0; state.ivCurrentA = 0; visualChanged = true;
+      const q = state.ivDeviceTransition; state.toast = q < .28 ? 'The switch opens and the active component lifts vertically from the spring terminals.' : q < .78 ? `The ${currentIvDevice().label.toLowerCase()} glides in from outside the visible workbench.` : 'The module lowers into the two test sockets; both contacts close before the supply can be energised.';
+      if (q >= 1) { state.ivStage = 0; state.ivTimer = 0; state.running = false; state.ivPreviousDeviceIndex = state.ivDeviceIndex; state.toast = `${currentIvDevice().label} seated. The power pack is at 0 V and the circuit is ready for its positive and negative sweep.` }
+    }
+    if (visualChanged && !skipDraw) draw();
     return;
   }
   if (id === 'wirelength') {
@@ -4729,7 +5090,10 @@ window.render_game_to_text = () => {
         voltmeter_parallel_path: 'voltmeter connected directly across the fixed and sliding contacts',
         cable_lanes_separated: true,
         measured_segment_highlighted: true,
-        switch_aligned_with_instrument_row: true,
+        component_zones: ['rear supply and meters', 'middle safety switch', 'foreground ruler and test wire'],
+        switch_in_separate_middle_row: true,
+        compact_meter_displays: true,
+        meter_displays_clear_of_terminals: true,
         ammeter_label: 'A · SERIES',
         voltmeter_label: 'V · PARALLEL'
       },
@@ -4836,6 +5200,40 @@ window.render_game_to_text = () => {
       smooth_stage_animation: true
     };
     payload.controls = [`MATERIAL: ${currentShcMaterial().label}`, 'PREPARE BLOCK', 'START HEATING', 'CALCULATE c', 'RESET', 'GRAPH', 'METHOD', 'F fullscreen'];
+  } else if (id === 'latentheat') {
+    const material = currentLatentMaterial(), phases = ['solid sample and separate tube ready', 'moving tube into water bath and lowering thermometer', 'clamped apparatus ready to heat', 'heating and logging temperature', 'hot liquid ready to cool', 'cooling, freezing and logging temperature', 'heating and cooling curves complete'];
+    payload.graph_axes = { x: 'time from start of stage / s', y: 'sample temperature / °C', chart_type: 'two-series heating and cooling curve' };
+    payload.graph_readings = state.latentHeatingResults.length + state.latentCoolingResults.length;
+    payload.results_view = 'overlaid heating and cooling curves with highlighted phase-change band';
+    payload.latent_heat_practical = {
+      stage: state.latentStage,
+      phase: phases[state.latentStage],
+      elapsed_stage_s: +state.latentTimer.toFixed(2),
+      simulated_elapsed_s: +state.time.toFixed(1),
+      material: state.latentMaterial,
+      sample_label: material.label,
+      sample_form: material.sampleForm,
+      melting_point_c: material.meltingPointC,
+      temperature_c: +state.latentTemperatureC.toFixed(1),
+      liquid_fraction: +state.latentPhaseFraction.toFixed(3),
+      physical_state: state.latentPhaseFraction < .08 ? 'solid' : state.latentPhaseFraction > .92 ? 'liquid' : state.latentStage === 5 ? 'solidifying' : 'melting',
+      apparatus: {
+        beaker: '500 cm³ borosilicate beaker filled with water and supported above the Bunsen',
+        support: 'heavy clamp stand with lower beaker-support ring and upper rubber-lined boiling-tube clamp',
+        inner_vessel: 'wide boiling tube immersed in the water bath',
+        thermometer: 'graduated liquid-in-glass thermometer with bulb centred inside the sample',
+        heat_source: 'Bunsen burner on a worn heatproof mat',
+        sample_jars: ['paraffin wax pellets', 'stearic acid flakes']
+      },
+      initial_layout: { boiling_tube: 'lying flat on the left-side instrument tray', thermometer: 'lying flat beside the boiling tube', right_foreground_reserved_for: ['logger', 'sample jars', 'gas tap'] },
+      submerged_sample_optics: { pellets_or_flakes_remain_visible: true, molten_sample_remains_visible: true, water_reduces_brightness: true, subtle_blue_water_veil: true },
+      measurements: { interval_s: 40, heating: state.latentHeatingResults, cooling: state.latentCoolingResults },
+      curve_features: { heating_plateau_visible: state.latentHeatingResults.some(item => item.phase === 'melting'), cooling_plateau_visible: state.latentCoolingResults.some(item => item.phase === 'freezing'), plateau_temperature_c: material.meltingPointC, plateau_explanation: 'energy changes intermolecular potential energy during the change of state rather than increasing or decreasing mean particle kinetic energy' },
+      animation: { tube_arcs_and_lowers_into_bath: state.latentStage === 1, tube_and_thermometer_lift_together_from_left_tray: state.latentStage === 1, clamp_jaws_close_smoothly: state.latentStage === 1, thermometer_travels_to_bath_then_lowers_into_sample: state.latentStage === 1, thermometer_lowers_into_sample: state.latentStage === 1, thermometer_column_tracks_temperature_continuously: true, water_convection_and_bubbles_visible_while_heating: state.latentStage === 3, solid_pellets_or_flakes_morph_into_liquid: state.latentStage === 3, crystals_reform_smoothly_during_cooling: state.latentStage === 5, steam_and_heat_haze_fade_after_flame_off: state.latentStage >= 5 },
+      complete: state.complete,
+      conclusion: state.complete ? `Both curves flatten near ${material.meltingPointC} °C as ${material.label.toLowerCase()} changes state, demonstrating latent heat transfer without a large temperature change.` : null
+    };
+    payload.controls = [`SAMPLE: ${material.short}`, 'ASSEMBLE BATH', 'START HEATING', 'START COOLING', 'RESET', 'CURVES', 'METHOD', 'F fullscreen'];
   }
   return JSON.stringify(payload)
 };
@@ -4996,6 +5394,7 @@ window.render_game_to_text = () => {
       apparatus: {
         glass_chamber_and_capillary_completely_water_filled: true,
         single_measurement_bubble: state.potometerStage >= 1,
+        measurement_bubble_appearance: 'capillary-sized refractive air pocket with curved end menisci and specular highlights',
         graduated_capillary_mm: true,
         graduated_capillary_shifted_right: true,
         refiller_with_stopcock_and_plunger: true,
@@ -5052,15 +5451,28 @@ window.render_game_to_text = () => {
     };
     payload.controls = ['LAY GRID TAPES', 'GENERATE POINT', 'PLACE QUADRAT', 'COUNT DAISIES', 'RECORD SAMPLE', 'NEXT SAMPLE', 'RESET STUDY', 'RESULTS', 'METHOD', 'F fullscreen'];
   } else if (id === 'capture') {
-    const phases = ['meadow ready', 'traps waiting overnight', 'ready for first capture', 'marking bugs', 'ready to release', 'waiting 24 hours', 'ready for second capture', 'counting second catch', 'ready to record', 'study complete'];
+    const phases = ['meadow population moving naturally; traps ready to set', 'installing recessed covered traps while other beetles continue roaming', 'first sample held safely in the five traps while uncaptured beetles remain in the meadow', 'transferring, counting and applying one white dorsal paint spot to each beetle', 'sixteen visibly marked beetles arranged in the inspection tray while uncaptured beetles continue roaming', 'releasing marked beetles, allowing 24-hour mixing and forming the second trap sample', 'second sample held in the reset traps', 'transferring and counting twenty beetles while identifying six retained white marks', 'second sample arranged with exactly six marked recaptures', 'Lincoln Index study complete'], visible = captureVisibleCounts(), stageDuration = captureStageDurations[state.captureStage] || 0, stageProgress = captureStageProgress(), estimateExact = state.captureFirstCatch * state.captureSecondCatch / state.captureRecaptured, marksOnTray = state.captureStage === 3 ? visible.firstMarked : state.captureStage === 4 ? state.captureFirstCatch : state.captureStage >= 7 ? visible.secondMarked : 0, firstUncapturedTotal = 40 - state.captureFirstCatch, firstUncapturedVisible = state.captureStage <= 4 ? Math.min(firstUncapturedTotal, state.captureSecondCatch - state.captureRecaptured) : 0;
     payload.graph_axes = null; payload.graph_readings = state.complete ? 1 : 0; payload.results_view = 'Lincoln Index calculation';
     payload.capture_mark_recapture_practical = {
       stage: state.captureStage,
       phase: phases[state.captureStage],
+      elapsed_stage_s: +state.captureTimer.toFixed(2),
+      stage_duration_s: stageDuration,
+      stage_progress: +stageProgress.toFixed(3),
       first_catch_marked: state.captureStage >= 4 ? state.captureFirstCatch : null,
       second_catch_total: state.captureStage >= 8 ? state.captureSecondCatch : null,
       marked_recaptured: state.captureStage >= 8 ? state.captureRecaptured : null,
-      habitat: { living_turf: true, grass_blade_count: 26720, grass_blade_density_per_rendered_m2: 78.0, grass_blade_geometry: 'short tapered strip with a pointed tip', subtle_per_blade_tone_variation: true, rendered_meadow_bounds_world: { x: [-14, 14], z: [-3.05, 9.95] }, rendered_meadow_extends_beyond_visible_view: true, moss_patch_count: 900 },
+      environment: { laboratory_tiles_visible: false, laboratory_worktop_visible: false, laboratory_bench_front_visible: false, laboratory_cupboards_visible: false, full_height_meadow_extends_behind_footer: true, forest_background: true, responsive_horizontal_overscan: true },
+      habitat: { living_turf: true, grass_blade_count: 50000, grass_blade_density_per_rendered_m2: 146.0, grass_blade_geometry: 'short tapered strip with a pointed tip', subtle_per_blade_tone_variation: true, rendered_meadow_bounds_world: { x: [-14, 14], z: [-3.05, 9.95] }, rendered_meadow_extends_beyond_visible_view: true, moss_patch_count: 900, grass_and_tree_canopies_sway_smoothly: true },
+      pitfall_traps: { count: 5, installed_fraction: state.captureStage < 1 ? 0 : state.captureStage === 1 ? +Math.min(1, stageProgress / .58).toFixed(3) : 1, recessed_open_cups: true, flush_with_soil_surface: true, cup_depth_world: .34, dark_visible_mouths: true, disturbed_soil_lips: true, raised_transparent_rain_covers: true, grass_clearance_around_each_mouth: true, caught_first_sample_visible: visible.firstCaught, caught_second_sample_visible: visible.secondCaught },
+      beetle_model: { total_models: 40, type: 'ground beetle', body_parts: ['head', 'pronotum', 'paired elytra', 'central elytral seam'], leg_count_each: 6, antenna_count_each: 2, body_remains_dark_when_marked: true, paint_mark: 'small separate cream-white dorsal spot on one elytron', inspection_tray_visible: [3, 4, 5, 7, 8, 9].includes(state.captureStage), magnifier_visible: state.captureStage === 7 && stageProgress > .4 || state.captureStage >= 8 },
+      first_sample: { modelled_population_total: 40, target_total: state.captureFirstCatch, visibly_caught: visible.firstCaught, uncaptured_total: firstUncapturedTotal, visibly_roaming_uncaptured: firstUncapturedVisible, entire_population_was_not_captured: true, visibly_white_marked: visible.firstMarked, visibly_released: visible.released, all_marks_complete: state.captureStage >= 4 },
+      release_and_mixing: { release_is_animated: state.captureStage === 5, released_count: visible.released, dispersal_fraction: state.captureStage < 5 ? 0 : state.captureStage === 5 ? +Math.min(1, stageProgress / .68).toFixed(3) : 1, mixing_period_hours: state.captureStage >= 6 ? 24 : state.captureStage === 5 ? +(Math.max(0, stageProgress - .58) / .42 * 24).toFixed(1) : 0, marked_and_unmarked_beetles_mix_before_recapture: true },
+      second_sample: { target_total: state.captureSecondCatch, visibly_counted_total: visible.secondCaught, target_marked_recaptures: state.captureRecaptured, visibly_identified_marked: visible.secondMarked, visible_white_marks_on_inspection_tray: marksOnTray },
+      animation: { traps_install_with_staggered_lowering_and_settle: state.captureStage === 1, beetles_walk_and_drop_into_traps: state.captureStage === 1 || state.captureStage === 5, uncaptured_beetles_continue_roaming_during_first_sample: state.captureStage <= 4, first_sample_transfers_to_tray_in_smooth_arcs: state.captureStage === 3, paint_marker_visits_each_beetle_sequentially: state.captureStage === 3, beetles_walk_outward_during_release: state.captureStage === 5, second_sample_transfers_to_tray_progressively: state.captureStage === 7, magnifier_scans_marked_recaptures: state.captureStage === 7, full_rig_rebuild_between_stages: false },
+      welfare: { non_toxic_quick_drying_paint: true, tiny_mark_does_not_impair_movement: true, traps_checked_promptly: true, rain_covers_reduce_flooding_and_predation: true, beetles_released_at_capture_site: true },
+      assumptions: ['population is closed during the study', 'paint marks are retained and recognised', 'marked beetles mix fully back into the population', 'marked and unmarked beetles have equal capture probability', 'marking does not affect survival or behaviour'],
+      lincoln_index_calculation: state.complete ? `(${state.captureFirstCatch} × ${state.captureSecondCatch}) ÷ ${state.captureRecaptured} = ${estimateExact.toFixed(1)} ≈ ${Math.round(estimateExact)} beetles` : null,
       lincoln_index_estimate: state.complete ? Math.round((state.captureFirstCatch * state.captureSecondCatch) / state.captureRecaptured) : null,
       complete: state.complete
     };
@@ -5280,8 +5692,8 @@ window.render_game_to_text = () => {
     complete: transition.complete
   } : null;
   payload.bunsen_geometry = geometry;
-  payload.lab_bench_front = ['quadrats', 'shoretransect'].includes(practicals[state.selected].id) ? {
-    finish: practicals[state.selected].id === 'quadrats' ? 'replaced by the full-height living meadow scene' : 'hidden behind the full-height rocky-shore and sea scene',
+  payload.lab_bench_front = ['quadrats', 'capture', 'shoretransect'].includes(practicals[state.selected].id) ? {
+    finish: ['quadrats', 'capture'].includes(practicals[state.selected].id) ? 'replaced by the full-height living meadow scene' : 'hidden behind the full-height rocky-shore and sea scene',
     embossed_door_panelling: false,
     responsive_panel_count: 0,
     blue_resin_worktop_edge_retained: false,
@@ -5322,7 +5734,7 @@ window.render_game_to_text = () => {
     click_enabled: true,
     drag_enabled: false,
     experiment_setup_action_hidden: true,
-    heading: ['quadrats', 'shoretransect'].includes(activePractical.id) ? 'BIOLOGICAL SAMPLES — CLICK FOR SAFETY' : ['ripple', 'hooke', 'specificheat'].includes(activePractical.id) ? 'MATERIALS — CLICK FOR SAFETY' : activePractical.id === 'nuclear' ? 'SEALED SOURCES — CLICK FOR SAFETY' : 'REACTANTS — CLICK FOR SAFETY',
+    heading: ['quadrats', 'capture', 'shoretransect'].includes(activePractical.id) ? 'BIOLOGICAL SAMPLES — CLICK FOR SAFETY' : ['ripple', 'hooke', 'specificheat', 'latentheat', 'ivdevices'].includes(activePractical.id) ? 'MATERIALS — CLICK FOR SAFETY' : activePractical.id === 'nuclear' ? 'SEALED SOURCES — CLICK FOR SAFETY' : 'REACTANTS — CLICK FOR SAFETY',
     popup: state.reactantSafety ? {
       open: true,
       reactant: state.reactantSafety.name,
@@ -5339,7 +5751,7 @@ window.render_game_to_text = () => {
     webgl_arena_ui_overlay_alpha: 0,
     arena_cutout: 'fully transparent clearRect',
     blend_state_reset_each_frame: true,
-    wall_tiles_behind_webgl_apparatus: !['quadrats', 'shoretransect'].includes(activePractical.id),
+    wall_tiles_behind_webgl_apparatus: !['quadrats', 'capture', 'shoretransect'].includes(activePractical.id),
     opaque_3d_apparatus_preserved: true
   };
   if (transitionState) payload.bunsen_load_transition = transitionState;
@@ -5451,15 +5863,41 @@ window.render_game_to_text = () => {
       canonical_comparisons_complete: state.complete,
       apparatus: {
         alignment: 'source, absorber and GM window remain at fixed positions without a visible rail or scale',
-        source_handling: 'three sealed carriers, labelled lead-lined store and long-handled tongs',
+        source_handling: 'three sealed carriers, labelled lead-lined store and long-handled tongs visibly parked before pickup',
+        store_lid_animation: 'lid opens slightly before the tongs approach, then closes after transfer',
         absorbers: ['paper 0.10 mm', 'aluminium 3 mm', 'lead 10 mm'],
         detector: 'cylindrical Geiger–Müller tube with thin mica window facing the source',
         scaler: 'compact angled digital counter positioned clear of the GM tube, with count and elapsed-time display'
       },
-      educational_radiation_tracks: { visible_only_while_counting: true, types: ['clustered alpha particles', 'deflected beta electrons', 'gamma photon rings'], visible_in_reality: false },
+      educational_radiation_tracks: { visible_only_while_counting: true, types: ['clustered alpha particles', 'deflected beta electrons', 'luminous green sinusoidal gamma wave packets'], visible_in_reality: false },
       safety: { simulation_only: true, time_distance_shielding: true, sources_never_touched: true, store_sources_when_not_in_use: true }
     };
     payload.controls = [`SOURCE · ${source.short}`, `ABSORBER · ${absorber.short}`, state.running ? 'STOP COUNT' : 'MEASURE 10 s', 'RESET', 'METHOD', 'F fullscreen'];
+  }
+  return JSON.stringify(payload)
+};
+const ivDevicesAwareRenderGameToText = window.render_game_to_text;
+window.render_game_to_text = () => {
+  const payload = JSON.parse(ivDevicesAwareRenderGameToText());
+  if (practicals[state.selected].id === 'ivdevices') {
+    const device = currentIvDevice(), phases = ['device seated; supply isolated', 'automatic forward and reverse voltage sweep', 'sweep complete; curve ready to save', 'curve saved; next device ready', 'component modules changing', 'all device curves complete'];
+    payload.graph_axes = { x: 'potential difference across device / V', y: 'current / A', x_range: [-6, 6], y_range: [-.22, .22] };
+    payload.results_view = 'three overlaid current–potential difference curves';
+    payload.iv_characteristics = {
+      stage: state.ivStage, phase: phases[state.ivStage] || phases[0], active_device: device.id, active_device_label: device.label,
+      elapsed_stage_s: +state.ivTimer.toFixed(2), supply_voltage_v: +state.ivSupplyV.toFixed(3), device_voltage_v: +state.ivDeviceV.toFixed(3), current_a: +state.ivCurrentA.toFixed(5), current_ma: +(state.ivCurrentA * 1000).toFixed(2),
+      polarity: state.ivSupplyV > .02 ? 'forward' : state.ivSupplyV < -.02 ? 'reverse' : 'zero / isolated', switch_closed: state.ivStage === 1 && Math.abs(state.ivSupplyV) > .02,
+      apparatus: {
+        power_pack: 'variable ±6 V DC laboratory power pack with live voltage display and rotary control', ammeter: 'digital ammeter connected in series', voltmeter: 'digital voltmeter connected in parallel across the active device',
+        test_station: 'two shrouded spring terminals showing only the active component; inactive modules remain outside the visible workbench', devices: ['100 Ω axial fixed resistor with colour bands', '6 V MES laboratory filament bulb with transparent glass and visible coiled tungsten filament', 'red 5 mm LED with domed epoxy, cathode flat and 220 Ω protection resistor'],
+        circuit_path: 'power pack positive → switch → ammeter → active device → power pack negative', voltmeter_branch: 'connected directly across both active-device terminals', cable_routes_separated: true
+      },
+      animations: { device_seating_smooth: state.ivStage === 4, completed_device_exits_left_and_next_enters_right: state.ivStage === 4, inactive_devices_outside_visible_workbench: true, switch_and_voltage_dial_smooth: state.ivStage === 1, polarity_plugs_cross_at_zero: state.ivStage === 1 && state.ivTimer >= ivSweepIntervalS * 7 && state.ivTimer <= ivSweepIntervalS * 10, moving_charge_markers: state.ivStage === 1 && Math.abs(state.ivCurrentA) > .0001, filament_temperature_and_glow_continuous: device.id === 'lamp', led_threshold_glow_continuous: device.id === 'led' },
+      live_sweep_readings: state.ivSweepReadings.map(reading => ({ ...reading })), saved_curves: state.ivResults.map(result => ({ device: result.device, label: result.label, conclusion: result.conclusion, readings: result.readings.map(reading => ({ ...reading })) })), curves_complete: state.complete,
+      scientific_conclusions: { resistor: ivDeviceDefinitions[0].conclusion, filament_lamp: ivDeviceDefinitions[1].conclusion, led: ivDeviceDefinitions[2].conclusion },
+      safety: { low_voltage_supply: true, switch_off_before_changing_component_or_polarity: true, hot_lamp_cool_before_touching: true, led_protection_resistor_fitted: true }
+    };
+    payload.controls = [ivPrimaryLabel(), `DEVICE · ${device.short}`, 'RESET', 'CURVES', 'METHOD', 'F fullscreen'];
   }
   return JSON.stringify(payload)
 };

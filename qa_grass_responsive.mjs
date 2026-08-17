@@ -79,7 +79,7 @@ try {
   await page.setViewportSize({ width: 1440, height: 900 }); await page.waitForTimeout(250); await page.mouse.click(1364, 32); await page.waitForFunction(() => JSON.parse(window.render_game_to_text()).focus_mode === false);
   await page.mouse.click(135, 451); await page.waitForFunction(() => JSON.parse(window.render_game_to_text()).practical === 'Mark-release-recapture'); await page.evaluate(() => window.advanceTime(3200)); await page.waitForTimeout(600);
   const captureState = await state(), captureHabitat = captureState.capture_mark_recapture_practical.habitat;
-  assert(captureHabitat.grass_blade_count === 26720 && captureHabitat.grass_blade_geometry.includes('tapered') && captureHabitat.rendered_meadow_extends_beyond_visible_view, 'Mark–release–recapture did not receive the shared grass improvements.');
+  assert(captureHabitat.grass_blade_count === 50000 && captureHabitat.grass_blade_geometry.includes('tapered') && captureHabitat.rendered_meadow_extends_beyond_visible_view, 'Mark–release–recapture did not receive the shared grass improvements.');
   await page.screenshot({ path: `${out}/07-capture-shared-grass.png`, fullPage: true });
   await page.mouse.click(135, 505); await page.waitForFunction(() => JSON.parse(window.render_game_to_text()).practical === 'Rocky-shore belt transect'); await page.evaluate(() => window.advanceTime(900)); await page.waitForTimeout(600);
   const shoreState = await state(), shoreLandscape = shoreState.rocky_shore_transect_practical.landscape;

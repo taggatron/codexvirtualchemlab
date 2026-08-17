@@ -3,6 +3,8 @@
     {
       "subject": "chemistry",
       "practical": "Free workspace",
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": true
     },
     {
@@ -11,6 +13,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -19,6 +23,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -27,6 +33,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -35,6 +43,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -43,6 +53,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -51,6 +63,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -59,6 +73,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -67,6 +83,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -75,6 +93,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -83,6 +103,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -91,6 +113,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -99,6 +123,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -107,6 +133,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -115,6 +143,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -123,6 +153,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -131,6 +163,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -139,6 +173,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -147,6 +183,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -155,6 +193,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -163,6 +203,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -171,6 +213,88 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Rocky-shore belt transect",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Rocky-shore belt transect",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Rocky-shore belt transect",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Rocky-shore belt transect",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Rocky-shore belt transect",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Rocky-shore belt transect",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Rocky-shore belt transect",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Rocky-shore belt transect",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -179,6 +303,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -187,6 +313,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -195,6 +323,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -203,6 +333,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -211,6 +343,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -219,6 +353,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -227,6 +363,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -235,6 +373,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -243,6 +383,18 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
+      "drag_enabled": false
+    },
+    {
+      "subject": "physics",
+      "practical": "Heating & cooling curves",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -251,6 +403,18 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
+      "drag_enabled": false
+    },
+    {
+      "subject": "physics",
+      "practical": "Ohmic & non-ohmic devices",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -259,6 +423,20 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
+      "drag_enabled": false
+    },
+    {
+      "subject": "physics",
+      "practical": "Nuclear radiation",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [
+        "ABSORBER · OPEN BEAM"
+      ],
       "drag_enabled": false
     }
   ],
@@ -266,6 +444,8 @@
     {
       "subject": "chemistry",
       "practical": "Free workspace",
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": true
     },
     {
@@ -274,6 +454,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -282,6 +464,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -290,6 +474,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -298,6 +484,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -306,6 +494,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -314,6 +504,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -322,6 +514,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -330,6 +524,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -338,6 +534,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -346,6 +544,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -354,6 +554,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -362,6 +564,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -370,6 +574,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -378,6 +584,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -386,6 +594,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -394,6 +604,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -402,6 +614,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -410,6 +624,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -418,6 +634,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -426,6 +644,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -434,6 +654,88 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Rocky-shore belt transect",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Rocky-shore belt transect",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Rocky-shore belt transect",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Rocky-shore belt transect",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Rocky-shore belt transect",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Rocky-shore belt transect",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Rocky-shore belt transect",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Rocky-shore belt transect",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -442,6 +744,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -450,6 +754,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -458,6 +764,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -466,6 +774,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -474,6 +784,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -482,6 +794,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -490,6 +804,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -498,6 +814,8 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -506,6 +824,18 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
+      "drag_enabled": false
+    },
+    {
+      "subject": "physics",
+      "practical": "Heating & cooling curves",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -514,6 +844,18 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
+      "drag_enabled": false
+    },
+    {
+      "subject": "physics",
+      "practical": "Ohmic & non-ohmic devices",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
       "drag_enabled": false
     },
     {
@@ -522,6 +864,20 @@
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
+      "drag_enabled": false
+    },
+    {
+      "subject": "physics",
+      "practical": "Nuclear radiation",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [
+        "ABSORBER · OPEN BEAM"
+      ],
       "drag_enabled": false
     }
   ],

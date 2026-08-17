@@ -34,22 +34,23 @@
     "readings_saved": [],
     "canonical_comparisons_complete": false,
     "apparatus": {
-      "optical_rail": "fixed source–absorber–GM-tube alignment with centimetre scale",
-      "source_handling": "three sealed carriers, labelled lead-lined store and long-handled tongs",
+      "alignment": "source, absorber and GM window remain at fixed positions without a visible rail or scale",
+      "source_handling": "three sealed carriers, labelled lead-lined store and long-handled tongs visibly parked before pickup",
+      "store_lid_animation": "lid opens slightly before the tongs approach, then closes after transfer",
       "absorbers": [
         "paper 0.10 mm",
         "aluminium 3 mm",
         "lead 10 mm"
       ],
       "detector": "cylindrical Geiger–Müller tube with thin mica window facing the source",
-      "scaler": "single cabled digital counter with count and elapsed-time display"
+      "scaler": "compact angled digital counter positioned clear of the GM tube, with count and elapsed-time display"
     },
     "educational_radiation_tracks": {
       "visible_only_while_counting": true,
       "types": [
         "clustered alpha particles",
         "deflected beta electrons",
-        "gamma photon rings"
+        "luminous green sinusoidal gamma wave packets"
       ],
       "visible_in_reality": false
     },
@@ -84,22 +85,23 @@
     "readings_saved": [],
     "canonical_comparisons_complete": false,
     "apparatus": {
-      "optical_rail": "fixed source–absorber–GM-tube alignment with centimetre scale",
-      "source_handling": "three sealed carriers, labelled lead-lined store and long-handled tongs",
+      "alignment": "source, absorber and GM window remain at fixed positions without a visible rail or scale",
+      "source_handling": "three sealed carriers, labelled lead-lined store and long-handled tongs visibly parked before pickup",
+      "store_lid_animation": "lid opens slightly before the tongs approach, then closes after transfer",
       "absorbers": [
         "paper 0.10 mm",
         "aluminium 3 mm",
         "lead 10 mm"
       ],
       "detector": "cylindrical Geiger–Müller tube with thin mica window facing the source",
-      "scaler": "single cabled digital counter with count and elapsed-time display"
+      "scaler": "compact angled digital counter positioned clear of the GM tube, with count and elapsed-time display"
     },
     "educational_radiation_tracks": {
       "visible_only_while_counting": true,
       "types": [
         "clustered alpha particles",
         "deflected beta electrons",
-        "gamma photon rings"
+        "luminous green sinusoidal gamma wave packets"
       ],
       "visible_in_reality": false
     },
@@ -144,22 +146,23 @@
     ],
     "canonical_comparisons_complete": false,
     "apparatus": {
-      "optical_rail": "fixed source–absorber–GM-tube alignment with centimetre scale",
-      "source_handling": "three sealed carriers, labelled lead-lined store and long-handled tongs",
+      "alignment": "source, absorber and GM window remain at fixed positions without a visible rail or scale",
+      "source_handling": "three sealed carriers, labelled lead-lined store and long-handled tongs visibly parked before pickup",
+      "store_lid_animation": "lid opens slightly before the tongs approach, then closes after transfer",
       "absorbers": [
         "paper 0.10 mm",
         "aluminium 3 mm",
         "lead 10 mm"
       ],
       "detector": "cylindrical Geiger–Müller tube with thin mica window facing the source",
-      "scaler": "single cabled digital counter with count and elapsed-time display"
+      "scaler": "compact angled digital counter positioned clear of the GM tube, with count and elapsed-time display"
     },
     "educational_radiation_tracks": {
       "visible_only_while_counting": true,
       "types": [
         "clustered alpha particles",
         "deflected beta electrons",
-        "gamma photon rings"
+        "luminous green sinusoidal gamma wave packets"
       ],
       "visible_in_reality": false
     },
@@ -213,22 +216,23 @@
     ],
     "canonical_comparisons_complete": false,
     "apparatus": {
-      "optical_rail": "fixed source–absorber–GM-tube alignment with centimetre scale",
-      "source_handling": "three sealed carriers, labelled lead-lined store and long-handled tongs",
+      "alignment": "source, absorber and GM window remain at fixed positions without a visible rail or scale",
+      "source_handling": "three sealed carriers, labelled lead-lined store and long-handled tongs visibly parked before pickup",
+      "store_lid_animation": "lid opens slightly before the tongs approach, then closes after transfer",
       "absorbers": [
         "paper 0.10 mm",
         "aluminium 3 mm",
         "lead 10 mm"
       ],
       "detector": "cylindrical Geiger–Müller tube with thin mica window facing the source",
-      "scaler": "single cabled digital counter with count and elapsed-time display"
+      "scaler": "compact angled digital counter positioned clear of the GM tube, with count and elapsed-time display"
     },
     "educational_radiation_tracks": {
       "visible_only_while_counting": true,
       "types": [
         "clustered alpha particles",
         "deflected beta electrons",
-        "gamma photon rings"
+        "luminous green sinusoidal gamma wave packets"
       ],
       "visible_in_reality": false
     },
@@ -282,22 +286,23 @@
     ],
     "canonical_comparisons_complete": false,
     "apparatus": {
-      "optical_rail": "fixed source–absorber–GM-tube alignment with centimetre scale",
-      "source_handling": "three sealed carriers, labelled lead-lined store and long-handled tongs",
+      "alignment": "source, absorber and GM window remain at fixed positions without a visible rail or scale",
+      "source_handling": "three sealed carriers, labelled lead-lined store and long-handled tongs visibly parked before pickup",
+      "store_lid_animation": "lid opens slightly before the tongs approach, then closes after transfer",
       "absorbers": [
         "paper 0.10 mm",
         "aluminium 3 mm",
         "lead 10 mm"
       ],
       "detector": "cylindrical Geiger–Müller tube with thin mica window facing the source",
-      "scaler": "single cabled digital counter with count and elapsed-time display"
+      "scaler": "compact angled digital counter positioned clear of the GM tube, with count and elapsed-time display"
     },
     "educational_radiation_tracks": {
       "visible_only_while_counting": true,
       "types": [
         "clustered alpha particles",
         "deflected beta electrons",
-        "gamma photon rings"
+        "luminous green sinusoidal gamma wave packets"
       ],
       "visible_in_reality": false
     },
@@ -369,22 +374,23 @@
     ],
     "canonical_comparisons_complete": false,
     "apparatus": {
-      "optical_rail": "fixed source–absorber–GM-tube alignment with centimetre scale",
-      "source_handling": "three sealed carriers, labelled lead-lined store and long-handled tongs",
+      "alignment": "source, absorber and GM window remain at fixed positions without a visible rail or scale",
+      "source_handling": "three sealed carriers, labelled lead-lined store and long-handled tongs visibly parked before pickup",
+      "store_lid_animation": "lid opens slightly before the tongs approach, then closes after transfer",
       "absorbers": [
         "paper 0.10 mm",
         "aluminium 3 mm",
         "lead 10 mm"
       ],
       "detector": "cylindrical Geiger–Müller tube with thin mica window facing the source",
-      "scaler": "single cabled digital counter with count and elapsed-time display"
+      "scaler": "compact angled digital counter positioned clear of the GM tube, with count and elapsed-time display"
     },
     "educational_radiation_tracks": {
       "visible_only_while_counting": true,
       "types": [
         "clustered alpha particles",
         "deflected beta electrons",
-        "gamma photon rings"
+        "luminous green sinusoidal gamma wave packets"
       ],
       "visible_in_reality": false
     },
@@ -456,22 +462,23 @@
     ],
     "canonical_comparisons_complete": false,
     "apparatus": {
-      "optical_rail": "fixed source–absorber–GM-tube alignment with centimetre scale",
-      "source_handling": "three sealed carriers, labelled lead-lined store and long-handled tongs",
+      "alignment": "source, absorber and GM window remain at fixed positions without a visible rail or scale",
+      "source_handling": "three sealed carriers, labelled lead-lined store and long-handled tongs visibly parked before pickup",
+      "store_lid_animation": "lid opens slightly before the tongs approach, then closes after transfer",
       "absorbers": [
         "paper 0.10 mm",
         "aluminium 3 mm",
         "lead 10 mm"
       ],
       "detector": "cylindrical Geiger–Müller tube with thin mica window facing the source",
-      "scaler": "single cabled digital counter with count and elapsed-time display"
+      "scaler": "compact angled digital counter positioned clear of the GM tube, with count and elapsed-time display"
     },
     "educational_radiation_tracks": {
       "visible_only_while_counting": true,
       "types": [
         "clustered alpha particles",
         "deflected beta electrons",
-        "gamma photon rings"
+        "luminous green sinusoidal gamma wave packets"
       ],
       "visible_in_reality": false
     },
@@ -561,22 +568,23 @@
     ],
     "canonical_comparisons_complete": true,
     "apparatus": {
-      "optical_rail": "fixed source–absorber–GM-tube alignment with centimetre scale",
-      "source_handling": "three sealed carriers, labelled lead-lined store and long-handled tongs",
+      "alignment": "source, absorber and GM window remain at fixed positions without a visible rail or scale",
+      "source_handling": "three sealed carriers, labelled lead-lined store and long-handled tongs visibly parked before pickup",
+      "store_lid_animation": "lid opens slightly before the tongs approach, then closes after transfer",
       "absorbers": [
         "paper 0.10 mm",
         "aluminium 3 mm",
         "lead 10 mm"
       ],
       "detector": "cylindrical Geiger–Müller tube with thin mica window facing the source",
-      "scaler": "single cabled digital counter with count and elapsed-time display"
+      "scaler": "compact angled digital counter positioned clear of the GM tube, with count and elapsed-time display"
     },
     "educational_radiation_tracks": {
       "visible_only_while_counting": true,
       "types": [
         "clustered alpha particles",
         "deflected beta electrons",
-        "gamma photon rings"
+        "luminous green sinusoidal gamma wave packets"
       ],
       "visible_in_reality": false
     },
@@ -612,22 +620,23 @@
     "readings_saved": [],
     "canonical_comparisons_complete": false,
     "apparatus": {
-      "optical_rail": "fixed source–absorber–GM-tube alignment with centimetre scale",
-      "source_handling": "three sealed carriers, labelled lead-lined store and long-handled tongs",
+      "alignment": "source, absorber and GM window remain at fixed positions without a visible rail or scale",
+      "source_handling": "three sealed carriers, labelled lead-lined store and long-handled tongs visibly parked before pickup",
+      "store_lid_animation": "lid opens slightly before the tongs approach, then closes after transfer",
       "absorbers": [
         "paper 0.10 mm",
         "aluminium 3 mm",
         "lead 10 mm"
       ],
       "detector": "cylindrical Geiger–Müller tube with thin mica window facing the source",
-      "scaler": "single cabled digital counter with count and elapsed-time display"
+      "scaler": "compact angled digital counter positioned clear of the GM tube, with count and elapsed-time display"
     },
     "educational_radiation_tracks": {
       "visible_only_while_counting": true,
       "types": [
         "clustered alpha particles",
         "deflected beta electrons",
-        "gamma photon rings"
+        "luminous green sinusoidal gamma wave packets"
       ],
       "visible_in_reality": false
     },

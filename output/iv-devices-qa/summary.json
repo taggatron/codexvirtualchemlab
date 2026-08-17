@@ -1,0 +1,3931 @@
+{
+  "initial": {
+    "coordinates": "origin top-left, x right, y down",
+    "id": "ivdevices",
+    "subject": "physics",
+    "renderer": {
+      "enabled": true,
+      "renderer": "WebGL / Three.js",
+      "objects": 1,
+      "context_lost": false,
+      "scene_compiling": false,
+      "scene_warmup_frames": 2,
+      "canvas_visible": true,
+      "legacy_2d_apparatus": false
+    },
+    "mode": "guided practical",
+    "practical": "Ohmic & non-ohmic devices",
+    "objective": "Compare current–potential difference characteristics for an ohmic resistor, a filament lamp and a light-emitting diode.",
+    "symbol_equation": "R = V / I",
+    "word_equation": "current is proportional to potential difference only for an ohmic conductor at constant temperature",
+    "tab": "bench",
+    "focus_mode": false,
+    "method_dropdown": false,
+    "graph_modal": {
+      "available": true,
+      "button_visible": false,
+      "button_label": null,
+      "button_icon": null,
+      "button_text_visible": false,
+      "button_row": null,
+      "open": false,
+      "chart_kind": "iv-device-curves",
+      "sidebar_header_layout": null,
+      "scaled_view": null
+    },
+    "evaluation_modal": {
+      "open": false
+    },
+    "running": false,
+    "complete": false,
+    "practical_evaluation": {
+      "position": "below guidance",
+      "section_heading": "PRACTICAL EVALUATION",
+      "button_label": "OPEN EVALUATION",
+      "ready": false,
+      "appearance": "outlined pale teal",
+      "open": false
+    },
+    "dragging": null,
+    "pouring": false,
+    "acid_transfer": null,
+    "bunsen_lit": false,
+    "magnesium_glow": false,
+    "dose_dialog": null,
+    "tripod_gauze_snap_targets": [],
+    "workspace_items": [],
+    "mass_practical": null,
+    "salt_practical": null,
+    "hydrogen_practical": null,
+    "thermometer_visual": null,
+    "time_s": 0,
+    "temperature_c": 25,
+    "volume_ml": 0,
+    "ph": 7,
+    "progress": 0,
+    "chromatography_dyes": null,
+    "graph_axes": {
+      "x": "potential difference across device / V",
+      "y": "current / A",
+      "x_range": [
+        -6,
+        6
+      ],
+      "y_range": [
+        -0.22,
+        0.22
+      ]
+    },
+    "results_columns": null,
+    "graph_readings": 0,
+    "guidance": "The 100 Ω resistor is seated in the test socket. Trace the red series path through the ammeter and the violet voltmeter branch across the device, then run the I–V sweep.",
+    "controls": [
+      "RUN I–V SWEEP",
+      "DEVICE · RESISTOR",
+      "RESET",
+      "CURVES",
+      "METHOD",
+      "F fullscreen"
+    ],
+    "responsive_layout": {
+      "viewport_css_px": {
+        "width": 1440,
+        "height": 900
+      },
+      "logical_canvas_px": {
+        "width": 1440,
+        "height": 900
+      },
+      "scale": 1,
+      "mode": "desktop",
+      "portrait_prompt_visible": false,
+      "three_column_layout_preserved": true,
+      "mobile_landscape_layout": false,
+      "pointer_coordinates_scaled": false,
+      "minimum_touch_target_css_px": null
+    },
+    "bunsen_geometry": {
+      "main_tube": "hollow with chamfered wider mouth and real intake opening",
+      "base_top_sealed_to_main_tube": true,
+      "main_tube_outer_diameter_scene_units": 0.208,
+      "main_tube_inner_diameter_scene_units": 0.174,
+      "chamfered_mouth_outer_diameter_scene_units": 0.26,
+      "air_intake_valve": "short, thin collar immediately above the base-to-barrel seal",
+      "air_intake_collar_bottom_gap_scene_units": 0.02,
+      "air_intake_collar_height_scene_units": 0.2,
+      "air_intake_collar_inner_diameter_scene_units": 0.216,
+      "air_intake_collar_radial_thickness_scene_units": 0.0155,
+      "air_intake_collar_wall_reduction_percent": 50,
+      "air_intake_collar_finish": "brushed steel matching the main Bunsen tube",
+      "air_intake_collar_edge_profile": "square unrounded top and bottom edges",
+      "air_intake_outer_diameter_scene_units": 0.247,
+      "air_intake_opening_count": 1,
+      "air_intake_collar_front_hole_diameter_scene_units": 0.136,
+      "main_tube_front_hole_diameter_scene_units": 0.122,
+      "air_intake_adjustment_tab_present": false,
+      "air_intake_hole_geometry": "one larger actual front perforation through collar and main tube with recessed tunnel wall",
+      "air_intake_hole_alignment": "barrel opening slightly offset behind collar opening for depth",
+      "gas_connector_height_scene_units": 0.18,
+      "gas_connector_finish": "black matching the flexible gas hose",
+      "gas_connector_restored_to_previous_height": true,
+      "gas_connector_raised_with_valve": false,
+      "hose_radius_scene_units": 0.057,
+      "hose_minimum_centre_height_scene_units": 0.14,
+      "hose_minimum_ground_clearance_scene_units": 0.083,
+      "hose_kink_reduced": true,
+      "hose_overlaps_brass_valve_scene_units": 0.2,
+      "hose_valve_overlap_sleeve": true,
+      "hose_valve_sleeve_profile": "rubber cuff flares from 0.059 to 0.094 scene-unit radius over the brass barbs",
+      "hose_valve_sleeve_flared": true,
+      "hose_valve_final_approach_axis": "+x coaxial with the gas-tap outlet",
+      "hose_valve_final_tangent": [
+        1,
+        0,
+        0
+      ],
+      "gas_tap_outlet_profile": "tapered brass spigot, narrow at the hose entry and widening toward the valve body",
+      "gas_tap_outlet_entry_radius_scene_units": 0.06,
+      "gas_tap_outlet_base_radius_scene_units": 0.078,
+      "flame_width_scale_from_previous_geometry": 0.881,
+      "dependent_animations_realigned": true,
+      "collar_turn_uses_updated_geometry": true,
+      "flame_rim_core_and_jets_scaled": true,
+      "coloured_flame_overlays_scaled": true,
+      "flame_test_sample_alignment": "salt scoop centre remains on the narrowed burner axis"
+    },
+    "lab_bench_front": {
+      "finish": "dark grey enamel",
+      "embossed_door_panelling": true,
+      "responsive_panel_count": "2 to 4",
+      "blue_resin_worktop_edge_retained": true
+    },
+    "right_sidebar_layout": {
+      "fills_available_vertical_space": true,
+      "adaptive_section_spacing": true,
+      "remaining_height_allocated_to_content_cards": true,
+      "excessive_blank_section_gaps_removed": true,
+      "larger_responsive_typography": true,
+      "explicit_heading_to_content_spacing": true,
+      "method_stage_cards": true,
+      "method_stage_text_wrap": "complete multiline text without clipping or ellipsis",
+      "reactant_text_wrap": "complete multiline text without clipping or ellipsis",
+      "apparatus_text_wrap": "complete multiline text without clipping or ellipsis",
+      "guidance_text_wrap": "complete multiline text",
+      "compact_landscape_supported": true,
+      "content_top_y": 126,
+      "content_bottom_y": 886,
+      "available_bottom_y": 886,
+      "evaluation_button_top_y": 822.03,
+      "evaluation_button_bottom_y": 886,
+      "unused_vertical_space_px": 0,
+      "overflow_vertical_space_px": 0,
+      "compression_ratio": 0,
+      "method_stage_count": 4,
+      "method_stage_line_counts": [
+        3,
+        3,
+        2,
+        2
+      ],
+      "reactant_rows": [
+        {
+          "name": "100 Ω fixed resistor",
+          "top_y": 437.98,
+          "bottom_y": 471.41
+        },
+        {
+          "name": "6 V laboratory filament lamp",
+          "top_y": 475.41,
+          "bottom_y": 508.84
+        },
+        {
+          "name": "Red LED + 220 Ω protection resistor",
+          "top_y": 512.84,
+          "bottom_y": 546.27
+        }
+      ],
+      "heading_to_content_gap_px": 7,
+      "method_font_size_px": 10.6,
+      "reactant_font_size_px": 10.3,
+      "guidance_font_size_px": 10,
+      "all_method_stage_text_visible": true,
+      "all_reactant_text_visible": true,
+      "all_apparatus_text_visible": true,
+      "all_sidebar_components_visible": true,
+      "compact": false
+    },
+    "reactant_interaction": {
+      "mode": "health and safety information",
+      "listed_reactants": [
+        "100 Ω fixed resistor",
+        "6 V laboratory filament lamp",
+        "Red LED + 220 Ω protection resistor"
+      ],
+      "click_enabled": true,
+      "drag_enabled": false,
+      "experiment_setup_action_hidden": true,
+      "heading": "MATERIALS — CLICK FOR SAFETY",
+      "popup": {
+        "open": false
+      }
+    },
+    "canvas_compositing": {
+      "webgl_arena_ui_overlay_alpha": 0,
+      "arena_cutout": "fully transparent clearRect",
+      "blend_state_reset_each_frame": true,
+      "wall_tiles_behind_webgl_apparatus": true,
+      "opaque_3d_apparatus_preserved": true
+    },
+    "bunsen_load_transition": {
+      "appearance_animation_scope": "all lit Bunsen instances in every practical",
+      "active": false,
+      "elapsed_s": 3.4,
+      "progress": 1,
+      "phase": "powerful blue heating flame",
+      "collar_rotation_degrees": 0,
+      "collar_open_fraction": 1,
+      "flame_heat_mix": 1,
+      "safety_flame_visible": false,
+      "powerful_blue_heating_flame_visible": true,
+      "complete": true
+    },
+    "left_practical_sidebar": {
+      "scroll_enabled": false,
+      "scrollbar_visible": false,
+      "input": "mouse wheel or trackpad over the clipped practical rail",
+      "subject": "physics",
+      "scroll_offset_px": 0,
+      "maximum_scroll_offset_px": 0,
+      "visible_card_count": 14
+    },
+    "control_label_layout": {
+      "all_visible_button_labels_fit": true,
+      "visible_button_count": 6,
+      "wrapped_button_labels": [],
+      "minimum_font_size_px": 12,
+      "labels": [
+        {
+          "label": "RUN I–V SWEEP",
+          "lines": [
+            "RUN I–V SWEEP"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 95.89,
+          "available_width_px": 138.6,
+          "button_width_px": 154,
+          "fits": true
+        },
+        {
+          "label": "DEVICE · RESISTOR",
+          "lines": [
+            "DEVICE · RESISTOR"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 116.85,
+          "available_width_px": 133.2,
+          "button_width_px": 148,
+          "fits": true
+        },
+        {
+          "label": "RESET",
+          "lines": [
+            "RESET"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 39.29,
+          "available_width_px": 60,
+          "button_width_px": 70,
+          "fits": true
+        },
+        {
+          "label": "CURVES",
+          "lines": [
+            "CURVES"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 50.34,
+          "available_width_px": 68,
+          "button_width_px": 78,
+          "fits": true
+        },
+        {
+          "label": "METHOD",
+          "lines": [
+            "METHOD"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 54.08,
+          "available_width_px": 82,
+          "button_width_px": 92,
+          "fits": true
+        },
+        {
+          "label": "CURVES",
+          "lines": [
+            "CURVES"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 50.34,
+          "available_width_px": 82,
+          "button_width_px": 92,
+          "fits": true
+        }
+      ]
+    },
+    "results_view": "three overlaid current–potential difference curves",
+    "iv_characteristics": {
+      "stage": 0,
+      "phase": "device seated; supply isolated",
+      "active_device": "resistor",
+      "active_device_label": "100 Ω RESISTOR",
+      "elapsed_stage_s": 0,
+      "supply_voltage_v": 0,
+      "device_voltage_v": 0,
+      "current_a": 0,
+      "current_ma": 0,
+      "polarity": "zero / isolated",
+      "switch_closed": false,
+      "apparatus": {
+        "power_pack": "variable ±6 V DC laboratory power pack with live voltage display and rotary control",
+        "ammeter": "digital ammeter connected in series",
+        "voltmeter": "digital voltmeter connected in parallel across the active device",
+        "test_station": "two shrouded spring terminals showing only the active component; inactive modules remain outside the visible workbench",
+        "devices": [
+          "100 Ω axial fixed resistor with colour bands",
+          "6 V MES laboratory filament bulb with transparent glass and visible coiled tungsten filament",
+          "red 5 mm LED with domed epoxy, cathode flat and 220 Ω protection resistor"
+        ],
+        "circuit_path": "power pack positive → switch → ammeter → active device → power pack negative",
+        "voltmeter_branch": "connected directly across both active-device terminals",
+        "cable_routes_separated": true
+      },
+      "animations": {
+        "device_seating_smooth": false,
+        "completed_device_exits_left_and_next_enters_right": false,
+        "inactive_devices_outside_visible_workbench": true,
+        "switch_and_voltage_dial_smooth": false,
+        "polarity_plugs_cross_at_zero": false,
+        "moving_charge_markers": false,
+        "filament_temperature_and_glow_continuous": false,
+        "led_threshold_glow_continuous": false
+      },
+      "live_sweep_readings": [],
+      "saved_curves": [],
+      "curves_complete": false,
+      "scientific_conclusions": {
+        "resistor": "A straight line through the origin: current is proportional to potential difference at constant temperature.",
+        "filament_lamp": "The curve becomes shallower as the filament heats and its resistance increases.",
+        "led": "Almost no reverse current; forward current rises only after the LED turn-on potential difference."
+      },
+      "safety": {
+        "low_voltage_supply": true,
+        "switch_off_before_changing_component_or_polarity": true,
+        "hot_lamp_cool_before_touching": true,
+        "led_protection_resistor_fitted": true
+      }
+    }
+  },
+  "resistorForward": {
+    "coordinates": "origin top-left, x right, y down",
+    "id": "ivdevices",
+    "subject": "physics",
+    "renderer": {
+      "enabled": true,
+      "renderer": "WebGL / Three.js",
+      "objects": 1,
+      "context_lost": false,
+      "scene_compiling": false,
+      "scene_warmup_frames": 2,
+      "canvas_visible": true,
+      "legacy_2d_apparatus": false
+    },
+    "mode": "guided practical",
+    "practical": "Ohmic & non-ohmic devices",
+    "objective": "Compare current–potential difference characteristics for an ohmic resistor, a filament lamp and a light-emitting diode.",
+    "symbol_equation": "R = V / I",
+    "word_equation": "current is proportional to potential difference only for an ohmic conductor at constant temperature",
+    "tab": "bench",
+    "focus_mode": false,
+    "method_dropdown": false,
+    "graph_modal": {
+      "available": true,
+      "button_visible": false,
+      "button_label": null,
+      "button_icon": null,
+      "button_text_visible": false,
+      "button_row": null,
+      "open": false,
+      "chart_kind": "iv-device-curves",
+      "sidebar_header_layout": null,
+      "scaled_view": null
+    },
+    "evaluation_modal": {
+      "open": false
+    },
+    "running": false,
+    "complete": false,
+    "practical_evaluation": {
+      "position": "below guidance",
+      "section_heading": "PRACTICAL EVALUATION",
+      "button_label": "OPEN EVALUATION",
+      "ready": false,
+      "appearance": "outlined pale teal",
+      "open": false
+    },
+    "dragging": null,
+    "pouring": false,
+    "acid_transfer": null,
+    "bunsen_lit": false,
+    "magnesium_glow": false,
+    "dose_dialog": null,
+    "tripod_gauze_snap_targets": [],
+    "workspace_items": [],
+    "mass_practical": null,
+    "salt_practical": null,
+    "hydrogen_practical": null,
+    "thermometer_visual": null,
+    "time_s": 5.6,
+    "temperature_c": 25,
+    "volume_ml": 0,
+    "ph": 7,
+    "progress": 0.11,
+    "chromatography_dyes": null,
+    "graph_axes": {
+      "x": "potential difference across device / V",
+      "y": "current / A",
+      "x_range": [
+        -6,
+        6
+      ],
+      "y_range": [
+        -0.22,
+        0.22
+      ]
+    },
+    "results_columns": null,
+    "graph_readings": 0,
+    "guidance": "RESISTOR: increasing the forward supply — 6.00 V across the device, 60.0 mA.",
+    "controls": [
+      "SWEEP RUNNING…",
+      "DEVICE · RESISTOR",
+      "RESET",
+      "CURVES",
+      "METHOD",
+      "F fullscreen"
+    ],
+    "responsive_layout": {
+      "viewport_css_px": {
+        "width": 1440,
+        "height": 900
+      },
+      "logical_canvas_px": {
+        "width": 1440,
+        "height": 900
+      },
+      "scale": 1,
+      "mode": "desktop",
+      "portrait_prompt_visible": false,
+      "three_column_layout_preserved": true,
+      "mobile_landscape_layout": false,
+      "pointer_coordinates_scaled": false,
+      "minimum_touch_target_css_px": null
+    },
+    "bunsen_geometry": {
+      "main_tube": "hollow with chamfered wider mouth and real intake opening",
+      "base_top_sealed_to_main_tube": true,
+      "main_tube_outer_diameter_scene_units": 0.208,
+      "main_tube_inner_diameter_scene_units": 0.174,
+      "chamfered_mouth_outer_diameter_scene_units": 0.26,
+      "air_intake_valve": "short, thin collar immediately above the base-to-barrel seal",
+      "air_intake_collar_bottom_gap_scene_units": 0.02,
+      "air_intake_collar_height_scene_units": 0.2,
+      "air_intake_collar_inner_diameter_scene_units": 0.216,
+      "air_intake_collar_radial_thickness_scene_units": 0.0155,
+      "air_intake_collar_wall_reduction_percent": 50,
+      "air_intake_collar_finish": "brushed steel matching the main Bunsen tube",
+      "air_intake_collar_edge_profile": "square unrounded top and bottom edges",
+      "air_intake_outer_diameter_scene_units": 0.247,
+      "air_intake_opening_count": 1,
+      "air_intake_collar_front_hole_diameter_scene_units": 0.136,
+      "main_tube_front_hole_diameter_scene_units": 0.122,
+      "air_intake_adjustment_tab_present": false,
+      "air_intake_hole_geometry": "one larger actual front perforation through collar and main tube with recessed tunnel wall",
+      "air_intake_hole_alignment": "barrel opening slightly offset behind collar opening for depth",
+      "gas_connector_height_scene_units": 0.18,
+      "gas_connector_finish": "black matching the flexible gas hose",
+      "gas_connector_restored_to_previous_height": true,
+      "gas_connector_raised_with_valve": false,
+      "hose_radius_scene_units": 0.057,
+      "hose_minimum_centre_height_scene_units": 0.14,
+      "hose_minimum_ground_clearance_scene_units": 0.083,
+      "hose_kink_reduced": true,
+      "hose_overlaps_brass_valve_scene_units": 0.2,
+      "hose_valve_overlap_sleeve": true,
+      "hose_valve_sleeve_profile": "rubber cuff flares from 0.059 to 0.094 scene-unit radius over the brass barbs",
+      "hose_valve_sleeve_flared": true,
+      "hose_valve_final_approach_axis": "+x coaxial with the gas-tap outlet",
+      "hose_valve_final_tangent": [
+        1,
+        0,
+        0
+      ],
+      "gas_tap_outlet_profile": "tapered brass spigot, narrow at the hose entry and widening toward the valve body",
+      "gas_tap_outlet_entry_radius_scene_units": 0.06,
+      "gas_tap_outlet_base_radius_scene_units": 0.078,
+      "flame_width_scale_from_previous_geometry": 0.881,
+      "dependent_animations_realigned": true,
+      "collar_turn_uses_updated_geometry": true,
+      "flame_rim_core_and_jets_scaled": true,
+      "coloured_flame_overlays_scaled": true,
+      "flame_test_sample_alignment": "salt scoop centre remains on the narrowed burner axis"
+    },
+    "lab_bench_front": {
+      "finish": "dark grey enamel",
+      "embossed_door_panelling": true,
+      "responsive_panel_count": "2 to 4",
+      "blue_resin_worktop_edge_retained": true
+    },
+    "right_sidebar_layout": {
+      "fills_available_vertical_space": true,
+      "adaptive_section_spacing": true,
+      "remaining_height_allocated_to_content_cards": true,
+      "excessive_blank_section_gaps_removed": true,
+      "larger_responsive_typography": true,
+      "explicit_heading_to_content_spacing": true,
+      "method_stage_cards": true,
+      "method_stage_text_wrap": "complete multiline text without clipping or ellipsis",
+      "reactant_text_wrap": "complete multiline text without clipping or ellipsis",
+      "apparatus_text_wrap": "complete multiline text without clipping or ellipsis",
+      "guidance_text_wrap": "complete multiline text",
+      "compact_landscape_supported": true,
+      "content_top_y": 126,
+      "content_bottom_y": 886,
+      "available_bottom_y": 886,
+      "evaluation_button_top_y": 821.22,
+      "evaluation_button_bottom_y": 886,
+      "unused_vertical_space_px": 0,
+      "overflow_vertical_space_px": 0,
+      "compression_ratio": 0,
+      "method_stage_count": 4,
+      "method_stage_line_counts": [
+        3,
+        3,
+        2,
+        2
+      ],
+      "reactant_rows": [
+        {
+          "name": "100 Ω fixed resistor",
+          "top_y": 440.66,
+          "bottom_y": 474.41
+        },
+        {
+          "name": "6 V laboratory filament lamp",
+          "top_y": 478.41,
+          "bottom_y": 512.16
+        },
+        {
+          "name": "Red LED + 220 Ω protection resistor",
+          "top_y": 516.16,
+          "bottom_y": 549.91
+        }
+      ],
+      "heading_to_content_gap_px": 7,
+      "method_font_size_px": 10.6,
+      "reactant_font_size_px": 10.3,
+      "guidance_font_size_px": 10,
+      "all_method_stage_text_visible": true,
+      "all_reactant_text_visible": true,
+      "all_apparatus_text_visible": true,
+      "all_sidebar_components_visible": true,
+      "compact": false
+    },
+    "reactant_interaction": {
+      "mode": "health and safety information",
+      "listed_reactants": [
+        "100 Ω fixed resistor",
+        "6 V laboratory filament lamp",
+        "Red LED + 220 Ω protection resistor"
+      ],
+      "click_enabled": true,
+      "drag_enabled": false,
+      "experiment_setup_action_hidden": true,
+      "heading": "MATERIALS — CLICK FOR SAFETY",
+      "popup": {
+        "open": false
+      }
+    },
+    "canvas_compositing": {
+      "webgl_arena_ui_overlay_alpha": 0,
+      "arena_cutout": "fully transparent clearRect",
+      "blend_state_reset_each_frame": true,
+      "wall_tiles_behind_webgl_apparatus": true,
+      "opaque_3d_apparatus_preserved": true
+    },
+    "bunsen_load_transition": {
+      "appearance_animation_scope": "all lit Bunsen instances in every practical",
+      "active": false,
+      "elapsed_s": 3.4,
+      "progress": 1,
+      "phase": "powerful blue heating flame",
+      "collar_rotation_degrees": 0,
+      "collar_open_fraction": 1,
+      "flame_heat_mix": 1,
+      "safety_flame_visible": false,
+      "powerful_blue_heating_flame_visible": true,
+      "complete": true
+    },
+    "left_practical_sidebar": {
+      "scroll_enabled": false,
+      "scrollbar_visible": false,
+      "input": "mouse wheel or trackpad over the clipped practical rail",
+      "subject": "physics",
+      "scroll_offset_px": 0,
+      "maximum_scroll_offset_px": 0,
+      "visible_card_count": 14
+    },
+    "control_label_layout": {
+      "all_visible_button_labels_fit": true,
+      "visible_button_count": 6,
+      "wrapped_button_labels": [],
+      "minimum_font_size_px": 12,
+      "labels": [
+        {
+          "label": "SWEEP RUNNING…",
+          "lines": [
+            "SWEEP RUNNING…"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 115.35,
+          "available_width_px": 138.6,
+          "button_width_px": 154,
+          "fits": true
+        },
+        {
+          "label": "DEVICE · RESISTOR",
+          "lines": [
+            "DEVICE · RESISTOR"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 116.85,
+          "available_width_px": 133.2,
+          "button_width_px": 148,
+          "fits": true
+        },
+        {
+          "label": "RESET",
+          "lines": [
+            "RESET"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 39.29,
+          "available_width_px": 60,
+          "button_width_px": 70,
+          "fits": true
+        },
+        {
+          "label": "CURVES",
+          "lines": [
+            "CURVES"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 50.34,
+          "available_width_px": 68,
+          "button_width_px": 78,
+          "fits": true
+        },
+        {
+          "label": "METHOD",
+          "lines": [
+            "METHOD"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 54.08,
+          "available_width_px": 82,
+          "button_width_px": 92,
+          "fits": true
+        },
+        {
+          "label": "CURVES",
+          "lines": [
+            "CURVES"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 50.34,
+          "available_width_px": 82,
+          "button_width_px": 92,
+          "fits": true
+        }
+      ]
+    },
+    "results_view": "three overlaid current–potential difference curves",
+    "iv_characteristics": {
+      "stage": 1,
+      "phase": "automatic forward and reverse voltage sweep",
+      "active_device": "resistor",
+      "active_device_label": "100 Ω RESISTOR",
+      "elapsed_stage_s": 5.6,
+      "supply_voltage_v": 6,
+      "device_voltage_v": 6,
+      "current_a": 0.06,
+      "current_ma": 60,
+      "polarity": "forward",
+      "switch_closed": true,
+      "apparatus": {
+        "power_pack": "variable ±6 V DC laboratory power pack with live voltage display and rotary control",
+        "ammeter": "digital ammeter connected in series",
+        "voltmeter": "digital voltmeter connected in parallel across the active device",
+        "test_station": "two shrouded spring terminals showing only the active component; inactive modules remain outside the visible workbench",
+        "devices": [
+          "100 Ω axial fixed resistor with colour bands",
+          "6 V MES laboratory filament bulb with transparent glass and visible coiled tungsten filament",
+          "red 5 mm LED with domed epoxy, cathode flat and 220 Ω protection resistor"
+        ],
+        "circuit_path": "power pack positive → switch → ammeter → active device → power pack negative",
+        "voltmeter_branch": "connected directly across both active-device terminals",
+        "cable_routes_separated": true
+      },
+      "animations": {
+        "device_seating_smooth": false,
+        "completed_device_exits_left_and_next_enters_right": false,
+        "inactive_devices_outside_visible_workbench": true,
+        "switch_and_voltage_dial_smooth": true,
+        "polarity_plugs_cross_at_zero": false,
+        "moving_charge_markers": true,
+        "filament_temperature_and_glow_continuous": false,
+        "led_threshold_glow_continuous": false
+      },
+      "live_sweep_readings": [
+        {
+          "supply_v": 0,
+          "voltage_v": 0,
+          "current_a": 0
+        },
+        {
+          "supply_v": 1,
+          "voltage_v": 1,
+          "current_a": 0.01
+        },
+        {
+          "supply_v": 2,
+          "voltage_v": 2,
+          "current_a": 0.02
+        },
+        {
+          "supply_v": 3,
+          "voltage_v": 3,
+          "current_a": 0.03
+        },
+        {
+          "supply_v": 4,
+          "voltage_v": 4,
+          "current_a": 0.04
+        },
+        {
+          "supply_v": 5,
+          "voltage_v": 5,
+          "current_a": 0.05
+        },
+        {
+          "supply_v": 6,
+          "voltage_v": 6,
+          "current_a": 0.06
+        }
+      ],
+      "saved_curves": [],
+      "curves_complete": false,
+      "scientific_conclusions": {
+        "resistor": "A straight line through the origin: current is proportional to potential difference at constant temperature.",
+        "filament_lamp": "The curve becomes shallower as the filament heats and its resistance increases.",
+        "led": "Almost no reverse current; forward current rises only after the LED turn-on potential difference."
+      },
+      "safety": {
+        "low_voltage_supply": true,
+        "switch_off_before_changing_component_or_polarity": true,
+        "hot_lamp_cool_before_touching": true,
+        "led_protection_resistor_fitted": true
+      }
+    }
+  },
+  "resistorReverse": {
+    "coordinates": "origin top-left, x right, y down",
+    "id": "ivdevices",
+    "subject": "physics",
+    "renderer": {
+      "enabled": true,
+      "renderer": "WebGL / Three.js",
+      "objects": 1,
+      "context_lost": false,
+      "scene_compiling": false,
+      "scene_warmup_frames": 2,
+      "canvas_visible": true,
+      "legacy_2d_apparatus": false
+    },
+    "mode": "guided practical",
+    "practical": "Ohmic & non-ohmic devices",
+    "objective": "Compare current–potential difference characteristics for an ohmic resistor, a filament lamp and a light-emitting diode.",
+    "symbol_equation": "R = V / I",
+    "word_equation": "current is proportional to potential difference only for an ohmic conductor at constant temperature",
+    "tab": "bench",
+    "focus_mode": false,
+    "method_dropdown": false,
+    "graph_modal": {
+      "available": true,
+      "button_visible": false,
+      "button_label": null,
+      "button_icon": null,
+      "button_text_visible": false,
+      "button_row": null,
+      "open": false,
+      "chart_kind": "iv-device-curves",
+      "sidebar_header_layout": null,
+      "scaled_view": null
+    },
+    "evaluation_modal": {
+      "open": false
+    },
+    "running": false,
+    "complete": false,
+    "practical_evaluation": {
+      "position": "below guidance",
+      "section_heading": "PRACTICAL EVALUATION",
+      "button_label": "OPEN EVALUATION",
+      "ready": false,
+      "appearance": "outlined pale teal",
+      "open": false
+    },
+    "dragging": null,
+    "pouring": false,
+    "acid_transfer": null,
+    "bunsen_lit": false,
+    "magnesium_glow": false,
+    "dose_dialog": null,
+    "tripod_gauze_snap_targets": [],
+    "workspace_items": [],
+    "mass_practical": null,
+    "salt_practical": null,
+    "hydrogen_practical": null,
+    "thermometer_visual": null,
+    "time_s": 13.5,
+    "temperature_c": 25,
+    "volume_ml": 0,
+    "ph": 7,
+    "progress": 0.27,
+    "chromatography_dyes": null,
+    "graph_axes": {
+      "x": "potential difference across device / V",
+      "y": "current / A",
+      "x_range": [
+        -6,
+        6
+      ],
+      "y_range": [
+        -0.22,
+        0.22
+      ]
+    },
+    "results_columns": null,
+    "graph_readings": 0,
+    "guidance": "RESISTOR sweep complete with 13 settled readings from −6 V to +6 V. Save this curve before changing components.",
+    "controls": [
+      "SAVE CURVE",
+      "DEVICE · RESISTOR",
+      "RESET",
+      "CURVES",
+      "METHOD",
+      "F fullscreen"
+    ],
+    "responsive_layout": {
+      "viewport_css_px": {
+        "width": 1440,
+        "height": 900
+      },
+      "logical_canvas_px": {
+        "width": 1440,
+        "height": 900
+      },
+      "scale": 1,
+      "mode": "desktop",
+      "portrait_prompt_visible": false,
+      "three_column_layout_preserved": true,
+      "mobile_landscape_layout": false,
+      "pointer_coordinates_scaled": false,
+      "minimum_touch_target_css_px": null
+    },
+    "bunsen_geometry": {
+      "main_tube": "hollow with chamfered wider mouth and real intake opening",
+      "base_top_sealed_to_main_tube": true,
+      "main_tube_outer_diameter_scene_units": 0.208,
+      "main_tube_inner_diameter_scene_units": 0.174,
+      "chamfered_mouth_outer_diameter_scene_units": 0.26,
+      "air_intake_valve": "short, thin collar immediately above the base-to-barrel seal",
+      "air_intake_collar_bottom_gap_scene_units": 0.02,
+      "air_intake_collar_height_scene_units": 0.2,
+      "air_intake_collar_inner_diameter_scene_units": 0.216,
+      "air_intake_collar_radial_thickness_scene_units": 0.0155,
+      "air_intake_collar_wall_reduction_percent": 50,
+      "air_intake_collar_finish": "brushed steel matching the main Bunsen tube",
+      "air_intake_collar_edge_profile": "square unrounded top and bottom edges",
+      "air_intake_outer_diameter_scene_units": 0.247,
+      "air_intake_opening_count": 1,
+      "air_intake_collar_front_hole_diameter_scene_units": 0.136,
+      "main_tube_front_hole_diameter_scene_units": 0.122,
+      "air_intake_adjustment_tab_present": false,
+      "air_intake_hole_geometry": "one larger actual front perforation through collar and main tube with recessed tunnel wall",
+      "air_intake_hole_alignment": "barrel opening slightly offset behind collar opening for depth",
+      "gas_connector_height_scene_units": 0.18,
+      "gas_connector_finish": "black matching the flexible gas hose",
+      "gas_connector_restored_to_previous_height": true,
+      "gas_connector_raised_with_valve": false,
+      "hose_radius_scene_units": 0.057,
+      "hose_minimum_centre_height_scene_units": 0.14,
+      "hose_minimum_ground_clearance_scene_units": 0.083,
+      "hose_kink_reduced": true,
+      "hose_overlaps_brass_valve_scene_units": 0.2,
+      "hose_valve_overlap_sleeve": true,
+      "hose_valve_sleeve_profile": "rubber cuff flares from 0.059 to 0.094 scene-unit radius over the brass barbs",
+      "hose_valve_sleeve_flared": true,
+      "hose_valve_final_approach_axis": "+x coaxial with the gas-tap outlet",
+      "hose_valve_final_tangent": [
+        1,
+        0,
+        0
+      ],
+      "gas_tap_outlet_profile": "tapered brass spigot, narrow at the hose entry and widening toward the valve body",
+      "gas_tap_outlet_entry_radius_scene_units": 0.06,
+      "gas_tap_outlet_base_radius_scene_units": 0.078,
+      "flame_width_scale_from_previous_geometry": 0.881,
+      "dependent_animations_realigned": true,
+      "collar_turn_uses_updated_geometry": true,
+      "flame_rim_core_and_jets_scaled": true,
+      "coloured_flame_overlays_scaled": true,
+      "flame_test_sample_alignment": "salt scoop centre remains on the narrowed burner axis"
+    },
+    "lab_bench_front": {
+      "finish": "dark grey enamel",
+      "embossed_door_panelling": true,
+      "responsive_panel_count": "2 to 4",
+      "blue_resin_worktop_edge_retained": true
+    },
+    "right_sidebar_layout": {
+      "fills_available_vertical_space": true,
+      "adaptive_section_spacing": true,
+      "remaining_height_allocated_to_content_cards": true,
+      "excessive_blank_section_gaps_removed": true,
+      "larger_responsive_typography": true,
+      "explicit_heading_to_content_spacing": true,
+      "method_stage_cards": true,
+      "method_stage_text_wrap": "complete multiline text without clipping or ellipsis",
+      "reactant_text_wrap": "complete multiline text without clipping or ellipsis",
+      "apparatus_text_wrap": "complete multiline text without clipping or ellipsis",
+      "guidance_text_wrap": "complete multiline text",
+      "compact_landscape_supported": true,
+      "content_top_y": 126,
+      "content_bottom_y": 886,
+      "available_bottom_y": 886,
+      "evaluation_button_top_y": 821.22,
+      "evaluation_button_bottom_y": 886,
+      "unused_vertical_space_px": 0,
+      "overflow_vertical_space_px": 0,
+      "compression_ratio": 0,
+      "method_stage_count": 4,
+      "method_stage_line_counts": [
+        3,
+        3,
+        2,
+        2
+      ],
+      "reactant_rows": [
+        {
+          "name": "100 Ω fixed resistor",
+          "top_y": 440.66,
+          "bottom_y": 474.41
+        },
+        {
+          "name": "6 V laboratory filament lamp",
+          "top_y": 478.41,
+          "bottom_y": 512.16
+        },
+        {
+          "name": "Red LED + 220 Ω protection resistor",
+          "top_y": 516.16,
+          "bottom_y": 549.91
+        }
+      ],
+      "heading_to_content_gap_px": 7,
+      "method_font_size_px": 10.6,
+      "reactant_font_size_px": 10.3,
+      "guidance_font_size_px": 10,
+      "all_method_stage_text_visible": true,
+      "all_reactant_text_visible": true,
+      "all_apparatus_text_visible": true,
+      "all_sidebar_components_visible": true,
+      "compact": false
+    },
+    "reactant_interaction": {
+      "mode": "health and safety information",
+      "listed_reactants": [
+        "100 Ω fixed resistor",
+        "6 V laboratory filament lamp",
+        "Red LED + 220 Ω protection resistor"
+      ],
+      "click_enabled": true,
+      "drag_enabled": false,
+      "experiment_setup_action_hidden": true,
+      "heading": "MATERIALS — CLICK FOR SAFETY",
+      "popup": {
+        "open": false
+      }
+    },
+    "canvas_compositing": {
+      "webgl_arena_ui_overlay_alpha": 0,
+      "arena_cutout": "fully transparent clearRect",
+      "blend_state_reset_each_frame": true,
+      "wall_tiles_behind_webgl_apparatus": true,
+      "opaque_3d_apparatus_preserved": true
+    },
+    "bunsen_load_transition": {
+      "appearance_animation_scope": "all lit Bunsen instances in every practical",
+      "active": false,
+      "elapsed_s": 3.4,
+      "progress": 1,
+      "phase": "powerful blue heating flame",
+      "collar_rotation_degrees": 0,
+      "collar_open_fraction": 1,
+      "flame_heat_mix": 1,
+      "safety_flame_visible": false,
+      "powerful_blue_heating_flame_visible": true,
+      "complete": true
+    },
+    "left_practical_sidebar": {
+      "scroll_enabled": false,
+      "scrollbar_visible": false,
+      "input": "mouse wheel or trackpad over the clipped practical rail",
+      "subject": "physics",
+      "scroll_offset_px": 0,
+      "maximum_scroll_offset_px": 0,
+      "visible_card_count": 14
+    },
+    "control_label_layout": {
+      "all_visible_button_labels_fit": true,
+      "visible_button_count": 6,
+      "wrapped_button_labels": [],
+      "minimum_font_size_px": 12,
+      "labels": [
+        {
+          "label": "SAVE CURVE",
+          "lines": [
+            "SAVE CURVE"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 77.58,
+          "available_width_px": 138.6,
+          "button_width_px": 154,
+          "fits": true
+        },
+        {
+          "label": "DEVICE · RESISTOR",
+          "lines": [
+            "DEVICE · RESISTOR"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 116.85,
+          "available_width_px": 133.2,
+          "button_width_px": 148,
+          "fits": true
+        },
+        {
+          "label": "RESET",
+          "lines": [
+            "RESET"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 39.29,
+          "available_width_px": 60,
+          "button_width_px": 70,
+          "fits": true
+        },
+        {
+          "label": "CURVES",
+          "lines": [
+            "CURVES"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 50.34,
+          "available_width_px": 68,
+          "button_width_px": 78,
+          "fits": true
+        },
+        {
+          "label": "METHOD",
+          "lines": [
+            "METHOD"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 54.08,
+          "available_width_px": 82,
+          "button_width_px": 92,
+          "fits": true
+        },
+        {
+          "label": "CURVES",
+          "lines": [
+            "CURVES"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 50.34,
+          "available_width_px": 82,
+          "button_width_px": 92,
+          "fits": true
+        }
+      ]
+    },
+    "results_view": "three overlaid current–potential difference curves",
+    "iv_characteristics": {
+      "stage": 2,
+      "phase": "sweep complete; curve ready to save",
+      "active_device": "resistor",
+      "active_device_label": "100 Ω RESISTOR",
+      "elapsed_stage_s": 13.5,
+      "supply_voltage_v": -6,
+      "device_voltage_v": -6,
+      "current_a": -0.06,
+      "current_ma": -60,
+      "polarity": "reverse",
+      "switch_closed": false,
+      "apparatus": {
+        "power_pack": "variable ±6 V DC laboratory power pack with live voltage display and rotary control",
+        "ammeter": "digital ammeter connected in series",
+        "voltmeter": "digital voltmeter connected in parallel across the active device",
+        "test_station": "two shrouded spring terminals showing only the active component; inactive modules remain outside the visible workbench",
+        "devices": [
+          "100 Ω axial fixed resistor with colour bands",
+          "6 V MES laboratory filament bulb with transparent glass and visible coiled tungsten filament",
+          "red 5 mm LED with domed epoxy, cathode flat and 220 Ω protection resistor"
+        ],
+        "circuit_path": "power pack positive → switch → ammeter → active device → power pack negative",
+        "voltmeter_branch": "connected directly across both active-device terminals",
+        "cable_routes_separated": true
+      },
+      "animations": {
+        "device_seating_smooth": false,
+        "completed_device_exits_left_and_next_enters_right": false,
+        "inactive_devices_outside_visible_workbench": true,
+        "switch_and_voltage_dial_smooth": false,
+        "polarity_plugs_cross_at_zero": false,
+        "moving_charge_markers": false,
+        "filament_temperature_and_glow_continuous": false,
+        "led_threshold_glow_continuous": false
+      },
+      "live_sweep_readings": [
+        {
+          "supply_v": -6,
+          "voltage_v": -6,
+          "current_a": -0.06
+        },
+        {
+          "supply_v": -5,
+          "voltage_v": -5,
+          "current_a": -0.05
+        },
+        {
+          "supply_v": -4,
+          "voltage_v": -4,
+          "current_a": -0.04
+        },
+        {
+          "supply_v": -3,
+          "voltage_v": -3,
+          "current_a": -0.03
+        },
+        {
+          "supply_v": -2,
+          "voltage_v": -2,
+          "current_a": -0.02
+        },
+        {
+          "supply_v": -1,
+          "voltage_v": -1,
+          "current_a": -0.01
+        },
+        {
+          "supply_v": 0,
+          "voltage_v": 0,
+          "current_a": 0
+        },
+        {
+          "supply_v": 1,
+          "voltage_v": 1,
+          "current_a": 0.01
+        },
+        {
+          "supply_v": 2,
+          "voltage_v": 2,
+          "current_a": 0.02
+        },
+        {
+          "supply_v": 3,
+          "voltage_v": 3,
+          "current_a": 0.03
+        },
+        {
+          "supply_v": 4,
+          "voltage_v": 4,
+          "current_a": 0.04
+        },
+        {
+          "supply_v": 5,
+          "voltage_v": 5,
+          "current_a": 0.05
+        },
+        {
+          "supply_v": 6,
+          "voltage_v": 6,
+          "current_a": 0.06
+        }
+      ],
+      "saved_curves": [],
+      "curves_complete": false,
+      "scientific_conclusions": {
+        "resistor": "A straight line through the origin: current is proportional to potential difference at constant temperature.",
+        "filament_lamp": "The curve becomes shallower as the filament heats and its resistance increases.",
+        "led": "Almost no reverse current; forward current rises only after the LED turn-on potential difference."
+      },
+      "safety": {
+        "low_voltage_supply": true,
+        "switch_off_before_changing_component_or_polarity": true,
+        "hot_lamp_cool_before_touching": true,
+        "led_protection_resistor_fitted": true
+      }
+    }
+  },
+  "lampForward": {
+    "coordinates": "origin top-left, x right, y down",
+    "id": "ivdevices",
+    "subject": "physics",
+    "renderer": {
+      "enabled": true,
+      "renderer": "WebGL / Three.js",
+      "objects": 1,
+      "context_lost": false,
+      "scene_compiling": false,
+      "scene_warmup_frames": 2,
+      "canvas_visible": true,
+      "legacy_2d_apparatus": false
+    },
+    "mode": "guided practical",
+    "practical": "Ohmic & non-ohmic devices",
+    "objective": "Compare current–potential difference characteristics for an ohmic resistor, a filament lamp and a light-emitting diode.",
+    "symbol_equation": "R = V / I",
+    "word_equation": "current is proportional to potential difference only for an ohmic conductor at constant temperature",
+    "tab": "bench",
+    "focus_mode": false,
+    "method_dropdown": false,
+    "graph_modal": {
+      "available": true,
+      "button_visible": false,
+      "button_label": null,
+      "button_icon": null,
+      "button_text_visible": false,
+      "button_row": null,
+      "open": false,
+      "chart_kind": "iv-device-curves",
+      "sidebar_header_layout": null,
+      "scaled_view": null
+    },
+    "evaluation_modal": {
+      "open": false
+    },
+    "running": false,
+    "complete": false,
+    "practical_evaluation": {
+      "position": "below guidance",
+      "section_heading": "PRACTICAL EVALUATION",
+      "button_label": "OPEN EVALUATION",
+      "ready": false,
+      "appearance": "outlined pale teal",
+      "open": false
+    },
+    "dragging": null,
+    "pouring": false,
+    "acid_transfer": null,
+    "bunsen_lit": false,
+    "magnesium_glow": false,
+    "dose_dialog": null,
+    "tripod_gauze_snap_targets": [],
+    "workspace_items": [],
+    "mass_practical": null,
+    "salt_practical": null,
+    "hydrogen_practical": null,
+    "thermometer_visual": null,
+    "time_s": 19.1,
+    "temperature_c": 25,
+    "volume_ml": 0,
+    "ph": 7,
+    "progress": 0.45,
+    "chromatography_dyes": null,
+    "graph_axes": {
+      "x": "potential difference across device / V",
+      "y": "current / A",
+      "x_range": [
+        -6,
+        6
+      ],
+      "y_range": [
+        -0.22,
+        0.22
+      ]
+    },
+    "results_columns": null,
+    "graph_readings": 0,
+    "guidance": "FILAMENT LAMP: increasing the forward supply — 6.00 V across the device, 210.0 mA.",
+    "controls": [
+      "SWEEP RUNNING…",
+      "DEVICE · FILAMENT LAMP",
+      "RESET",
+      "CURVES",
+      "METHOD",
+      "F fullscreen"
+    ],
+    "responsive_layout": {
+      "viewport_css_px": {
+        "width": 1440,
+        "height": 900
+      },
+      "logical_canvas_px": {
+        "width": 1440,
+        "height": 900
+      },
+      "scale": 1,
+      "mode": "desktop",
+      "portrait_prompt_visible": false,
+      "three_column_layout_preserved": true,
+      "mobile_landscape_layout": false,
+      "pointer_coordinates_scaled": false,
+      "minimum_touch_target_css_px": null
+    },
+    "bunsen_geometry": {
+      "main_tube": "hollow with chamfered wider mouth and real intake opening",
+      "base_top_sealed_to_main_tube": true,
+      "main_tube_outer_diameter_scene_units": 0.208,
+      "main_tube_inner_diameter_scene_units": 0.174,
+      "chamfered_mouth_outer_diameter_scene_units": 0.26,
+      "air_intake_valve": "short, thin collar immediately above the base-to-barrel seal",
+      "air_intake_collar_bottom_gap_scene_units": 0.02,
+      "air_intake_collar_height_scene_units": 0.2,
+      "air_intake_collar_inner_diameter_scene_units": 0.216,
+      "air_intake_collar_radial_thickness_scene_units": 0.0155,
+      "air_intake_collar_wall_reduction_percent": 50,
+      "air_intake_collar_finish": "brushed steel matching the main Bunsen tube",
+      "air_intake_collar_edge_profile": "square unrounded top and bottom edges",
+      "air_intake_outer_diameter_scene_units": 0.247,
+      "air_intake_opening_count": 1,
+      "air_intake_collar_front_hole_diameter_scene_units": 0.136,
+      "main_tube_front_hole_diameter_scene_units": 0.122,
+      "air_intake_adjustment_tab_present": false,
+      "air_intake_hole_geometry": "one larger actual front perforation through collar and main tube with recessed tunnel wall",
+      "air_intake_hole_alignment": "barrel opening slightly offset behind collar opening for depth",
+      "gas_connector_height_scene_units": 0.18,
+      "gas_connector_finish": "black matching the flexible gas hose",
+      "gas_connector_restored_to_previous_height": true,
+      "gas_connector_raised_with_valve": false,
+      "hose_radius_scene_units": 0.057,
+      "hose_minimum_centre_height_scene_units": 0.14,
+      "hose_minimum_ground_clearance_scene_units": 0.083,
+      "hose_kink_reduced": true,
+      "hose_overlaps_brass_valve_scene_units": 0.2,
+      "hose_valve_overlap_sleeve": true,
+      "hose_valve_sleeve_profile": "rubber cuff flares from 0.059 to 0.094 scene-unit radius over the brass barbs",
+      "hose_valve_sleeve_flared": true,
+      "hose_valve_final_approach_axis": "+x coaxial with the gas-tap outlet",
+      "hose_valve_final_tangent": [
+        1,
+        0,
+        0
+      ],
+      "gas_tap_outlet_profile": "tapered brass spigot, narrow at the hose entry and widening toward the valve body",
+      "gas_tap_outlet_entry_radius_scene_units": 0.06,
+      "gas_tap_outlet_base_radius_scene_units": 0.078,
+      "flame_width_scale_from_previous_geometry": 0.881,
+      "dependent_animations_realigned": true,
+      "collar_turn_uses_updated_geometry": true,
+      "flame_rim_core_and_jets_scaled": true,
+      "coloured_flame_overlays_scaled": true,
+      "flame_test_sample_alignment": "salt scoop centre remains on the narrowed burner axis"
+    },
+    "lab_bench_front": {
+      "finish": "dark grey enamel",
+      "embossed_door_panelling": true,
+      "responsive_panel_count": "2 to 4",
+      "blue_resin_worktop_edge_retained": true
+    },
+    "right_sidebar_layout": {
+      "fills_available_vertical_space": true,
+      "adaptive_section_spacing": true,
+      "remaining_height_allocated_to_content_cards": true,
+      "excessive_blank_section_gaps_removed": true,
+      "larger_responsive_typography": true,
+      "explicit_heading_to_content_spacing": true,
+      "method_stage_cards": true,
+      "method_stage_text_wrap": "complete multiline text without clipping or ellipsis",
+      "reactant_text_wrap": "complete multiline text without clipping or ellipsis",
+      "apparatus_text_wrap": "complete multiline text without clipping or ellipsis",
+      "guidance_text_wrap": "complete multiline text",
+      "compact_landscape_supported": true,
+      "content_top_y": 126,
+      "content_bottom_y": 886,
+      "available_bottom_y": 886,
+      "evaluation_button_top_y": 821.22,
+      "evaluation_button_bottom_y": 886,
+      "unused_vertical_space_px": 0,
+      "overflow_vertical_space_px": 0,
+      "compression_ratio": 0,
+      "method_stage_count": 4,
+      "method_stage_line_counts": [
+        3,
+        3,
+        2,
+        2
+      ],
+      "reactant_rows": [
+        {
+          "name": "100 Ω fixed resistor",
+          "top_y": 440.66,
+          "bottom_y": 474.41
+        },
+        {
+          "name": "6 V laboratory filament lamp",
+          "top_y": 478.41,
+          "bottom_y": 512.16
+        },
+        {
+          "name": "Red LED + 220 Ω protection resistor",
+          "top_y": 516.16,
+          "bottom_y": 549.91
+        }
+      ],
+      "heading_to_content_gap_px": 7,
+      "method_font_size_px": 10.6,
+      "reactant_font_size_px": 10.3,
+      "guidance_font_size_px": 10,
+      "all_method_stage_text_visible": true,
+      "all_reactant_text_visible": true,
+      "all_apparatus_text_visible": true,
+      "all_sidebar_components_visible": true,
+      "compact": false
+    },
+    "reactant_interaction": {
+      "mode": "health and safety information",
+      "listed_reactants": [
+        "100 Ω fixed resistor",
+        "6 V laboratory filament lamp",
+        "Red LED + 220 Ω protection resistor"
+      ],
+      "click_enabled": true,
+      "drag_enabled": false,
+      "experiment_setup_action_hidden": true,
+      "heading": "MATERIALS — CLICK FOR SAFETY",
+      "popup": {
+        "open": false
+      }
+    },
+    "canvas_compositing": {
+      "webgl_arena_ui_overlay_alpha": 0,
+      "arena_cutout": "fully transparent clearRect",
+      "blend_state_reset_each_frame": true,
+      "wall_tiles_behind_webgl_apparatus": true,
+      "opaque_3d_apparatus_preserved": true
+    },
+    "bunsen_load_transition": {
+      "appearance_animation_scope": "all lit Bunsen instances in every practical",
+      "active": false,
+      "elapsed_s": 3.4,
+      "progress": 1,
+      "phase": "powerful blue heating flame",
+      "collar_rotation_degrees": 0,
+      "collar_open_fraction": 1,
+      "flame_heat_mix": 1,
+      "safety_flame_visible": false,
+      "powerful_blue_heating_flame_visible": true,
+      "complete": true
+    },
+    "left_practical_sidebar": {
+      "scroll_enabled": false,
+      "scrollbar_visible": false,
+      "input": "mouse wheel or trackpad over the clipped practical rail",
+      "subject": "physics",
+      "scroll_offset_px": 0,
+      "maximum_scroll_offset_px": 0,
+      "visible_card_count": 14
+    },
+    "control_label_layout": {
+      "all_visible_button_labels_fit": true,
+      "visible_button_count": 6,
+      "wrapped_button_labels": [
+        {
+          "label": "DEVICE · FILAMENT LAMP",
+          "lines": [
+            "DEVICE ·",
+            "FILAMENT LAMP"
+          ],
+          "font_size_px": 10.5
+        }
+      ],
+      "minimum_font_size_px": 10.5,
+      "labels": [
+        {
+          "label": "SWEEP RUNNING…",
+          "lines": [
+            "SWEEP RUNNING…"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 115.35,
+          "available_width_px": 138.6,
+          "button_width_px": 154,
+          "fits": true
+        },
+        {
+          "label": "DEVICE · FILAMENT LAMP",
+          "lines": [
+            "DEVICE ·",
+            "FILAMENT LAMP"
+          ],
+          "font_size_px": 10.5,
+          "widest_line_px": 89.04,
+          "available_width_px": 133.2,
+          "button_width_px": 148,
+          "fits": true
+        },
+        {
+          "label": "RESET",
+          "lines": [
+            "RESET"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 39.29,
+          "available_width_px": 60,
+          "button_width_px": 70,
+          "fits": true
+        },
+        {
+          "label": "CURVES",
+          "lines": [
+            "CURVES"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 50.34,
+          "available_width_px": 68,
+          "button_width_px": 78,
+          "fits": true
+        },
+        {
+          "label": "METHOD",
+          "lines": [
+            "METHOD"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 54.08,
+          "available_width_px": 82,
+          "button_width_px": 92,
+          "fits": true
+        },
+        {
+          "label": "CURVES",
+          "lines": [
+            "CURVES"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 50.34,
+          "available_width_px": 82,
+          "button_width_px": 92,
+          "fits": true
+        }
+      ]
+    },
+    "results_view": "three overlaid current–potential difference curves",
+    "iv_characteristics": {
+      "stage": 1,
+      "phase": "automatic forward and reverse voltage sweep",
+      "active_device": "lamp",
+      "active_device_label": "6 V FILAMENT LAMP",
+      "elapsed_stage_s": 5.6,
+      "supply_voltage_v": 6,
+      "device_voltage_v": 6,
+      "current_a": 0.21,
+      "current_ma": 210,
+      "polarity": "forward",
+      "switch_closed": true,
+      "apparatus": {
+        "power_pack": "variable ±6 V DC laboratory power pack with live voltage display and rotary control",
+        "ammeter": "digital ammeter connected in series",
+        "voltmeter": "digital voltmeter connected in parallel across the active device",
+        "test_station": "two shrouded spring terminals showing only the active component; inactive modules remain outside the visible workbench",
+        "devices": [
+          "100 Ω axial fixed resistor with colour bands",
+          "6 V MES laboratory filament bulb with transparent glass and visible coiled tungsten filament",
+          "red 5 mm LED with domed epoxy, cathode flat and 220 Ω protection resistor"
+        ],
+        "circuit_path": "power pack positive → switch → ammeter → active device → power pack negative",
+        "voltmeter_branch": "connected directly across both active-device terminals",
+        "cable_routes_separated": true
+      },
+      "animations": {
+        "device_seating_smooth": false,
+        "completed_device_exits_left_and_next_enters_right": false,
+        "inactive_devices_outside_visible_workbench": true,
+        "switch_and_voltage_dial_smooth": true,
+        "polarity_plugs_cross_at_zero": false,
+        "moving_charge_markers": true,
+        "filament_temperature_and_glow_continuous": true,
+        "led_threshold_glow_continuous": false
+      },
+      "live_sweep_readings": [
+        {
+          "supply_v": 0,
+          "voltage_v": 0,
+          "current_a": 0
+        },
+        {
+          "supply_v": 1,
+          "voltage_v": 1,
+          "current_a": 0.08573
+        },
+        {
+          "supply_v": 2,
+          "voltage_v": 2,
+          "current_a": 0.12124
+        },
+        {
+          "supply_v": 3,
+          "voltage_v": 3,
+          "current_a": 0.14849
+        },
+        {
+          "supply_v": 4,
+          "voltage_v": 4,
+          "current_a": 0.17146
+        },
+        {
+          "supply_v": 5,
+          "voltage_v": 5,
+          "current_a": 0.1917
+        },
+        {
+          "supply_v": 6,
+          "voltage_v": 6,
+          "current_a": 0.21
+        }
+      ],
+      "saved_curves": [
+        {
+          "device": "resistor",
+          "label": "100 Ω RESISTOR",
+          "conclusion": "A straight line through the origin: current is proportional to potential difference at constant temperature.",
+          "readings": [
+            {
+              "supply_v": -6,
+              "voltage_v": -6,
+              "current_a": -0.06
+            },
+            {
+              "supply_v": -5,
+              "voltage_v": -5,
+              "current_a": -0.05
+            },
+            {
+              "supply_v": -4,
+              "voltage_v": -4,
+              "current_a": -0.04
+            },
+            {
+              "supply_v": -3,
+              "voltage_v": -3,
+              "current_a": -0.03
+            },
+            {
+              "supply_v": -2,
+              "voltage_v": -2,
+              "current_a": -0.02
+            },
+            {
+              "supply_v": -1,
+              "voltage_v": -1,
+              "current_a": -0.01
+            },
+            {
+              "supply_v": 0,
+              "voltage_v": 0,
+              "current_a": 0
+            },
+            {
+              "supply_v": 1,
+              "voltage_v": 1,
+              "current_a": 0.01
+            },
+            {
+              "supply_v": 2,
+              "voltage_v": 2,
+              "current_a": 0.02
+            },
+            {
+              "supply_v": 3,
+              "voltage_v": 3,
+              "current_a": 0.03
+            },
+            {
+              "supply_v": 4,
+              "voltage_v": 4,
+              "current_a": 0.04
+            },
+            {
+              "supply_v": 5,
+              "voltage_v": 5,
+              "current_a": 0.05
+            },
+            {
+              "supply_v": 6,
+              "voltage_v": 6,
+              "current_a": 0.06
+            }
+          ]
+        }
+      ],
+      "curves_complete": false,
+      "scientific_conclusions": {
+        "resistor": "A straight line through the origin: current is proportional to potential difference at constant temperature.",
+        "filament_lamp": "The curve becomes shallower as the filament heats and its resistance increases.",
+        "led": "Almost no reverse current; forward current rises only after the LED turn-on potential difference."
+      },
+      "safety": {
+        "low_voltage_supply": true,
+        "switch_off_before_changing_component_or_polarity": true,
+        "hot_lamp_cool_before_touching": true,
+        "led_protection_resistor_fitted": true
+      }
+    }
+  },
+  "ledForward": {
+    "coordinates": "origin top-left, x right, y down",
+    "id": "ivdevices",
+    "subject": "physics",
+    "renderer": {
+      "enabled": true,
+      "renderer": "WebGL / Three.js",
+      "objects": 1,
+      "context_lost": false,
+      "scene_compiling": false,
+      "scene_warmup_frames": 2,
+      "canvas_visible": true,
+      "legacy_2d_apparatus": false
+    },
+    "mode": "guided practical",
+    "practical": "Ohmic & non-ohmic devices",
+    "objective": "Compare current–potential difference characteristics for an ohmic resistor, a filament lamp and a light-emitting diode.",
+    "symbol_equation": "R = V / I",
+    "word_equation": "current is proportional to potential difference only for an ohmic conductor at constant temperature",
+    "tab": "bench",
+    "focus_mode": false,
+    "method_dropdown": false,
+    "graph_modal": {
+      "available": true,
+      "button_visible": false,
+      "button_label": null,
+      "button_icon": null,
+      "button_text_visible": false,
+      "button_row": null,
+      "open": false,
+      "chart_kind": "iv-device-curves",
+      "sidebar_header_layout": null,
+      "scaled_view": null
+    },
+    "evaluation_modal": {
+      "open": false
+    },
+    "running": false,
+    "complete": false,
+    "practical_evaluation": {
+      "position": "below guidance",
+      "section_heading": "PRACTICAL EVALUATION",
+      "button_label": "OPEN EVALUATION",
+      "ready": false,
+      "appearance": "outlined pale teal",
+      "open": false
+    },
+    "dragging": null,
+    "pouring": false,
+    "acid_transfer": null,
+    "bunsen_lit": false,
+    "magnesium_glow": false,
+    "dose_dialog": null,
+    "tripod_gauze_snap_targets": [],
+    "workspace_items": [],
+    "mass_practical": null,
+    "salt_practical": null,
+    "hydrogen_practical": null,
+    "thermometer_visual": null,
+    "time_s": 32.6,
+    "temperature_c": 25,
+    "volume_ml": 0,
+    "ph": 7,
+    "progress": 0.78,
+    "chromatography_dyes": null,
+    "graph_axes": {
+      "x": "potential difference across device / V",
+      "y": "current / A",
+      "x_range": [
+        -6,
+        6
+      ],
+      "y_range": [
+        -0.22,
+        0.22
+      ]
+    },
+    "results_columns": null,
+    "graph_readings": 0,
+    "guidance": "RED LED: increasing the forward supply — 1.91 V across the device, 20.2 mA.",
+    "controls": [
+      "SWEEP RUNNING…",
+      "DEVICE · RED LED",
+      "RESET",
+      "CURVES",
+      "METHOD",
+      "F fullscreen"
+    ],
+    "responsive_layout": {
+      "viewport_css_px": {
+        "width": 1440,
+        "height": 900
+      },
+      "logical_canvas_px": {
+        "width": 1440,
+        "height": 900
+      },
+      "scale": 1,
+      "mode": "desktop",
+      "portrait_prompt_visible": false,
+      "three_column_layout_preserved": true,
+      "mobile_landscape_layout": false,
+      "pointer_coordinates_scaled": false,
+      "minimum_touch_target_css_px": null
+    },
+    "bunsen_geometry": {
+      "main_tube": "hollow with chamfered wider mouth and real intake opening",
+      "base_top_sealed_to_main_tube": true,
+      "main_tube_outer_diameter_scene_units": 0.208,
+      "main_tube_inner_diameter_scene_units": 0.174,
+      "chamfered_mouth_outer_diameter_scene_units": 0.26,
+      "air_intake_valve": "short, thin collar immediately above the base-to-barrel seal",
+      "air_intake_collar_bottom_gap_scene_units": 0.02,
+      "air_intake_collar_height_scene_units": 0.2,
+      "air_intake_collar_inner_diameter_scene_units": 0.216,
+      "air_intake_collar_radial_thickness_scene_units": 0.0155,
+      "air_intake_collar_wall_reduction_percent": 50,
+      "air_intake_collar_finish": "brushed steel matching the main Bunsen tube",
+      "air_intake_collar_edge_profile": "square unrounded top and bottom edges",
+      "air_intake_outer_diameter_scene_units": 0.247,
+      "air_intake_opening_count": 1,
+      "air_intake_collar_front_hole_diameter_scene_units": 0.136,
+      "main_tube_front_hole_diameter_scene_units": 0.122,
+      "air_intake_adjustment_tab_present": false,
+      "air_intake_hole_geometry": "one larger actual front perforation through collar and main tube with recessed tunnel wall",
+      "air_intake_hole_alignment": "barrel opening slightly offset behind collar opening for depth",
+      "gas_connector_height_scene_units": 0.18,
+      "gas_connector_finish": "black matching the flexible gas hose",
+      "gas_connector_restored_to_previous_height": true,
+      "gas_connector_raised_with_valve": false,
+      "hose_radius_scene_units": 0.057,
+      "hose_minimum_centre_height_scene_units": 0.14,
+      "hose_minimum_ground_clearance_scene_units": 0.083,
+      "hose_kink_reduced": true,
+      "hose_overlaps_brass_valve_scene_units": 0.2,
+      "hose_valve_overlap_sleeve": true,
+      "hose_valve_sleeve_profile": "rubber cuff flares from 0.059 to 0.094 scene-unit radius over the brass barbs",
+      "hose_valve_sleeve_flared": true,
+      "hose_valve_final_approach_axis": "+x coaxial with the gas-tap outlet",
+      "hose_valve_final_tangent": [
+        1,
+        0,
+        0
+      ],
+      "gas_tap_outlet_profile": "tapered brass spigot, narrow at the hose entry and widening toward the valve body",
+      "gas_tap_outlet_entry_radius_scene_units": 0.06,
+      "gas_tap_outlet_base_radius_scene_units": 0.078,
+      "flame_width_scale_from_previous_geometry": 0.881,
+      "dependent_animations_realigned": true,
+      "collar_turn_uses_updated_geometry": true,
+      "flame_rim_core_and_jets_scaled": true,
+      "coloured_flame_overlays_scaled": true,
+      "flame_test_sample_alignment": "salt scoop centre remains on the narrowed burner axis"
+    },
+    "lab_bench_front": {
+      "finish": "dark grey enamel",
+      "embossed_door_panelling": true,
+      "responsive_panel_count": "2 to 4",
+      "blue_resin_worktop_edge_retained": true
+    },
+    "right_sidebar_layout": {
+      "fills_available_vertical_space": true,
+      "adaptive_section_spacing": true,
+      "remaining_height_allocated_to_content_cards": true,
+      "excessive_blank_section_gaps_removed": true,
+      "larger_responsive_typography": true,
+      "explicit_heading_to_content_spacing": true,
+      "method_stage_cards": true,
+      "method_stage_text_wrap": "complete multiline text without clipping or ellipsis",
+      "reactant_text_wrap": "complete multiline text without clipping or ellipsis",
+      "apparatus_text_wrap": "complete multiline text without clipping or ellipsis",
+      "guidance_text_wrap": "complete multiline text",
+      "compact_landscape_supported": true,
+      "content_top_y": 126,
+      "content_bottom_y": 886,
+      "available_bottom_y": 886,
+      "evaluation_button_top_y": 821.22,
+      "evaluation_button_bottom_y": 886,
+      "unused_vertical_space_px": 0,
+      "overflow_vertical_space_px": 0,
+      "compression_ratio": 0,
+      "method_stage_count": 4,
+      "method_stage_line_counts": [
+        3,
+        3,
+        2,
+        2
+      ],
+      "reactant_rows": [
+        {
+          "name": "100 Ω fixed resistor",
+          "top_y": 440.66,
+          "bottom_y": 474.41
+        },
+        {
+          "name": "6 V laboratory filament lamp",
+          "top_y": 478.41,
+          "bottom_y": 512.16
+        },
+        {
+          "name": "Red LED + 220 Ω protection resistor",
+          "top_y": 516.16,
+          "bottom_y": 549.91
+        }
+      ],
+      "heading_to_content_gap_px": 7,
+      "method_font_size_px": 10.6,
+      "reactant_font_size_px": 10.3,
+      "guidance_font_size_px": 10,
+      "all_method_stage_text_visible": true,
+      "all_reactant_text_visible": true,
+      "all_apparatus_text_visible": true,
+      "all_sidebar_components_visible": true,
+      "compact": false
+    },
+    "reactant_interaction": {
+      "mode": "health and safety information",
+      "listed_reactants": [
+        "100 Ω fixed resistor",
+        "6 V laboratory filament lamp",
+        "Red LED + 220 Ω protection resistor"
+      ],
+      "click_enabled": true,
+      "drag_enabled": false,
+      "experiment_setup_action_hidden": true,
+      "heading": "MATERIALS — CLICK FOR SAFETY",
+      "popup": {
+        "open": false
+      }
+    },
+    "canvas_compositing": {
+      "webgl_arena_ui_overlay_alpha": 0,
+      "arena_cutout": "fully transparent clearRect",
+      "blend_state_reset_each_frame": true,
+      "wall_tiles_behind_webgl_apparatus": true,
+      "opaque_3d_apparatus_preserved": true
+    },
+    "bunsen_load_transition": {
+      "appearance_animation_scope": "all lit Bunsen instances in every practical",
+      "active": false,
+      "elapsed_s": 3.4,
+      "progress": 1,
+      "phase": "powerful blue heating flame",
+      "collar_rotation_degrees": 0,
+      "collar_open_fraction": 1,
+      "flame_heat_mix": 1,
+      "safety_flame_visible": false,
+      "powerful_blue_heating_flame_visible": true,
+      "complete": true
+    },
+    "left_practical_sidebar": {
+      "scroll_enabled": false,
+      "scrollbar_visible": false,
+      "input": "mouse wheel or trackpad over the clipped practical rail",
+      "subject": "physics",
+      "scroll_offset_px": 0,
+      "maximum_scroll_offset_px": 0,
+      "visible_card_count": 14
+    },
+    "control_label_layout": {
+      "all_visible_button_labels_fit": true,
+      "visible_button_count": 6,
+      "wrapped_button_labels": [],
+      "minimum_font_size_px": 12,
+      "labels": [
+        {
+          "label": "SWEEP RUNNING…",
+          "lines": [
+            "SWEEP RUNNING…"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 115.35,
+          "available_width_px": 138.6,
+          "button_width_px": 154,
+          "fits": true
+        },
+        {
+          "label": "DEVICE · RED LED",
+          "lines": [
+            "DEVICE · RED LED"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 107.06,
+          "available_width_px": 133.2,
+          "button_width_px": 148,
+          "fits": true
+        },
+        {
+          "label": "RESET",
+          "lines": [
+            "RESET"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 39.29,
+          "available_width_px": 60,
+          "button_width_px": 70,
+          "fits": true
+        },
+        {
+          "label": "CURVES",
+          "lines": [
+            "CURVES"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 50.34,
+          "available_width_px": 68,
+          "button_width_px": 78,
+          "fits": true
+        },
+        {
+          "label": "METHOD",
+          "lines": [
+            "METHOD"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 54.08,
+          "available_width_px": 82,
+          "button_width_px": 92,
+          "fits": true
+        },
+        {
+          "label": "CURVES",
+          "lines": [
+            "CURVES"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 50.34,
+          "available_width_px": 82,
+          "button_width_px": 92,
+          "fits": true
+        }
+      ]
+    },
+    "results_view": "three overlaid current–potential difference curves",
+    "iv_characteristics": {
+      "stage": 1,
+      "phase": "automatic forward and reverse voltage sweep",
+      "active_device": "led",
+      "active_device_label": "RED LED + 220 Ω",
+      "elapsed_stage_s": 5.6,
+      "supply_voltage_v": 6,
+      "device_voltage_v": 1.914,
+      "current_a": 0.02023,
+      "current_ma": 20.23,
+      "polarity": "forward",
+      "switch_closed": true,
+      "apparatus": {
+        "power_pack": "variable ±6 V DC laboratory power pack with live voltage display and rotary control",
+        "ammeter": "digital ammeter connected in series",
+        "voltmeter": "digital voltmeter connected in parallel across the active device",
+        "test_station": "two shrouded spring terminals showing only the active component; inactive modules remain outside the visible workbench",
+        "devices": [
+          "100 Ω axial fixed resistor with colour bands",
+          "6 V MES laboratory filament bulb with transparent glass and visible coiled tungsten filament",
+          "red 5 mm LED with domed epoxy, cathode flat and 220 Ω protection resistor"
+        ],
+        "circuit_path": "power pack positive → switch → ammeter → active device → power pack negative",
+        "voltmeter_branch": "connected directly across both active-device terminals",
+        "cable_routes_separated": true
+      },
+      "animations": {
+        "device_seating_smooth": false,
+        "completed_device_exits_left_and_next_enters_right": false,
+        "inactive_devices_outside_visible_workbench": true,
+        "switch_and_voltage_dial_smooth": true,
+        "polarity_plugs_cross_at_zero": false,
+        "moving_charge_markers": true,
+        "filament_temperature_and_glow_continuous": false,
+        "led_threshold_glow_continuous": true
+      },
+      "live_sweep_readings": [
+        {
+          "supply_v": 0,
+          "voltage_v": 0,
+          "current_a": 0
+        },
+        {
+          "supply_v": 1,
+          "voltage_v": 1,
+          "current_a": 0
+        },
+        {
+          "supply_v": 2,
+          "voltage_v": 1.587,
+          "current_a": 0.00205
+        },
+        {
+          "supply_v": 3,
+          "voltage_v": 1.669,
+          "current_a": 0.00659
+        },
+        {
+          "supply_v": 4,
+          "voltage_v": 1.75,
+          "current_a": 0.01114
+        },
+        {
+          "supply_v": 5,
+          "voltage_v": 1.832,
+          "current_a": 0.01568
+        },
+        {
+          "supply_v": 6,
+          "voltage_v": 1.914,
+          "current_a": 0.02023
+        }
+      ],
+      "saved_curves": [
+        {
+          "device": "resistor",
+          "label": "100 Ω RESISTOR",
+          "conclusion": "A straight line through the origin: current is proportional to potential difference at constant temperature.",
+          "readings": [
+            {
+              "supply_v": -6,
+              "voltage_v": -6,
+              "current_a": -0.06
+            },
+            {
+              "supply_v": -5,
+              "voltage_v": -5,
+              "current_a": -0.05
+            },
+            {
+              "supply_v": -4,
+              "voltage_v": -4,
+              "current_a": -0.04
+            },
+            {
+              "supply_v": -3,
+              "voltage_v": -3,
+              "current_a": -0.03
+            },
+            {
+              "supply_v": -2,
+              "voltage_v": -2,
+              "current_a": -0.02
+            },
+            {
+              "supply_v": -1,
+              "voltage_v": -1,
+              "current_a": -0.01
+            },
+            {
+              "supply_v": 0,
+              "voltage_v": 0,
+              "current_a": 0
+            },
+            {
+              "supply_v": 1,
+              "voltage_v": 1,
+              "current_a": 0.01
+            },
+            {
+              "supply_v": 2,
+              "voltage_v": 2,
+              "current_a": 0.02
+            },
+            {
+              "supply_v": 3,
+              "voltage_v": 3,
+              "current_a": 0.03
+            },
+            {
+              "supply_v": 4,
+              "voltage_v": 4,
+              "current_a": 0.04
+            },
+            {
+              "supply_v": 5,
+              "voltage_v": 5,
+              "current_a": 0.05
+            },
+            {
+              "supply_v": 6,
+              "voltage_v": 6,
+              "current_a": 0.06
+            }
+          ]
+        },
+        {
+          "device": "lamp",
+          "label": "6 V FILAMENT LAMP",
+          "conclusion": "The curve becomes shallower as the filament heats and its resistance increases.",
+          "readings": [
+            {
+              "supply_v": -6,
+              "voltage_v": -6,
+              "current_a": -0.21
+            },
+            {
+              "supply_v": -5,
+              "voltage_v": -5,
+              "current_a": -0.1917
+            },
+            {
+              "supply_v": -4,
+              "voltage_v": -4,
+              "current_a": -0.17146
+            },
+            {
+              "supply_v": -3,
+              "voltage_v": -3,
+              "current_a": -0.14849
+            },
+            {
+              "supply_v": -2,
+              "voltage_v": -2,
+              "current_a": -0.12124
+            },
+            {
+              "supply_v": -1,
+              "voltage_v": -1,
+              "current_a": -0.08573
+            },
+            {
+              "supply_v": 0,
+              "voltage_v": 0,
+              "current_a": 0
+            },
+            {
+              "supply_v": 1,
+              "voltage_v": 1,
+              "current_a": 0.08573
+            },
+            {
+              "supply_v": 2,
+              "voltage_v": 2,
+              "current_a": 0.12124
+            },
+            {
+              "supply_v": 3,
+              "voltage_v": 3,
+              "current_a": 0.14849
+            },
+            {
+              "supply_v": 4,
+              "voltage_v": 4,
+              "current_a": 0.17146
+            },
+            {
+              "supply_v": 5,
+              "voltage_v": 5,
+              "current_a": 0.1917
+            },
+            {
+              "supply_v": 6,
+              "voltage_v": 6,
+              "current_a": 0.21
+            }
+          ]
+        }
+      ],
+      "curves_complete": false,
+      "scientific_conclusions": {
+        "resistor": "A straight line through the origin: current is proportional to potential difference at constant temperature.",
+        "filament_lamp": "The curve becomes shallower as the filament heats and its resistance increases.",
+        "led": "Almost no reverse current; forward current rises only after the LED turn-on potential difference."
+      },
+      "safety": {
+        "low_voltage_supply": true,
+        "switch_off_before_changing_component_or_polarity": true,
+        "hot_lamp_cool_before_touching": true,
+        "led_protection_resistor_fitted": true
+      }
+    }
+  },
+  "ledReverse": {
+    "coordinates": "origin top-left, x right, y down",
+    "id": "ivdevices",
+    "subject": "physics",
+    "renderer": {
+      "enabled": true,
+      "renderer": "WebGL / Three.js",
+      "objects": 1,
+      "context_lost": false,
+      "scene_compiling": false,
+      "scene_warmup_frames": 2,
+      "canvas_visible": true,
+      "legacy_2d_apparatus": false
+    },
+    "mode": "guided practical",
+    "practical": "Ohmic & non-ohmic devices",
+    "objective": "Compare current–potential difference characteristics for an ohmic resistor, a filament lamp and a light-emitting diode.",
+    "symbol_equation": "R = V / I",
+    "word_equation": "current is proportional to potential difference only for an ohmic conductor at constant temperature",
+    "tab": "bench",
+    "focus_mode": false,
+    "method_dropdown": false,
+    "graph_modal": {
+      "available": true,
+      "button_visible": false,
+      "button_label": null,
+      "button_icon": null,
+      "button_text_visible": false,
+      "button_row": null,
+      "open": false,
+      "chart_kind": "iv-device-curves",
+      "sidebar_header_layout": null,
+      "scaled_view": null
+    },
+    "evaluation_modal": {
+      "open": false
+    },
+    "running": false,
+    "complete": false,
+    "practical_evaluation": {
+      "position": "below guidance",
+      "section_heading": "PRACTICAL EVALUATION",
+      "button_label": "OPEN EVALUATION",
+      "ready": false,
+      "appearance": "outlined pale teal",
+      "open": false
+    },
+    "dragging": null,
+    "pouring": false,
+    "acid_transfer": null,
+    "bunsen_lit": false,
+    "magnesium_glow": false,
+    "dose_dialog": null,
+    "tripod_gauze_snap_targets": [],
+    "workspace_items": [],
+    "mass_practical": null,
+    "salt_practical": null,
+    "hydrogen_practical": null,
+    "thermometer_visual": null,
+    "time_s": 36.7,
+    "temperature_c": 25,
+    "volume_ml": 0,
+    "ph": 7,
+    "progress": 0.86,
+    "chromatography_dyes": null,
+    "graph_axes": {
+      "x": "potential difference across device / V",
+      "y": "current / A",
+      "x_range": [
+        -6,
+        6
+      ],
+      "y_range": [
+        -0.22,
+        0.22
+      ]
+    },
+    "results_columns": null,
+    "graph_readings": 0,
+    "guidance": "RED LED: reverse-polarity sweep — -1.87 V, -0.0 mA.",
+    "controls": [
+      "SWEEP RUNNING…",
+      "DEVICE · RED LED",
+      "RESET",
+      "CURVES",
+      "METHOD",
+      "F fullscreen"
+    ],
+    "responsive_layout": {
+      "viewport_css_px": {
+        "width": 1440,
+        "height": 900
+      },
+      "logical_canvas_px": {
+        "width": 1440,
+        "height": 900
+      },
+      "scale": 1,
+      "mode": "desktop",
+      "portrait_prompt_visible": false,
+      "three_column_layout_preserved": true,
+      "mobile_landscape_layout": false,
+      "pointer_coordinates_scaled": false,
+      "minimum_touch_target_css_px": null
+    },
+    "bunsen_geometry": {
+      "main_tube": "hollow with chamfered wider mouth and real intake opening",
+      "base_top_sealed_to_main_tube": true,
+      "main_tube_outer_diameter_scene_units": 0.208,
+      "main_tube_inner_diameter_scene_units": 0.174,
+      "chamfered_mouth_outer_diameter_scene_units": 0.26,
+      "air_intake_valve": "short, thin collar immediately above the base-to-barrel seal",
+      "air_intake_collar_bottom_gap_scene_units": 0.02,
+      "air_intake_collar_height_scene_units": 0.2,
+      "air_intake_collar_inner_diameter_scene_units": 0.216,
+      "air_intake_collar_radial_thickness_scene_units": 0.0155,
+      "air_intake_collar_wall_reduction_percent": 50,
+      "air_intake_collar_finish": "brushed steel matching the main Bunsen tube",
+      "air_intake_collar_edge_profile": "square unrounded top and bottom edges",
+      "air_intake_outer_diameter_scene_units": 0.247,
+      "air_intake_opening_count": 1,
+      "air_intake_collar_front_hole_diameter_scene_units": 0.136,
+      "main_tube_front_hole_diameter_scene_units": 0.122,
+      "air_intake_adjustment_tab_present": false,
+      "air_intake_hole_geometry": "one larger actual front perforation through collar and main tube with recessed tunnel wall",
+      "air_intake_hole_alignment": "barrel opening slightly offset behind collar opening for depth",
+      "gas_connector_height_scene_units": 0.18,
+      "gas_connector_finish": "black matching the flexible gas hose",
+      "gas_connector_restored_to_previous_height": true,
+      "gas_connector_raised_with_valve": false,
+      "hose_radius_scene_units": 0.057,
+      "hose_minimum_centre_height_scene_units": 0.14,
+      "hose_minimum_ground_clearance_scene_units": 0.083,
+      "hose_kink_reduced": true,
+      "hose_overlaps_brass_valve_scene_units": 0.2,
+      "hose_valve_overlap_sleeve": true,
+      "hose_valve_sleeve_profile": "rubber cuff flares from 0.059 to 0.094 scene-unit radius over the brass barbs",
+      "hose_valve_sleeve_flared": true,
+      "hose_valve_final_approach_axis": "+x coaxial with the gas-tap outlet",
+      "hose_valve_final_tangent": [
+        1,
+        0,
+        0
+      ],
+      "gas_tap_outlet_profile": "tapered brass spigot, narrow at the hose entry and widening toward the valve body",
+      "gas_tap_outlet_entry_radius_scene_units": 0.06,
+      "gas_tap_outlet_base_radius_scene_units": 0.078,
+      "flame_width_scale_from_previous_geometry": 0.881,
+      "dependent_animations_realigned": true,
+      "collar_turn_uses_updated_geometry": true,
+      "flame_rim_core_and_jets_scaled": true,
+      "coloured_flame_overlays_scaled": true,
+      "flame_test_sample_alignment": "salt scoop centre remains on the narrowed burner axis"
+    },
+    "lab_bench_front": {
+      "finish": "dark grey enamel",
+      "embossed_door_panelling": true,
+      "responsive_panel_count": "2 to 4",
+      "blue_resin_worktop_edge_retained": true
+    },
+    "right_sidebar_layout": {
+      "fills_available_vertical_space": true,
+      "adaptive_section_spacing": true,
+      "remaining_height_allocated_to_content_cards": true,
+      "excessive_blank_section_gaps_removed": true,
+      "larger_responsive_typography": true,
+      "explicit_heading_to_content_spacing": true,
+      "method_stage_cards": true,
+      "method_stage_text_wrap": "complete multiline text without clipping or ellipsis",
+      "reactant_text_wrap": "complete multiline text without clipping or ellipsis",
+      "apparatus_text_wrap": "complete multiline text without clipping or ellipsis",
+      "guidance_text_wrap": "complete multiline text",
+      "compact_landscape_supported": true,
+      "content_top_y": 126,
+      "content_bottom_y": 886,
+      "available_bottom_y": 886,
+      "evaluation_button_top_y": 821.22,
+      "evaluation_button_bottom_y": 886,
+      "unused_vertical_space_px": 0,
+      "overflow_vertical_space_px": 0,
+      "compression_ratio": 0,
+      "method_stage_count": 4,
+      "method_stage_line_counts": [
+        3,
+        3,
+        2,
+        2
+      ],
+      "reactant_rows": [
+        {
+          "name": "100 Ω fixed resistor",
+          "top_y": 440.66,
+          "bottom_y": 474.41
+        },
+        {
+          "name": "6 V laboratory filament lamp",
+          "top_y": 478.41,
+          "bottom_y": 512.16
+        },
+        {
+          "name": "Red LED + 220 Ω protection resistor",
+          "top_y": 516.16,
+          "bottom_y": 549.91
+        }
+      ],
+      "heading_to_content_gap_px": 7,
+      "method_font_size_px": 10.6,
+      "reactant_font_size_px": 10.3,
+      "guidance_font_size_px": 10,
+      "all_method_stage_text_visible": true,
+      "all_reactant_text_visible": true,
+      "all_apparatus_text_visible": true,
+      "all_sidebar_components_visible": true,
+      "compact": false
+    },
+    "reactant_interaction": {
+      "mode": "health and safety information",
+      "listed_reactants": [
+        "100 Ω fixed resistor",
+        "6 V laboratory filament lamp",
+        "Red LED + 220 Ω protection resistor"
+      ],
+      "click_enabled": true,
+      "drag_enabled": false,
+      "experiment_setup_action_hidden": true,
+      "heading": "MATERIALS — CLICK FOR SAFETY",
+      "popup": {
+        "open": false
+      }
+    },
+    "canvas_compositing": {
+      "webgl_arena_ui_overlay_alpha": 0,
+      "arena_cutout": "fully transparent clearRect",
+      "blend_state_reset_each_frame": true,
+      "wall_tiles_behind_webgl_apparatus": true,
+      "opaque_3d_apparatus_preserved": true
+    },
+    "bunsen_load_transition": {
+      "appearance_animation_scope": "all lit Bunsen instances in every practical",
+      "active": false,
+      "elapsed_s": 3.4,
+      "progress": 1,
+      "phase": "powerful blue heating flame",
+      "collar_rotation_degrees": 0,
+      "collar_open_fraction": 1,
+      "flame_heat_mix": 1,
+      "safety_flame_visible": false,
+      "powerful_blue_heating_flame_visible": true,
+      "complete": true
+    },
+    "left_practical_sidebar": {
+      "scroll_enabled": false,
+      "scrollbar_visible": false,
+      "input": "mouse wheel or trackpad over the clipped practical rail",
+      "subject": "physics",
+      "scroll_offset_px": 0,
+      "maximum_scroll_offset_px": 0,
+      "visible_card_count": 14
+    },
+    "control_label_layout": {
+      "all_visible_button_labels_fit": true,
+      "visible_button_count": 6,
+      "wrapped_button_labels": [],
+      "minimum_font_size_px": 12,
+      "labels": [
+        {
+          "label": "SWEEP RUNNING…",
+          "lines": [
+            "SWEEP RUNNING…"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 115.35,
+          "available_width_px": 138.6,
+          "button_width_px": 154,
+          "fits": true
+        },
+        {
+          "label": "DEVICE · RED LED",
+          "lines": [
+            "DEVICE · RED LED"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 107.06,
+          "available_width_px": 133.2,
+          "button_width_px": 148,
+          "fits": true
+        },
+        {
+          "label": "RESET",
+          "lines": [
+            "RESET"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 39.29,
+          "available_width_px": 60,
+          "button_width_px": 70,
+          "fits": true
+        },
+        {
+          "label": "CURVES",
+          "lines": [
+            "CURVES"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 50.34,
+          "available_width_px": 68,
+          "button_width_px": 78,
+          "fits": true
+        },
+        {
+          "label": "METHOD",
+          "lines": [
+            "METHOD"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 54.08,
+          "available_width_px": 82,
+          "button_width_px": 92,
+          "fits": true
+        },
+        {
+          "label": "CURVES",
+          "lines": [
+            "CURVES"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 50.34,
+          "available_width_px": 82,
+          "button_width_px": 92,
+          "fits": true
+        }
+      ]
+    },
+    "results_view": "three overlaid current–potential difference curves",
+    "iv_characteristics": {
+      "stage": 1,
+      "phase": "automatic forward and reverse voltage sweep",
+      "active_device": "led",
+      "active_device_label": "RED LED + 220 Ω",
+      "elapsed_stage_s": 9.7,
+      "supply_voltage_v": -1.874,
+      "device_voltage_v": -1.874,
+      "current_a": -0.00002,
+      "current_ma": -0.02,
+      "polarity": "reverse",
+      "switch_closed": true,
+      "apparatus": {
+        "power_pack": "variable ±6 V DC laboratory power pack with live voltage display and rotary control",
+        "ammeter": "digital ammeter connected in series",
+        "voltmeter": "digital voltmeter connected in parallel across the active device",
+        "test_station": "two shrouded spring terminals showing only the active component; inactive modules remain outside the visible workbench",
+        "devices": [
+          "100 Ω axial fixed resistor with colour bands",
+          "6 V MES laboratory filament bulb with transparent glass and visible coiled tungsten filament",
+          "red 5 mm LED with domed epoxy, cathode flat and 220 Ω protection resistor"
+        ],
+        "circuit_path": "power pack positive → switch → ammeter → active device → power pack negative",
+        "voltmeter_branch": "connected directly across both active-device terminals",
+        "cable_routes_separated": true
+      },
+      "animations": {
+        "device_seating_smooth": false,
+        "completed_device_exits_left_and_next_enters_right": false,
+        "inactive_devices_outside_visible_workbench": true,
+        "switch_and_voltage_dial_smooth": true,
+        "polarity_plugs_cross_at_zero": false,
+        "moving_charge_markers": false,
+        "filament_temperature_and_glow_continuous": false,
+        "led_threshold_glow_continuous": true
+      },
+      "live_sweep_readings": [
+        {
+          "supply_v": 0,
+          "voltage_v": 0,
+          "current_a": 0
+        },
+        {
+          "supply_v": 1,
+          "voltage_v": 1,
+          "current_a": 0
+        },
+        {
+          "supply_v": 2,
+          "voltage_v": 1.587,
+          "current_a": 0.00205
+        },
+        {
+          "supply_v": 3,
+          "voltage_v": 1.669,
+          "current_a": 0.00659
+        },
+        {
+          "supply_v": 4,
+          "voltage_v": 1.75,
+          "current_a": 0.01114
+        },
+        {
+          "supply_v": 5,
+          "voltage_v": 1.832,
+          "current_a": 0.01568
+        },
+        {
+          "supply_v": 6,
+          "voltage_v": 1.914,
+          "current_a": 0.02023
+        },
+        {
+          "supply_v": -1,
+          "voltage_v": -1,
+          "current_a": -0.00002
+        }
+      ],
+      "saved_curves": [
+        {
+          "device": "resistor",
+          "label": "100 Ω RESISTOR",
+          "conclusion": "A straight line through the origin: current is proportional to potential difference at constant temperature.",
+          "readings": [
+            {
+              "supply_v": -6,
+              "voltage_v": -6,
+              "current_a": -0.06
+            },
+            {
+              "supply_v": -5,
+              "voltage_v": -5,
+              "current_a": -0.05
+            },
+            {
+              "supply_v": -4,
+              "voltage_v": -4,
+              "current_a": -0.04
+            },
+            {
+              "supply_v": -3,
+              "voltage_v": -3,
+              "current_a": -0.03
+            },
+            {
+              "supply_v": -2,
+              "voltage_v": -2,
+              "current_a": -0.02
+            },
+            {
+              "supply_v": -1,
+              "voltage_v": -1,
+              "current_a": -0.01
+            },
+            {
+              "supply_v": 0,
+              "voltage_v": 0,
+              "current_a": 0
+            },
+            {
+              "supply_v": 1,
+              "voltage_v": 1,
+              "current_a": 0.01
+            },
+            {
+              "supply_v": 2,
+              "voltage_v": 2,
+              "current_a": 0.02
+            },
+            {
+              "supply_v": 3,
+              "voltage_v": 3,
+              "current_a": 0.03
+            },
+            {
+              "supply_v": 4,
+              "voltage_v": 4,
+              "current_a": 0.04
+            },
+            {
+              "supply_v": 5,
+              "voltage_v": 5,
+              "current_a": 0.05
+            },
+            {
+              "supply_v": 6,
+              "voltage_v": 6,
+              "current_a": 0.06
+            }
+          ]
+        },
+        {
+          "device": "lamp",
+          "label": "6 V FILAMENT LAMP",
+          "conclusion": "The curve becomes shallower as the filament heats and its resistance increases.",
+          "readings": [
+            {
+              "supply_v": -6,
+              "voltage_v": -6,
+              "current_a": -0.21
+            },
+            {
+              "supply_v": -5,
+              "voltage_v": -5,
+              "current_a": -0.1917
+            },
+            {
+              "supply_v": -4,
+              "voltage_v": -4,
+              "current_a": -0.17146
+            },
+            {
+              "supply_v": -3,
+              "voltage_v": -3,
+              "current_a": -0.14849
+            },
+            {
+              "supply_v": -2,
+              "voltage_v": -2,
+              "current_a": -0.12124
+            },
+            {
+              "supply_v": -1,
+              "voltage_v": -1,
+              "current_a": -0.08573
+            },
+            {
+              "supply_v": 0,
+              "voltage_v": 0,
+              "current_a": 0
+            },
+            {
+              "supply_v": 1,
+              "voltage_v": 1,
+              "current_a": 0.08573
+            },
+            {
+              "supply_v": 2,
+              "voltage_v": 2,
+              "current_a": 0.12124
+            },
+            {
+              "supply_v": 3,
+              "voltage_v": 3,
+              "current_a": 0.14849
+            },
+            {
+              "supply_v": 4,
+              "voltage_v": 4,
+              "current_a": 0.17146
+            },
+            {
+              "supply_v": 5,
+              "voltage_v": 5,
+              "current_a": 0.1917
+            },
+            {
+              "supply_v": 6,
+              "voltage_v": 6,
+              "current_a": 0.21
+            }
+          ]
+        }
+      ],
+      "curves_complete": false,
+      "scientific_conclusions": {
+        "resistor": "A straight line through the origin: current is proportional to potential difference at constant temperature.",
+        "filament_lamp": "The curve becomes shallower as the filament heats and its resistance increases.",
+        "led": "Almost no reverse current; forward current rises only after the LED turn-on potential difference."
+      },
+      "safety": {
+        "low_voltage_supply": true,
+        "switch_off_before_changing_component_or_polarity": true,
+        "hot_lamp_cool_before_touching": true,
+        "led_protection_resistor_fitted": true
+      }
+    }
+  },
+  "complete": {
+    "coordinates": "origin top-left, x right, y down",
+    "id": "ivdevices",
+    "subject": "physics",
+    "renderer": {
+      "enabled": true,
+      "renderer": "WebGL / Three.js",
+      "objects": 1,
+      "context_lost": false,
+      "scene_compiling": false,
+      "scene_warmup_frames": 2,
+      "canvas_visible": true,
+      "legacy_2d_apparatus": false
+    },
+    "mode": "guided practical",
+    "practical": "Ohmic & non-ohmic devices",
+    "objective": "Compare current–potential difference characteristics for an ohmic resistor, a filament lamp and a light-emitting diode.",
+    "symbol_equation": "R = V / I",
+    "word_equation": "current is proportional to potential difference only for an ohmic conductor at constant temperature",
+    "tab": "graph",
+    "focus_mode": false,
+    "method_dropdown": false,
+    "graph_modal": {
+      "available": true,
+      "button_visible": true,
+      "button_label": "EXPAND",
+      "button_icon": null,
+      "button_text_visible": true,
+      "button_row": "graph heading",
+      "open": false,
+      "chart_kind": "iv-device-curves",
+      "sidebar_header_layout": {
+        "expand_button_top_y": 120,
+        "expand_button_bottom_y": 148,
+        "graph_heading_center_y": 134,
+        "heading_and_expand_same_row": true,
+        "tabs_and_expand_same_row": false,
+        "description_first_line_center_y": 166,
+        "description_spacing_from_header_centres_px": 32,
+        "description_clearance_below_expand_px": 13,
+        "text_overlap": false
+      },
+      "scaled_view": null
+    },
+    "evaluation_modal": {
+      "open": false
+    },
+    "running": false,
+    "complete": true,
+    "practical_evaluation": {
+      "position": "below guidance",
+      "section_heading": "PRACTICAL EVALUATION",
+      "button_label": "OPEN EVALUATION",
+      "ready": true,
+      "appearance": "filled teal with glow",
+      "open": false
+    },
+    "dragging": null,
+    "pouring": false,
+    "acid_transfer": null,
+    "bunsen_lit": false,
+    "magnesium_glow": false,
+    "dose_dialog": null,
+    "tripod_gauze_snap_targets": [],
+    "workspace_items": [],
+    "mass_practical": null,
+    "salt_practical": null,
+    "hydrogen_practical": null,
+    "thermometer_visual": null,
+    "time_s": 40.5,
+    "temperature_c": 25,
+    "volume_ml": 0,
+    "ph": 7,
+    "progress": 1,
+    "chromatography_dyes": null,
+    "graph_axes": {
+      "x": "potential difference across device / V",
+      "y": "current / A",
+      "x_range": [
+        -6,
+        6
+      ],
+      "y_range": [
+        -0.22,
+        0.22
+      ]
+    },
+    "results_columns": null,
+    "graph_readings": 0,
+    "guidance": "All three curves are saved. The resistor is ohmic; the hot filament and LED are non-ohmic in different ways.",
+    "controls": [
+      "VIEW CURVES",
+      "DEVICE · RED LED",
+      "RESET",
+      "CURVES",
+      "METHOD",
+      "F fullscreen"
+    ],
+    "responsive_layout": {
+      "viewport_css_px": {
+        "width": 1440,
+        "height": 900
+      },
+      "logical_canvas_px": {
+        "width": 1440,
+        "height": 900
+      },
+      "scale": 1,
+      "mode": "desktop",
+      "portrait_prompt_visible": false,
+      "three_column_layout_preserved": true,
+      "mobile_landscape_layout": false,
+      "pointer_coordinates_scaled": false,
+      "minimum_touch_target_css_px": null
+    },
+    "bunsen_geometry": {
+      "main_tube": "hollow with chamfered wider mouth and real intake opening",
+      "base_top_sealed_to_main_tube": true,
+      "main_tube_outer_diameter_scene_units": 0.208,
+      "main_tube_inner_diameter_scene_units": 0.174,
+      "chamfered_mouth_outer_diameter_scene_units": 0.26,
+      "air_intake_valve": "short, thin collar immediately above the base-to-barrel seal",
+      "air_intake_collar_bottom_gap_scene_units": 0.02,
+      "air_intake_collar_height_scene_units": 0.2,
+      "air_intake_collar_inner_diameter_scene_units": 0.216,
+      "air_intake_collar_radial_thickness_scene_units": 0.0155,
+      "air_intake_collar_wall_reduction_percent": 50,
+      "air_intake_collar_finish": "brushed steel matching the main Bunsen tube",
+      "air_intake_collar_edge_profile": "square unrounded top and bottom edges",
+      "air_intake_outer_diameter_scene_units": 0.247,
+      "air_intake_opening_count": 1,
+      "air_intake_collar_front_hole_diameter_scene_units": 0.136,
+      "main_tube_front_hole_diameter_scene_units": 0.122,
+      "air_intake_adjustment_tab_present": false,
+      "air_intake_hole_geometry": "one larger actual front perforation through collar and main tube with recessed tunnel wall",
+      "air_intake_hole_alignment": "barrel opening slightly offset behind collar opening for depth",
+      "gas_connector_height_scene_units": 0.18,
+      "gas_connector_finish": "black matching the flexible gas hose",
+      "gas_connector_restored_to_previous_height": true,
+      "gas_connector_raised_with_valve": false,
+      "hose_radius_scene_units": 0.057,
+      "hose_minimum_centre_height_scene_units": 0.14,
+      "hose_minimum_ground_clearance_scene_units": 0.083,
+      "hose_kink_reduced": true,
+      "hose_overlaps_brass_valve_scene_units": 0.2,
+      "hose_valve_overlap_sleeve": true,
+      "hose_valve_sleeve_profile": "rubber cuff flares from 0.059 to 0.094 scene-unit radius over the brass barbs",
+      "hose_valve_sleeve_flared": true,
+      "hose_valve_final_approach_axis": "+x coaxial with the gas-tap outlet",
+      "hose_valve_final_tangent": [
+        1,
+        0,
+        0
+      ],
+      "gas_tap_outlet_profile": "tapered brass spigot, narrow at the hose entry and widening toward the valve body",
+      "gas_tap_outlet_entry_radius_scene_units": 0.06,
+      "gas_tap_outlet_base_radius_scene_units": 0.078,
+      "flame_width_scale_from_previous_geometry": 0.881,
+      "dependent_animations_realigned": true,
+      "collar_turn_uses_updated_geometry": true,
+      "flame_rim_core_and_jets_scaled": true,
+      "coloured_flame_overlays_scaled": true,
+      "flame_test_sample_alignment": "salt scoop centre remains on the narrowed burner axis"
+    },
+    "lab_bench_front": {
+      "finish": "dark grey enamel",
+      "embossed_door_panelling": true,
+      "responsive_panel_count": "2 to 4",
+      "blue_resin_worktop_edge_retained": true
+    },
+    "right_sidebar_layout": {
+      "fills_available_vertical_space": false,
+      "adaptive_section_spacing": true,
+      "remaining_height_allocated_to_content_cards": true,
+      "excessive_blank_section_gaps_removed": true,
+      "larger_responsive_typography": true,
+      "explicit_heading_to_content_spacing": true,
+      "method_stage_cards": true,
+      "method_stage_text_wrap": "complete multiline text without clipping or ellipsis",
+      "reactant_text_wrap": "complete multiline text without clipping or ellipsis",
+      "apparatus_text_wrap": "complete multiline text without clipping or ellipsis",
+      "guidance_text_wrap": "complete multiline text",
+      "compact_landscape_supported": true
+    },
+    "reactant_interaction": {
+      "mode": "health and safety information",
+      "listed_reactants": [
+        "100 Ω fixed resistor",
+        "6 V laboratory filament lamp",
+        "Red LED + 220 Ω protection resistor"
+      ],
+      "click_enabled": true,
+      "drag_enabled": false,
+      "experiment_setup_action_hidden": true,
+      "heading": "MATERIALS — CLICK FOR SAFETY",
+      "popup": {
+        "open": false
+      }
+    },
+    "canvas_compositing": {
+      "webgl_arena_ui_overlay_alpha": 0,
+      "arena_cutout": "fully transparent clearRect",
+      "blend_state_reset_each_frame": true,
+      "wall_tiles_behind_webgl_apparatus": true,
+      "opaque_3d_apparatus_preserved": true
+    },
+    "bunsen_load_transition": {
+      "appearance_animation_scope": "all lit Bunsen instances in every practical",
+      "active": false,
+      "elapsed_s": 3.4,
+      "progress": 1,
+      "phase": "powerful blue heating flame",
+      "collar_rotation_degrees": 0,
+      "collar_open_fraction": 1,
+      "flame_heat_mix": 1,
+      "safety_flame_visible": false,
+      "powerful_blue_heating_flame_visible": true,
+      "complete": true
+    },
+    "left_practical_sidebar": {
+      "scroll_enabled": false,
+      "scrollbar_visible": false,
+      "input": "mouse wheel or trackpad over the clipped practical rail",
+      "subject": "physics",
+      "scroll_offset_px": 0,
+      "maximum_scroll_offset_px": 0,
+      "visible_card_count": 14
+    },
+    "control_label_layout": {
+      "all_visible_button_labels_fit": true,
+      "visible_button_count": 6,
+      "wrapped_button_labels": [],
+      "minimum_font_size_px": 12,
+      "labels": [
+        {
+          "label": "VIEW CURVES",
+          "lines": [
+            "VIEW CURVES"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 85.48,
+          "available_width_px": 138.6,
+          "button_width_px": 154,
+          "fits": true
+        },
+        {
+          "label": "DEVICE · RED LED",
+          "lines": [
+            "DEVICE · RED LED"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 107.06,
+          "available_width_px": 133.2,
+          "button_width_px": 148,
+          "fits": true
+        },
+        {
+          "label": "RESET",
+          "lines": [
+            "RESET"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 39.29,
+          "available_width_px": 60,
+          "button_width_px": 70,
+          "fits": true
+        },
+        {
+          "label": "CURVES",
+          "lines": [
+            "CURVES"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 50.34,
+          "available_width_px": 68,
+          "button_width_px": 78,
+          "fits": true
+        },
+        {
+          "label": "METHOD",
+          "lines": [
+            "METHOD"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 54.08,
+          "available_width_px": 82,
+          "button_width_px": 92,
+          "fits": true
+        },
+        {
+          "label": "CURVES",
+          "lines": [
+            "CURVES"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 50.34,
+          "available_width_px": 82,
+          "button_width_px": 92,
+          "fits": true
+        }
+      ]
+    },
+    "results_view": "three overlaid current–potential difference curves",
+    "iv_characteristics": {
+      "stage": 5,
+      "phase": "all device curves complete",
+      "active_device": "led",
+      "active_device_label": "RED LED + 220 Ω",
+      "elapsed_stage_s": 13.5,
+      "supply_voltage_v": -6,
+      "device_voltage_v": -6,
+      "current_a": -0.00002,
+      "current_ma": -0.02,
+      "polarity": "reverse",
+      "switch_closed": false,
+      "apparatus": {
+        "power_pack": "variable ±6 V DC laboratory power pack with live voltage display and rotary control",
+        "ammeter": "digital ammeter connected in series",
+        "voltmeter": "digital voltmeter connected in parallel across the active device",
+        "test_station": "two shrouded spring terminals showing only the active component; inactive modules remain outside the visible workbench",
+        "devices": [
+          "100 Ω axial fixed resistor with colour bands",
+          "6 V MES laboratory filament bulb with transparent glass and visible coiled tungsten filament",
+          "red 5 mm LED with domed epoxy, cathode flat and 220 Ω protection resistor"
+        ],
+        "circuit_path": "power pack positive → switch → ammeter → active device → power pack negative",
+        "voltmeter_branch": "connected directly across both active-device terminals",
+        "cable_routes_separated": true
+      },
+      "animations": {
+        "device_seating_smooth": false,
+        "completed_device_exits_left_and_next_enters_right": false,
+        "inactive_devices_outside_visible_workbench": true,
+        "switch_and_voltage_dial_smooth": false,
+        "polarity_plugs_cross_at_zero": false,
+        "moving_charge_markers": false,
+        "filament_temperature_and_glow_continuous": false,
+        "led_threshold_glow_continuous": true
+      },
+      "live_sweep_readings": [
+        {
+          "supply_v": -6,
+          "voltage_v": -6,
+          "current_a": -0.00002
+        },
+        {
+          "supply_v": -5,
+          "voltage_v": -5,
+          "current_a": -0.00002
+        },
+        {
+          "supply_v": -4,
+          "voltage_v": -4,
+          "current_a": -0.00002
+        },
+        {
+          "supply_v": -3,
+          "voltage_v": -3,
+          "current_a": -0.00002
+        },
+        {
+          "supply_v": -2,
+          "voltage_v": -2,
+          "current_a": -0.00002
+        },
+        {
+          "supply_v": -1,
+          "voltage_v": -1,
+          "current_a": -0.00002
+        },
+        {
+          "supply_v": 0,
+          "voltage_v": 0,
+          "current_a": 0
+        },
+        {
+          "supply_v": 1,
+          "voltage_v": 1,
+          "current_a": 0
+        },
+        {
+          "supply_v": 2,
+          "voltage_v": 1.587,
+          "current_a": 0.00205
+        },
+        {
+          "supply_v": 3,
+          "voltage_v": 1.669,
+          "current_a": 0.00659
+        },
+        {
+          "supply_v": 4,
+          "voltage_v": 1.75,
+          "current_a": 0.01114
+        },
+        {
+          "supply_v": 5,
+          "voltage_v": 1.832,
+          "current_a": 0.01568
+        },
+        {
+          "supply_v": 6,
+          "voltage_v": 1.914,
+          "current_a": 0.02023
+        }
+      ],
+      "saved_curves": [
+        {
+          "device": "resistor",
+          "label": "100 Ω RESISTOR",
+          "conclusion": "A straight line through the origin: current is proportional to potential difference at constant temperature.",
+          "readings": [
+            {
+              "supply_v": -6,
+              "voltage_v": -6,
+              "current_a": -0.06
+            },
+            {
+              "supply_v": -5,
+              "voltage_v": -5,
+              "current_a": -0.05
+            },
+            {
+              "supply_v": -4,
+              "voltage_v": -4,
+              "current_a": -0.04
+            },
+            {
+              "supply_v": -3,
+              "voltage_v": -3,
+              "current_a": -0.03
+            },
+            {
+              "supply_v": -2,
+              "voltage_v": -2,
+              "current_a": -0.02
+            },
+            {
+              "supply_v": -1,
+              "voltage_v": -1,
+              "current_a": -0.01
+            },
+            {
+              "supply_v": 0,
+              "voltage_v": 0,
+              "current_a": 0
+            },
+            {
+              "supply_v": 1,
+              "voltage_v": 1,
+              "current_a": 0.01
+            },
+            {
+              "supply_v": 2,
+              "voltage_v": 2,
+              "current_a": 0.02
+            },
+            {
+              "supply_v": 3,
+              "voltage_v": 3,
+              "current_a": 0.03
+            },
+            {
+              "supply_v": 4,
+              "voltage_v": 4,
+              "current_a": 0.04
+            },
+            {
+              "supply_v": 5,
+              "voltage_v": 5,
+              "current_a": 0.05
+            },
+            {
+              "supply_v": 6,
+              "voltage_v": 6,
+              "current_a": 0.06
+            }
+          ]
+        },
+        {
+          "device": "lamp",
+          "label": "6 V FILAMENT LAMP",
+          "conclusion": "The curve becomes shallower as the filament heats and its resistance increases.",
+          "readings": [
+            {
+              "supply_v": -6,
+              "voltage_v": -6,
+              "current_a": -0.21
+            },
+            {
+              "supply_v": -5,
+              "voltage_v": -5,
+              "current_a": -0.1917
+            },
+            {
+              "supply_v": -4,
+              "voltage_v": -4,
+              "current_a": -0.17146
+            },
+            {
+              "supply_v": -3,
+              "voltage_v": -3,
+              "current_a": -0.14849
+            },
+            {
+              "supply_v": -2,
+              "voltage_v": -2,
+              "current_a": -0.12124
+            },
+            {
+              "supply_v": -1,
+              "voltage_v": -1,
+              "current_a": -0.08573
+            },
+            {
+              "supply_v": 0,
+              "voltage_v": 0,
+              "current_a": 0
+            },
+            {
+              "supply_v": 1,
+              "voltage_v": 1,
+              "current_a": 0.08573
+            },
+            {
+              "supply_v": 2,
+              "voltage_v": 2,
+              "current_a": 0.12124
+            },
+            {
+              "supply_v": 3,
+              "voltage_v": 3,
+              "current_a": 0.14849
+            },
+            {
+              "supply_v": 4,
+              "voltage_v": 4,
+              "current_a": 0.17146
+            },
+            {
+              "supply_v": 5,
+              "voltage_v": 5,
+              "current_a": 0.1917
+            },
+            {
+              "supply_v": 6,
+              "voltage_v": 6,
+              "current_a": 0.21
+            }
+          ]
+        },
+        {
+          "device": "led",
+          "label": "RED LED + 220 Ω",
+          "conclusion": "Almost no reverse current; forward current rises only after the LED turn-on potential difference.",
+          "readings": [
+            {
+              "supply_v": -6,
+              "voltage_v": -6,
+              "current_a": -0.00002
+            },
+            {
+              "supply_v": -5,
+              "voltage_v": -5,
+              "current_a": -0.00002
+            },
+            {
+              "supply_v": -4,
+              "voltage_v": -4,
+              "current_a": -0.00002
+            },
+            {
+              "supply_v": -3,
+              "voltage_v": -3,
+              "current_a": -0.00002
+            },
+            {
+              "supply_v": -2,
+              "voltage_v": -2,
+              "current_a": -0.00002
+            },
+            {
+              "supply_v": -1,
+              "voltage_v": -1,
+              "current_a": -0.00002
+            },
+            {
+              "supply_v": 0,
+              "voltage_v": 0,
+              "current_a": 0
+            },
+            {
+              "supply_v": 1,
+              "voltage_v": 1,
+              "current_a": 0
+            },
+            {
+              "supply_v": 2,
+              "voltage_v": 1.587,
+              "current_a": 0.00205
+            },
+            {
+              "supply_v": 3,
+              "voltage_v": 1.669,
+              "current_a": 0.00659
+            },
+            {
+              "supply_v": 4,
+              "voltage_v": 1.75,
+              "current_a": 0.01114
+            },
+            {
+              "supply_v": 5,
+              "voltage_v": 1.832,
+              "current_a": 0.01568
+            },
+            {
+              "supply_v": 6,
+              "voltage_v": 1.914,
+              "current_a": 0.02023
+            }
+          ]
+        }
+      ],
+      "curves_complete": true,
+      "scientific_conclusions": {
+        "resistor": "A straight line through the origin: current is proportional to potential difference at constant temperature.",
+        "filament_lamp": "The curve becomes shallower as the filament heats and its resistance increases.",
+        "led": "Almost no reverse current; forward current rises only after the LED turn-on potential difference."
+      },
+      "safety": {
+        "low_voltage_supply": true,
+        "switch_off_before_changing_component_or_polarity": true,
+        "hot_lamp_cool_before_touching": true,
+        "led_protection_resistor_fitted": true
+      }
+    }
+  },
+  "reset": {
+    "coordinates": "origin top-left, x right, y down",
+    "id": "ivdevices",
+    "subject": "physics",
+    "renderer": {
+      "enabled": true,
+      "renderer": "WebGL / Three.js",
+      "objects": 1,
+      "context_lost": false,
+      "scene_compiling": false,
+      "scene_warmup_frames": 2,
+      "canvas_visible": true,
+      "legacy_2d_apparatus": false
+    },
+    "mode": "guided practical",
+    "practical": "Ohmic & non-ohmic devices",
+    "objective": "Compare current–potential difference characteristics for an ohmic resistor, a filament lamp and a light-emitting diode.",
+    "symbol_equation": "R = V / I",
+    "word_equation": "current is proportional to potential difference only for an ohmic conductor at constant temperature",
+    "tab": "bench",
+    "focus_mode": false,
+    "method_dropdown": false,
+    "graph_modal": {
+      "available": true,
+      "button_visible": false,
+      "button_label": null,
+      "button_icon": null,
+      "button_text_visible": false,
+      "button_row": null,
+      "open": false,
+      "chart_kind": "iv-device-curves",
+      "sidebar_header_layout": null,
+      "scaled_view": null
+    },
+    "evaluation_modal": {
+      "open": false
+    },
+    "running": false,
+    "complete": false,
+    "practical_evaluation": {
+      "position": "below guidance",
+      "section_heading": "PRACTICAL EVALUATION",
+      "button_label": "OPEN EVALUATION",
+      "ready": false,
+      "appearance": "outlined pale teal",
+      "open": false
+    },
+    "dragging": null,
+    "pouring": false,
+    "acid_transfer": null,
+    "bunsen_lit": false,
+    "magnesium_glow": false,
+    "dose_dialog": null,
+    "tripod_gauze_snap_targets": [],
+    "workspace_items": [],
+    "mass_practical": null,
+    "salt_practical": null,
+    "hydrogen_practical": null,
+    "thermometer_visual": null,
+    "time_s": 0,
+    "temperature_c": 25,
+    "volume_ml": 0,
+    "ph": 7,
+    "progress": 0,
+    "chromatography_dyes": null,
+    "graph_axes": {
+      "x": "potential difference across device / V",
+      "y": "current / A",
+      "x_range": [
+        -6,
+        6
+      ],
+      "y_range": [
+        -0.22,
+        0.22
+      ]
+    },
+    "results_columns": null,
+    "graph_readings": 0,
+    "guidance": "The 100 Ω resistor is seated in the test socket. Trace the red series path through the ammeter and the violet voltmeter branch across the device, then run the I–V sweep.",
+    "controls": [
+      "RUN I–V SWEEP",
+      "DEVICE · RESISTOR",
+      "RESET",
+      "CURVES",
+      "METHOD",
+      "F fullscreen"
+    ],
+    "responsive_layout": {
+      "viewport_css_px": {
+        "width": 1440,
+        "height": 900
+      },
+      "logical_canvas_px": {
+        "width": 1440,
+        "height": 900
+      },
+      "scale": 1,
+      "mode": "desktop",
+      "portrait_prompt_visible": false,
+      "three_column_layout_preserved": true,
+      "mobile_landscape_layout": false,
+      "pointer_coordinates_scaled": false,
+      "minimum_touch_target_css_px": null
+    },
+    "bunsen_geometry": {
+      "main_tube": "hollow with chamfered wider mouth and real intake opening",
+      "base_top_sealed_to_main_tube": true,
+      "main_tube_outer_diameter_scene_units": 0.208,
+      "main_tube_inner_diameter_scene_units": 0.174,
+      "chamfered_mouth_outer_diameter_scene_units": 0.26,
+      "air_intake_valve": "short, thin collar immediately above the base-to-barrel seal",
+      "air_intake_collar_bottom_gap_scene_units": 0.02,
+      "air_intake_collar_height_scene_units": 0.2,
+      "air_intake_collar_inner_diameter_scene_units": 0.216,
+      "air_intake_collar_radial_thickness_scene_units": 0.0155,
+      "air_intake_collar_wall_reduction_percent": 50,
+      "air_intake_collar_finish": "brushed steel matching the main Bunsen tube",
+      "air_intake_collar_edge_profile": "square unrounded top and bottom edges",
+      "air_intake_outer_diameter_scene_units": 0.247,
+      "air_intake_opening_count": 1,
+      "air_intake_collar_front_hole_diameter_scene_units": 0.136,
+      "main_tube_front_hole_diameter_scene_units": 0.122,
+      "air_intake_adjustment_tab_present": false,
+      "air_intake_hole_geometry": "one larger actual front perforation through collar and main tube with recessed tunnel wall",
+      "air_intake_hole_alignment": "barrel opening slightly offset behind collar opening for depth",
+      "gas_connector_height_scene_units": 0.18,
+      "gas_connector_finish": "black matching the flexible gas hose",
+      "gas_connector_restored_to_previous_height": true,
+      "gas_connector_raised_with_valve": false,
+      "hose_radius_scene_units": 0.057,
+      "hose_minimum_centre_height_scene_units": 0.14,
+      "hose_minimum_ground_clearance_scene_units": 0.083,
+      "hose_kink_reduced": true,
+      "hose_overlaps_brass_valve_scene_units": 0.2,
+      "hose_valve_overlap_sleeve": true,
+      "hose_valve_sleeve_profile": "rubber cuff flares from 0.059 to 0.094 scene-unit radius over the brass barbs",
+      "hose_valve_sleeve_flared": true,
+      "hose_valve_final_approach_axis": "+x coaxial with the gas-tap outlet",
+      "hose_valve_final_tangent": [
+        1,
+        0,
+        0
+      ],
+      "gas_tap_outlet_profile": "tapered brass spigot, narrow at the hose entry and widening toward the valve body",
+      "gas_tap_outlet_entry_radius_scene_units": 0.06,
+      "gas_tap_outlet_base_radius_scene_units": 0.078,
+      "flame_width_scale_from_previous_geometry": 0.881,
+      "dependent_animations_realigned": true,
+      "collar_turn_uses_updated_geometry": true,
+      "flame_rim_core_and_jets_scaled": true,
+      "coloured_flame_overlays_scaled": true,
+      "flame_test_sample_alignment": "salt scoop centre remains on the narrowed burner axis"
+    },
+    "lab_bench_front": {
+      "finish": "dark grey enamel",
+      "embossed_door_panelling": true,
+      "responsive_panel_count": "2 to 4",
+      "blue_resin_worktop_edge_retained": true
+    },
+    "right_sidebar_layout": {
+      "fills_available_vertical_space": true,
+      "adaptive_section_spacing": true,
+      "remaining_height_allocated_to_content_cards": true,
+      "excessive_blank_section_gaps_removed": true,
+      "larger_responsive_typography": true,
+      "explicit_heading_to_content_spacing": true,
+      "method_stage_cards": true,
+      "method_stage_text_wrap": "complete multiline text without clipping or ellipsis",
+      "reactant_text_wrap": "complete multiline text without clipping or ellipsis",
+      "apparatus_text_wrap": "complete multiline text without clipping or ellipsis",
+      "guidance_text_wrap": "complete multiline text",
+      "compact_landscape_supported": true,
+      "content_top_y": 126,
+      "content_bottom_y": 886,
+      "available_bottom_y": 886,
+      "evaluation_button_top_y": 822.03,
+      "evaluation_button_bottom_y": 886,
+      "unused_vertical_space_px": 0,
+      "overflow_vertical_space_px": 0,
+      "compression_ratio": 0,
+      "method_stage_count": 4,
+      "method_stage_line_counts": [
+        3,
+        3,
+        2,
+        2
+      ],
+      "reactant_rows": [
+        {
+          "name": "100 Ω fixed resistor",
+          "top_y": 437.98,
+          "bottom_y": 471.41
+        },
+        {
+          "name": "6 V laboratory filament lamp",
+          "top_y": 475.41,
+          "bottom_y": 508.84
+        },
+        {
+          "name": "Red LED + 220 Ω protection resistor",
+          "top_y": 512.84,
+          "bottom_y": 546.27
+        }
+      ],
+      "heading_to_content_gap_px": 7,
+      "method_font_size_px": 10.6,
+      "reactant_font_size_px": 10.3,
+      "guidance_font_size_px": 10,
+      "all_method_stage_text_visible": true,
+      "all_reactant_text_visible": true,
+      "all_apparatus_text_visible": true,
+      "all_sidebar_components_visible": true,
+      "compact": false
+    },
+    "reactant_interaction": {
+      "mode": "health and safety information",
+      "listed_reactants": [
+        "100 Ω fixed resistor",
+        "6 V laboratory filament lamp",
+        "Red LED + 220 Ω protection resistor"
+      ],
+      "click_enabled": true,
+      "drag_enabled": false,
+      "experiment_setup_action_hidden": true,
+      "heading": "MATERIALS — CLICK FOR SAFETY",
+      "popup": {
+        "open": false
+      }
+    },
+    "canvas_compositing": {
+      "webgl_arena_ui_overlay_alpha": 0,
+      "arena_cutout": "fully transparent clearRect",
+      "blend_state_reset_each_frame": true,
+      "wall_tiles_behind_webgl_apparatus": true,
+      "opaque_3d_apparatus_preserved": true
+    },
+    "bunsen_load_transition": {
+      "appearance_animation_scope": "all lit Bunsen instances in every practical",
+      "active": false,
+      "elapsed_s": 3.4,
+      "progress": 1,
+      "phase": "powerful blue heating flame",
+      "collar_rotation_degrees": 0,
+      "collar_open_fraction": 1,
+      "flame_heat_mix": 1,
+      "safety_flame_visible": false,
+      "powerful_blue_heating_flame_visible": true,
+      "complete": true
+    },
+    "left_practical_sidebar": {
+      "scroll_enabled": false,
+      "scrollbar_visible": false,
+      "input": "mouse wheel or trackpad over the clipped practical rail",
+      "subject": "physics",
+      "scroll_offset_px": 0,
+      "maximum_scroll_offset_px": 0,
+      "visible_card_count": 14
+    },
+    "control_label_layout": {
+      "all_visible_button_labels_fit": true,
+      "visible_button_count": 6,
+      "wrapped_button_labels": [],
+      "minimum_font_size_px": 12,
+      "labels": [
+        {
+          "label": "RUN I–V SWEEP",
+          "lines": [
+            "RUN I–V SWEEP"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 95.89,
+          "available_width_px": 138.6,
+          "button_width_px": 154,
+          "fits": true
+        },
+        {
+          "label": "DEVICE · RESISTOR",
+          "lines": [
+            "DEVICE · RESISTOR"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 116.85,
+          "available_width_px": 133.2,
+          "button_width_px": 148,
+          "fits": true
+        },
+        {
+          "label": "RESET",
+          "lines": [
+            "RESET"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 39.29,
+          "available_width_px": 60,
+          "button_width_px": 70,
+          "fits": true
+        },
+        {
+          "label": "CURVES",
+          "lines": [
+            "CURVES"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 50.34,
+          "available_width_px": 68,
+          "button_width_px": 78,
+          "fits": true
+        },
+        {
+          "label": "METHOD",
+          "lines": [
+            "METHOD"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 54.08,
+          "available_width_px": 82,
+          "button_width_px": 92,
+          "fits": true
+        },
+        {
+          "label": "CURVES",
+          "lines": [
+            "CURVES"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 50.34,
+          "available_width_px": 82,
+          "button_width_px": 92,
+          "fits": true
+        }
+      ]
+    },
+    "results_view": "three overlaid current–potential difference curves",
+    "iv_characteristics": {
+      "stage": 0,
+      "phase": "device seated; supply isolated",
+      "active_device": "resistor",
+      "active_device_label": "100 Ω RESISTOR",
+      "elapsed_stage_s": 0,
+      "supply_voltage_v": 0,
+      "device_voltage_v": 0,
+      "current_a": 0,
+      "current_ma": 0,
+      "polarity": "zero / isolated",
+      "switch_closed": false,
+      "apparatus": {
+        "power_pack": "variable ±6 V DC laboratory power pack with live voltage display and rotary control",
+        "ammeter": "digital ammeter connected in series",
+        "voltmeter": "digital voltmeter connected in parallel across the active device",
+        "test_station": "two shrouded spring terminals showing only the active component; inactive modules remain outside the visible workbench",
+        "devices": [
+          "100 Ω axial fixed resistor with colour bands",
+          "6 V MES laboratory filament bulb with transparent glass and visible coiled tungsten filament",
+          "red 5 mm LED with domed epoxy, cathode flat and 220 Ω protection resistor"
+        ],
+        "circuit_path": "power pack positive → switch → ammeter → active device → power pack negative",
+        "voltmeter_branch": "connected directly across both active-device terminals",
+        "cable_routes_separated": true
+      },
+      "animations": {
+        "device_seating_smooth": false,
+        "completed_device_exits_left_and_next_enters_right": false,
+        "inactive_devices_outside_visible_workbench": true,
+        "switch_and_voltage_dial_smooth": false,
+        "polarity_plugs_cross_at_zero": false,
+        "moving_charge_markers": false,
+        "filament_temperature_and_glow_continuous": false,
+        "led_threshold_glow_continuous": false
+      },
+      "live_sweep_readings": [],
+      "saved_curves": [],
+      "curves_complete": false,
+      "scientific_conclusions": {
+        "resistor": "A straight line through the origin: current is proportional to potential difference at constant temperature.",
+        "filament_lamp": "The curve becomes shallower as the filament heats and its resistance increases.",
+        "led": "Almost no reverse current; forward current rises only after the LED turn-on potential difference."
+      },
+      "safety": {
+        "low_voltage_supply": true,
+        "switch_off_before_changing_component_or_polarity": true,
+        "hot_lamp_cool_before_touching": true,
+        "led_protection_resistor_fitted": true
+      }
+    }
+  },
+  "errors": []
+}

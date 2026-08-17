@@ -1,0 +1,315 @@
+{
+  "errors": [],
+  "desktop": {
+    "responsive": {
+      "viewport_css_px": {
+        "width": 1440,
+        "height": 900
+      },
+      "logical_canvas_px": {
+        "width": 1440,
+        "height": 900
+      },
+      "scale": 1,
+      "mode": "desktop",
+      "portrait_prompt_visible": false,
+      "three_column_layout_preserved": true,
+      "mobile_landscape_layout": false,
+      "pointer_coordinates_scaled": false,
+      "minimum_touch_target_css_px": null
+    },
+    "sidebar": {
+      "fills_available_vertical_space": true,
+      "adaptive_section_spacing": true,
+      "remaining_height_allocated_to_content_cards": true,
+      "excessive_blank_section_gaps_removed": true,
+      "larger_responsive_typography": true,
+      "explicit_heading_to_content_spacing": true,
+      "method_stage_cards": true,
+      "method_stage_text_wrap": "complete multiline text without clipping or ellipsis",
+      "reactant_text_wrap": "complete multiline text without clipping or ellipsis",
+      "apparatus_text_wrap": "complete multiline text without clipping or ellipsis",
+      "guidance_text_wrap": "complete multiline text",
+      "compact_landscape_supported": true,
+      "content_top_y": 126,
+      "content_bottom_y": 886,
+      "available_bottom_y": 886,
+      "evaluation_button_top_y": 822.03,
+      "evaluation_button_bottom_y": 886,
+      "unused_vertical_space_px": 0,
+      "overflow_vertical_space_px": 0,
+      "compression_ratio": 0,
+      "method_stage_count": 4,
+      "method_stage_line_counts": [
+        3,
+        3,
+        2,
+        2
+      ],
+      "reactant_rows": [
+        {
+          "name": "Paraffin wax pellets",
+          "top_y": 437.98,
+          "bottom_y": 471.41
+        },
+        {
+          "name": "Stearic acid flakes",
+          "top_y": 475.41,
+          "bottom_y": 508.84
+        },
+        {
+          "name": "Hot water bath",
+          "top_y": 512.84,
+          "bottom_y": 546.27
+        }
+      ],
+      "heading_to_content_gap_px": 7,
+      "method_font_size_px": 10.6,
+      "reactant_font_size_px": 10.3,
+      "guidance_font_size_px": 10,
+      "all_method_stage_text_visible": true,
+      "all_reactant_text_visible": true,
+      "all_apparatus_text_visible": true,
+      "all_sidebar_components_visible": true,
+      "compact": false
+    },
+    "control_labels": {
+      "all_visible_button_labels_fit": true,
+      "visible_button_count": 6,
+      "wrapped_button_labels": [],
+      "minimum_font_size_px": 12,
+      "labels": [
+        {
+          "label": "ASSEMBLE BATH",
+          "lines": [
+            "ASSEMBLE BATH"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 102.88,
+          "available_width_px": 158.4,
+          "button_width_px": 176,
+          "fits": true
+        },
+        {
+          "label": "SAMPLE: PARAFFIN",
+          "lines": [
+            "SAMPLE: PARAFFIN"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 118.52,
+          "available_width_px": 138.6,
+          "button_width_px": 154,
+          "fits": true
+        },
+        {
+          "label": "RESET",
+          "lines": [
+            "RESET"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 39.29,
+          "available_width_px": 62,
+          "button_width_px": 72,
+          "fits": true
+        },
+        {
+          "label": "CURVES",
+          "lines": [
+            "CURVES"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 50.34,
+          "available_width_px": 68,
+          "button_width_px": 78,
+          "fits": true
+        },
+        {
+          "label": "METHOD",
+          "lines": [
+            "METHOD"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 54.08,
+          "available_width_px": 82,
+          "button_width_px": 92,
+          "fits": true
+        },
+        {
+          "label": "CURVES",
+          "lines": [
+            "CURVES"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 50.34,
+          "available_width_px": 82,
+          "button_width_px": 92,
+          "fits": true
+        }
+      ]
+    },
+    "neighbouring": [
+      "Specific heat capacity",
+      "Heating & cooling curves",
+      "Resistance of a wire",
+      "Ohmic & non-ohmic devices",
+      "Magnetic field patterns",
+      "Nuclear radiation"
+    ]
+  },
+  "compact": {
+    "responsive": {
+      "viewport_css_px": {
+        "width": 1206,
+        "height": 584
+      },
+      "logical_canvas_px": {
+        "width": 1239,
+        "height": 600
+      },
+      "scale": 0.973,
+      "mode": "compact landscape",
+      "portrait_prompt_visible": false,
+      "three_column_layout_preserved": true,
+      "mobile_landscape_layout": true,
+      "pointer_coordinates_scaled": true,
+      "minimum_touch_target_css_px": 44
+    },
+    "sidebar": {
+      "fills_available_vertical_space": true,
+      "adaptive_section_spacing": true,
+      "remaining_height_allocated_to_content_cards": true,
+      "excessive_blank_section_gaps_removed": true,
+      "larger_responsive_typography": true,
+      "explicit_heading_to_content_spacing": true,
+      "method_stage_cards": true,
+      "method_stage_text_wrap": "complete multiline text without clipping or ellipsis",
+      "reactant_text_wrap": "complete multiline text without clipping or ellipsis",
+      "apparatus_text_wrap": "complete multiline text without clipping or ellipsis",
+      "guidance_text_wrap": "complete multiline text",
+      "compact_landscape_supported": true,
+      "content_top_y": 122,
+      "content_bottom_y": 591,
+      "available_bottom_y": 591,
+      "evaluation_button_top_y": 551.51,
+      "evaluation_button_bottom_y": 591,
+      "unused_vertical_space_px": 0,
+      "overflow_vertical_space_px": 0,
+      "compression_ratio": 0.128,
+      "method_stage_count": 4,
+      "method_stage_line_counts": [
+        3,
+        3,
+        3,
+        3
+      ],
+      "reactant_rows": [
+        {
+          "name": "Paraffin wax pellets",
+          "top_y": 324.97,
+          "bottom_y": 344.71
+        },
+        {
+          "name": "Stearic acid flakes",
+          "top_y": 346.71,
+          "bottom_y": 366.46
+        },
+        {
+          "name": "Hot water bath",
+          "top_y": 368.46,
+          "bottom_y": 388.2
+        }
+      ],
+      "heading_to_content_gap_px": 3,
+      "method_font_size_px": 9.2,
+      "reactant_font_size_px": 9.4,
+      "guidance_font_size_px": 8.9,
+      "all_method_stage_text_visible": true,
+      "all_reactant_text_visible": true,
+      "all_apparatus_text_visible": true,
+      "all_sidebar_components_visible": true,
+      "compact": true
+    },
+    "control_labels": {
+      "all_visible_button_labels_fit": true,
+      "visible_button_count": 6,
+      "wrapped_button_labels": [],
+      "minimum_font_size_px": 12,
+      "labels": [
+        {
+          "label": "ASSEMBLE BATH",
+          "lines": [
+            "ASSEMBLE BATH"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 102.88,
+          "available_width_px": 140.4,
+          "button_width_px": 156,
+          "fits": true
+        },
+        {
+          "label": "SAMPLE: PARAFFIN",
+          "lines": [
+            "SAMPLE: PARAFFIN"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 118.52,
+          "available_width_px": 123.3,
+          "button_width_px": 137,
+          "fits": true
+        },
+        {
+          "label": "RESET",
+          "lines": [
+            "RESET"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 39.29,
+          "available_width_px": 54,
+          "button_width_px": 64,
+          "fits": true
+        },
+        {
+          "label": "CURVES",
+          "lines": [
+            "CURVES"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 50.34,
+          "available_width_px": 59,
+          "button_width_px": 69,
+          "fits": true
+        },
+        {
+          "label": "METHOD",
+          "lines": [
+            "METHOD"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 54.08,
+          "available_width_px": 82,
+          "button_width_px": 92,
+          "fits": true
+        },
+        {
+          "label": "CURVES",
+          "lines": [
+            "CURVES"
+          ],
+          "font_size_px": 12,
+          "widest_line_px": 50.34,
+          "available_width_px": 82,
+          "button_width_px": 92,
+          "fits": true
+        }
+      ]
+    },
+    "neighbouring": [
+      "Specific heat capacity",
+      "Heating & cooling curves",
+      "Resistance of a wire",
+      "Ohmic & non-ohmic devices",
+      "Magnetic field patterns",
+      "Nuclear radiation"
+    ]
+  }
+}

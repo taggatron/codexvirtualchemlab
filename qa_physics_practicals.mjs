@@ -11,7 +11,8 @@ const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, dev
 const errors = [];
 page.on('console', message => { if (message.type() === 'error') errors.push(`console: ${message.text()}`); });
 page.on('pageerror', error => errors.push(`page: ${error.message}`));
-await page.goto(`http://127.0.0.1:4173/?physics-practicals-qa=${Date.now()}`, { waitUntil: 'networkidle' });
+const baseUrl = process.env.LAB_URL || 'http://127.0.0.1:4173';
+await page.goto(`${baseUrl}/?physics-practicals-qa=${Date.now()}`, { waitUntil: 'networkidle' });
 await page.waitForFunction(() => typeof window.render_game_to_text === 'function');
 await page.evaluate(() => { window.__manualSimulationTime = true; });
 

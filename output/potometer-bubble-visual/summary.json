@@ -1,0 +1,13 @@
+{
+  "errors": [],
+  "stage": 5,
+  "wind_speed_m_s": 0.5,
+  "animation": {
+    "capillary_tip_lifts_and_redips": false,
+    "refiller_plunger_resets_bubble": false,
+    "bubble_moves_smoothly_toward_shoot": true,
+    "fan_blades_and_airflow_ribbons": true,
+    "leaf_flutter_scales_with_wind_speed": true,
+    "timer_accelerates_to_five_minutes": true
+  }
+}

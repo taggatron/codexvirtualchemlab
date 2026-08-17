@@ -1,0 +1,57 @@
+{
+  "pass": true,
+  "errors": [],
+  "stage": 7,
+  "current_count": 2,
+  "phase": "identifying and highlighting rooted daisies",
+  "grid_tapes": {
+    "physical_lengths_m": {
+      "x": 10,
+      "y": 10
+    },
+    "common_origin_world": [
+      -2.8,
+      0.344,
+      -1
+    ],
+    "x_direction_world": [
+      1,
+      0,
+      0
+    ],
+    "y_direction_world": [
+      0,
+      0,
+      1
+    ],
+    "x_end_world": [
+      2.8,
+      0.344,
+      -1
+    ],
+    "y_end_world": [
+      -2.8,
+      0.344,
+      4.2
+    ],
+    "current_x_end_world": [
+      2.8,
+      0.344,
+      -1
+    ],
+    "current_y_end_world": [
+      -2.8,
+      0.344,
+      4.2
+    ],
+    "x_unroll_progress": 1,
+    "y_unroll_progress": 1,
+    "right_angle_degrees": 90,
+    "direction_dot_product": 0,
+    "share_exact_origin": true,
+    "lie_on_meadow_surface": true,
+    "x_increases_left_to_right": true,
+    "y_increases_toward_foreground": true,
+    "completed_endpoints_inside_supported_view": true
+  }
+}
