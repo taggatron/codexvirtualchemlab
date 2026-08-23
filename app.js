@@ -16,7 +16,7 @@ class DeferredLabRenderer {
     if (this.preloadTimer) clearTimeout(this.preloadTimer);
     if (this.idleHandle && 'cancelIdleCallback' in window) cancelIdleCallback(this.idleHandle);
     this.preloadTimer = 0; this.idleHandle = 0;
-    this.loading = import(`./lab3d.js?v=20260823-7`).then(({ LabRenderer3D }) => {
+    this.loading = import(`./lab3d.js?v=20260823-9`).then(({ LabRenderer3D }) => {
       const renderer = new LabRenderer3D(this.canvas);
       renderer.signature = this.pendingSignature;
       this.impl = renderer;
@@ -1243,7 +1243,7 @@ function drawChemicalTags(id) {
     starchleaf: [['BOILING WATER', [-2.35, 0, .05], 22, { size: 8.2, minWidth: 104 }], ['ETHANOL · WATER BATH', [-.35, 0, -.42], 37, { size: 8.1, minWidth: 134 }], ['WARM RINSE', [1.28, 0, .16], 22, { size: 8.2, minWidth: 90 }], ['IODINE TILE', [2.55, 0, .15], 22, { size: 8.2, minWidth: 86 }]],
     lipase: [['LIPASE', [-2.05, 0, .05], 24], ['MILK + INDICATOR', [.24, .2, -.15], 27, { size: 8.2, minWidth: 118 }], ['ELECTRIC WATER BATH', [.55, 0, -.38], 44, { size: 8.1, minWidth: 128 }]],
     transformation: [],
-    respiration: [['GLUCOSE', [-2.78, 0, .92], 24], ['YEAST SUSPENSION', [2.75, 0, .92], 26, { size: 8.1, minWidth: 108 }], ['SAME 10 MINUTES', [0, 0, -.92], 30, { size: 8.1, minWidth: 104 }]],
+    respiration: [['GLUCOSE', [-2.78, 0, .92], 24], ['YEAST SUSPENSION', [2.75, 0, .92], 26, { size: 8.1, minWidth: 108 }], ['SAME 10 MINUTES', [0, 0, 2.18], 18, { size: 8.1, minWidth: 104 }]],
     antibiotics: state.antibioticStage >= 7 ? [['SEALED · INVERTED · 25 °C', [0, .12, .05], 34, { size: 8.1, minWidth: 146 }]] : [['B. SUBTILIS · NUTRIENT AGAR', [0, .12, .05], 38, { size: 8.1, minWidth: 158 }], ['STERILE DISC SET', [2.35, .05, .74], 27, { size: 8.1, minWidth: 104 }]],
     osmosis: [[state.osmosisConcentration === 0 ? 'DISTILLED WATER · 0.0 M' : `${state.osmosisConcentration.toFixed(1)} M SUCROSE`, [0, 0, -.3], 30, { size: 8.1, minWidth: 126 }], ['BLOT DRY', [2.28, 0, .12], 25, { size: 8.1, minWidth: 72 }]],
     potometer: [['SEALED LEAFY SHOOT', [-.15, 2.48, -.15], -5, { size: 8.1, minWidth: 112 }], ['GRADUATED CAPILLARY', [1.32, .3, .02], 34, { size: 7.9, minWidth: 124 }], [`WIND ${state.potometerWindSpeed.toFixed(1)} m s⁻¹`, [-2.42, .38, -.25], 23, { size: 8.1, minWidth: 104 }]],
