@@ -16,7 +16,7 @@ class DeferredLabRenderer {
     if (this.preloadTimer) clearTimeout(this.preloadTimer);
     if (this.idleHandle && 'cancelIdleCallback' in window) cancelIdleCallback(this.idleHandle);
     this.preloadTimer = 0; this.idleHandle = 0;
-    this.loading = import('./lab3d.js?v=20260823-4').then(({ LabRenderer3D }) => {
+    this.loading = import('./lab3d.js?v=20260823-5').then(({ LabRenderer3D }) => {
       const renderer = new LabRenderer3D(this.canvas);
       renderer.signature = this.pendingSignature;
       this.impl = renderer;
