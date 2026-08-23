@@ -1,5 +1,5 @@
-import * as THREE from './vendor/three.module.js';
-import { drawThermalBenchScene } from './thermalview.js';
+import * as THREE from './vendor/three.module.js?v=20260823-1';
+import { drawThermalBenchScene } from './thermalview.js?v=20260823-1';
 
 const GLASS = () => new THREE.MeshPhysicalMaterial({ color: 0xccefff, transparent: true, opacity: .43, transmission: .6, roughness: .045, metalness: 0, ior: 1.46, thickness: .08, clearcoat: .35, clearcoatRoughness: .08, side: THREE.DoubleSide, depthWrite: false });
 const metal = (color = 0x687b82, roughness = .26) => new THREE.MeshStandardMaterial({ color, metalness: .82, roughness });
@@ -122,8 +122,13 @@ export class LabRenderer3D {
   constructor(canvas) {
     this.canvas = canvas; this.available = false; this.signature = ''; this.flames = []; this.dynamic = []; this.width = 1; this.height = 1; this.left = 0; this.top = 0; this.coolantVisualLevel = 0; this.coolantTransitionTarget = 0; this.lastRenderTime = 0; this.thermiteAfterglowUntil = 0; this.thermiteGlowFraction = 0; this.osmosisRotationState = null; this.lastPracticalId = null; this.bunsenLoadDuration = 3.4; this.bunsenLoadElapsed = this.bunsenLoadDuration; this.bunsenTransitionActive = false; this.sceneWarmupFrames = 0; this.sceneNeedsCompile = false; this.sceneCompiling = false; this.sceneCompileGeneration = 0; this.contextLost = false; this.pendingCanvasReveal = true; canvas.style.visibility = 'hidden';
     try {
+      const constrainedDevice = (navigator.deviceMemory || 8) <= 4 || matchMedia('(pointer: coarse)').matches;
+      this.performanceProfile = constrainedDevice ? 'balanced' : 'high';
+      // The WebGL canvas sits behind a transparent 2D interaction canvas and
+      // intentionally stops rendering when idle, so its last composited frame
+      // must remain available between demand-driven updates.
       this.renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'high-performance', preserveDrawingBuffer: true });
-      this.renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2)); this.renderer.setClearColor(0xeaf1f2, 1); this.renderer.shadowMap.enabled = true; this.renderer.shadowMap.type = THREE.PCFSoftShadowMap; this.renderer.outputColorSpace = THREE.SRGBColorSpace; this.renderer.toneMapping = THREE.ACESFilmicToneMapping; this.renderer.toneMappingExposure = 1.12;
+      this.renderer.setPixelRatio(Math.min(devicePixelRatio || 1, constrainedDevice ? 1.5 : 2)); this.renderer.setClearColor(0xeaf1f2, 1); this.renderer.shadowMap.enabled = true; this.renderer.shadowMap.type = THREE.PCFSoftShadowMap; this.renderer.outputColorSpace = THREE.SRGBColorSpace; this.renderer.toneMapping = THREE.ACESFilmicToneMapping; this.renderer.toneMappingExposure = 1.12;
       this.scene = new THREE.Scene(); this.scene.background = new THREE.Color(0xeaf1f2); this.scene.fog = new THREE.Fog(0xeaf1f2, 13, 24);
       this.camera = new THREE.PerspectiveCamera(36, 1, .1, 50); this.camera.position.set(0, 4.65, 8.55); this.camera.lookAt(0, 1.05, 0);
       this.root = new THREE.Group(); this.scene.add(this.root); this.buildRoom(); this.available = true;
@@ -136,7 +141,7 @@ export class LabRenderer3D {
   }
   buildRoom() {
     const hemi = new THREE.HemisphereLight(0xf5fbff, 0x7d6d59, 2.25); this.scene.add(hemi);
-    const key = new THREE.DirectionalLight(0xffffff, 3.1); key.position.set(-4, 8, 7); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); key.shadow.camera.left = -9; key.shadow.camera.right = 9; key.shadow.camera.top = 8; key.shadow.camera.bottom = -4; this.scene.add(key);
+    const key = new THREE.DirectionalLight(0xffffff, 3.1); key.position.set(-4, 8, 7); key.castShadow = true; const shadowSize = this.performanceProfile === 'balanced' ? 1024 : 1536; key.shadow.mapSize.set(shadowSize, shadowSize); key.shadow.camera.left = -9; key.shadow.camera.right = 9; key.shadow.camera.top = 8; key.shadow.camera.bottom = -4; this.scene.add(key);
     const rim = new THREE.SpotLight(0x8edfff, 16, 18, .7, .5, 1.1); rim.position.set(5, 6, -2); rim.target.position.set(0, 1, 0); this.scene.add(rim, rim.target);
     const wall = new THREE.Mesh(new THREE.PlaneGeometry(16, 8), solid(0xf2f7f7, .85)); wall.position.set(0, 3.8, -3); wall.receiveShadow = true; this.scene.add(wall);
     const gridMat = new THREE.LineBasicMaterial({ color: 0xb8c9cc, transparent: true, opacity: .42 }); const pts = []; for (let x = -8; x <= 8; x += .8)pts.push(x, 0, -2.98, x, 8, -2.98); for (let y = 0; y <= 8; y += .8)pts.push(-8, y, -2.98, 8, y, -2.98); const gridGeo = new THREE.BufferGeometry(); gridGeo.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3)); const grid = new THREE.LineSegments(gridGeo, gridMat); this.scene.add(grid);
@@ -166,6 +171,9 @@ export class LabRenderer3D {
     }
     else if (id === 'shoretransect') { this.camera.fov = 42; this.camera.position.set(0, 5.7, 10.2); this.camera.lookAt(0, .72, -.24) }
     else if (id === 'ripple') { this.camera.fov = 38; this.camera.position.set(0, 5.5, 8.85); this.camera.lookAt(0, 1.12, -.05) }
+    else if (id === 'transformation') { this.camera.fov = 39; this.camera.position.set(0, 5.05, 9.35); this.camera.lookAt(0, .82, .05) }
+    else if (id === 'respiration') { this.camera.fov = 38; this.camera.position.set(0, 4.55, 8.9); this.camera.lookAt(0, 1.12, .12) }
+    else if (id === 'antibiotics') { this.camera.fov = 37; this.camera.position.set(0, 5.15, 8.65); this.camera.lookAt(0, .62, .08) }
     else { this.camera.fov = 36; this.camera.position.set(0, 4.65, 8.55); this.camera.lookAt(0, 1.05, 0) }
     if (id === 'hooke' && hookeFocusProgress > 0) {
       const q = Math.max(0, Math.min(1, hookeFocusProgress)), eased = q * q * (3 - 2 * q);
@@ -369,7 +377,7 @@ export class LabRenderer3D {
     g.add(hose, valveSleeve, this.gasTap(lit));
     Object.assign(g.userData, { bunsenGeometry: true, baseSealedToMainTube: true, baseTopHeight: baseCentreY, baseInnerRadius, barrelOuterRadius, barrelInnerRadius, barrelMouthOuterRadius, barrelMouthInnerRadius, flameWidthScale, airIntakeValveRaised: true, airIntakeValveCentreY: intakeCentreY, airIntakeValveHeight: intakeHalfHeight * 2, airIntakeValveBottomGap: intakeClearanceAboveBase, airIntakeValveInnerDiameter: collarInnerRadius * 2, airIntakeValveRadialThickness: collarBottomRadius - collarInnerRadius, airIntakeValveWallThicknessReductionPercent: 50, airIntakeValveFinish: 'brushed steel matching main tube', airIntakeValveEdgeProfile: 'square unrounded top and bottom edges', airIntakeValveOuterDiameter: collarBottomRadius * 2, airIntakeAdjustmentTabPresent: false, airIntakeOpeningCount: 1, airIntakeOpenings: 'one larger actual aligned front opening through collar and barrel', airIntakeFrontHoleDiameter: collarHoles[0].radiusX * 2, barrelFrontHoleDiameter: barrelHoles[0].radiusX * 2, airIntakeOpeningDepth: collarMidRadius - (barrelInnerRadius - .006), gasConnectorCentreY: connectorY, gasConnectorFinish: 'black matching flexible gas hose', gasConnectorRestoredToPreviousHeight: true, hoseRadius, hoseMinimumCentreY, hoseMinimumGroundClearance: hoseMinimumCentreY - hoseRadius, hoseKinkReduced: true, hoseValveFinalApproachAxis: '+x coaxial with gas-tap outlet', hoseValveFinalTangent: [1, 0, 0], hoseValveSleeveStartRadius: .059, hoseValveSleeveExpandedRadius: .094, hoseValveOverlapLength: .2, hoseValveSleeve: true, hoseValveSleeveFlared: true });
     if (lit) {
-      const loadTransition = options.loadTransition !== false, uniforms = { uTime: { value: 0 }, uSeed: { value: Math.random() * 20 }, uStrength: { value: 1 }, uHeatMix: { value: loadTransition ? 0 : 1 } };
+      const safetyFlame = options.safetyFlame === true, loadTransition = options.loadTransition !== false && !safetyFlame, uniforms = { uTime: { value: 0 }, uSeed: { value: Math.random() * 20 }, uStrength: { value: 1 }, uHeatMix: { value: safetyFlame || loadTransition ? 0 : 1 } };
       const flameMaterial = new THREE.ShaderMaterial({
         uniforms,
         transparent: true,
@@ -462,7 +470,7 @@ export class LabRenderer3D {
       const jets = []; for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2, mat = new THREE.MeshBasicMaterial({ color: 0x79dfff, transparent: true, opacity: .52, depthWrite: false, toneMapped: false }), jet = new THREE.Mesh(new THREE.ConeGeometry(.016 * flameWidthScale, .14, 12), mat); jet.position.set(Math.cos(a) * barrelMouthInnerRadius * .88, 1.39, Math.sin(a) * barrelMouthInnerRadius * .88); jet.renderOrder = 7; jet.castShadow = false; g.add(jet); jets.push(jet) }
       let wrap = null, wrapJets = [], wrapY = 1.29 + 1.42 * flameHeight * .94; if (wrapMode) { const wrapMat = new THREE.MeshBasicMaterial({ color: 0x73dfff, transparent: true, opacity: .3, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }); wrap = new THREE.Mesh(new THREE.TorusGeometry(.48, .052, 14, 64), wrapMat); wrap.rotation.x = Math.PI / 2; wrap.position.y = wrapY; wrap.scale.z = .72; wrap.renderOrder = 7; g.add(wrap); for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2, jet = new THREE.Mesh(new THREE.ConeGeometry(.04, .2, 12), wrapMat); jet.position.set(Math.cos(a) * .48, wrapY + .045, Math.sin(a) * .48); jet.scale.y = .72 + (i % 3) * .12; jet.renderOrder = 7; g.add(jet); wrapJets.push(jet) } }
       const glow = new THREE.PointLight(0x249dff, 3.8, 4.2, 1.8); glow.position.y = 1.7;
-      g.add(sheet, veil, rim, hotBase, glow); shadowReady(g);[sheet, veil, rim, hotBase, ...jets, ...wrapJets].forEach(o => { o.userData.noShadow = true; o.castShadow = false; o.receiveShadow = false }); this.flames.push({ sheet, veil, uniforms, veilUniforms: veilMat.uniforms, glow, rimMat, hotBaseMat, height: flameHeight, seed: uniforms.uSeed.value, wrap, wrapJets, wrapY, jets, loadTransition, airIntakeCollar: intakeAssembly })
+      g.add(sheet, veil, rim, hotBase, glow); shadowReady(g);[sheet, veil, rim, hotBase, ...jets, ...wrapJets].forEach(o => { o.userData.noShadow = true; o.castShadow = false; o.receiveShadow = false }); this.flames.push({ sheet, veil, uniforms, veilUniforms: veilMat.uniforms, glow, rimMat, hotBaseMat, height: flameHeight, seed: uniforms.uSeed.value, wrap, wrapJets, wrapY, jets, loadTransition, safetyFlame, airIntakeCollar: intakeAssembly })
       return g
     }
     return shadowReady(g)
@@ -804,9 +812,9 @@ export class LabRenderer3D {
     const body = cylinder(.31, .72, bodyMat, 48); body.position.y = .39; g.add(body);
     const shoulder = new THREE.Mesh(new THREE.SphereGeometry(.31, 48, 20), bodyMat); shoulder.scale.set(1, .42, 1); shoulder.position.y = .75; g.add(shoulder);
     const neck = cylinder(.14, .25, bodyMat, 36); neck.position.y = .94; g.add(neck);
-    const cap = cylinder(.17, .18, capMat, 36); cap.position.y = 1.12; g.add(cap);
-    for (let i = 0; i < 10; i++) { const ridge = new THREE.Mesh(new THREE.BoxGeometry(.018, .16, .025), solid(0xcac8bf, .5)); const a = i / 10 * Math.PI * 2; ridge.position.set(Math.cos(a) * .17, 1.12, Math.sin(a) * .17); ridge.rotation.y = -a; g.add(ridge) }
-    const labelMesh = this.curvedBottleLabel(label); g.add(labelMesh); Object.assign(g.userData, { labelSurface: 'cylindrical wrap', automaticCurvedLabel: true });
+    const capAssembly = new THREE.Group(), cap = cylinder(.17, .18, capMat, 36); cap.position.y = 1.12; capAssembly.add(cap); const capRidges = [];
+    for (let i = 0; i < 10; i++) { const ridge = new THREE.Mesh(new THREE.BoxGeometry(.018, .16, .025), solid(0xcac8bf, .5)); const a = i / 10 * Math.PI * 2; ridge.position.set(Math.cos(a) * .17, 1.12, Math.sin(a) * .17); ridge.rotation.y = -a; capAssembly.add(ridge); capRidges.push(ridge) }
+    g.add(capAssembly); const labelMesh = this.curvedBottleLabel(label); g.add(labelMesh); Object.assign(g.userData, { labelSurface: 'cylindrical wrap', automaticCurvedLabel: true, capAssembly, cap, capRidges });
     return shadowReady(g)
   }
   digitalStopwatch() {
@@ -851,6 +859,186 @@ export class LabRenderer3D {
     const globules = []; for (let i = 0; i < 24; i++) { const globule = new THREE.Mesh(new THREE.SphereGeometry(.012 + (i % 4) * .005, 12, 8), new THREE.MeshPhysicalMaterial({ color: 0xfff4d7, transparent: true, opacity: .72, roughness: .28 })); const a = i * 2.399, r = .025 + (i % 5) * .022; globule.position.set(Math.cos(a) * r, .22 + (i % 9) * .055, Math.sin(a) * r); tube.add(globule); globules.push(globule) }
     this.dynamic.push({ kind: 'lipase', tube, solution: tube.userData.liquid, pipette, drops, globules, display: stopwatch.userData.display, benchLift });
     return shadowReady(g)
+  }
+  antibioticDiscRig(state) {
+    const g = new THREE.Group(), glass = new THREE.MeshPhysicalMaterial({ color: 0xeaf7f5, transparent: true, opacity: .3, transmission: .55, roughness: .055, clearcoat: 1, clearcoatRoughness: .035, side: THREE.DoubleSide, depthWrite: false }), steel = metal(0xc0ccce, .14), teal = new THREE.MeshPhysicalMaterial({ color: 0x397f84, roughness: .32, clearcoat: .55 });
+    const labelTexture = (title, subtitle, accent = '#397f84', width = 640, height = 220) => {
+      const canvas = document.createElement('canvas'), dc = canvas.getContext('2d'); canvas.width = width; canvas.height = height;
+      dc.fillStyle = '#fbfcf7'; dc.fillRect(0, 0, width, height); dc.strokeStyle = accent; dc.lineWidth = 10; dc.strokeRect(6, 6, width - 12, height - 12);
+      dc.fillStyle = accent; dc.font = '800 58px Inter, Arial, sans-serif'; dc.textAlign = 'center'; dc.textBaseline = 'middle'; dc.fillText(title, width / 2, subtitle ? height * .38 : height / 2);
+      if (subtitle) { dc.fillStyle = '#536b70'; dc.font = '700 31px Inter, Arial, sans-serif'; dc.fillText(subtitle, width / 2, height * .7) }
+      const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = Math.min(8, this.renderer.capabilities.getMaxAnisotropy()); return texture
+    };
+
+    const plateAssembly = new THREE.Group(); plateAssembly.position.set(0, .36, .08); g.add(plateAssembly);
+    const base = cylinder(1.42, .16, glass, 96); base.position.y = -.2; plateAssembly.add(base);
+    const baseFoot = new THREE.Mesh(new THREE.TorusGeometry(1.35, .04, 14, 112), new THREE.MeshPhysicalMaterial({ color: 0xc5dfdc, transparent: true, opacity: .55, roughness: .1, clearcoat: .9 })); baseFoot.rotation.x = Math.PI / 2; baseFoot.position.y = -.285; plateAssembly.add(baseFoot);
+    const agarMat = new THREE.MeshPhysicalMaterial({ color: 0xd9d69b, transparent: true, opacity: .88, roughness: .55, transmission: .03, clearcoat: .17 }), agar = cylinder(1.31, .105, agarMat, 96); agar.position.y = -.095; plateAssembly.add(agar);
+    const agarEdge = new THREE.Mesh(new THREE.TorusGeometry(1.275, .024, 12, 104), new THREE.MeshStandardMaterial({ color: 0xb9b985, roughness: .68 })); agarEdge.rotation.x = Math.PI / 2; agarEdge.position.y = -.038; plateAssembly.add(agarEdge);
+    const lawnMat = new THREE.MeshPhysicalMaterial({ color: 0x6e864a, transparent: true, opacity: 0, roughness: .82, side: THREE.DoubleSide, depthWrite: false }), lawn = new THREE.Mesh(new THREE.CircleGeometry(1.27, 112), lawnMat); lawn.rotation.x = -Math.PI / 2; lawn.position.y = -.034; lawn.renderOrder = 3; plateAssembly.add(lawn);
+    const colonies = [];
+    for (let i = 0; i < 150; i++) { const a = i * 2.399963, r = .075 + ((i * 37) % 100) / 100 * 1.14, size = .011 + (i % 5) * .0035, colonyMat = new THREE.MeshBasicMaterial({ color: i % 4 ? 0x6e7f45 : 0x849458, transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide }), colony = new THREE.Mesh(new THREE.CircleGeometry(size, 12), colonyMat); colony.rotation.x = -Math.PI / 2; colony.position.set(Math.cos(a) * r, -.026 + (i % 3) * .0006, Math.sin(a) * r); colony.renderOrder = 4; plateAssembly.add(colony); colonies.push({ mesh: colony, material: colonyMat, phase: (i % 29) / 29, threshold: (i % 31) / 31 }) }
+    const discData = [
+      { code: 'P', name: 'Penicillin', diameter: 18, colour: '#4e83b5', hex: 0x4e83b5, position: new THREE.Vector3(-.58, 0, -.58) },
+      { code: 'E', name: 'Erythromycin', diameter: 24, colour: '#a45d92', hex: 0xa45d92, position: new THREE.Vector3(.58, 0, -.58) },
+      { code: 'T', name: 'Tetracycline', diameter: 30, colour: '#d28b3d', hex: 0xd28b3d, position: new THREE.Vector3(.58, 0, .58) },
+      { code: 'C', name: 'Water control', diameter: 0, colour: '#6e858c', hex: 0x6e858c, position: new THREE.Vector3(-.58, 0, .58) }
+    ];
+    const placedDiscs = [], sourceDiscs = [], zones = [], paper = new THREE.MeshPhysicalMaterial({ color: 0xfffdf0, roughness: .78, clearcoat: .05 });
+    discData.forEach((disc, index) => {
+      const zoneRadius = disc.diameter / 58, zoneMat = new THREE.MeshBasicMaterial({ color: 0xf3f2c7, transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide }), zone = new THREE.Mesh(new THREE.CircleGeometry(Math.max(.13, zoneRadius), 64), zoneMat); zone.rotation.x = -Math.PI / 2; zone.position.set(disc.position.x, -.015, disc.position.z); zone.renderOrder = 5; plateAssembly.add(zone);
+      const ringMat = new THREE.MeshBasicMaterial({ color: disc.hex, transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide }), ring = new THREE.Mesh(new THREE.RingGeometry(Math.max(.13, zoneRadius) - .018, Math.max(.13, zoneRadius) + .018, 64), ringMat); ring.rotation.x = -Math.PI / 2; ring.position.set(disc.position.x, -.009, disc.position.z); ring.renderOrder = 6; plateAssembly.add(ring); zones.push({ mesh: zone, material: zoneMat, ring, ringMat, radius: zoneRadius, disc });
+      const discGroup = new THREE.Group(), discMesh = cylinder(.13, .028, paper, 36); discGroup.add(discMesh); const label = new THREE.Mesh(new THREE.CircleGeometry(.109, 36), new THREE.MeshBasicMaterial({ map: labelTexture(disc.code, '', disc.colour, 180, 180), toneMapped: false, side: THREE.DoubleSide })); label.rotation.x = -Math.PI / 2; label.position.y = .016; label.renderOrder = 8; discGroup.add(label); discGroup.position.set(disc.position.x, .008, disc.position.z); discGroup.visible = false; plateAssembly.add(discGroup); placedDiscs.push(discGroup);
+      const source = discGroup.clone(); source.position.set(2.28 + (index % 2) * .42, .155, .5 + Math.floor(index / 2) * .42); source.visible = true; g.add(source); sourceDiscs.push(source)
+    });
+    const lid = new THREE.Group(), lidTop = cylinder(1.46, .052, glass.clone(), 96); lidTop.material.opacity = .22; lid.add(lidTop); const lidWall = new THREE.Mesh(new THREE.CylinderGeometry(1.46, 1.46, .28, 96, 1, true), glass.clone()); lidWall.position.y = -.13; lid.add(lidWall); const lidRim = new THREE.Mesh(new THREE.TorusGeometry(1.43, .046, 16, 112), new THREE.MeshPhysicalMaterial({ color: 0xcde5e2, transparent: true, opacity: .58, roughness: .08, clearcoat: .95 })); lidRim.rotation.x = Math.PI / 2; lidRim.position.y = -.275; lid.add(lidRim); lid.position.y = .2; plateAssembly.add(lid);
+    const tapeMaterial = new THREE.MeshPhysicalMaterial({ color: 0xd8e7dd, transparent: true, opacity: .72, roughness: .58, transmission: .12, side: THREE.DoubleSide }), tapes = [];
+    for (const angle of [-Math.PI / 4, Math.PI / 4]) { const tape = new THREE.Mesh(roundedBox(2.84, .025, .16, .03), tapeMaterial); tape.position.y = .24; tape.rotation.y = angle; tape.scale.x = .001; tape.renderOrder = 10; plateAssembly.add(tape); tapes.push(tape) }
+    const dishLabel = new THREE.Mesh(new THREE.PlaneGeometry(.92, .28), new THREE.MeshBasicMaterial({ map: labelTexture('B. SUBTILIS', '25 °C · 48 h', '#397f84'), transparent: true, toneMapped: false, side: THREE.DoubleSide })); dishLabel.rotation.x = -Math.PI / 2; dishLabel.position.set(0, -.292, .81); dishLabel.renderOrder = 7; plateAssembly.add(dishLabel);
+    const markerInk = new THREE.MeshBasicMaterial({ color: 0x111719, transparent: true, opacity: .94, toneMapped: false, side: THREE.DoubleSide, depthWrite: false }), divisionLines = [];
+    const lineA = new THREE.Mesh(roundedBox(2.26, .018, .026, .01), markerInk), lineB = new THREE.Mesh(roundedBox(2.26, .018, .026, .01), markerInk.clone());
+    lineA.position.y = -.297; lineB.position.y = -.296; lineB.rotation.y = Math.PI / 2; lineA.scale.x = lineB.scale.x = .001; lineA.renderOrder = lineB.renderOrder = 11; plateAssembly.add(lineA, lineB); divisionLines.push(lineA, lineB);
+
+    const marker = new THREE.Group(), markerBodyMat = new THREE.MeshPhysicalMaterial({ color: 0x151a1c, roughness: .25, clearcoat: .7, clearcoatRoughness: .11 }), markerGripMat = new THREE.MeshPhysicalMaterial({ color: 0x252c2f, roughness: .52, clearcoat: .22 });
+    const markerBody = cylinder(.105, 1.02, markerBodyMat, 40); marker.add(markerBody); const markerGrip = cylinder(.116, .38, markerGripMat, 40); markerGrip.position.y = -.33; marker.add(markerGrip); const markerCap = cylinder(.119, .25, markerBodyMat, 40); markerCap.position.y = .635; marker.add(markerCap); const capRing = new THREE.Mesh(new THREE.TorusGeometry(.119, .016, 10, 40), metal(0x8c989b, .28)); capRing.rotation.x = Math.PI / 2; capRing.position.y = .51; marker.add(capRing); const markerNib = new THREE.Mesh(new THREE.ConeGeometry(.052, .2, 28), new THREE.MeshStandardMaterial({ color: 0x090b0c, roughness: .78 })); markerNib.rotation.z = Math.PI; markerNib.position.y = -.63; marker.add(markerNib); marker.position.set(-1.92, .17, 1.53); marker.rotation.z = Math.PI / 2; marker.scale.setScalar(.8); g.add(marker);
+
+    const flameEntryIndex = this.flames.length, burner = this.bunsen(true, .62, false, { safetyFlame: true }), burnerFlame = this.flames[flameEntryIndex]; burner.position.set(-1.88, .01, -.5); burner.rotation.y = Math.PI; burner.scale.setScalar(.54); g.add(burner);
+
+    const biohazardBin = new THREE.Group(), binYellow = new THREE.MeshPhysicalMaterial({ color: 0xe4b522, roughness: .36, clearcoat: .5 }), binDark = new THREE.MeshStandardMaterial({ color: 0x232a2c, roughness: .72 });
+    const binBody = new THREE.Mesh(roundedBox(.78, .82, .68, .075), binYellow); binBody.position.y = .42; biohazardBin.add(binBody); const binMouth = new THREE.Mesh(roundedBox(.64, .025, .5, .04), binDark); binMouth.position.y = .85; biohazardBin.add(binMouth);
+    const binLidPivot = new THREE.Group(); binLidPivot.position.set(0, .88, -.31); const binLid = new THREE.Mesh(roundedBox(.84, .09, .7, .06), binYellow); binLid.position.z = .31; binLidPivot.add(binLid); const binHinge = cylinder(.055, .72, metal(0x6d7474, .22), 28); binHinge.rotation.z = Math.PI / 2; binLidPivot.add(binHinge); biohazardBin.add(binLidPivot);
+    const binLabel = new THREE.Mesh(new THREE.PlaneGeometry(.58, .39), new THREE.MeshBasicMaterial({ map: labelTexture('☣', 'BIOHAZARD', '#8e281f', 420, 300), toneMapped: false })); binLabel.position.set(0, .47, .347); binLabel.renderOrder = 8; biohazardBin.add(binLabel); const pedal = new THREE.Mesh(roundedBox(.35, .055, .25, .03), binDark); pedal.position.set(0, .045, .43); biohazardBin.add(pedal); biohazardBin.position.set(-3.08, .02, -1.48); biohazardBin.rotation.y = .08; g.add(biohazardBin);
+
+    const swab = new THREE.Group(), swabStem = cylinder(.027, 1.68, new THREE.MeshStandardMaterial({ color: 0xf2eee0, roughness: .62 }), 20); swab.add(swabStem); const cotton = new THREE.Mesh(new THREE.CapsuleGeometry(.08, .22, 6, 18), new THREE.MeshPhysicalMaterial({ color: 0xfffdf2, roughness: .94 })); cotton.position.y = -.96; swab.add(cotton); swab.rotation.z = Math.PI / 2; swab.position.set(-2.05, .18, .68); g.add(swab);
+    swab.position.set(-2.55, .18, 1.08);
+    const wrapper = new THREE.Mesh(roundedBox(1.85, .025, .36, .025), new THREE.MeshPhysicalMaterial({ color: 0xf5f8f4, transparent: true, opacity: .78, roughness: .34, clearcoat: .35 })); wrapper.position.set(-2.55, .04, 1.08); wrapper.rotation.y = -.05; g.add(wrapper);
+    const culture = this.labelledBiologyBottle('B. SUBTILIS', 0xc9e5dc); culture.position.set(-2.65, .02, -.48); culture.scale.setScalar(.72); g.add(culture);
+    const forceps = this.biologyForceps(); forceps.scale.setScalar(.74); forceps.rotation.set(0, 0, Math.PI / 2); forceps.position.set(2.38, .23, 1.06); g.add(forceps);
+    const discCard = new THREE.Mesh(roundedBox(1.08, .045, 1.05, .06), new THREE.MeshPhysicalMaterial({ color: 0xf0f4ee, roughness: .42, clearcoat: .35 })); discCard.position.set(2.48, .075, .72); g.add(discCard); for (let i = 0; i < 4; i++) { const well = new THREE.Mesh(new THREE.TorusGeometry(.17, .018, 10, 40), new THREE.MeshStandardMaterial({ color: 0xb7c5c1, roughness: .48 })); well.rotation.x = Math.PI / 2; well.position.set(2.28 + (i % 2) * .42, .105, .5 + Math.floor(i / 2) * .42); g.add(well) }
+
+    const spray = new THREE.Group(), sprayBody = new THREE.Mesh(roundedBox(.48, .92, .42, .1), new THREE.MeshPhysicalMaterial({ color: 0xddeff0, transparent: true, opacity: .84, roughness: .22, clearcoat: .7 })); sprayBody.position.y = .46; spray.add(sprayBody); const neck = cylinder(.12, .25, teal, 28); neck.position.y = 1.03; spray.add(neck); const trigger = new THREE.Mesh(roundedBox(.4, .12, .14, .04), teal); trigger.position.set(.16, 1.18, 0); spray.add(trigger); const nozzle = new THREE.Mesh(roundedBox(.32, .13, .17, .04), teal); nozzle.position.set(-.13, 1.22, 0); spray.add(nozzle); const sprayLabel = new THREE.Mesh(new THREE.PlaneGeometry(.36, .31), new THREE.MeshBasicMaterial({ map: labelTexture('70%', 'SURFACE', '#397f84'), toneMapped: false })); sprayLabel.position.set(0, .54, .216); spray.add(sprayLabel); spray.position.set(-3.05, 0, .72); g.add(spray);
+    const wipe = new THREE.Mesh(roundedBox(.72, .035, .54, .06), new THREE.MeshPhysicalMaterial({ color: 0xf3f6ee, roughness: .88 })); wipe.position.set(-2.72, .055, 1.58); wipe.rotation.y = .08; g.add(wipe);
+    const sprayDrops = []; for (let i = 0; i < 22; i++) { const drop = new THREE.Mesh(new THREE.SphereGeometry(.016 + i % 3 * .004, 10, 7), new THREE.MeshBasicMaterial({ color: 0x9be4e2, transparent: true, opacity: 0, depthWrite: false, toneMapped: false })); g.add(drop); sprayDrops.push({ mesh: drop, phase: i / 22, lateral: ((i * 17) % 11 - 5) * .045 }) }
+
+    const incubator = new THREE.Group(), incubatorWhite = new THREE.MeshPhysicalMaterial({ color: 0xe9efed, roughness: .22, clearcoat: .72, clearcoatRoughness: .1 }), incubatorDark = new THREE.MeshStandardMaterial({ color: 0x162a31, roughness: .42, metalness: .12 }), incubatorBody = new THREE.Mesh(roundedBox(3.48, 2.36, 2.96, .13), incubatorWhite); incubatorBody.position.y = 1.18; incubator.add(incubatorBody);
+    const cavity = new THREE.Mesh(roundedBox(3.12, 1.65, .08, .07), incubatorDark); cavity.position.set(0, 1.12, 1.51); incubator.add(cavity); const chamberFloor = new THREE.Mesh(roundedBox(3.02, .06, 2.55, .03), steel); chamberFloor.position.set(0, .38, .05); incubator.add(chamberFloor); for (const y of [.73, 1.08, 1.43]) { const shelf = new THREE.Mesh(roundedBox(2.98, .035, 2.46, .02), steel); shelf.position.set(0, y, .04); incubator.add(shelf); for (const x of [-1.34, 0, 1.34]) { const rail = new THREE.Mesh(roundedBox(.025, .018, 2.38, .008), incubatorDark); rail.position.set(x, y + .027, .04); incubator.add(rail) } }
+    const frameSpecs = [[0, 2.08, 3.32, .2], [0, .23, 3.32, .18], [-1.61, 1.15, .16, 1.75], [1.61, 1.15, .16, 1.75]]; frameSpecs.forEach(([x, y, w, h]) => { const framePiece = new THREE.Mesh(roundedBox(w, h, .15, .04), incubatorWhite); framePiece.position.set(x, y, 1.54); incubator.add(framePiece) });
+    const incubatorDoorPivot = new THREE.Group(); incubatorDoorPivot.position.set(-1.67, 1.15, 1.61); const doorGlassMat = new THREE.MeshPhysicalMaterial({ color: 0xb9e3e7, transparent: true, opacity: .28, transmission: .62, roughness: .045, clearcoat: 1, clearcoatRoughness: .035, side: THREE.DoubleSide, depthWrite: false }), doorGlass = new THREE.Mesh(roundedBox(3.28, 1.7, .065, .07), doorGlassMat); doorGlass.position.x = 1.64; doorGlass.renderOrder = 8; incubatorDoorPivot.add(doorGlass);
+    const doorFrameMat = metal(0x60777c, .16); for (const [x, y, w, h] of [[1.64, .82, 3.36, .1], [1.64, -.82, 3.36, .1], [.05, 0, .1, 1.72], [3.23, 0, .1, 1.72]]) { const bar = new THREE.Mesh(roundedBox(w, h, .11, .035), doorFrameMat); bar.position.set(x, y, .02); incubatorDoorPivot.add(bar) } const doorHandle = new THREE.Mesh(roundedBox(.13, .74, .16, .05), new THREE.MeshPhysicalMaterial({ color: 0x334e55, roughness: .26, metalness: .48, clearcoat: .46 })); doorHandle.position.set(3.02, 0, .15); incubatorDoorPivot.add(doorHandle); for (const y of [-.58, .58]) { const hinge = cylinder(.06, .25, doorFrameMat, 28); hinge.position.set(0, y, -.02); incubatorDoorPivot.add(hinge) } incubator.add(incubatorDoorPivot);
+    const displayCanvas = document.createElement('canvas'), displayContext = displayCanvas.getContext('2d'); displayCanvas.width = 560; displayCanvas.height = 240; const displayTexture = new THREE.CanvasTexture(displayCanvas); displayTexture.colorSpace = THREE.SRGBColorSpace; const displayBezel = new THREE.Mesh(roundedBox(1.22, .39, .055, .045), incubatorDark); displayBezel.position.set(.15, 2.16, 1.61); incubator.add(displayBezel); const display = new THREE.Mesh(new THREE.PlaneGeometry(1.1, .31), new THREE.MeshBasicMaterial({ map: displayTexture, toneMapped: false })); display.position.set(.15, 2.16, 1.642); display.renderOrder = 12; incubator.add(display); const incubatorLabel = new THREE.Mesh(new THREE.PlaneGeometry(1.14, .32), new THREE.MeshBasicMaterial({ map: labelTexture('INCUBATOR', '25 °C · SEALED PLATES', '#397f84'), toneMapped: false })); incubatorLabel.position.set(-1.0, 2.16, 1.642); incubatorLabel.renderOrder = 12; incubator.add(incubatorLabel); const indicator = new THREE.Mesh(new THREE.SphereGeometry(.05, 20, 12), new THREE.MeshStandardMaterial({ color: 0x455c5e, emissive: 0x66f0ca, emissiveIntensity: 0 })); indicator.position.set(.92, 2.16, 1.64); incubator.add(indicator); const incubatorInteriorLight = new THREE.PointLight(0x9fe8db, .28, 3.4, 1.8); incubatorInteriorLight.position.set(0, 1.55, .55); incubator.add(incubatorInteriorLight); incubator.position.set(1.86, .02, -1.85); g.add(incubator);
+
+    const ruler = new THREE.Group(), rulerBody = new THREE.Mesh(roundedBox(2.18, .035, .34, .035), new THREE.MeshPhysicalMaterial({ color: 0xcfe9eb, transparent: true, opacity: .58, transmission: .28, roughness: .08, clearcoat: .9 })); ruler.add(rulerBody); for (let i = -10; i <= 10; i++) { const major = i % 5 === 0, tick = new THREE.Mesh(new THREE.BoxGeometry(.012, .018, major ? .24 : .14), new THREE.MeshBasicMaterial({ color: major ? 0x1f6065 : 0x58878a, transparent: true, opacity: .9, toneMapped: false })); tick.position.set(i * .1, .028, -.05); ruler.add(tick) } const rulerLabel = new THREE.Mesh(new THREE.PlaneGeometry(.55, .14), new THREE.MeshBasicMaterial({ map: labelTexture('mm', '', '#2b777b', 280, 120), transparent: true, toneMapped: false })); rulerLabel.rotation.x = -Math.PI / 2; rulerLabel.position.set(.72, .035, .085); ruler.add(rulerLabel); ruler.visible = false; g.add(ruler);
+
+    this.dynamic.push({ kind: 'antibiotics', plateAssembly, lid, tapes, lawnMat, colonies, zones, placedDiscs, sourceDiscs, discData, marker, divisionLines, burnerFlame, swab, forceps, spray, wipe, sprayDrops, biohazardBin, binLidPivot, ruler, incubator, incubatorDoorPivot, incubatorInteriorLight, incubatorDisplay: { canvas: displayCanvas, context: displayContext, texture: displayTexture, lastKey: '' }, indicator });
+    Object.assign(g.userData, { antibioticDiscRig: true, petriDishDiameterMm: 90, visuallyReducedPlateScale: true, organism: 'Bacillus subtilis teaching strain', nutrientAgar: true, codedDiscs: ['P', 'E', 'T', 'C'], sterileWaterControl: true, yellowSafetyFlameAnimated: true, blackMarkerQuadrantsAnimated: true, biohazardWasteBin: true, minimalLidOpeningAnimated: true, crossTapeAnimated: true, glassDoorIncubatorAnimated: true, invertedIncubationAnimated: true, closedLidMeasurementAnimated: true });
+    return shadowReady(g)
+  }
+  geneticEngineeringRig(state) {
+    const g = new THREE.Group(), white = new THREE.MeshPhysicalMaterial({ color: 0xf5f6f3, roughness: .28, clearcoat: .68, clearcoatRoughness: .12 }), dark = solid(0x20363e, .46), steel = metal(0xaebdc1, .17), violet = new THREE.MeshPhysicalMaterial({ color: 0x6559ae, roughness: .26, clearcoat: .55 }), cyan = new THREE.MeshPhysicalMaterial({ color: 0x42c6d9, roughness: .22, clearcoat: .62 }), amberAgar = new THREE.MeshPhysicalMaterial({ color: 0xe5ba6c, transparent: true, opacity: .78, roughness: .34, transmission: .12, clearcoat: .55, depthWrite: false });
+    const makeLabel = (line1, line2, width = .72, height = .28, accent = '#5b55a5', background = '#fffdf6') => {
+      const canvas = document.createElement('canvas'), dc = canvas.getContext('2d'); canvas.width = 512; canvas.height = 190; dc.fillStyle = background; dc.fillRect(0, 0, 512, 190); dc.strokeStyle = accent; dc.lineWidth = 10; dc.strokeRect(5, 5, 502, 180); dc.textAlign = 'center'; dc.textBaseline = 'middle'; dc.fillStyle = '#203a42'; dc.font = `800 ${line2 ? 57 : 66}px Inter, sans-serif`; dc.fillText(line1, 256, line2 ? 65 : 95); if (line2) { dc.fillStyle = accent; dc.font = '750 37px Inter, sans-serif'; dc.fillText(line2, 256, 139) } const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = Math.min(8, this.renderer.capabilities.getMaxAnisotropy()); const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, opacity: 1, toneMapped: false, side: THREE.DoubleSide, depthWrite: false }); const plane = new THREE.Mesh(new THREE.PlaneGeometry(width, height), material); plane.renderOrder = 14; return plane
+    };
+    const makeMicrotube = (positive, x) => {
+      const tube = new THREE.Group(), glassMat = new THREE.MeshPhysicalMaterial({ color: positive ? 0xd7e1ff : 0xd9f5f6, transparent: true, opacity: .58, transmission: .55, roughness: .055, clearcoat: .85, depthWrite: false, side: THREE.DoubleSide }), liquidMat = new THREE.MeshPhysicalMaterial({ color: positive ? 0x786dca : 0x69c5ce, transparent: true, opacity: .72, roughness: .18, emissive: positive ? 0x17113d : 0x0d3338, emissiveIntensity: .08 });
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(.16, .13, .67, 36, 1, true), glassMat); body.position.y = .52; tube.add(body); const tip = new THREE.Mesh(new THREE.ConeGeometry(.13, .25, 36), glassMat); tip.position.y = .06; tip.rotation.z = Math.PI; tube.add(tip); const liquid = cylinder(.12, .28, liquidMat, 30); liquid.position.y = .37; tube.add(liquid); const meniscus = new THREE.Mesh(new THREE.CircleGeometry(.12, 30), liquidMat); meniscus.rotation.x = -Math.PI / 2; meniscus.position.y = .515; tube.add(meniscus);
+      const collar = new THREE.Mesh(new THREE.TorusGeometry(.17, .025, 10, 40), steel); collar.rotation.x = Math.PI / 2; collar.position.y = .85; tube.add(collar); const capPivot = new THREE.Group(); capPivot.position.set(-.17, .86, 0); const cap = cylinder(.19, .1, positive ? violet : cyan, 36); cap.rotation.z = Math.PI / 2; cap.position.x = .17; capPivot.add(cap); const hinge = cylinder(.045, .12, steel, 20); hinge.rotation.z = Math.PI / 2; capPivot.add(hinge); tube.add(capPivot);
+      const label = makeLabel(positive ? '+DNA' : '−DNA', positive ? 'PLASMID' : 'CONTROL', .49, .24, positive ? '#6257ae' : '#278b92'); label.position.set(0, .59, .166); label.scale.setScalar(.001); label.material.opacity = 0; tube.add(label);
+      const cells = []; for (let i = 0; i < 16; i++) { const cellMat = new THREE.MeshPhysicalMaterial({ color: 0xf1d38b, roughness: .48, emissive: 0x372300, emissiveIntensity: .04 }); const cell = new THREE.Mesh(new THREE.CapsuleGeometry(.018, .035, 4, 8), cellMat); const a = i * 2.399, r = .025 + (i % 4) * .021; cell.position.set(Math.cos(a) * r, .26 + (i % 7) * .038, Math.sin(a) * r); cell.rotation.set(i * .4, i * .73, i * .31); tube.add(cell); cells.push(cell) }
+      tube.position.x = x; Object.assign(tube.userData, { positive, liquidMat, capPivot, label, cells }); return shadowReady(tube)
+    };
+
+    // Insulated ice bath with individually modelled translucent ice cubes.
+    const iceBath = new THREE.Group(), bathOuter = new THREE.Mesh(roundedBox(1.42, .58, 1.18, .12), new THREE.MeshPhysicalMaterial({ color: 0xf2f5f5, roughness: .24, clearcoat: .8 })); bathOuter.position.y = .3; iceBath.add(bathOuter); const iceWell = new THREE.Mesh(roundedBox(1.18, .33, .94, .08), new THREE.MeshPhysicalMaterial({ color: 0x5dcce5, transparent: true, opacity: .62, transmission: .14, roughness: .16, depthWrite: false })); iceWell.position.y = .51; iceBath.add(iceWell); const iceCubes = []; for (let i = 0; i < 18; i++) { const cube = new THREE.Mesh(roundedBox(.18 + i % 3 * .025, .14, .17, .025), new THREE.MeshPhysicalMaterial({ color: 0xcff7ff, transparent: true, opacity: .62, transmission: .45, roughness: .05, clearcoat: 1, depthWrite: false })); const a = i * 2.399, r = .13 + (i % 5) * .105; cube.position.set(Math.cos(a) * r, .69 + (i % 3) * .025, Math.sin(a) * r * .62); cube.rotation.set(i * .13, i * .47, i * .21); iceBath.add(cube); iceCubes.push(cube) } const iceLabel = makeLabel('ICE BATH', '4 °C', .78, .28, '#258fa7'); iceLabel.position.set(0, .29, .612); iceBath.add(iceLabel); iceBath.position.set(-2.42, .04, -1.06); g.add(iceBath);
+    const tubeCarriage = new THREE.Group(), plusTube = makeMicrotube(true, -.22), minusTube = makeMicrotube(false, .22); tubeCarriage.add(plusTube, minusTube); const tubeRest = new THREE.Vector3(-2.42, .47, -1.06), tubeHeat = new THREE.Vector3(-.28, .47, -1.14); tubeCarriage.position.copy(tubeRest); g.add(tubeCarriage);
+
+    // Temperature-controlled aluminium heat block and live 42 °C display.
+    const heatBlock = new THREE.Group(), heatBody = new THREE.Mesh(roundedBox(1.24, .54, 1.06, .08), white); heatBody.position.y = .28; heatBlock.add(heatBody); const heatTop = new THREE.Mesh(roundedBox(1.06, .18, .88, .05), metal(0xb9c2c5, .2)); heatTop.position.y = .61; heatBlock.add(heatTop); for (const x of [-.22, .22]) { const hole = new THREE.Mesh(new THREE.CylinderGeometry(.18, .18, .08, 32), dark); hole.position.set(x, .71, 0); heatBlock.add(hole) } const displayCanvas = document.createElement('canvas'), displayContext = displayCanvas.getContext('2d'); displayCanvas.width = 512; displayCanvas.height = 180; displayContext.fillStyle = '#071c22'; displayContext.fillRect(0, 0, 512, 180); displayContext.shadowColor = '#ffb36d'; displayContext.shadowBlur = 20; displayContext.fillStyle = '#ffc184'; displayContext.font = '800 88px ui-monospace, Menlo, monospace'; displayContext.textAlign = 'center'; displayContext.textBaseline = 'middle'; displayContext.fillText('42.0 °C', 256, 72); displayContext.shadowBlur = 0; displayContext.fillStyle = '#b6c8cb'; displayContext.font = '700 27px Inter, sans-serif'; displayContext.fillText('HEAT SHOCK · 50 s', 256, 143); const displayTexture = new THREE.CanvasTexture(displayCanvas); displayTexture.colorSpace = THREE.SRGBColorSpace; const heatDisplay = new THREE.Mesh(new THREE.PlaneGeometry(.82, .3), new THREE.MeshBasicMaterial({ map: displayTexture, toneMapped: false })); heatDisplay.position.set(0, .3, .542); heatDisplay.renderOrder = 8; heatBlock.add(heatDisplay); const heatLed = new THREE.Mesh(new THREE.SphereGeometry(.035, 16, 10), new THREE.MeshStandardMaterial({ color: 0xff8a4b, emissive: 0xff3b12, emissiveIntensity: .35 })); heatLed.position.set(.48, .53, .545); heatLed.scale.z = .35; heatBlock.add(heatLed); heatBlock.position.set(-.28, .04, -1.14); g.add(heatBlock);
+
+    const cellBottle = this.labelledBiologyBottle('CELLS', 0xe9d9ab); cellBottle.position.set(-3.0, .02, .35); cellBottle.scale.setScalar(.58); g.add(cellBottle); const plasmidBottle = this.labelledBiologyBottle('pGLO DNA', 0xc9c5ee); plasmidBottle.position.set(-1.95, .02, 1.0); plasmidBottle.scale.setScalar(.58); g.add(plasmidBottle); const brothBottle = this.labelledBiologyBottle('LB BROTH', 0xd9ebc4); brothBottle.position.set(-.85, .02, .34); brothBottle.scale.setScalar(.58); g.add(brothBottle);
+
+    // High-detail adjustable P20 micropipette with detachable sterile tip,
+    // two-stop plunger, volume window and dedicated ejector mechanism.
+    const pipette = new THREE.Group(), pipetteBodyMat = new THREE.MeshPhysicalMaterial({ color: 0xf4f5f1, roughness: .24, clearcoat: .72, clearcoatRoughness: .1 }), rubberMat = new THREE.MeshPhysicalMaterial({ color: 0x6257ae, roughness: .32, clearcoat: .42 }), pipetteProfile = [new THREE.Vector2(.078, 0), new THREE.Vector2(.105, .08), new THREE.Vector2(.12, .27), new THREE.Vector2(.145, .48), new THREE.Vector2(.15, .77), new THREE.Vector2(.132, 1.03), new THREE.Vector2(.105, 1.16)], pipetteBody = new THREE.Mesh(new THREE.LatheGeometry(pipetteProfile, 48), pipetteBodyMat); pipette.add(pipetteBody);
+    const gripFront = new THREE.Mesh(roundedBox(.23, .52, .065, .035), rubberMat); gripFront.position.set(0, .76, .145); pipette.add(gripFront); const fingerRest = new THREE.Mesh(roundedBox(.42, .075, .29, .04), rubberMat); fingerRest.position.set(.09, .98, 0); pipette.add(fingerRest); const lowerNose = new THREE.Mesh(new THREE.ConeGeometry(.105, .34, 36), pipetteBodyMat); lowerNose.position.y = -.17; lowerNose.rotation.z = Math.PI; pipette.add(lowerNose); const nozzle = cylinder(.045, .32, steel, 28); nozzle.position.y = -.43; pipette.add(nozzle); const ejectorSleeve = cylinder(.061, .28, new THREE.MeshPhysicalMaterial({ color: 0xcbd5d6, roughness: .2, metalness: .18, clearcoat: .4 }), 28); ejectorSleeve.position.set(-.028, -.36, 0); pipette.add(ejectorSleeve);
+    const volumeCanvas = document.createElement('canvas'), volumeContext = volumeCanvas.getContext('2d'); volumeCanvas.width = 280; volumeCanvas.height = 190; volumeContext.fillStyle = '#10282f'; volumeContext.fillRect(0, 0, 280, 190); volumeContext.strokeStyle = '#92a4a6'; volumeContext.lineWidth = 12; volumeContext.strokeRect(6, 6, 268, 178); volumeContext.fillStyle = '#f5d471'; volumeContext.font = '800 88px ui-monospace, Menlo, monospace'; volumeContext.textAlign = 'center'; volumeContext.textBaseline = 'middle'; volumeContext.fillText('010', 140, 83); volumeContext.fillStyle = '#b9cbcd'; volumeContext.font = '750 28px Inter, sans-serif'; volumeContext.fillText('µL · P20', 140, 151); const volumeTexture = new THREE.CanvasTexture(volumeCanvas); volumeTexture.colorSpace = THREE.SRGBColorSpace; const volumeBezel = new THREE.Mesh(roundedBox(.25, .35, .035, .025), dark); volumeBezel.position.set(0, .61, .157); pipette.add(volumeBezel); const volumeWindow = new THREE.Mesh(new THREE.PlaneGeometry(.205, .292), new THREE.MeshBasicMaterial({ map: volumeTexture, toneMapped: false })); volumeWindow.position.set(0, .61, .18); volumeWindow.renderOrder = 12; pipette.add(volumeWindow);
+    const plungerAssembly = new THREE.Group(), adjustmentDial = cylinder(.108, .18, dark, 32); adjustmentDial.position.y = 1.22; plungerAssembly.add(adjustmentDial); const plungerStem = cylinder(.055, .27, metal(0xaeb9bd, .16), 28); plungerStem.position.y = 1.36; plungerAssembly.add(plungerStem); const plungerButton = cylinder(.145, .09, rubberMat, 36); plungerButton.position.y = 1.52; plungerAssembly.add(plungerButton); const buttonTop = new THREE.Mesh(new THREE.CircleGeometry(.145, 36), new THREE.MeshPhysicalMaterial({ color: 0x766cc0, roughness: .22, clearcoat: .7 })); buttonTop.rotation.x = -Math.PI / 2; buttonTop.position.y = 1.568; plungerAssembly.add(buttonTop); pipette.add(plungerAssembly); const ejectorButton = new THREE.Mesh(roundedBox(.12, .28, .12, .045), dark); ejectorButton.position.set(-.145, 1.08, .015); pipette.add(ejectorButton); const ejectorRod = cylinder(.022, .72, steel, 16); ejectorRod.position.set(-.125, .35, 0); pipette.add(ejectorRod);
+    const tipMaterial = new THREE.MeshPhysicalMaterial({ color: 0xd9f7ff, transparent: true, opacity: .58, transmission: .56, roughness: .025, clearcoat: 1, depthWrite: false, side: THREE.DoubleSide }), tipLiquidMaterial = new THREE.MeshPhysicalMaterial({ color: 0xd9c68b, transparent: true, opacity: .9, transmission: .08, roughness: .12, emissive: 0x3a2b0d, emissiveIntensity: .05, depthWrite: false }), pipetteTip = new THREE.Group(), tipHub = cylinder(.072, .14, tipMaterial, 32); tipHub.position.y = -.61; pipetteTip.add(tipHub); const tipShell = new THREE.Mesh(new THREE.ConeGeometry(.068, .72, 36, 1, true), tipMaterial); tipShell.position.y = -.99; tipShell.rotation.z = Math.PI; tipShell.renderOrder = 10; tipShell.castShadow = false; pipetteTip.add(tipShell); const tipHighlight = new THREE.Mesh(new THREE.ConeGeometry(.046, .62, 28, 1, true), new THREE.MeshBasicMaterial({ color: 0xf4feff, transparent: true, opacity: .18, depthWrite: false, side: THREE.DoubleSide, toneMapped: false })); tipHighlight.position.set(.018, -.95, .018); tipHighlight.rotation.z = Math.PI; tipHighlight.renderOrder = 11; tipHighlight.castShadow = false; pipetteTip.add(tipHighlight); const tipLiquid = new THREE.Mesh(new THREE.ConeGeometry(.033, .45, 28), tipLiquidMaterial); tipLiquid.position.y = -1.01; tipLiquid.rotation.z = Math.PI; tipLiquid.renderOrder = 9; tipLiquid.castShadow = false; tipLiquid.visible = false; pipetteTip.add(tipLiquid); pipetteTip.visible = false; pipette.add(pipetteTip);
+    const pipetteRest = new THREE.Vector3(-.42, .36, 1.72); pipette.position.copy(pipetteRest); pipette.rotation.set(0, 0, Math.PI / 2); pipette.scale.setScalar(.66); g.add(pipette);
+
+    const pipetteStand = new THREE.Group(), standBase = new THREE.Mesh(roundedBox(1.08, .07, .42, .06), new THREE.MeshPhysicalMaterial({ color: 0xdfe8e7, roughness: .28, clearcoat: .55 })); standBase.position.y = .04; pipetteStand.add(standBase); for (const x of [-.36, .36]) { const post = cylinder(.035, .24, steel, 18); post.position.set(x, .15, 0); pipetteStand.add(post); const cradle = new THREE.Mesh(new THREE.TorusGeometry(.115, .025, 10, 30, Math.PI), rubberMat); cradle.rotation.set(Math.PI / 2, 0, x < 0 ? Math.PI : 0); cradle.position.set(x, .28, 0); pipetteStand.add(cradle) } pipetteStand.position.set(pipetteRest.x, .01, pipetteRest.z); g.add(pipetteStand);
+    const tipRack = new THREE.Group(), rackBase = new THREE.Mesh(roundedBox(1.02, .2, .72, .07), new THREE.MeshPhysicalMaterial({ color: 0xe9efec, roughness: .28, clearcoat: .52 })); rackBase.position.y = .11; tipRack.add(rackBase); const rackTop = new THREE.Mesh(roundedBox(.9, .055, .6, .04), new THREE.MeshPhysicalMaterial({ color: 0xc9d9d9, roughness: .32 })); rackTop.position.y = .24; tipRack.add(rackTop); const tipEntries = [], tipPickupTargets = []; for (let i = 0; i < 9; i++) { const x = (i % 3 - 1) * .27, z = (Math.floor(i / 3) - 1) * .19, holder = new THREE.Mesh(new THREE.TorusGeometry(.055, .012, 8, 24), dark); holder.rotation.x = Math.PI / 2; holder.position.set(x, .285, z); tipRack.add(holder); const rackTip = new THREE.Mesh(new THREE.ConeGeometry(.052, .4, 22, 1, true), tipMaterial.clone()); rackTip.position.set(x, .48, z); rackTip.rotation.z = Math.PI; rackTip.renderOrder = 8; rackTip.castShadow = false; tipRack.add(rackTip); tipEntries.push(rackTip) } const rackLabel = makeLabel('STERILE', 'PIPETTE TIPS', .74, .22, '#4d7e83'); rackLabel.position.set(0, .12, .374); tipRack.add(rackLabel); const rackLidPivot = new THREE.Group(); rackLidPivot.position.set(0, .2, -.37); const rackLid = new THREE.Mesh(roundedBox(1.03, .045, .72, .06), new THREE.MeshPhysicalMaterial({ color: 0xdaf4f5, transparent: true, opacity: .38, transmission: .42, roughness: .04, clearcoat: 1, depthWrite: false })); rackLid.position.z = .36; rackLidPivot.add(rackLid); rackLidPivot.rotation.x = -1.12; tipRack.add(rackLidPivot); tipRack.position.set(.12, .03, .94); for (let i = 0; i < 9; i++) { const x = (i % 3 - 1) * .27, z = (Math.floor(i / 3) - 1) * .19; tipPickupTargets.push(new THREE.Vector3(tipRack.position.x + x, 1.14, tipRack.position.z + z)) } g.add(tipRack);
+    const tipWaste = new THREE.Group(), wasteBody = new THREE.Mesh(new THREE.CylinderGeometry(.3, .25, .55, 40, 1, true), new THREE.MeshPhysicalMaterial({ color: 0xe8eef0, transparent: true, opacity: .72, transmission: .16, roughness: .18, clearcoat: .6 })); wasteBody.position.y = .3; tipWaste.add(wasteBody); const wasteBase = new THREE.Mesh(new THREE.CircleGeometry(.25, 40), white); wasteBase.rotation.x = -Math.PI / 2; wasteBase.position.y = .025; tipWaste.add(wasteBase); const wasteRim = new THREE.Mesh(new THREE.TorusGeometry(.3, .025, 10, 40), steel); wasteRim.rotation.x = Math.PI / 2; wasteRim.position.y = .58; tipWaste.add(wasteRim); const wasteLabel = makeLabel('USED TIPS', '', .5, .17, '#7a697c'); wasteLabel.position.set(0, .28, .29); tipWaste.add(wasteLabel); tipWaste.position.set(.72, .02, 1.62); g.add(tipWaste); const usedTips = []; for (let i = 0; i < 9; i++) { const usedTip = new THREE.Mesh(new THREE.ConeGeometry(.035, .28, 18, 1, true), tipMaterial.clone()); usedTip.position.set(tipWaste.position.x + (i % 3 - 1) * .08, .18 + Math.floor(i / 3) * .055, tipWaste.position.z + (i % 2 ? .06 : -.05)); usedTip.rotation.set((i % 3 - 1) * .3, i * .7, Math.PI + (i % 2 ? .42 : -.34)); usedTip.visible = false; usedTip.castShadow = false; g.add(usedTip); usedTips.push(usedTip) } const ejectedTip = new THREE.Mesh(new THREE.ConeGeometry(.052, .55, 24, 1, true), tipMaterial.clone()); ejectedTip.rotation.z = Math.PI; ejectedTip.visible = false; ejectedTip.castShadow = false; g.add(ejectedTip);
+    const drops = []; for (let i = 0; i < 12; i++) { const drop = new THREE.Mesh(new THREE.SphereGeometry(.028, 16, 10), new THREE.MeshPhysicalMaterial({ color: i > 7 ? 0xdff0c4 : i > 4 ? 0x7568ca : 0xd7c793, transparent: true, opacity: .9, roughness: .08, depthWrite: false })); drop.scale.set(.8, 1.35, .8); drop.visible = false; drop.userData.phase = i; g.add(drop); drops.push(drop) }
+    const plasmidRings = []; for (let i = 0; i < 7; i++) { const ring = new THREE.Mesh(new THREE.TorusGeometry(.055, .012, 9, 32), new THREE.MeshStandardMaterial({ color: 0x73f294, emissive: 0x1cb24b, emissiveIntensity: 1.1, roughness: .25 })); ring.visible = false; ring.userData.phase = i / 7; g.add(ring); plasmidRings.push(ring) }
+
+    const plateSpecs = [
+      { id: 'plus_amp_ara', line1: '+DNA', line2: 'LB / amp / ara', fluorescent: true, colonies: 36, home: new THREE.Vector3(.95, .16, .05) },
+      { id: 'plus_amp', line1: '+DNA', line2: 'LB / amp', fluorescent: false, colonies: 30, home: new THREE.Vector3(2.45, .16, .05) },
+      { id: 'minus_lb', line1: '−DNA', line2: 'LB', fluorescent: false, colonies: 52, lawn: true, home: new THREE.Vector3(.95, .16, 1.35) },
+      { id: 'minus_amp', line1: '−DNA', line2: 'LB / amp', fluorescent: false, colonies: 0, home: new THREE.Vector3(2.45, .16, 1.35) }
+    ];
+    const plates = plateSpecs.map((spec, plateIndex) => {
+      const plate = new THREE.Group(), base = new THREE.Mesh(new THREE.CylinderGeometry(.54, .58, .13, 64), new THREE.MeshPhysicalMaterial({ color: 0xdfe9e9, transparent: true, opacity: .55, roughness: .11, clearcoat: .8, depthWrite: false })); base.position.y = .07; plate.add(base); const agar = new THREE.Mesh(new THREE.CylinderGeometry(.5, .5, .07, 64), amberAgar.clone()); agar.position.y = .14; plate.add(agar); const lid = new THREE.Mesh(new THREE.CylinderGeometry(.585, .585, .14, 64, 1, true), new THREE.MeshPhysicalMaterial({ color: 0xe3f4f7, transparent: true, opacity: .35, transmission: .48, roughness: .035, clearcoat: 1, side: THREE.DoubleSide, depthWrite: false })); lid.position.y = .24; lid.renderOrder = 8; plate.add(lid); const lidTop = new THREE.Mesh(new THREE.CircleGeometry(.585, 64), lid.material); lidTop.rotation.x = -Math.PI / 2; lidTop.position.y = .31; lidTop.renderOrder = 8; plate.add(lidTop); const label = makeLabel(spec.line1, spec.line2, .88, .27, spec.fluorescent ? '#2e9c59' : spec.line1 === '+DNA' ? '#6559ae' : '#278b92'); label.position.set(0, .1, .615); label.rotation.x = -.18; label.scale.setScalar(.001); label.material.opacity = 0; plate.add(label);
+      const streakMaterial = new THREE.LineBasicMaterial({ color: plateIndex < 2 ? 0xb5a9e1 : 0x80c4c9, transparent: true, opacity: 0 }); const streakPoints = []; for (let i = 0; i < 28; i++) { const a = i / 27 * Math.PI * 5.2, r = .06 + i / 27 * .38; streakPoints.push(new THREE.Vector3(Math.cos(a) * r, .188, Math.sin(a) * r)) } const streak = new THREE.Line(new THREE.BufferGeometry().setFromPoints(streakPoints), streakMaterial); plate.add(streak);
+      const colonyEntries = []; for (let i = 0; i < spec.colonies; i++) { const fluorescent = spec.fluorescent, colonyMat = new THREE.MeshStandardMaterial({ color: fluorescent ? 0x6ff291 : 0xf3ead0, emissive: fluorescent ? 0x26bd55 : 0x2b210c, emissiveIntensity: fluorescent ? .06 : .03, roughness: .58, transparent: true, opacity: 0 }); const colony = new THREE.Mesh(new THREE.SphereGeometry(spec.lawn ? .025 : .032 + i % 3 * .007, 12, 8), colonyMat); const a = i * 2.399, r = .06 + (i % 8) * .049; colony.position.set(Math.cos(a) * r, .195, Math.sin(a) * r * .88); colony.scale.set(1, .2, 1); colony.visible = false; plate.add(colony); colonyEntries.push({ mesh: colony, threshold: .08 + (i % 17) / 20, fluorescent }) }
+      plate.position.copy(spec.home); Object.assign(plate.userData, { ...spec, lid, lidTop, label, streak, colonyEntries }); g.add(plate); return plate
+    });
+
+    const viewer = new THREE.Group(), viewerBase = new THREE.Mesh(roundedBox(3.18, .18, 2.42, .12), new THREE.MeshStandardMaterial({ color: 0x102843, emissive: 0x0a4d91, emissiveIntensity: .08, roughness: .25, metalness: .18 })); viewerBase.position.set(1.7, .09, .7); viewer.add(viewerBase); const viewerGlass = new THREE.Mesh(roundedBox(2.94, .035, 2.16, .08), new THREE.MeshStandardMaterial({ color: 0x166fd0, emissive: 0x187ef1, emissiveIntensity: .2, transparent: true, opacity: .56, roughness: .12 })); viewerGlass.position.set(1.7, .2, .7); viewer.add(viewerGlass); const viewerLabel = makeLabel('BLUE LIGHT', 'GFP VIEWER', 1.0, .28, '#2179d6', '#eaf4ff'); viewerLabel.position.set(1.7, .13, 1.96); viewerLabel.rotation.x = -.3; viewer.add(viewerLabel); const viewerLight = new THREE.PointLight(0x268cff, 0, 4.1, 1.6); viewerLight.position.set(1.7, .72, .7); viewer.add(viewerLight); viewer.visible = false; g.add(viewer);
+
+    const incubator = new THREE.Group(), incubatorShell = new THREE.Mesh(roundedBox(2.25, 1.66, 1.2, .11), white); incubatorShell.position.y = .84; incubator.add(incubatorShell); const cavity = new THREE.Mesh(roundedBox(1.88, 1.22, .05, .06), dark); cavity.position.set(0, .82, .626); incubator.add(cavity); for (const y of [.45, .78, 1.11]) { const shelf = new THREE.Mesh(new THREE.BoxGeometry(1.68, .035, .88), steel); shelf.position.set(0, y, .18); incubator.add(shelf) } const incubatorDoorPivot = new THREE.Group(); incubatorDoorPivot.position.set(1.06, .83, .64); const door = new THREE.Mesh(roundedBox(2.08, 1.46, .09, .08), new THREE.MeshPhysicalMaterial({ color: 0xd9f1f3, transparent: true, opacity: .55, transmission: .2, roughness: .12, clearcoat: .9 })); door.position.x = -1.04; incubatorDoorPivot.add(door); const doorFrame = new THREE.LineSegments(new THREE.EdgesGeometry(door.geometry), new THREE.LineBasicMaterial({ color: 0x667e84 })); doorFrame.position.copy(door.position); incubatorDoorPivot.add(doorFrame); incubator.add(incubatorDoorPivot); const incLabel = makeLabel('37 °C', 'SIMULATION INCUBATOR', .96, .28, '#b56d32'); incLabel.position.set(0, 1.35, .69); incubator.add(incLabel); const clockCanvas = document.createElement('canvas'), clockContext = clockCanvas.getContext('2d'); clockCanvas.width = 420; clockCanvas.height = 150; const clockTexture = new THREE.CanvasTexture(clockCanvas); clockTexture.colorSpace = THREE.SRGBColorSpace; const clockScreen = new THREE.Mesh(new THREE.PlaneGeometry(.74, .26), new THREE.MeshBasicMaterial({ map: clockTexture, toneMapped: false })); clockScreen.position.set(0, .29, .688); clockScreen.renderOrder = 10; incubator.add(clockScreen); incubator.position.set(2.45, .03, -1.58); incubator.scale.setScalar(.78); g.add(incubator);
+
+    const spreader = new THREE.Group(), spreadHandle = cylinder(.035, .82, steel, 20); spreadHandle.position.y = .2; spreadHandle.rotation.z = Math.PI / 2; spreader.add(spreadHandle); const spreadBar = cylinder(.03, .58, new THREE.MeshPhysicalMaterial({ color: 0xcfeff4, transparent: true, opacity: .72, transmission: .32, roughness: .06 }), 20); spreadBar.rotation.x = Math.PI / 2; spreadBar.position.set(-.41, .2, 0); spreader.add(spreadBar); const spreaderRest = new THREE.Vector3(2.78, .25, 1.86); spreader.position.copy(spreaderRest); spreader.rotation.y = -.2; g.add(spreader);
+
+    this.dynamic.push({ kind: 'geneticEngineering', iceBath, iceCubes, tubeCarriage, tubeRest, tubeHeat, plusTube, minusTube, heatLed, cellBottle, plasmidBottle, brothBottle, pipette, pipetteRest, pipetteStand, plungerAssembly, ejectorButton, ejectorButtonHomeX: ejectorButton.position.x, ejectorSleeve, pipetteTip, tipLiquid, tipLiquidMaterial, tipEndLocal: new THREE.Vector3(0, -1.34, 0), tipRack, tipEntries, tipPickupTargets, tipWaste, tipWasteTarget: new THREE.Vector3(.72, 1.59, 1.62), usedTips, ejectedTip, drops, plasmidRings, plates, plateSpecs, viewer, viewerBase, viewerGlass, viewerLight, incubator, incubatorDoorPivot, clockDisplay: { canvas: clockCanvas, context: clockContext, texture: clockTexture }, spreader, spreaderRest });
+    Object.assign(g.userData, { geneticEngineeringRig: true, matchedControls: ['+DNA', '−DNA'], selectableMarkers: ['ampR'], reporterGenes: ['gfp'], gfpInducer: 'arabinose', sealedPlates: true, adjustableMicropipette: 'P20', sterileTipRack: true, twoStopPlungerAnimated: true, tipEjectionAnimated: true, nonPathogenicTeachingStrainSimulation: true });
+    return shadowReady(g)
+  }
+  respirationMiniBath(temperature) {
+    const g = new THREE.Group(), bodyMat = new THREE.MeshPhysicalMaterial({ color: 0xf6f7f3, roughness: .25, metalness: .04, clearcoat: .76, clearcoatRoughness: .12 }), rimMat = metal(0xc2cdd0, .14), dark = solid(0x152a32, .48), waterMat = new THREE.MeshPhysicalMaterial({ color: temperature <= 20 ? 0x58c9e7 : temperature >= 60 ? 0x55b9cf : 0x45c5df, transparent: true, opacity: .62, roughness: .09, transmission: .08, clearcoat: .9, clearcoatRoughness: .04, depthWrite: false, side: THREE.DoubleSide });
+    const base = new THREE.Mesh(roundedBox(1.08, .58, 1.18, .055), bodyMat); base.position.y = .29; g.add(base);
+    const wallY = .68;
+    for (const x of [-.5, .5]) { const wall = new THREE.Mesh(new THREE.BoxGeometry(.08, .38, 1.04), bodyMat); wall.position.set(x, wallY, 0); g.add(wall) }
+    for (const z of [-.5, .5]) { const wall = new THREE.Mesh(new THREE.BoxGeometry(1, .38, .08), bodyMat); wall.position.set(0, wallY, z); g.add(wall) }
+    for (const [a, b] of [[[-.5, .87, -.5], [.5, .87, -.5]], [[-.5, .87, .5], [.5, .87, .5]], [[-.5, .87, -.5], [-.5, .87, .5]], [[.5, .87, -.5], [.5, .87, .5]]]) g.add(this.tubeBetween(new THREE.Vector3(...a), new THREE.Vector3(...b), .035, rimMat));
+    const volume = new THREE.Mesh(new THREE.BoxGeometry(.91, .23, .91), waterMat); volume.position.y = .72; volume.renderOrder = 2; volume.userData.noShadow = true; g.add(volume);
+    const surface = new THREE.Mesh(new THREE.PlaneGeometry(.91, .91), waterMat.clone()); surface.rotation.x = -Math.PI / 2; surface.position.y = .842; surface.renderOrder = 6; surface.userData.noShadow = true; g.add(surface);
+    const meniscus = new THREE.Mesh(new THREE.TorusGeometry(.39, .011, 8, 64), new THREE.MeshBasicMaterial({ color: 0xc8f7ff, transparent: true, opacity: .54, depthWrite: false, toneMapped: false })); meniscus.rotation.x = Math.PI / 2; meniscus.position.y = .85; meniscus.scale.z = .92; meniscus.userData.noShadow = true; g.add(meniscus);
+    const panel = new THREE.Mesh(roundedBox(.72, .26, .035, .025), dark); panel.position.set(0, .27, .611); g.add(panel);
+    const displayCanvas = document.createElement('canvas'), dc = displayCanvas.getContext('2d'); displayCanvas.width = 320; displayCanvas.height = 128; dc.fillStyle = '#061b22'; dc.fillRect(0, 0, 320, 128); dc.shadowColor = temperature >= 50 ? '#ffb56b' : '#6fffe4'; dc.shadowBlur = 18; dc.fillStyle = temperature >= 50 ? '#ffc27e' : '#8effe7'; dc.font = '800 68px ui-monospace, SFMono-Regular, Menlo, monospace'; dc.textAlign = 'center'; dc.textBaseline = 'middle'; dc.fillText(`${temperature} °C`, 160, 51); dc.shadowBlur = 0; dc.fillStyle = '#b8c9cc'; dc.font = '700 21px Inter, sans-serif'; dc.fillText('THERMOSTATIC BATH', 160, 101);
+    const texture = new THREE.CanvasTexture(displayCanvas); texture.colorSpace = THREE.SRGBColorSpace; const display = new THREE.Mesh(new THREE.PlaneGeometry(.62, .22), new THREE.MeshBasicMaterial({ map: texture, toneMapped: false })); display.position.set(0, .27, .638); display.renderOrder = 8; g.add(display);
+    const lamp = new THREE.Mesh(new THREE.SphereGeometry(.025, 16, 10), new THREE.MeshBasicMaterial({ color: 0x58efbc, toneMapped: false })); lamp.position.set(.43, .27, .64); lamp.scale.z = .35; g.add(lamp);
+    for (const x of [-.39, .39]) for (const z of [-.4, .4]) { const foot = new THREE.Mesh(roundedBox(.14, .055, .14, .018), dark); foot.position.set(x, .025, z); g.add(foot) }
+    Object.assign(g.userData, { temperature, surface, volume, meniscus, lamp }); return shadowReady(g)
+  }
+  respirationBalloon(colour) {
+    const g = new THREE.Group(), latex = new THREE.MeshPhysicalMaterial({ color: colour, roughness: .34, metalness: 0, transparent: true, opacity: .91, clearcoat: .46, clearcoatRoughness: .18, side: THREE.DoubleSide }), body = new THREE.Mesh(new THREE.SphereGeometry(.36, 48, 32), latex); body.position.y = .34; g.add(body);
+    const neck = new THREE.Mesh(new THREE.CylinderGeometry(.108, .092, .3, 40, 1, true), latex); neck.position.y = .04; g.add(neck);
+    const rolledLip = new THREE.Mesh(new THREE.TorusGeometry(.108, .018, 10, 48), latex); rolledLip.rotation.x = Math.PI / 2; rolledLip.position.y = -.11; g.add(rolledLip);
+    const highlight = new THREE.Mesh(new THREE.SphereGeometry(.29, 32, 20), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .12, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false })); highlight.scale.set(.48, .7, .2); highlight.position.set(-.11, .43, .29); highlight.userData.noShadow = true; g.add(highlight);
+    Object.assign(g.userData, { body, neck, rolledLip, highlight, latex }); return shadowReady(g)
+  }
+  respirationRig(state) {
+    const g = new THREE.Group(), temperatures = [10, 20, 30, 40, 60], finalVolumes = [6, 22, 51, 78, 4], xs = [-2.64, -1.32, 0, 1.32, 2.64], bathZ = -.34, balloonColours = [0x7f6ac8, 0x3ca9a1, 0xe89d43, 0xd26082, 0x438fc4], stage = state.respirationStage || 0;
+    const baths = [], flasks = [], liquids = [], foams = [], sugarDeposits = [], balloons = [], trayPositions = [];
+    for (let i = 0; i < temperatures.length; i++) {
+      const bath = this.respirationMiniBath(temperatures[i]); bath.position.set(xs[i], 0, bathZ); bath.scale.setScalar(.94); g.add(bath); baths.push(bath);
+      const flask = this.flask(.58, 0xc6a66f); flask.scale.setScalar(.49); flask.position.set(xs[i], .26, bathZ); flask.userData.liquid.visible = stage >= 3; flask.userData.meniscus.visible = stage >= 3; flask.userData.liquid.material.opacity = .78; flask.userData.liquid.material.roughness = .34; g.add(flask); flasks.push(flask); liquids.push(flask.userData.liquid);
+      const sugarGroup = new THREE.Group(); sugarGroup.position.set(xs[i], .32, bathZ); for (let grainIndex = 0; grainIndex < 13; grainIndex++) { const grain = new THREE.Mesh(new THREE.OctahedronGeometry(.018 + (grainIndex % 3) * .004, 0), new THREE.MeshPhysicalMaterial({ color: 0xfff4dc, roughness: .78, clearcoat: .08 })); const a = grainIndex * 2.399, r = .035 + (grainIndex % 4) * .026; grain.position.set(Math.cos(a) * r, (grainIndex % 3) * .012, Math.sin(a) * r); grain.rotation.set(a, a * .7, a * .4); sugarGroup.add(grain) } sugarGroup.visible = stage >= 2; g.add(sugarGroup); sugarDeposits.push(sugarGroup);
+      const foam = new THREE.Group(); foam.position.set(xs[i], .53, bathZ); for (let foamIndex = 0; foamIndex < 14; foamIndex++) { const a = foamIndex * 2.399, r = .04 + (foamIndex % 5) * .033, bubble = new THREE.Mesh(new THREE.SphereGeometry(.016 + (foamIndex % 3) * .006, 14, 9), new THREE.MeshPhysicalMaterial({ color: 0xf3e4bf, transparent: true, opacity: .72, roughness: .36 })); bubble.position.set(Math.cos(a) * r, (foamIndex % 4) * .011, Math.sin(a) * r); foam.add(bubble) } foam.visible = stage >= 7; g.add(foam); foams.push(foam);
+      const balloon = this.respirationBalloon(balloonColours[i]); const trayPosition = new THREE.Vector3(xs[i], .16, 1.22 + Math.abs(i - 2) * .035); trayPositions.push(trayPosition); balloon.position.copy(stage >= 6 ? new THREE.Vector3(xs[i], 1.18, bathZ) : trayPosition); g.add(balloon); balloons.push(balloon)
+    }
+    const tray = new THREE.Mesh(roundedBox(6.32, .07, .62, .08), new THREE.MeshPhysicalMaterial({ color: 0xc9d2d4, metalness: .72, roughness: .18, clearcoat: .48 })); tray.position.set(0, .06, 1.26); g.add(tray); for (const z of [.98, 1.54]) { const rail = this.tubeBetween(new THREE.Vector3(-3.02, .13, z), new THREE.Vector3(3.02, .13, z), .025, metal(0xa7b3b7, .16)); g.add(rail) }
+    const sugarBottle = this.labelledBiologyBottle('GLUCOSE', 0xf2ead1); sugarBottle.position.set(-3.12, .08, .78); sugarBottle.scale.setScalar(.5); g.add(sugarBottle);
+    const yeastBottle = this.labelledBiologyBottle('YEAST', 0xd0b27b); yeastBottle.position.set(3.12, .08, .78); yeastBottle.scale.setScalar(.5); g.add(yeastBottle);
+    const scoop = new THREE.Group(), scoopSteel = metal(0xc8d2d4, .12), scoopHandle = this.tubeBetween(new THREE.Vector3(0, .05, 0), new THREE.Vector3(1.05, .05, 0), .035, scoopSteel), scoopBowl = new THREE.Mesh(new THREE.SphereGeometry(.22, 38, 18, 0, Math.PI * 2, 0, Math.PI / 2), scoopSteel); scoopBowl.scale.set(1.15, .26, .72); scoopBowl.position.set(-.12, .02, 0); scoopBowl.rotation.z = Math.PI; scoop.add(scoopHandle, scoopBowl); scoop.position.set(-3.02, .38, 1.1); g.add(scoop);
+    const measuringCylinder = this.measuringCylinder(.52); measuringCylinder.scale.setScalar(.42); measuringCylinder.position.set(3.05, .18, 1.08); g.add(measuringCylinder);
+    const sugarDrops = [], yeastDrops = [], fermentationBubbles = [];
+    for (let i = 0; i < 25; i++) { const sugar = new THREE.Mesh(new THREE.OctahedronGeometry(.018 + (i % 3) * .004, 0), new THREE.MeshPhysicalMaterial({ color: 0xfff4dc, transparent: true, opacity: .94, roughness: .7 })); sugar.visible = false; g.add(sugar); sugarDrops.push(sugar); const yeast = new THREE.Mesh(new THREE.SphereGeometry(.022 + (i % 3) * .004, 14, 9), new THREE.MeshPhysicalMaterial({ color: 0xd4b578, transparent: true, opacity: .86, roughness: .28 })); yeast.visible = false; yeast.scale.y = 1.35; g.add(yeast); yeastDrops.push(yeast) }
+    for (let flaskIndex = 0; flaskIndex < 5; flaskIndex++) for (let bubbleIndex = 0; bubbleIndex < 12; bubbleIndex++) { const bubble = new THREE.Mesh(new THREE.SphereGeometry(.012 + (bubbleIndex % 3) * .004, 12, 8), new THREE.MeshPhysicalMaterial({ color: 0xfff6df, transparent: true, opacity: .64, roughness: .18, transmission: .1 })); bubble.visible = false; bubble.userData = { flaskIndex, bubbleIndex, phase: (bubbleIndex * .173 + flaskIndex * .117) % 1 }; g.add(bubble); fermentationBubbles.push(bubble) }
+    const timer = this.digitalStopwatch(); timer.position.set(0, .13, 1.58); timer.rotation.y = 0; timer.scale.setScalar(.68); g.add(timer);
+    this.dynamic.push({ kind: 'respiration', temperatures, finalVolumes, xs, bathZ, baths, flasks, liquids, foams, sugarDeposits, balloons, trayPositions, scoop, measuringCylinder, sugarDrops, yeastDrops, fermentationBubbles, timerDisplay: timer.userData.display });
+    Object.assign(g.userData, { respirationRig: true, flaskCount: 5, separateThermostaticBaths: true, identicalBalloons: true, equalTimeMinutes: 10, equalGlucoseG: 5, equalYeastVolumeCm3: 25 }); return shadowReady(g)
   }
   potatoCylinder() {
     const g = new THREE.Group(), flesh = new THREE.MeshPhysicalMaterial({ color: 0xe6c985, roughness: .76, metalness: 0, clearcoat: .04 }), cut = new THREE.MeshStandardMaterial({ color: 0xf0d99b, roughness: .82, metalness: 0 }), skinFleck = new THREE.MeshStandardMaterial({ color: 0xa8793e, roughness: .9, metalness: 0 });
@@ -1656,6 +1844,17 @@ export class LabRenderer3D {
     const shoreGravelCount = 300, shoreGravelGeo = new THREE.DodecahedronGeometry(.038, 0), shoreGravelMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: .99, flatShading: true }), shoreGravel = new THREE.InstancedMesh(shoreGravelGeo, shoreGravelMat, shoreGravelCount), gravelDummy = new THREE.Object3D(); let gravelSeed = 91367; const gravelRnd = () => ((gravelSeed = Math.imul(gravelSeed, 1664525) + 1013904223 >>> 0) / 4294967296); for (let i = 0; i < shoreGravelCount; i++) { let x, z; do { x = THREE.MathUtils.lerp(shoreMinX + .25, shoreMaxX - .25, gravelRnd()); z = THREE.MathUtils.lerp(-3.75, 6.7, gravelRnd()) } while (Math.abs(x) < .88 && z > -1.35 && z < 3.3); const scale = .52 + gravelRnd() * 1.28; gravelDummy.position.set(x, this.shoreHeight(x, z) + .014 + scale * .006, z); gravelDummy.rotation.set(gravelRnd() * Math.PI, gravelRnd() * Math.PI, gravelRnd() * Math.PI); gravelDummy.scale.set(scale * (.8 + gravelRnd() * .55), scale * (.34 + gravelRnd() * .32), scale * (.7 + gravelRnd() * .48)); gravelDummy.updateMatrix(); shoreGravel.setMatrixAt(i, gravelDummy.matrix); shoreGravel.setColorAt(i, new THREE.Color().setHSL(.09 + gravelRnd() * .08, .05 + gravelRnd() * .12, .3 + gravelRnd() * .22)) } shoreGravel.instanceMatrix.needsUpdate = true; shoreGravel.castShadow = false; shoreGravel.receiveShadow = true; g.add(shoreGravel);
     const poolDefs = [[-2.82, 1.3, .76, .42, .4], [2.55, .86, .66, .36, 1.7], [-1.72, 2.52, .58, .32, 2.8]], scatteredRocks = []; for (let i = 0; i < 70 && scatteredRocks.length < 54; i++) { const x = -4.7 + ((i * 37) % 101) / 100 * 9.4, z = -1.65 + ((i * 61) % 103) / 102 * 5.25; if (poolDefs.some(([px, pz, rx, rz]) => Math.pow((x - px) / (rx * 1.18), 2) + Math.pow((z - pz) / (rz * 1.25), 2) < 1)) continue; const y = this.shoreHeight(x, z), r = .09 + (i % 7) * .026, mesh = new THREE.Mesh(new THREE.DodecahedronGeometry(r, 0), new THREE.MeshStandardMaterial({ color: i % 3 === 0 ? 0x4b5552 : i % 3 === 1 ? 0x68665c : 0x777064, roughness: .96, flatShading: true })); mesh.scale.set(1 + (i % 4) * .22, .65 + (i % 3) * .16, .8 + (i % 5) * .12); mesh.rotation.set(i * .73, i * 1.11, i * .29); mesh.position.set(x, y + r * .3, z); g.add(mesh); scatteredRocks.push(mesh) }
     const pools = [], poolSeaweed = []; poolDefs.forEach(([x, z, rx, rz, phase], pi) => { const baseY = this.shoreHeight(x, z) + .035, outline = []; for (let j = 0; j < 44; j++) { const a = j / 44 * Math.PI * 2, noise = 1 + Math.sin(a * 3 + phase) * .13 + Math.sin(a * 7 - phase * .7) * .065 + Math.sin(a * 11 + phase) * .025; outline.push(new THREE.Vector2(Math.cos(a) * rx * noise, -Math.sin(a) * rz * noise)) } const basinShape = new THREE.Shape(outline.map(p => p.clone().multiplyScalar(1.08))), basin = new THREE.Mesh(new THREE.ShapeGeometry(basinShape), new THREE.MeshStandardMaterial({ color: 0x2d4441, roughness: .86, side: THREE.DoubleSide })); basin.rotation.x = -Math.PI / 2; basin.position.set(x, baseY - .012, z); g.add(basin); const waterShape = new THREE.Shape(outline.map(p => p.clone().multiplyScalar(.91))), pool = new THREE.Mesh(new THREE.ShapeGeometry(waterShape), new THREE.MeshPhysicalMaterial({ color: 0x3d9bb0, transparent: true, opacity: .64, roughness: .1, transmission: .2, clearcoat: .78, side: THREE.DoubleSide, depthWrite: false })); pool.rotation.x = -Math.PI / 2; pool.position.set(x, baseY + .008, z); pool.renderOrder = 4; g.add(pool); pools.push(pool); const rimPoints = outline.map(p => new THREE.Vector3(p.x, 0, -p.y)), rim = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(rimPoints, true, 'centripetal'), 88, .028, 8, true), new THREE.MeshStandardMaterial({ color: 0x3f514b, roughness: .94 })); rim.position.set(x, baseY, z); g.add(rim); for (let s = 0; s < 10; s++) { const a = s / 10 * Math.PI * 2 + phase * .17, p = outline[Math.floor((s / 10) * outline.length)], stone = new THREE.Mesh(new THREE.DodecahedronGeometry(.045 + (s % 3) * .012, 0), new THREE.MeshStandardMaterial({ color: s % 2 ? 0x58645d : 0x6d6b60, roughness: .98, flatShading: true })); stone.scale.set(1.25, .62, .82); stone.position.set(x + p.x, baseY + .022, z - p.y); stone.rotation.y = a; g.add(stone) } for (let c = 0; c < 4; c++) { const clump = new THREE.Group(), cx = (c - 1.5) * rx * .18 + Math.sin(c + phase) * rx * .12, cz = Math.cos(c * 1.8 + phase) * rz * .22; for (let f = 0; f < 3; f++) { const h = .13 + (f + c % 2) * .035, curve = new THREE.CatmullRomCurve3([new THREE.Vector3(cx, 0, cz), new THREE.Vector3(cx + (f - 1) * .018, h * .34, cz + .012), new THREE.Vector3(cx - (f - 1) * .025, h * .7, cz + .025), new THREE.Vector3(cx + (f - 1) * .016, h, cz + .04)], false, 'centripetal'), frond = new THREE.Mesh(new THREE.TubeGeometry(curve, 14, .009 + f * .002, 6, false), new THREE.MeshStandardMaterial({ color: (f + c) % 2 ? 0x657431 : 0x806028, roughness: .82 })); clump.add(frond) } const holdfast = new THREE.Mesh(new THREE.SphereGeometry(.035, 10, 6), new THREE.MeshStandardMaterial({ color: 0x55472b, roughness: .95 })); holdfast.scale.y = .42; holdfast.position.set(cx, .012, cz); clump.add(holdfast); clump.position.set(x, baseY + .014, z); g.add(clump); poolSeaweed.push(clump) } });
+    // Populate the habitat independently of the belt. Survey organisms below
+    // remain tied to stations for highlighting, while these ambient populations
+    // make the same zonation visible across the full width of the beach.
+    const ambientSeaweed = [], ambientLimpetCount = 64, ambientBarnacleCount = 220, ambientSeaweedClumpCount = 48, ambientBounds = { x: [-12.65, 12.65], z: [-1.65, 3.75] };
+    let organismSeed = 48271; const organismRnd = () => ((organismSeed = Math.imul(organismSeed, 1664525) + 1013904223 >>> 0) / 4294967296), ambientX = i => (i % 2 ? 1 : -1) * (.86 + organismRnd() * (i % 4 === 0 ? 11.79 : 4.94));
+    const ambientLimpets = new THREE.InstancedMesh(new THREE.ConeGeometry(.052, .07, 18), new THREE.MeshStandardMaterial({ color: 0xb8aa91, roughness: .84 }), ambientLimpetCount), ambientBarnacles = new THREE.InstancedMesh(new THREE.ConeGeometry(.027, .045, 9), new THREE.MeshStandardMaterial({ color: 0xd8d0bb, roughness: .92 }), ambientBarnacleCount), organismDummy = new THREE.Object3D(), organismTone = new THREE.Color();
+    for (let i = 0; i < ambientLimpetCount; i++) { const x = ambientX(i), z = THREE.MathUtils.lerp(ambientBounds.z[0], ambientBounds.z[1], .08 + organismRnd() * .84), scale = .72 + organismRnd() * .7; organismDummy.position.set(x, this.shoreHeight(x, z) + .035 * scale, z); organismDummy.rotation.set(0, organismRnd() * Math.PI * 2, 0); organismDummy.scale.set(scale * (.82 + organismRnd() * .28), scale, scale * (.82 + organismRnd() * .28)); organismDummy.updateMatrix(); ambientLimpets.setMatrixAt(i, organismDummy.matrix); organismTone.setHSL(.105 + organismRnd() * .035, .13 + organismRnd() * .08, .57 + organismRnd() * .12); ambientLimpets.setColorAt(i, organismTone) }
+    for (let i = 0; i < ambientBarnacleCount; i++) { const x = ambientX(i), z = THREE.MathUtils.lerp(ambientBounds.z[0], ambientBounds.z[1], Math.pow(organismRnd(), 1.58)), scale = .68 + organismRnd() * .66; organismDummy.position.set(x, this.shoreHeight(x, z) + .022 * scale, z); organismDummy.rotation.set(0, organismRnd() * Math.PI * 2, 0); organismDummy.scale.set(scale, scale, scale); organismDummy.updateMatrix(); ambientBarnacles.setMatrixAt(i, organismDummy.matrix); organismTone.setHSL(.105 + organismRnd() * .035, .09 + organismRnd() * .08, .72 + organismRnd() * .14); ambientBarnacles.setColorAt(i, organismTone) }
+    ambientLimpets.instanceMatrix.needsUpdate = true; ambientLimpets.instanceColor.needsUpdate = true; ambientBarnacles.instanceMatrix.needsUpdate = true; ambientBarnacles.instanceColor.needsUpdate = true; ambientLimpets.castShadow = false; ambientBarnacles.castShadow = false; g.add(ambientLimpets, ambientBarnacles);
+    const ambientSeaweedMats = [0x607e35, 0x718d3b, 0x795128, 0x8a642d].map(color => new THREE.MeshStandardMaterial({ color, roughness: .78 }));
+    for (let i = 0; i < ambientSeaweedClumpCount; i++) { const x = ambientX(i), wetBias = Math.pow(organismRnd(), .62), z = THREE.MathUtils.lerp(.08, ambientBounds.z[1], wetBias), baseY = this.shoreHeight(x, z), clump = new THREE.Group(), isGreen = i % 2 === 0; for (let f = 0; f < 2 + i % 2; f++) { const h = .16 + organismRnd() * .22, spread = (f - .7) * .025, curve = new THREE.CatmullRomCurve3([new THREE.Vector3(spread, 0, 0), new THREE.Vector3(spread + .025, h * .34, .018), new THREE.Vector3(spread - .035, h * .7, .05), new THREE.Vector3(spread + .018, h, .09)]), matIndex = (isGreen ? 0 : 2) + f % 2, frond = new THREE.Mesh(new THREE.TubeGeometry(curve, 14, .011 + organismRnd() * .006, 6, false), ambientSeaweedMats[matIndex]); clump.add(frond) } const holdfast = new THREE.Mesh(new THREE.SphereGeometry(.032, 8, 5), new THREE.MeshStandardMaterial({ color: 0x4c4028, roughness: .96 })); holdfast.scale.y = .38; holdfast.position.y = .01; clump.add(holdfast); clump.position.set(x, baseY + .016, z); clump.rotation.y = organismRnd() * Math.PI * 2; clump.userData.species = isGreen ? 'green seaweed' : 'brown seaweed'; g.add(clump); ambientSeaweed.push(clump) }
     const stationZ = [-1.05, -.25, .55, 1.35, 2.15, 2.95], organisms = [];
     const addHighlight = (mesh, si, species) => { mesh.userData.station = si; mesh.userData.species = species; organisms.push(mesh); return mesh };
     stationZ.forEach((z, si) => { const data = [8, 10, 13, 11, 6, 2][si]; for (let j = 0; j < Math.min(data, 8); j++) { const a = j * 2.399 + si, r = .08 + (j % 4) * .09, x = Math.cos(a) * r, y = this.shoreHeight(x, z + Math.sin(a) * r), limpet = addHighlight(new THREE.Mesh(new THREE.ConeGeometry(.052, .07, 18), new THREE.MeshStandardMaterial({ color: 0xb8aa91, roughness: .82, emissive: 0x000000 })), si, 'limpet'); limpet.position.set(x, y + .035, z + Math.sin(a) * r); g.add(limpet) } for (let j = 0; j < 5 + Math.round((5 - si) * .65); j++) { const x = -.42 + (j % 4) * .26, zp = z - .3 + Math.floor(j / 4) * .24, y = this.shoreHeight(x, zp), barn = addHighlight(new THREE.Mesh(new THREE.ConeGeometry(.027, .045, 9), new THREE.MeshStandardMaterial({ color: 0xd8d0bb, roughness: .9, emissive: 0x000000 })), si, 'barnacle'); barn.position.set(x, y + .022, zp); g.add(barn) } const frondCount = Math.max(0, si - 1) * 2; for (let j = 0; j < frondCount; j++) { const x = -.38 + (j % 5) * .18, zp = z - .25 + Math.floor(j / 5) * .23, y = this.shoreHeight(x, zp), curve = new THREE.CatmullRomCurve3([new THREE.Vector3(x, y, zp), new THREE.Vector3(x + .04, y + .14, zp + .03), new THREE.Vector3(x - .05, y + .29, zp + .07), new THREE.Vector3(x + .03, y + .43, zp + .12)]), frond = addHighlight(new THREE.Mesh(new THREE.TubeGeometry(curve, 18, .018 + (j % 2) * .005, 7, false), new THREE.MeshStandardMaterial({ color: j % 2 ? 0x5f682c : 0x6d5528, roughness: .72, emissive: 0x000000 })), si, 'seaweed'); g.add(frond) } });
@@ -1665,7 +1864,7 @@ export class LabRenderer3D {
     const waterDepth = 12, waterUniforms = { uTime: { value: 0 }, uAlpha: { value: .72 } }, waterMat = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, side: THREE.DoubleSide, uniforms: waterUniforms, vertexShader: 'uniform float uTime; varying float vWave; varying vec3 vPos; void main(){ vec3 p=position; float w=sin(p.x*1.45+uTime*2.4)*0.055+sin(p.z*2.2-uTime*1.65)*0.035+sin((p.x+p.z)*.72+uTime*.9)*0.028; p.y+=w; vWave=w; vPos=p; gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.0); }', fragmentShader: 'uniform float uAlpha; varying float vWave; varying vec3 vPos; void main(){ float streak=.5+.5*sin(vPos.x*5.2+vPos.z*2.8+vWave*22.0); vec3 deep=vec3(.025,.29,.38); vec3 shallow=vec3(.12,.65,.72); vec3 c=mix(deep,shallow,.48+vWave*3.2)+pow(streak,18.0)*.24; gl_FragColor=vec4(c,uAlpha); }' }), water = new THREE.Mesh(new THREE.PlaneGeometry(22, waterDepth, 88, 56), waterMat); water.rotation.x = -Math.PI / 2; water.renderOrder = 5; g.add(water);
     const foamBands = []; for (let bi = 0; bi < 3; bi++) { const pts = []; for (let i = 0; i <= 72; i++) { const x = -11.2 + i / 72 * 22.4; pts.push(new THREE.Vector3(x, .24 + bi * .008, Math.sin(x * 1.7 + bi) * .045 + Math.sin(x * .53 - bi) * .018)) } const foam = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 144, .025 - bi * .004, 8, false), new THREE.MeshBasicMaterial({ color: 0xf4ffff, transparent: true, opacity: .68 - bi * .12, depthWrite: false, toneMapped: false })); foam.renderOrder = 7; g.add(foam); foamBands.push(foam) }
     const clouds = [];[[-3.4, 4.05], [2.6, 3.92]].forEach(([x, y], ci) => { const cloud = new THREE.Group(); for (let i = 0; i < 6; i++) { const puff = new THREE.Mesh(new THREE.SphereGeometry(.34 + (i % 2) * .08, 20, 12), new THREE.MeshLambertMaterial({ color: 0xffffff, transparent: true, opacity: .82, depthWrite: false })); puff.scale.set(1.35, .56, .3); puff.position.set((i - 2.5) * .27, Math.sin(i * 2) * .08, 0); cloud.add(puff) } cloud.position.set(x, y, -4.82 + ci * .025); g.add(cloud); clouds.push({ group: cloud, baseX: x, phase: ci * 2 }) });
-    this.dynamic.push({ kind: 'rockyShoreSampling', tapeSegments, reel, quadrat, stationZ, organisms, poolSeaweed, water, waterDepth, waterUniforms, foamBands, clouds }); Object.assign(g.userData, { rockyShore: true, cliffBackdrop: true, continuousCliffRidge: true, cliffTopGrass: true, cliffTopGrassTapered: true, cliffTopGrassShortened: true, cliffTopGrassSubtleToneVariation: true, realisticErodedCliff: true, cliffFaceGrid: [cliffCols, cliffRows], brokenRockLedges, recessedBranchedFissures: true, peatSoilEdge: true, cliffLichenPatches, cliffTopGrassBlades: cliffGrassCount, cliffMaximumY: +cliffBounds.max.y.toFixed(2), cliffWithinCameraFrame: cliffBounds.max.y <= 3.02, cliffBoundsWorld: { x: [cliffMinX, cliffMaxX], maxY: +cliffBounds.max.y.toFixed(2) }, supportedMaxSceneAspect: 2.17, irregularRockPools: true, rockPools: pools.length, rockPoolSeaweedClumps: poolSeaweed.length, firstQuadratClearOfCliff: true, rockCount: scatteredRocks.length, shoreGravelCount, rockBeachFloorBoundsWorld: { x: [shoreMinX, shoreMaxX], z: [shoreMinZ, shoreMaxZ] }, rockBeachFloorExtendsBeyondView: true, minimumCompactLateralOverdrawWorld: 1.7, foregroundDepthOverdrawWorld: 2.5, waterWorldDimensions: [22, waterDepth], foamWorldSpan: 22.4, organismModels: organisms.length, beltLengthM: 10, beltWidthM: 1, incomingDetailedTide: true, laboratoryRoomHidden: true }); const ready = shadowReady(g); cliffGrass.castShadow = false; shoreGravel.castShadow = false; water.castShadow = false; cracks.castShadow = false; cracks.receiveShadow = false; lichenMeshes.forEach(patch => { patch.castShadow = false; patch.receiveShadow = false }); pools.forEach(pool => pool.castShadow = false); return ready
+    this.dynamic.push({ kind: 'rockyShoreSampling', tapeSegments, reel, quadrat, stationZ, organisms, ambientSeaweed, poolSeaweed, water, waterDepth, waterUniforms, foamBands, clouds }); Object.assign(g.userData, { rockyShore: true, cliffBackdrop: true, continuousCliffRidge: true, cliffTopGrass: true, cliffTopGrassTapered: true, cliffTopGrassShortened: true, cliffTopGrassSubtleToneVariation: true, realisticErodedCliff: true, cliffFaceGrid: [cliffCols, cliffRows], brokenRockLedges, recessedBranchedFissures: true, peatSoilEdge: true, cliffLichenPatches, cliffTopGrassBlades: cliffGrassCount, cliffMaximumY: +cliffBounds.max.y.toFixed(2), cliffWithinCameraFrame: cliffBounds.max.y <= 3.02, cliffBoundsWorld: { x: [cliffMinX, cliffMaxX], maxY: +cliffBounds.max.y.toFixed(2) }, supportedMaxSceneAspect: 2.17, irregularRockPools: true, rockPools: pools.length, rockPoolSeaweedClumps: poolSeaweed.length, firstQuadratClearOfCliff: true, rockCount: scatteredRocks.length, shoreGravelCount, rockBeachFloorBoundsWorld: { x: [shoreMinX, shoreMaxX], z: [shoreMinZ, shoreMaxZ] }, rockBeachFloorExtendsBeyondView: true, minimumCompactLateralOverdrawWorld: 1.7, foregroundDepthOverdrawWorld: 2.5, waterWorldDimensions: [22, waterDepth], foamWorldSpan: 22.4, organismModels: organisms.length + ambientLimpetCount + ambientBarnacleCount + ambientSeaweedClumpCount, surveyedOrganismModels: organisms.length, ambientOrganismCounts: { limpets: ambientLimpetCount, barnacles: ambientBarnacleCount, greenSeaweedClumps: ambientSeaweedClumpCount / 2, brownSeaweedClumps: ambientSeaweedClumpCount / 2 }, ambientOrganismBoundsWorld: ambientBounds, organismsDistributedBeyondBelt: true, beltLengthM: 10, beltWidthM: 1, incomingDetailedTide: true, laboratoryRoomHidden: true }); const ready = shadowReady(g); cliffGrass.castShadow = false; shoreGravel.castShadow = false; water.castShadow = false; cracks.castShadow = false; cracks.receiveShadow = false; lichenMeshes.forEach(patch => { patch.castShadow = false; patch.receiveShadow = false }); pools.forEach(pool => pool.castShadow = false); return ready
   }
   rippleTankRig(state) {
     const g = new THREE.Group(), tank = new THREE.Group(), aluminium = metal(0x9caeb4, .18), darkMetal = metal(0x344b54, .24), black = solid(0x142a33, .32), rubber = solid(0x17252a, .82), acrylic = new THREE.MeshPhysicalMaterial({ color: 0xd8f4fb, transparent: true, opacity: .34, transmission: .7, roughness: .035, ior: 1.48, thickness: .09, clearcoat: .7, clearcoatRoughness: .03, side: THREE.DoubleSide, depthWrite: false });
@@ -2775,34 +2974,40 @@ export class LabRenderer3D {
     return shadowReady(g);
   }
   wireResistanceRig(state) {
-    const g = new THREE.Group(), rulerStartX = -2.65, rulerLength = 5.3, rulerZ = 1.02, rulerTopY = .205;
+    const g = new THREE.Group(), rulerStartX = 2.65, rulerLength = 5.3, rulerDirection = -1, rulerZ = 1.02, rulerTopY = .205;
+    const rulerXAt = cm => rulerStartX + rulerDirection * rulerLength * cm / 100;
     const instrumentZ = -1.18, supplyX = -2.48, ammeterX = .16, voltmeterX = 1.86;
     const dark = solid(0x1b2b32, .3), steel = metal(0xb8c2c5, .12), brass = metal(0xd0a249, .16);
     const red = new THREE.MeshStandardMaterial({ color: 0xc83d42, roughness: .5 }), black = new THREE.MeshStandardMaterial({ color: 0x1b2429, roughness: .58 });
     const voltageRed = new THREE.MeshStandardMaterial({ color: 0xa84f94, roughness: .48 }), voltageBlack = new THREE.MeshStandardMaterial({ color: 0x6e55a4, roughness: .52 });
     const wireMaterial = new THREE.MeshPhysicalMaterial({ color: 0x71777b, metalness: .94, roughness: .23, clearcoat: .25, emissive: 0x2f0d05, emissiveIntensity: 0 });
 
-    // A full wooden metre ruler with engraved millimetre, centimetre and
-    // numbered ten-centimetre marks.
-    const ruler = new THREE.Mesh(roundedBox(rulerLength + .22, .12, .54, .035, 4), new THREE.MeshPhysicalMaterial({ color: 0xd8b06a, roughness: .66, clearcoat: .18 }));
+    // Use the same ivory backing and dark-blue scale treatment as the bubble
+    // potometer ruler so the practicals share one clear measuring convention.
+    const ruler = new THREE.Mesh(roundedBox(rulerLength + .22, .12, .54, .035, 4), new THREE.MeshStandardMaterial({ color: 0xf6f2df, roughness: .86, metalness: 0 }));
     ruler.position.set(0, .105, rulerZ); g.add(ruler);
-    const rulerInset = new THREE.Mesh(new THREE.BoxGeometry(rulerLength, .012, .475), new THREE.MeshStandardMaterial({ color: 0xe5c47e, roughness: .72 }));
+    const rulerInset = new THREE.Mesh(new THREE.BoxGeometry(rulerLength, .012, .475), new THREE.MeshStandardMaterial({ color: 0xfffdf1, roughness: .9, metalness: 0 }));
     rulerInset.position.set(0, .172, rulerZ); g.add(rulerInset);
-    const markMat = new THREE.MeshBasicMaterial({ color: 0x3a2a1c, toneMapped: false });
+    const majorMarkMat = new THREE.MeshBasicMaterial({ color: 0x102f3b, toneMapped: false });
+    const midMarkMat = new THREE.MeshBasicMaterial({ color: 0x254b59, toneMapped: false });
+    const minorMarkMat = new THREE.MeshBasicMaterial({ color: 0x476a76, toneMapped: false });
     for (let cm = 0; cm <= 100; cm++) {
-      const x = rulerStartX + rulerLength * cm / 100, major = cm % 10 === 0, mid = cm % 5 === 0;
-      const mark = new THREE.Mesh(new THREE.BoxGeometry(.009, .012, major ? .26 : mid ? .18 : .115), markMat);
-      mark.position.set(x, .184, rulerZ - .11 + (major ? 0 : mid ? -.04 : -.072)); g.add(mark);
+      const x = rulerXAt(cm), major = cm % 10 === 0, mid = cm % 5 === 0;
+      const markLength = major ? .29 : mid ? .205 : .13;
+      const mark = new THREE.Mesh(new THREE.BoxGeometry(major ? .018 : mid ? .012 : .008, .018, markLength), major ? majorMarkMat : mid ? midMarkMat : minorMarkMat);
+      mark.position.set(x, .19, rulerZ - .105 + (major ? 0 : mid ? -.04 : -.075)); mark.renderOrder = 9; g.add(mark);
       if (major) {
         const labelCanvas = document.createElement('canvas'), lc = labelCanvas.getContext('2d');
-        labelCanvas.width = 128; labelCanvas.height = 64; lc.clearRect(0, 0, 128, 64); lc.fillStyle = '#3c2b1b';
-        lc.font = '800 34px ui-monospace, Menlo, monospace'; lc.textAlign = 'center'; lc.textBaseline = 'middle'; lc.fillText(String(cm), 64, 32);
-        const texture = new THREE.CanvasTexture(labelCanvas); texture.colorSpace = THREE.SRGBColorSpace;
-        const label = new THREE.Mesh(new THREE.PlaneGeometry(.25, .105), new THREE.MeshBasicMaterial({ map: texture, transparent: true, toneMapped: false, depthWrite: false }));
-        label.rotation.x = -Math.PI / 2; label.position.set(x, .194, rulerZ + .095); label.renderOrder = 9; g.add(label);
+        labelCanvas.width = 256; labelCanvas.height = 128; lc.clearRect(0, 0, 256, 128); lc.fillStyle = '#102f3b';
+        lc.font = '900 64px Inter, sans-serif'; lc.textAlign = 'center'; lc.textBaseline = 'middle'; lc.fillText(String(cm), 128, 64);
+        const texture = new THREE.CanvasTexture(labelCanvas); texture.colorSpace = THREE.SRGBColorSpace; texture.minFilter = THREE.LinearFilter; texture.magFilter = THREE.LinearFilter;
+        const label = new THREE.Mesh(new THREE.PlaneGeometry(.34, .16), new THREE.MeshBasicMaterial({ map: texture, transparent: true, toneMapped: false, depthWrite: false }));
+        const endpointInset = cm === 0 ? -.05 : cm === 100 ? .05 : 0;
+        label.rotation.x = -Math.PI / 2; label.position.set(x + endpointInset, .2, rulerZ + .115); label.renderOrder = 10; g.add(label);
       }
     }
-    const wire = this.tubeBetween(new THREE.Vector3(rulerStartX, rulerTopY + .045, rulerZ), new THREE.Vector3(rulerStartX + rulerLength, rulerTopY + .045, rulerZ), .018, wireMaterial);
+    Object.assign(ruler.userData, { style: 'potometer ivory-white scale', rangeCm: [0, 100], numberedEveryCm: 10, darkBlueGraduations: true, highContrastScaleHierarchy: true, enlargedNumbers: true });
+    const wire = this.tubeBetween(new THREE.Vector3(rulerXAt(0), rulerTopY + .045, rulerZ), new THREE.Vector3(rulerXAt(100), rulerTopY + .045, rulerZ), .018, wireMaterial);
     g.add(wire);
 
     // A subtle cyan overlay makes the exact test length legible without
@@ -2832,34 +3037,55 @@ export class LabRenderer3D {
       clip.add(lowerJaw, upperJaw);
       const sleeve = new THREE.Mesh(new THREE.CapsuleGeometry(.15, .48, 10, 24), colourMaterial); sleeve.rotation.x = Math.PI / 2; sleeve.position.set(0, .02, .49); clip.add(sleeve);
       const cableFerrule = cylinder(.075, .17, dark, 24); cableFerrule.rotation.x = Math.PI / 2; cableFerrule.position.set(0, .02, .84); clip.add(cableFerrule);
-      clip.scale.setScalar(.74); clip.rotation.y = Math.PI;
+      clip.scale.setScalar(.74); clip.rotation.y = 0;
       Object.assign(clip.userData, { upperJaw, lowerJaw, fixed, serratedJaws: true });
       return shadowReady(clip);
     };
-    const contactX = rulerStartX + rulerLength * Math.max(20, Math.min(100, state.wireLengthCm || 20)) / 100;
-    const initialMeasuredLength = contactX - rulerStartX;
-    measuredSegment.position.x = rulerStartX + initialMeasuredLength / 2;
+    const contactX = rulerXAt(Math.max(20, Math.min(100, state.wireLengthCm || 20)));
+    const initialMeasuredLength = Math.abs(contactX - rulerStartX);
+    measuredSegment.position.x = rulerStartX + rulerDirection * initialMeasuredLength / 2;
     measuredSegment.scale.set(1, initialMeasuredLength, 1);
     const fixedClip = makeCrocodile(red, true); fixedClip.position.set(rulerStartX, .34, rulerZ + .02); g.add(fixedClip);
-    const sliderClip = makeCrocodile(black); sliderClip.position.set(contactX, .34, rulerZ + .02); g.add(sliderClip);
+    const sliderClip = makeCrocodile(black); sliderClip.position.set(contactX, .34, rulerZ + .02); sliderClip.rotation.y = Math.PI; g.add(sliderClip);
 
     const makeDisplay = (label, accent) => {
-      const meter = new THREE.Group(), body = new THREE.Mesh(roundedBox(1.3, .76, .64, .09, 5), new THREE.MeshPhysicalMaterial({ color: 0xe9edef, roughness: .3, clearcoat: .62 }));
-      body.position.y = .38; meter.add(body);
-      const bezel = new THREE.Mesh(roundedBox(.88, .32, .05, .04, 4), dark); bezel.position.set(0, .52, .345); meter.add(bezel);
-      const canvas = document.createElement('canvas'), dc = canvas.getContext('2d'); canvas.width = 512; canvas.height = 180;
+      const meter = new THREE.Group(), bottomWidth = 1.42, topWidth = 1.16, bottomDepth = .82, topDepth = .6, bodyHeight = .82;
+      const vertices = new Float32Array([
+        -bottomWidth / 2, 0, -bottomDepth / 2, bottomWidth / 2, 0, -bottomDepth / 2, bottomWidth / 2, 0, bottomDepth / 2, -bottomWidth / 2, 0, bottomDepth / 2,
+        -topWidth / 2, bodyHeight, -topDepth / 2, topWidth / 2, bodyHeight, -topDepth / 2, topWidth / 2, bodyHeight, topDepth / 2, -topWidth / 2, bodyHeight, topDepth / 2
+      ]);
+      // Each triangle is wound outwards. The previous winding pointed the top,
+      // front and camera-left normals into the housing, so WebGL correctly
+      // culled those faces and left the meter looking hollow.
+      const indices = [
+        0, 1, 2, 0, 2, 3,
+        4, 7, 6, 4, 6, 5,
+        0, 4, 5, 0, 5, 1,
+        3, 2, 6, 3, 6, 7,
+        0, 3, 7, 0, 7, 4,
+        1, 5, 6, 1, 6, 2
+      ];
+      const bodyGeometry = new THREE.BufferGeometry(); bodyGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3)); bodyGeometry.setIndex(indices); bodyGeometry.computeVertexNormals();
+      const body = new THREE.Mesh(bodyGeometry, new THREE.MeshPhysicalMaterial({ color: 0xe9edef, roughness: .28, clearcoat: .66, clearcoatRoughness: .16 })); meter.add(body);
+      const faceSlope = -Math.atan((bottomDepth - topDepth) / (2 * bodyHeight));
+      const frontZ = (y, lift = 0) => bottomDepth / 2 - (bottomDepth - topDepth) * y / (2 * bodyHeight) + lift;
+      const bezelY = .5, bezel = new THREE.Mesh(roundedBox(.98, .36, .05, .045, 5), dark); bezel.rotation.x = faceSlope; bezel.position.set(0, bezelY, frontZ(bezelY, .032)); meter.add(bezel);
+      const canvas = document.createElement('canvas'), dc = canvas.getContext('2d'); canvas.width = 640; canvas.height = 220;
       const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace;
-      const screen = new THREE.Mesh(new THREE.PlaneGeometry(.76, .23), new THREE.MeshBasicMaterial({ map: texture, toneMapped: false, depthWrite: false }));
-      screen.position.set(0, .53, .405); screen.renderOrder = 7; meter.add(screen);
+      dc.fillStyle = '#071c22'; dc.fillRect(0, 0, canvas.width, canvas.height); dc.strokeStyle = 'rgba(126,170,178,.2)'; dc.lineWidth = 6; dc.strokeRect(7, 7, canvas.width - 14, canvas.height - 14);
+      dc.fillStyle = '#8ba0a3'; dc.font = '800 82px ui-monospace, SFMono-Regular, Menlo, monospace'; dc.textAlign = 'center'; dc.textBaseline = 'middle'; dc.fillText(`0.00 ${label.startsWith('A') ? 'A' : 'V'}`, canvas.width / 2, 96);
+      dc.fillStyle = '#aec1c5'; dc.font = '700 24px Inter, sans-serif'; dc.fillText(label.startsWith('A') ? 'CURRENT THROUGH WIRE' : 'P.D. ACROSS TEST LENGTH', canvas.width / 2, 176); texture.needsUpdate = true;
+      const screen = new THREE.Mesh(new THREE.PlaneGeometry(.88, .27), new THREE.MeshBasicMaterial({ map: texture, toneMapped: false, depthWrite: false, depthTest: false }));
+      screen.rotation.x = faceSlope; screen.position.set(0, bezelY + .002, frontZ(bezelY, .074)); screen.renderOrder = 12; meter.add(screen);
       for (const [x, c] of [[-.4, 0x171c22], [.4, 0xd83e43]]) {
-        const terminal = cylinder(.075, .11, solid(c, .25), 28); terminal.rotation.x = Math.PI / 2; terminal.position.set(x, .18, .37); meter.add(terminal);
+        const terminalY = .15, terminal = cylinder(.075, .11, solid(c, .25), 28); terminal.rotation.x = Math.PI / 2; terminal.position.set(x, terminalY, frontZ(terminalY, .055)); meter.add(terminal);
       }
       const badgeCanvas = document.createElement('canvas'), bc = badgeCanvas.getContext('2d'); badgeCanvas.width = 256; badgeCanvas.height = 64;
       bc.fillStyle = `#${accent.toString(16).padStart(6, '0')}`; bc.fillRect(0, 0, 256, 64); bc.fillStyle = '#ffffff'; bc.font = '800 25px Inter, sans-serif'; bc.textAlign = 'center'; bc.textBaseline = 'middle'; bc.fillText(label, 128, 32);
       const badgeTexture = new THREE.CanvasTexture(badgeCanvas); badgeTexture.colorSpace = THREE.SRGBColorSpace;
-      const badge = new THREE.Mesh(new THREE.PlaneGeometry(.8, .13), new THREE.MeshBasicMaterial({ map: badgeTexture, toneMapped: false }));
-      badge.position.set(0, .715, .34); meter.add(badge);
-      Object.assign(meter.userData, { display: { canvas, context: dc, texture }, meterLabel: label, compactDisplay: true });
+      const badgeY = .735, badge = new THREE.Mesh(new THREE.PlaneGeometry(.78, .12), new THREE.MeshBasicMaterial({ map: badgeTexture, toneMapped: false }));
+      badge.rotation.x = faceSlope; badge.position.set(0, badgeY, frontZ(badgeY, .02)); meter.add(badge);
+      Object.assign(meter.userData, { display: { canvas, context: dc, texture }, meterLabel: label, compactDisplay: true, housingShape: 'truncated square-pyramid frustum', trapezoidalFaces: true, visibleCameraFaces: ['front', 'top', 'left'], screenInsideBezel: true });
       return shadowReady(meter);
     };
     const ammeter = makeDisplay('A · SERIES', 0xd45757); ammeter.position.set(ammeterX, 0, instrumentZ); g.add(ammeter);
@@ -2873,56 +3099,54 @@ export class LabRenderer3D {
     const supplyTexture = new THREE.CanvasTexture(supplyCanvas); supplyTexture.colorSpace = THREE.SRGBColorSpace;
     const supplyScreen = new THREE.Mesh(new THREE.PlaneGeometry(.82, .27), new THREE.MeshBasicMaterial({ map: supplyTexture, toneMapped: false, depthWrite: false })); supplyScreen.position.set(-.08, .53, .455); supplyScreen.renderOrder = 7; supply.add(supplyScreen);
     const powerLed = new THREE.Mesh(new THREE.SphereGeometry(.055, 24, 16), new THREE.MeshStandardMaterial({ color: 0x40575d, emissive: 0x26ffaf, emissiveIntensity: 0 }));
-    powerLed.position.set(.52, .58, .44); supply.add(powerLed);
+    powerLed.position.set(.52, .65, .44); supply.add(powerLed);
+    const powerButtonMaterial = new THREE.MeshStandardMaterial({ color: 0x334b55, roughness: .34, metalness: .08, emissive: 0x2ee8b5, emissiveIntensity: 0 });
+    const powerButton = new THREE.Mesh(roundedBox(.23, .15, .055, .025, 3), powerButtonMaterial);
+    powerButton.position.set(.52, .45, .445); supply.add(powerButton);
     for (const [x, c] of [[-.45, 0x171c22], [.45, 0xd83e43]]) { const terminal = cylinder(.075, .12, solid(c, .24), 28); terminal.rotation.x = Math.PI / 2; terminal.position.set(x, .22, .43); supply.add(terminal) }
     supply.position.set(supplyX, 0, instrumentZ); g.add(supply);
-
-    // Give the switch its own middle row between the rear instruments and the
-    // foreground ruler. This keeps its lever and both posts fully visible.
-    const switchCenterX = -1.22, switchZ = -.38;
-    const switchBase = new THREE.Mesh(roundedBox(.92, .11, .55, .055, 4), new THREE.MeshPhysicalMaterial({ color: 0xf2f0e7, roughness: .32, clearcoat: .5 }));
-    switchBase.position.set(switchCenterX, .075, switchZ); g.add(switchBase);
-    const switchInputX = switchCenterX - .23, switchOutputX = switchCenterX + .23;
-    for (const x of [switchInputX, switchOutputX]) { const post = cylinder(.065, .15, brass, 28); post.position.set(x, .2, switchZ); g.add(post) }
-    const switchPivot = new THREE.Group(); switchPivot.position.set(switchInputX, .29, switchZ);
-    const switchArm = new THREE.Mesh(new THREE.BoxGeometry(.54, .045, .11), brass); switchArm.position.x = .27; switchPivot.add(switchArm);
-    const switchGrip = new THREE.Mesh(new THREE.SphereGeometry(.085, 24, 16), red); switchGrip.position.x = .54; switchPivot.add(switchGrip);
-    switchPivot.rotation.z = .42; g.add(switchPivot);
 
     // Flexible leads are routed in separated cable lanes. The thick red/black
     // leads form the series loop; the thinner violet pair connects only across
     // the two test-length endpoints, making the voltmeter branch unmistakable.
     const makeFlexibleLead = (points, material, radius = .023) => {
-      const lead = new THREE.Group(), segments = [], joints = [];
-      for (let i = 0; i < points.length - 1; i++) {
-        const segment = cylinder(radius, 1, material, 14); lead.add(segment); segments.push(segment);
-      }
-      for (let i = 1; i < points.length - 1; i++) {
-        const joint = new THREE.Mesh(new THREE.SphereGeometry(radius * 1.05, 12, 8), material); lead.add(joint); joints.push(joint);
-      }
-      g.add(lead); return { lead, segments, joints, points: points.map(point => point.clone()) };
+      const lead = { points: points.map(point => point.clone()), radius, material, mesh: null };
+      lead.mesh = new THREE.Mesh(new THREE.BufferGeometry(), material); g.add(lead.mesh); return lead;
     };
     const updateFlexibleLead = lead => {
-      for (let i = 0; i < lead.segments.length; i++) {
-        const a = lead.points[i], b = lead.points[i + 1], delta = b.clone().sub(a), length = delta.length(), segment = lead.segments[i];
-        segment.position.copy(a).add(b).multiplyScalar(.5); segment.scale.set(1, length, 1);
-        segment.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), delta.normalize());
+      const oldGeometry = lead.mesh.geometry, curve = new THREE.CurvePath(), points = lead.points.map(point => point.clone());
+      let cursor = points[0].clone();
+      for (let index = 1; index < points.length - 1; index++) {
+        const previous = points[index - 1], corner = points[index], next = points[index + 1];
+        const rounding = Math.min(.18, previous.distanceTo(corner) * .28, corner.distanceTo(next) * .28);
+        const entry = corner.clone().add(previous.clone().sub(corner).normalize().multiplyScalar(rounding));
+        const exit = corner.clone().add(next.clone().sub(corner).normalize().multiplyScalar(rounding));
+        if (cursor.distanceTo(entry) > .001) curve.add(new THREE.LineCurve3(cursor.clone(), entry.clone()));
+        curve.add(new THREE.QuadraticBezierCurve3(entry, corner.clone(), exit)); cursor = exit;
       }
-      for (let i = 0; i < lead.joints.length; i++) lead.joints[i].position.copy(lead.points[i + 1]);
+      if (cursor.distanceTo(points.at(-1)) > .001) curve.add(new THREE.LineCurve3(cursor.clone(), points.at(-1).clone()));
+      lead.mesh.geometry = new THREE.TubeGeometry(curve, Math.max(36, lead.points.length * 18), lead.radius, 12, false);
+      oldGeometry.dispose();
     };
-    const clipAnchorZ = rulerZ - .59;
-    const fixedAnchor = new THREE.Vector3(rulerStartX, .36, clipAnchorZ), sliderAnchor = new THREE.Vector3(contactX, .36, clipAnchorZ);
+    const fixedClipAnchorZ = rulerZ + .59, sliderClipAnchorZ = rulerZ - .59, farSideCableZ = rulerZ - .48;
+    const fixedAnchor = new THREE.Vector3(rulerStartX, .36, fixedClipAnchorZ), sliderAnchor = new THREE.Vector3(contactX, .36, sliderClipAnchorZ);
     const terminalFaceZ = instrumentZ + .37;
     const supplyNegative = new THREE.Vector3(supplyX - .45, .22, terminalFaceZ), supplyPositive = new THREE.Vector3(supplyX + .45, .22, terminalFaceZ);
     const ammeterNegative = new THREE.Vector3(ammeterX - .4, .18, terminalFaceZ), ammeterPositive = new THREE.Vector3(ammeterX + .4, .18, terminalFaceZ);
     const voltmeterNegative = new THREE.Vector3(voltmeterX - .4, .18, terminalFaceZ), voltmeterPositive = new THREE.Vector3(voltmeterX + .4, .18, terminalFaceZ);
     const fixedLead = makeFlexibleLead([fixedAnchor, new THREE.Vector3(rulerStartX, .12, -.02), new THREE.Vector3(ammeterX - .4, .12, -.02), ammeterNegative], black);
-    const sliderLead = makeFlexibleLead([sliderAnchor, new THREE.Vector3(contactX + .16, .1, 1.68), new THREE.Vector3(-3.08, .1, 1.68), new THREE.Vector3(-3.08, .14, terminalFaceZ), supplyNegative], black);
-    const voltFixedLead = makeFlexibleLead([fixedAnchor.clone().add(new THREE.Vector3(0, .035, .045)), new THREE.Vector3(rulerStartX, .115, 1.42), new THREE.Vector3(voltmeterX + .4, .115, 1.42), voltmeterPositive], voltageRed, .017);
-    const voltSliderLead = makeFlexibleLead([sliderAnchor.clone().add(new THREE.Vector3(0, .035, -.045)), new THREE.Vector3(contactX + .12, .105, 1.25), new THREE.Vector3(voltmeterX - .4, .105, 1.25), voltmeterNegative], voltageBlack, .017);
-    const circuitLeadA = makeFlexibleLead([supplyPositive, new THREE.Vector3(-1.84, .12, -.72), new THREE.Vector3(switchInputX, .2, switchZ)], red);
-    const circuitLeadB = makeFlexibleLead([new THREE.Vector3(switchOutputX, .2, switchZ), new THREE.Vector3(-.52, .12, -.72), ammeterPositive], red);
-    [fixedLead, sliderLead, voltFixedLead, voltSliderLead, circuitLeadA, circuitLeadB].forEach(updateFlexibleLead);
+    const sliderLead = makeFlexibleLead([sliderAnchor, new THREE.Vector3(contactX - .16, .1, farSideCableZ), new THREE.Vector3(-3.08, .1, farSideCableZ), new THREE.Vector3(-3.08, .14, terminalFaceZ), supplyNegative], black);
+    const rulerRightCableX = rulerStartX + .46;
+    const voltFixedLead = makeFlexibleLead([
+      fixedAnchor.clone().add(new THREE.Vector3(0, .035, .045)),
+      new THREE.Vector3(rulerRightCableX, .34, fixedClipAnchorZ + .045),
+      new THREE.Vector3(rulerRightCableX, .115, .12),
+      new THREE.Vector3(voltmeterX + .62, .115, -.48),
+      voltmeterPositive
+    ], voltageRed, .017);
+    const voltSliderLead = makeFlexibleLead([sliderAnchor.clone().add(new THREE.Vector3(0, .035, -.045)), new THREE.Vector3(contactX - .12, .105, rulerZ - .34), new THREE.Vector3(voltmeterX - .4, .105, rulerZ - .34), voltmeterNegative], voltageBlack, .017);
+    const circuitLead = makeFlexibleLead([supplyPositive, new THREE.Vector3(-1.72, .12, -.72), new THREE.Vector3(-.52, .12, -.72), ammeterPositive], red);
+    [fixedLead, sliderLead, voltFixedLead, voltSliderLead, circuitLead].forEach(updateFlexibleLead);
 
     const chargeParticles = [];
     const chargeMat = new THREE.MeshBasicMaterial({ color: 0xffbb6a, transparent: true, opacity: .88, depthWrite: false, toneMapped: false });
@@ -2932,10 +3156,10 @@ export class LabRenderer3D {
     }
     this.dynamic.push({
       kind: 'wireResistance',
-      rulerStartX, rulerLength, rulerZ, clipAnchorZ, measuredSegment, sliderClip, sliderUpperJaw: sliderClip.userData.upperJaw, sliderLowerJaw: sliderClip.userData.lowerJaw,
-      sliderLead, voltSliderLead, fixedLead, voltFixedLead, circuitLeadA, circuitLeadB, updateFlexibleLead,
+      rulerStartX, rulerLength, rulerDirection, rulerZ, fixedClipAnchorZ, sliderClipAnchorZ, farSideCableZ, measuredSegment, sliderClip, sliderUpperJaw: sliderClip.userData.upperJaw, sliderLowerJaw: sliderClip.userData.lowerJaw,
+      sliderLead, voltSliderLead, fixedLead, voltFixedLead, circuitLead, updateFlexibleLead,
       ammeterDisplay: ammeter.userData.display, voltmeterDisplay: voltmeter.userData.display,
-      supplyDisplay: { canvas: supplyCanvas, context: sc, texture: supplyTexture }, powerLed, switchPivot, wireMaterial, chargeParticles
+      supplyDisplay: { canvas: supplyCanvas, context: sc, texture: supplyTexture }, powerLed, powerButton, powerButtonMaterial, wireMaterial, chargeParticles
     });
     Object.assign(g.userData, {
       wireResistanceRig: true,
@@ -2943,12 +3167,25 @@ export class LabRenderer3D {
       slidingCrocodileContact: true,
       uniformNichromeWire: true,
       circuitLayout: {
-        seriesPath: 'supply positive → switch → ammeter → fixed contact → nichrome test length → sliding contact → supply negative',
+        seriesPath: 'power pack positive → ammeter → fixed contact → nichrome test length → sliding contact → power pack negative',
         parallelPath: 'voltmeter connected directly across fixed and sliding contacts',
         separatedCableLanes: true,
-        componentZones: ['rear supply and meters', 'middle safety switch', 'foreground ruler and test wire'],
+        smoothCableCurves: true,
+        rulerRotated180Degrees: true,
+        fixedClampRetainsRotatedOrientation: true,
+        blackSliderClampFacesCamera: true,
+        blackSliderFerruleFacesFarSide: true,
+        blackSeriesLeadRoute: 'along the far side of the ruler',
+        componentZones: ['rear power pack and meters', 'foreground ruler and test wire'],
+        separateSwitchPresent: false,
+        powerPackIsSoleCircuitControl: true,
         compactMeterDisplays: true,
         meterDisplayClearOfTerminals: true,
+        meterHousingShape: 'truncated square-pyramid frustum with trapezoidal faces',
+        visibleMeterFaces: ['front', 'top', 'left'],
+        meterScreensFitBezels: true,
+        rulerStyle: 'potometer ivory-white scale with enlarged high-contrast dark blue graduations and numbers',
+        pinkParallelLeadRoute: 'around the right-hand edge of the ruler',
         ammeterRoleLabel: 'series',
         voltmeterRoleLabel: 'parallel'
       }
@@ -3599,10 +3836,10 @@ export class LabRenderer3D {
     const aluminium = new THREE.MeshPhysicalMaterial({ color: materialId === 'copper' ? 0xb96d45 : 0xaebbc0, metalness: .88, roughness: .2, clearcoat: .48, emissive: 0x4a1404, emissiveIntensity: 0 });
     const steel = metal(0xc4ced1, .13), dark = solid(0x1c2c33, .36), red = new THREE.MeshStandardMaterial({ color: 0xc63e43, roughness: .45 }), black = new THREE.MeshStandardMaterial({ color: 0x19242a, roughness: .58 });
     const foam = new THREE.MeshPhysicalMaterial({ color: 0xd9e1dc, roughness: .88, metalness: 0, clearcoat: .06 }), pasteMaterial = new THREE.MeshPhysicalMaterial({ color: 0xe9eef0, metalness: .18, roughness: .42, clearcoat: .3 });
-    const blockX = .25, blockZ = .55, blockW = 1.55, blockH = 1.15, blockD = 1.22, blockBottomY = .14, blockTopY = blockBottomY + blockH;
-    const heaterBore = new THREE.Vector3(blockX - .32, blockTopY, blockZ + .02), thermometerBore = new THREE.Vector3(blockX + .34, blockTopY, blockZ + .02);
+    const blockX = 0, blockZ = .58, blockW = 1.3, blockH = .96, blockD = 1, blockBottomY = .14, blockTopY = blockBottomY + blockH;
+    const heaterBore = new THREE.Vector3(blockX - .27, blockTopY, blockZ + .02), thermometerBore = new THREE.Vector3(blockX + .28, blockTopY, blockZ + .02);
 
-    // One-kilogram aluminium calorimetry block with two dark, recessed bores.
+    // One-kilogram metal calorimetry block with two dark, recessed bores.
     const block = new THREE.Mesh(roundedBox(blockW, blockH, blockD, .055, 6), aluminium); block.position.set(blockX, blockBottomY + blockH / 2, blockZ); g.add(block);
     const lowerPlate = new THREE.Mesh(roundedBox(blockW + .09, .08, blockD + .09, .035, 4), new THREE.MeshStandardMaterial({ color: 0x7f9096, metalness: .84, roughness: .26 })); lowerPlate.position.set(blockX, blockBottomY + .02, blockZ); g.add(lowerPlate);
     const boreMaterial = new THREE.MeshStandardMaterial({ color: 0x28373d, metalness: .58, roughness: .5, side: THREE.DoubleSide });
@@ -3611,23 +3848,33 @@ export class LabRenderer3D {
       const opening = new THREE.Mesh(new THREE.TorusGeometry(.088, .014, 10, 42), steel); opening.rotation.x = Math.PI / 2; opening.position.set(bore.x, blockTopY + .018, bore.z); g.add(opening);
       const darkness = new THREE.Mesh(new THREE.CircleGeometry(.074, 36), new THREE.MeshBasicMaterial({ color: 0x17252b, toneMapped: false })); darkness.rotation.x = -Math.PI / 2; darkness.position.set(bore.x, blockTopY + .021, bore.z); g.add(darkness);
     }
-    const massStamp = (() => { const canvas = document.createElement('canvas'), dc = canvas.getContext('2d'); canvas.width = 512; canvas.height = 128; dc.clearRect(0, 0, 512, 128); dc.fillStyle = materialId === 'copper' ? '#5e2d1f' : '#3f535a'; dc.font = '800 58px Inter, sans-serif'; dc.textAlign = 'center'; dc.textBaseline = 'middle'; dc.fillText(`${materialLabel} · 1.00 kg`, 256, 64); const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace; const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1.18, .26), new THREE.MeshBasicMaterial({ map: texture, transparent: true, toneMapped: false, depthWrite: false })); mesh.position.set(blockX, .67, blockZ + blockD / 2 + .031); mesh.renderOrder = 8; return mesh })(); g.add(massStamp);
+    const massStamp = (() => { const canvas = document.createElement('canvas'), dc = canvas.getContext('2d'); canvas.width = 512; canvas.height = 128; dc.clearRect(0, 0, 512, 128); dc.fillStyle = materialId === 'copper' ? '#5e2d1f' : '#3f535a'; dc.font = '800 58px Inter, sans-serif'; dc.textAlign = 'center'; dc.textBaseline = 'middle'; dc.fillText(`${materialLabel} · 1.00 kg`, 256, 64); const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace; const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1.02, .23), new THREE.MeshBasicMaterial({ map: texture, transparent: true, toneMapped: false, depthWrite: false })); mesh.position.set(blockX, blockBottomY + blockH * .47, blockZ + blockD / 2 + .031); mesh.renderOrder = 8; return mesh })(); g.add(massStamp);
+
+    // The supplied calorimetry blocks are already drilled before the lesson.
+    // A short inspection pulse makes both recessed bores unambiguous without
+    // depicting an unsafe or scientifically misleading classroom drilling step.
+    const boreInspectionRings = [];
+    for (const bore of [heaterBore, thermometerBore]) {
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(.13, .009, 10, 48), new THREE.MeshBasicMaterial({ color: 0x54d7e7, transparent: true, opacity: .34, depthWrite: false, toneMapped: false }));
+      ring.rotation.x = Math.PI / 2; ring.position.set(bore.x, blockTopY + .035, bore.z); ring.renderOrder = 11; ring.castShadow = false; ring.receiveShadow = false; g.add(ring); boreInspectionRings.push(ring);
+    }
 
     // Four side panels and a bored lid start opened out, then close snugly
     // around the block while leaving both probe collars accessible.
     const jacketPanels = [];
-    const addJacketPanel = (geometry, closed, open, closedRotation, openRotation) => {
-      const panel = new THREE.Mesh(geometry, foam); panel.position.copy(stage >= 2 ? closed : open); panel.rotation.copy(stage >= 2 ? closedRotation : openRotation); g.add(panel); jacketPanels.push({ mesh: panel, closed, open, closedRotation, openRotation }); return panel;
+    const addJacketPanel = (geometry, closed, open, closedRotation, openRotation, arrivalIndex) => {
+      const panel = new THREE.Mesh(geometry, foam); panel.position.copy(stage >= 2 ? closed : open); panel.rotation.copy(stage >= 2 ? closedRotation : openRotation); panel.visible = stage > 0; g.add(panel); jacketPanels.push({ mesh: panel, closed, open, closedRotation, openRotation, arrivalIndex }); return panel;
     };
-    addJacketPanel(new THREE.BoxGeometry(.15, 1.03, blockD + .18), new THREE.Vector3(blockX - blockW / 2 - .105, .665, blockZ), new THREE.Vector3(blockX - 1.55, .16, blockZ + .12), new THREE.Euler(0, 0, 0), new THREE.Euler(0, 0, -1.45));
-    addJacketPanel(new THREE.BoxGeometry(.15, 1.03, blockD + .18), new THREE.Vector3(blockX + blockW / 2 + .105, .665, blockZ), new THREE.Vector3(blockX + 1.55, .16, blockZ + .12), new THREE.Euler(0, 0, 0), new THREE.Euler(0, 0, 1.45));
-    addJacketPanel(new THREE.BoxGeometry(blockW + .16, 1.03, .14), new THREE.Vector3(blockX, .665, blockZ - blockD / 2 - .1), new THREE.Vector3(blockX, .13, blockZ - 1.38), new THREE.Euler(0, 0, 0), new THREE.Euler(1.42, 0, 0));
-    addJacketPanel(new THREE.BoxGeometry(blockW + .16, .76, .14), new THREE.Vector3(blockX, .53, blockZ + blockD / 2 + .1), new THREE.Vector3(blockX, .13, blockZ + 1.42), new THREE.Euler(0, 0, 0), new THREE.Euler(-1.42, 0, 0));
+    const jacketCentreY = blockBottomY + blockH / 2;
+    addJacketPanel(new THREE.BoxGeometry(.14, blockH - .08, blockD + .16), new THREE.Vector3(blockX - blockW / 2 - .1, jacketCentreY, blockZ), new THREE.Vector3(-5.15, .58, -.25), new THREE.Euler(0, 0, 0), new THREE.Euler(.1, -.35, -1.25), 0);
+    addJacketPanel(new THREE.BoxGeometry(.14, blockH - .08, blockD + .16), new THREE.Vector3(blockX + blockW / 2 + .1, jacketCentreY, blockZ), new THREE.Vector3(5.15, .64, -.2), new THREE.Euler(0, 0, 0), new THREE.Euler(-.08, .3, 1.3), 1);
+    addJacketPanel(new THREE.BoxGeometry(blockW + .16, blockH - .08, .14), new THREE.Vector3(blockX, jacketCentreY, blockZ - blockD / 2 - .095), new THREE.Vector3(-2.9, 2.35, -3.55), new THREE.Euler(0, 0, 0), new THREE.Euler(1.12, -.3, -.42), 2);
+    addJacketPanel(new THREE.BoxGeometry(blockW + .16, blockH - .24, .14), new THREE.Vector3(blockX, blockBottomY + (blockH - .24) / 2, blockZ + blockD / 2 + .095), new THREE.Vector3(2.7, 1.35, 4.1), new THREE.Euler(0, 0, 0), new THREE.Euler(-1.18, .26, .38), 3);
     const lidShape = new THREE.Shape();
     lidShape.moveTo(-blockW / 2 - .08, -blockD / 2 - .08); lidShape.lineTo(blockW / 2 + .08, -blockD / 2 - .08); lidShape.lineTo(blockW / 2 + .08, blockD / 2 + .08); lidShape.lineTo(-blockW / 2 - .08, blockD / 2 + .08); lidShape.closePath();
     for (const bore of [heaterBore, thermometerBore]) { const hole = new THREE.Path(); hole.absarc(bore.x - blockX, bore.z - blockZ, .135, 0, Math.PI * 2, true); lidShape.holes.push(hole) }
     const lidGeometry = new THREE.ExtrudeGeometry(lidShape, { depth: .12, bevelEnabled: true, bevelSegments: 2, bevelSize: .018, bevelThickness: .012, curveSegments: 28 }); lidGeometry.center(); lidGeometry.rotateX(Math.PI / 2);
-    addJacketPanel(lidGeometry, new THREE.Vector3(blockX, blockTopY + .075, blockZ), new THREE.Vector3(blockX + 2.15, .2, blockZ + .28), new THREE.Euler(0, 0, 0), new THREE.Euler(0, 0, 1.36));
+    addJacketPanel(lidGeometry, new THREE.Vector3(blockX, blockTopY + .075, blockZ), new THREE.Vector3(4.7, 2.6, 1.45), new THREE.Euler(0, 0, 0), new THREE.Euler(.48, -.42, 1.42), 4);
 
     const makeProbe = (type, colour) => {
       const probe = new THREE.Group(), sheath = cylinder(type === 'heater' ? .062 : .042, 1.12, steel, 36); sheath.position.y = -.45; probe.add(sheath);
@@ -3638,35 +3885,40 @@ export class LabRenderer3D {
       Object.assign(probe.userData, { type, connectorLocal: new THREE.Vector3(0, .76, 0), insertionDepth: .95 }); return shadowReady(probe);
     };
     const heaterProbe = makeProbe('heater', 0xd64b43), thermometerProbe = makeProbe('thermometer', 0x2d879e);
-    const heaterStart = new THREE.Vector3(-2.62, .31, .72), thermometerStart = new THREE.Vector3(-2.48, .24, 1.22), heaterInserted = new THREE.Vector3(heaterBore.x, blockTopY + .14, heaterBore.z), thermometerInserted = new THREE.Vector3(thermometerBore.x, blockTopY + .14, thermometerBore.z);
+    const heaterStart = new THREE.Vector3(-2.48, .31, 1.05), thermometerStart = new THREE.Vector3(-2.28, .24, 1.42), heaterInserted = new THREE.Vector3(heaterBore.x, blockTopY + .14, heaterBore.z), thermometerInserted = new THREE.Vector3(thermometerBore.x, blockTopY + .14, thermometerBore.z);
     if (stage >= 2) { heaterProbe.position.copy(heaterInserted); thermometerProbe.position.copy(thermometerInserted) } else { heaterProbe.position.copy(heaterStart); heaterProbe.rotation.z = Math.PI / 2; thermometerProbe.position.copy(thermometerStart); thermometerProbe.rotation.z = Math.PI / 2 }
     g.add(heaterProbe, thermometerProbe);
 
     // Thermal-paste syringe, visible white paste beads and a small tool tray.
-    const toolTray = new THREE.Mesh(roundedBox(1.65, .09, .82, .055, 5), new THREE.MeshPhysicalMaterial({ color: 0xdce3e4, metalness: .62, roughness: .33 })); toolTray.position.set(-2.72, .065, .94); g.add(toolTray);
+    const toolTray = new THREE.Mesh(roundedBox(1.72, .09, .78, .055, 5), new THREE.MeshPhysicalMaterial({ color: 0xdce3e4, metalness: .62, roughness: .33 })); toolTray.position.set(-2.42, .065, 1.24); g.add(toolTray);
     const syringe = new THREE.Group(), barrel = cylinder(.105, .78, new THREE.MeshPhysicalMaterial({ color: 0xe9f5f6, transparent: true, opacity: .72, transmission: .35, roughness: .12 }), 36); barrel.position.y = .22; syringe.add(barrel);
     const pasteColumn = cylinder(.075, .52, pasteMaterial, 28); pasteColumn.position.y = .18; syringe.add(pasteColumn);
     const plunger = cylinder(.055, .45, steel, 24); plunger.position.y = .78; syringe.add(plunger); const thumb = cylinder(.17, .04, steel, 30); thumb.position.y = 1.01; syringe.add(thumb);
     const nozzle = new THREE.Mesh(new THREE.ConeGeometry(.055, .42, 28), pasteMaterial); nozzle.rotation.z = Math.PI; nozzle.position.y = -.39; syringe.add(nozzle);
-    syringe.position.set(-3.12, .25, .93); syringe.rotation.z = Math.PI / 2; syringe.scale.setScalar(.72); g.add(syringe);
+    const syringeRest = new THREE.Vector3(-2.82, .25, 1.18); syringe.position.copy(syringeRest); syringe.rotation.z = Math.PI / 2; syringe.scale.setScalar(.72); g.add(syringe);
     const pasteDrops = [];
     for (const [i, bore] of [heaterBore, thermometerBore].entries()) { const drop = new THREE.Mesh(new THREE.SphereGeometry(.09, 28, 18), pasteMaterial); drop.scale.set(1, .12, 1); drop.position.set(bore.x, blockTopY + .035, bore.z); drop.visible = stage >= 2; drop.userData.dropIndex = i; g.add(drop); pasteDrops.push(drop) }
 
     const makeInstrument = (label, bodyColour, accent) => {
-      const instrument = new THREE.Group(), body = new THREE.Mesh(roundedBox(1.18, .76, .62, .085, 5), new THREE.MeshPhysicalMaterial({ color: bodyColour, roughness: .27, metalness: .08, clearcoat: .68 })); body.position.y = .38; instrument.add(body);
-      const bezel = new THREE.Mesh(roundedBox(.98, .43, .045, .04, 4), dark); bezel.position.set(0, .46, .335); instrument.add(bezel);
+      const instrument = new THREE.Group(), body = new THREE.Mesh(roundedBox(1.02, .68, .54, .075, 5), new THREE.MeshPhysicalMaterial({ color: bodyColour, roughness: .27, metalness: .08, clearcoat: .68 })); body.position.y = .34; instrument.add(body);
+      const bezel = new THREE.Mesh(roundedBox(.85, .38, .042, .036, 4), dark); bezel.position.set(0, .42, .292); instrument.add(bezel);
       const canvas = document.createElement('canvas'), dc = canvas.getContext('2d'); canvas.width = 512; canvas.height = 220; dc.fillStyle = '#071b22'; dc.fillRect(0, 0, 512, 220);
       const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace;
       texture.needsUpdate = true;
-      const screen = new THREE.Mesh(new THREE.PlaneGeometry(.88, .35), new THREE.MeshBasicMaterial({ map: texture, toneMapped: false, depthWrite: false, depthTest: false })); screen.position.set(0, .47, .385); screen.renderOrder = 20; instrument.add(screen);
-      for (const [x, colour] of [[-.37, 0x171c22], [.37, 0xd44247]]) { const terminal = cylinder(.068, .11, solid(colour, .26), 28); terminal.rotation.x = Math.PI / 2; terminal.position.set(x, .16, .34); instrument.add(terminal) }
-      Object.assign(instrument.userData, { label, display: { canvas, context: dc, texture }, accent }); return shadowReady(instrument);
+      const screen = new THREE.Mesh(new THREE.PlaneGeometry(.76, .3), new THREE.MeshBasicMaterial({ map: texture, toneMapped: false, depthWrite: false, depthTest: false })); screen.position.set(0, .425, .337); screen.renderOrder = 20; instrument.add(screen);
+      for (const [x, colour] of [[-.31, 0x171c22], [.31, 0xd44247]]) { const terminal = cylinder(.058, .1, solid(colour, .26), 28); terminal.rotation.x = Math.PI / 2; terminal.position.set(x, .14, .295); instrument.add(terminal) }
+      Object.assign(instrument.userData, { label, display: { canvas, context: dc, texture }, accent, terminalLocal: { black: new THREE.Vector3(-.31, .14, .345), red: new THREE.Vector3(.31, .14, .345) } }); return shadowReady(instrument);
     };
-    const supply = makeInstrument('12 V SUPPLY', 0x315a9b, '#78ffe2'); supply.position.set(-2.35, 0, -.82); g.add(supply);
-    const ammeter = makeInstrument('AMMETER', 0xe8edef, '#ff8d92'); ammeter.position.set(-1.05, 0, -.82); g.add(ammeter);
-    const joulemeter = makeInstrument('JOULEMETER', 0x354d61, '#8fffe8'); joulemeter.position.set(.78, 0, -.82); g.add(joulemeter);
-    const digitalThermometer = makeInstrument('THERMOMETER', 0xe8edef, '#ffca70'); digitalThermometer.position.set(2.15, 0, -.82); g.add(digitalThermometer);
-    const powerLed = new THREE.Mesh(new THREE.SphereGeometry(.05, 20, 14), new THREE.MeshStandardMaterial({ color: 0x40565c, emissive: 0x36ffc1, emissiveIntensity: 0 })); powerLed.position.set(-2.02, .69, -.47); g.add(powerLed);
+    const placeInstrument = (instrument, x, z, yaw) => { instrument.position.set(x, 0, z); instrument.rotation.y = yaw; g.add(instrument); return instrument };
+    // Two instruments sit clearly to each side of the smaller central block.
+    // A shallow arc keeps every display facing the learner and out of the
+    // block's silhouette in both the starting and insulated arrangements.
+    const supply = placeInstrument(makeInstrument('12 V SUPPLY', 0x315a9b, '#78ffe2'), -2.34, -.66, .075);
+    const ammeter = placeInstrument(makeInstrument('AMMETER', 0xe8edef, '#ff8d92'), -1.27, -.38, .025);
+    const joulemeter = placeInstrument(makeInstrument('JOULEMETER', 0x354d61, '#8fffe8'), 1.27, -.38, -.025);
+    const digitalThermometer = placeInstrument(makeInstrument('THERMOMETER', 0xe8edef, '#ffca70'), 2.34, -.66, -.075);
+    const powerLed = new THREE.Mesh(new THREE.SphereGeometry(.045, 20, 14), new THREE.MeshStandardMaterial({ color: 0x40565c, emissive: 0x36ffc1, emissiveIntensity: 0 })); powerLed.position.set(.29, .62, .29); supply.add(powerLed);
+    const instrumentTerminal = (instrument, colour) => instrument.userData.terminalLocal[colour].clone().applyQuaternion(instrument.quaternion).add(instrument.position);
 
     // Articulated insulated leads follow both probes during insertion without a
     // per-frame TubeGeometry rebuild.
@@ -3683,11 +3935,12 @@ export class LabRenderer3D {
     // Complete series circuit: supply (+) → ammeter → joulemeter → heater →
     // supply (−). The two short front links make every instrument connection
     // explicit instead of leaving the live displays on an open circuit.
-    const supplyToAmmeterLead = makeFlexibleLead([new THREE.Vector3(-1.98, .16, -.47), new THREE.Vector3(-1.72, .085, -.28), new THREE.Vector3(-1.42, .16, -.47)], red, .024);
-    const ammeterToJoulemeterLead = makeFlexibleLead([new THREE.Vector3(-.68, .16, -.47), new THREE.Vector3(-.18, .075, -.25), new THREE.Vector3(.41, .16, -.47)], red, .024);
-    const heaterRedLead = makeFlexibleLead([new THREE.Vector3(1.15, .16, -.47), new THREE.Vector3(1.34, .11, -.02), new THREE.Vector3(.82, .15, .32), heaterStart.clone()], red, .026);
-    const heaterBlackLead = makeFlexibleLead([new THREE.Vector3(-2.72, .16, -.47), new THREE.Vector3(-2.86, .09, .12), new THREE.Vector3(-1.12, .12, .42), heaterStart.clone().add(new THREE.Vector3(.04, 0, .05))], black, .026);
-    const thermometerLead = makeFlexibleLead([new THREE.Vector3(2.1, .16, -.47), new THREE.Vector3(2.0, .12, .12), new THREE.Vector3(1.26, .14, .36), thermometerStart.clone()], new THREE.MeshStandardMaterial({ color: 0x2b7388, roughness: .6 }), .021);
+    const supplyRed = instrumentTerminal(supply, 'red'), supplyBlack = instrumentTerminal(supply, 'black'), ammeterBlack = instrumentTerminal(ammeter, 'black'), ammeterRed = instrumentTerminal(ammeter, 'red'), joulemeterBlack = instrumentTerminal(joulemeter, 'black'), joulemeterRed = instrumentTerminal(joulemeter, 'red'), thermometerBlack = instrumentTerminal(digitalThermometer, 'black');
+    const supplyToAmmeterLead = makeFlexibleLead([supplyRed, new THREE.Vector3(-1.82, .075, -.16), ammeterBlack], red, .024);
+    const ammeterToJoulemeterLead = makeFlexibleLead([ammeterRed, new THREE.Vector3(-.62, .075, -.2), new THREE.Vector3(.62, .075, -.2), joulemeterBlack], red, .024);
+    const heaterRedLead = makeFlexibleLead([joulemeterRed, new THREE.Vector3(1.42, .1, .02), new THREE.Vector3(.84, .14, .34), heaterStart.clone()], red, .026);
+    const heaterBlackLead = makeFlexibleLead([supplyBlack, new THREE.Vector3(-2.75, .09, .08), new THREE.Vector3(-1.3, .12, .47), heaterStart.clone().add(new THREE.Vector3(.04, 0, .05))], black, .026);
+    const thermometerLead = makeFlexibleLead([thermometerBlack, new THREE.Vector3(2.5, .11, .04), new THREE.Vector3(1.12, .14, .39), thermometerStart.clone()], new THREE.MeshStandardMaterial({ color: 0x2b7388, roughness: .6 }), .021);
     updateFlexibleLead(supplyToAmmeterLead); updateFlexibleLead(ammeterToJoulemeterLead); updateFlexibleLead(heaterRedLead); updateFlexibleLead(heaterBlackLead); updateFlexibleLead(thermometerLead);
 
     const heaterCoreMaterial = heaterProbe.children[0].material.clone(); heaterCoreMaterial.emissive = new THREE.Color(0xff3d18); heaterCoreMaterial.emissiveIntensity = 0; heaterProbe.children[0].material = heaterCoreMaterial;
@@ -3704,17 +3957,17 @@ export class LabRenderer3D {
       const { canvas, context: dc, texture } = display; dc.clearRect(0, 0, canvas.width, canvas.height); dc.fillStyle = '#061920'; dc.fillRect(0, 0, canvas.width, canvas.height); dc.strokeStyle = 'rgba(130,190,203,.28)'; dc.lineWidth = 4; dc.strokeRect(7, 7, canvas.width - 14, canvas.height - 14); dc.fillStyle = '#9cb2b7'; dc.font = '800 29px Inter, sans-serif'; dc.textAlign = 'left'; dc.textBaseline = 'middle'; dc.fillText(label, 25, 42); dc.shadowColor = active ? accent : '#50656b'; dc.shadowBlur = 20; dc.fillStyle = active ? accent : '#7e9297'; dc.font = '800 72px ui-monospace, Menlo, monospace'; dc.textAlign = 'right'; dc.fillText(`${valueText} ${unit}`, canvas.width - 24, 120); dc.shadowBlur = 0; dc.fillStyle = active ? '#8fe4cb' : '#788e93'; dc.font = '800 24px Inter, sans-serif'; dc.textAlign = 'center'; dc.fillText(status, canvas.width / 2, 185); texture.needsUpdate = true;
     };
     this.dynamic.push({
-      kind: 'specificHeat', aluminium, heaterProbe, thermometerProbe, heaterStart, thermometerStart, heaterInserted, thermometerInserted, syringe, pasteDrops, jacketPanels,
+      kind: 'specificHeat', aluminium, heaterProbe, thermometerProbe, heaterStart, thermometerStart, heaterInserted, thermometerInserted, syringe, syringeRest, pasteDrops, jacketPanels, boreInspectionRings,
       heaterRedLead, heaterBlackLead, thermometerLead, updateFlexibleLead, heaterCoreMaterial, heatLight, energyParticles, heatWaves, blockX, blockZ, blockTopY, heaterBore, thermometerBore,
       supplyDisplay: supply.userData.display, ammeterDisplay: ammeter.userData.display, joulemeterDisplay: joulemeter.userData.display, thermometerDisplay: digitalThermometer.userData.display, powerLed, paintDisplay
     });
     Object.assign(g.userData, {
       specificHeatCapacityRig: true,
-      block: { material: materialId, massKg: 1, specificHeatCapacityJPerKgC: materialSpecificHeat, boreHoles: 2, heaterBorePosition: heaterBore.toArray(), thermometerBorePosition: thermometerBore.toArray() },
-      preparation: { thermalPasteSyringe: true, pasteDrops: 2, probesInserted: stage >= 2, probeInsertionDepthSceneUnits: .95, foamInsulationPanels: 5, boredInsulatingLid: true, foamInsulationClosed: stage >= 2, durationS: 3.8 },
-      electrical: { supplyVoltageV: 12, currentA: 2, powerW: 24, instruments: ['12 V supply', 'ammeter', 'joulemeter', 'digital thermometer'], flexibleInsulatedCables: true, completeSeriesCircuit: true, route: 'supply positive → ammeter → joulemeter → heater → supply negative' },
+      block: { material: materialId, massKg: 1, specificHeatCapacityJPerKgC: materialSpecificHeat, boreHoles: 2, holesPreDrilledBeforePractical: true, drillingIsClassroomMethodStep: false, heaterBorePosition: heaterBore.toArray(), thermometerBorePosition: thermometerBore.toArray() },
+      preparation: { thermalPasteSyringe: true, pasteDrops: 2, probesInserted: stage >= 2, probeInsertionDepthSceneUnits: .95, foamInsulationPanels: 5, boredInsulatingLid: true, foamInsulationStartsOffCamera: true, foamInsulationFliesInIndividually: true, foamInsulationClosed: stage >= 2, durationS: 3.8 },
+      electrical: { supplyVoltageV: 12, currentA: 2, powerW: 24, instruments: ['12 V supply', 'ammeter', 'joulemeter', 'digital thermometer'], visibleArrangement: { leftOfBlock: ['12 V supply', 'ammeter'], rightOfBlock: ['joulemeter', 'digital thermometer'] }, flexibleInsulatedCables: true, completeSeriesCircuit: true, route: 'supply positive → ammeter → joulemeter → heater → supply negative' },
       measurement: { energyRangeJ: [0, 18000], temperatureRangeC: [20, +(20 + 18000 / materialSpecificHeat).toFixed(1)], heatingDurationS: 8, targetSpecificHeatCapacityJPerKgC: materialSpecificHeat },
-      animation: { preparationSequence: ['apply paste', 'insert heater', 'insert thermometer', 'close foam jacket'], liveHeaterGlow: stage === 3, energyParticles: energyParticles.length }
+      animation: { preparationSequence: ['inspect two pre-drilled bores', 'apply paste', 'insert heater', 'insert thermometer', 'fly insulation panels in from off camera', 'close foam jacket'], boreInspectionPulse: true, drillingSparks: false, liveHeaterGlow: stage === 3, energyParticles: energyParticles.length }
     });
     const rig = shadowReady(g);
     for (const particle of energyParticles) { particle.castShadow = false; particle.receiveShadow = false }
@@ -3802,6 +4055,9 @@ export class LabRenderer3D {
     else if (id === 'thermite') { this.root.add(this.thermiteRig(state)) }
     else if (id === 'starchleaf') { this.root.add(this.starchLeafRig(state)) }
     else if (id === 'lipase') { this.root.add(this.lipaseRig(state)) }
+    else if (id === 'transformation') { this.root.add(this.geneticEngineeringRig(state)) }
+    else if (id === 'respiration') { this.root.add(this.respirationRig(state)) }
+    else if (id === 'antibiotics') { this.root.add(this.antibioticDiscRig(state)) }
     else if (id === 'osmosis') { this.root.add(this.osmosisRig(state)) }
     else if (id === 'potometer') { this.root.add(this.potometerRig(state)) }
     else if (id === 'pondweed') { this.root.add(this.pondweedRig(state)) }
@@ -3859,11 +4115,11 @@ export class LabRenderer3D {
     const temperatureKey = p.id === 'temp' ? Math.round((state.temp || 20) * 10) : p.id === 'rates' ? Math.round((state.ratesBathTemp || 20) * 10) : p.id === 'lipase' ? Math.round((state.lipaseBathTemp || 20) * 10) : 0;
     const nuclearVisualKey = p.id === 'nuclear' ? `${state.nuclearStage}:${state.nuclearSource}:${state.nuclearPreviousSource}:${state.nuclearAbsorber}:${state.nuclearAnimAbsorber}` : '';
     if (nuclearVisualKey !== this.nuclearVisualKey) { this.nuclearVisualKey = nuclearVisualKey; if (p.id === 'nuclear') this.signature = '' }
-    const signature = JSON.stringify({ id: p.id, workspace: visualWorkspace, drag: visualDrag, running: p.id === 'titration' || p.id === 'thermite' || p.id === 'displacement' || p.id === 'density' || p.id === 'starchleaf' || p.id === 'lipase' || p.id === 'osmosis' || p.id === 'potometer' || p.id === 'capture' || p.id === 'ripple' || p.id === 'hooke' || p.id === 'specificheat' || p.id === 'latentheat' || p.id === 'wirelength' || p.id === 'fieldlines' ? false : state.running, burner: state.burner, coolingWater: state.coolingWater, pour: !!state.pour, pourTick: state.pour && Math.round(state.pour.t * 24), lastReactant: state.lastReactant, transferred: Math.round((state.transferred || 0) * 20), temperature: temperatureKey, ratesStage: state.ratesStage, ratesTick: p.id === 'rates' ? Math.round((state.ratesStageTimer || 0) * 18) : 0, ratesTarget: state.ratesTargetTemp, ratesConditioning: !!state.ratesConditioning, massStage: state.massStage, massLidOn: state.massLidOn, massTransfer: state.massTransfer && { direction: state.massTransfer.direction, tick: Math.round(state.massTransfer.t * 12) }, massProgress: ['water', 'electro', 'titration', 'thermite', 'displacement', 'starchleaf', 'lipase', 'osmosis', 'potometer', 'capture', 'ripple', 'electromagnet', 'convection', 'conduction', 'thermal', 'hooke', 'specificheat', 'latentheat', 'wirelength', 'fieldlines'].includes(p.id) ? 0 : Math.round((state.progress || 0) * 20), electroWeighing: !!state.electroWeighing, electroRecorded: !!state.electroRecorded, hydrogenStage: state.hydrogenStage, hydrogenTick: Math.round((state.hydrogenTimer || 0) * 6), hydrogenGas: Math.round((state.hydrogenGas || 0) / 2), saltsStage: state.saltsStage, saltsTick: Math.round((state.saltsTimer || 0) * 10), flameTestStage: state.flameTestStage, flameTestSalt: state.flameTestSalt, flameTestTested: state.flameTestTested, titrationStage: state.titrationStage, titrationIndicator: state.titrationIndicator, titrationIndicatorAdding: (state.titrationIndicatorTimer || 0) > 0, titrationComplete: p.id === 'titration' && !!state.complete, titrationDropping: (state.titrationDropTimer || 0) > 0, titrationReading: p.id === 'titration' && !state.running ? Math.round((state.titrationVolume || 0) * 20) : 0, displacementStage: state.displacementStage, thermiteComplete: p.id === 'thermite' && !!state.complete, starchStage: state.starchStage, lipaseStage: state.lipaseStage, lipaseTarget: state.lipaseTargetTemp, lipaseConditioning: !!state.lipaseConditioning, osmosisStage: state.osmosisStage, osmosisConcentration: state.osmosisConcentration, potometerStage: state.potometerStage, potometerWindSpeed: state.potometerWindSpeed, pondweedDistance: state.pondweedDistance, pondweedLampOn: state.pondweedLampOn, newtonForce: state.newtonForce, newtonMass: state.newtonMass, newtonPos: Math.round((state.newtonPos || 0) * 50), newtonGate1Velocity: state.newtonGate1Velocity, newtonGate2Velocity: state.newtonGate2Velocity, electromagnetStage: state.electromagnetStage, electromagnetTurns: state.electromagnetTurns, convectionStage: state.convectionStage, conductionStage: state.conductionStage, thermalStage: state.thermalStage, densityStage: state.densityStage, densitySample: state.densitySample, densityTick: 0, hookeStage: state.hookeStage, hookeTrialIndex: state.hookeTrialIndex, hookeForceN: state.hookeForceN, shcStage: state.shcStage, latentStage: state.latentStage, latentMaterial: state.latentMaterial, wireStage: state.wireStage, wireLengthCm: state.wireLengthCm, wireTrialIndex: state.wireTrialIndex, fieldStage: state.fieldStage, fieldConfigIndex: state.fieldConfigIndex });
+    const signature = JSON.stringify({ id: p.id, workspace: visualWorkspace, drag: visualDrag, running: p.id === 'titration' || p.id === 'thermite' || p.id === 'displacement' || p.id === 'density' || p.id === 'starchleaf' || p.id === 'lipase' || p.id === 'transformation' || p.id === 'respiration' || p.id === 'antibiotics' || p.id === 'osmosis' || p.id === 'potometer' || p.id === 'capture' || p.id === 'ripple' || p.id === 'hooke' || p.id === 'specificheat' || p.id === 'latentheat' || p.id === 'wirelength' || p.id === 'fieldlines' ? false : state.running, burner: state.burner, coolingWater: state.coolingWater, pour: !!state.pour, pourTick: state.pour && Math.round(state.pour.t * 24), lastReactant: state.lastReactant, transferred: Math.round((state.transferred || 0) * 20), temperature: temperatureKey, ratesStage: state.ratesStage, ratesTick: p.id === 'rates' ? Math.round((state.ratesStageTimer || 0) * 18) : 0, ratesTarget: state.ratesTargetTemp, ratesConditioning: !!state.ratesConditioning, massStage: state.massStage, massLidOn: state.massLidOn, massTransfer: state.massTransfer && { direction: state.massTransfer.direction, tick: Math.round(state.massTransfer.t * 12) }, massProgress: ['water', 'electro', 'titration', 'thermite', 'displacement', 'starchleaf', 'lipase', 'transformation', 'respiration', 'antibiotics', 'osmosis', 'potometer', 'capture', 'ripple', 'electromagnet', 'convection', 'conduction', 'thermal', 'hooke', 'specificheat', 'latentheat', 'wirelength', 'fieldlines'].includes(p.id) ? 0 : Math.round((state.progress || 0) * 20), electroWeighing: !!state.electroWeighing, electroRecorded: !!state.electroRecorded, hydrogenStage: state.hydrogenStage, hydrogenTick: Math.round((state.hydrogenTimer || 0) * 6), hydrogenGas: Math.round((state.hydrogenGas || 0) / 2), saltsStage: state.saltsStage, saltsTick: Math.round((state.saltsTimer || 0) * 10), flameTestStage: state.flameTestStage, flameTestSalt: state.flameTestSalt, flameTestTested: state.flameTestTested, titrationStage: state.titrationStage, titrationIndicator: state.titrationIndicator, titrationIndicatorAdding: (state.titrationIndicatorTimer || 0) > 0, titrationComplete: p.id === 'titration' && !!state.complete, titrationDropping: (state.titrationDropTimer || 0) > 0, titrationReading: p.id === 'titration' && !state.running ? Math.round((state.titrationVolume || 0) * 20) : 0, displacementStage: state.displacementStage, thermiteComplete: p.id === 'thermite' && !!state.complete, starchStage: state.starchStage, lipaseStage: state.lipaseStage, lipaseTarget: state.lipaseTargetTemp, lipaseConditioning: !!state.lipaseConditioning, respirationStage: state.respirationStage, antibioticStage: state.antibioticStage, antibioticMeasuredIndex: state.antibioticMeasuredIndex, osmosisStage: state.osmosisStage, osmosisConcentration: state.osmosisConcentration, potometerStage: state.potometerStage, potometerWindSpeed: state.potometerWindSpeed, pondweedDistance: state.pondweedDistance, pondweedLampOn: state.pondweedLampOn, newtonForce: state.newtonForce, newtonMass: state.newtonMass, newtonPos: Math.round((state.newtonPos || 0) * 50), newtonGate1Velocity: state.newtonGate1Velocity, newtonGate2Velocity: state.newtonGate2Velocity, electromagnetStage: state.electromagnetStage, electromagnetTurns: state.electromagnetTurns, convectionStage: state.convectionStage, conductionStage: state.conductionStage, thermalStage: state.thermalStage, densityStage: state.densityStage, densitySample: state.densitySample, densityTick: 0, hookeStage: state.hookeStage, hookeTrialIndex: state.hookeTrialIndex, hookeForceN: state.hookeForceN, shcStage: state.shcStage, latentStage: state.latentStage, latentMaterial: state.latentMaterial, wireStage: state.wireStage, wireLengthCm: state.wireLengthCm, wireTrialIndex: state.wireTrialIndex, fieldStage: state.fieldStage, fieldConfigIndex: state.fieldConfigIndex });
     if (signature !== this.signature) { this.signature = signature; this.rebuild(state, p); this.sceneNeedsCompile = true; this.sceneWarmupFrames = 3 }
   }
   render(time, state, p) {
-    if (!this.available || this.contextLost) return;
+    if (!this.available || this.contextLost || this.sceneCompiling) return;
     const practicalChanged = this.lastPracticalId !== p.id, previousLitBunsens = this.flames.filter(f => f.loadTransition).length;
     if (practicalChanged) { this.lastPracticalId = p.id }
     const frameDt = this.lastRenderTime ? Math.min(.05, Math.max(0, (time - this.lastRenderTime) / 1000)) : 1 / 60; this.lastRenderTime = time; this.coolantTransitionTarget = state.coolingWater ? 1 : 0; this.coolantVisualLevel = THREE.MathUtils.lerp(this.coolantVisualLevel, this.coolantTransitionTarget, 1 - Math.exp(-frameDt * 4.4)); if (Math.abs(this.coolantVisualLevel - this.coolantTransitionTarget) < .002) this.coolantVisualLevel = this.coolantTransitionTarget; this.sync(state, p);
@@ -3872,20 +4128,23 @@ export class LabRenderer3D {
     this.bunsenTransitionActive = litBunsens > 0 && this.bunsenLoadElapsed < this.bunsenLoadDuration;
     this.applyCameraForPractical(p.id, state.hookeFocusProgress || 0);
     if (this.sceneNeedsCompile) {
-      this.renderer.compile(this.scene, this.camera); this.sceneNeedsCompile = false;
       if (this.pendingCanvasReveal && this.renderer.compileAsync) {
+        this.sceneNeedsCompile = false;
         const compileGeneration = ++this.sceneCompileGeneration; this.sceneCompiling = true;
-        this.renderer.compileAsync(this.scene, this.camera).then(() => {
+        const compile = this.renderer.compileAsync(this.scene, this.camera);
+        const budget = new Promise(resolve => setTimeout(resolve, 180));
+        Promise.race([compile, budget]).then(() => {
           if (compileGeneration !== this.sceneCompileGeneration || this.contextLost) return;
           this.sceneCompiling = false; this.canvas.dispatchEvent(new CustomEvent('lab3dneedsredraw'))
         }, () => {
           if (compileGeneration !== this.sceneCompileGeneration || this.contextLost) return;
           this.sceneCompiling = false; this.canvas.dispatchEvent(new CustomEvent('lab3dneedsredraw'))
-        })
-      }
+        });
+        return;
+      } else { this.renderer.compile(this.scene, this.camera); this.sceneNeedsCompile = false }
     }
     for (const f of this.flames) {
-      const seconds = time * .001, load = f.loadTransition ? this.bunsenLoadState() : { heat_mix: 1 }, heatMix = load.heat_mix, safety = 1 - heatMix, colourMix = THREE.MathUtils.smoothstep(heatMix, .28, .9);
+      const seconds = time * .001, load = f.safetyFlame ? { heat_mix: 0, collar_rotation_radians: .72 } : f.loadTransition ? this.bunsenLoadState() : { heat_mix: 1 }, heatMix = load.heat_mix, safety = 1 - heatMix, colourMix = THREE.MathUtils.smoothstep(heatMix, .28, .9);
       if (f.airIntakeCollar) f.airIntakeCollar.rotation.y = load.collar_rotation_radians || 0;
       const pulse = 1 + Math.sin(time * .009 + f.seed) * THREE.MathUtils.lerp(.055, .018, heatMix) + Math.sin(time * .021 + f.seed) * THREE.MathUtils.lerp(.024, .009, heatMix);
       const lean = Math.sin(time * .0047 + f.seed) * THREE.MathUtils.lerp(.038, .0018, heatMix) + Math.sin(time * .011 + f.seed * .7) * .012 * safety;
@@ -3963,7 +4222,7 @@ export class LabRenderer3D {
       }
       else if (d.kind === 'specificHeat') {
         const stage = state.shcStage || 0, t = Math.max(0, state.shcTimer || 0), clamp = q => Math.max(0, Math.min(1, q)), smooth = q => { q = clamp(q); return q * q * (3 - 2 * q) };
-        const syringeRest = new THREE.Vector3(-3.12, .25, .93), heaterPastePose = new THREE.Vector3(d.heaterBore.x, d.blockTopY + .47, d.heaterBore.z), thermometerPastePose = new THREE.Vector3(d.thermometerBore.x, d.blockTopY + .47, d.thermometerBore.z);
+        const syringeRest = d.syringeRest, heaterPastePose = new THREE.Vector3(d.heaterBore.x, d.blockTopY + .47, d.heaterBore.z), thermometerPastePose = new THREE.Vector3(d.thermometerBore.x, d.blockTopY + .47, d.thermometerBore.z);
         const arcLerp = (object, from, to, q, arc = 0) => { object.position.lerpVectors(from, to, q); object.position.y += Math.sin(Math.PI * q) * arc };
         d.syringe.visible = stage < 2;
         if (stage === 1) {
@@ -3978,11 +4237,15 @@ export class LabRenderer3D {
         const heaterInsertQ = stage >= 2 ? 1 : stage === 1 ? smooth((t - 1.64) / .92) : 0, thermometerInsertQ = stage >= 2 ? 1 : stage === 1 ? smooth((t - 1.92) / .94) : 0;
         arcLerp(d.heaterProbe, d.heaterStart, d.heaterInserted, heaterInsertQ, .36); d.heaterProbe.rotation.z = THREE.MathUtils.lerp(Math.PI / 2, 0, heaterInsertQ);
         arcLerp(d.thermometerProbe, d.thermometerStart, d.thermometerInserted, thermometerInsertQ, .32); d.thermometerProbe.rotation.z = THREE.MathUtils.lerp(Math.PI / 2, 0, thermometerInsertQ);
-        const jacketQ = stage >= 2 ? 1 : stage === 1 ? smooth((t - 2.62) / 1.18) : 0;
         for (const panel of d.jacketPanels) {
+          const jacketQ = stage >= 2 ? 1 : stage === 1 ? smooth((t - (2.44 + panel.arrivalIndex * .11)) / .92) : 0;
+          panel.mesh.visible = stage > 0;
           panel.mesh.position.lerpVectors(panel.open, panel.closed, jacketQ);
+          panel.mesh.position.y += Math.sin(Math.PI * jacketQ) * (.34 + panel.arrivalIndex * .045);
           panel.mesh.rotation.set(THREE.MathUtils.lerp(panel.openRotation.x, panel.closedRotation.x, jacketQ), THREE.MathUtils.lerp(panel.openRotation.y, panel.closedRotation.y, jacketQ), THREE.MathUtils.lerp(panel.openRotation.z, panel.closedRotation.z, jacketQ));
         }
+        const inspectingBores = stage === 0 || stage === 1 && t < .62;
+        d.boreInspectionRings.forEach((ring, index) => { const pulse = .5 + .5 * Math.sin(time * .009 + index * Math.PI); ring.visible = inspectingBores; ring.scale.setScalar(1 + pulse * .17); ring.material.opacity = inspectingBores ? .2 + pulse * .38 : 0 });
         const connectorWorld = probe => probe.userData.connectorLocal.clone().applyQuaternion(probe.quaternion).add(probe.position), heaterConnector = connectorWorld(d.heaterProbe), thermometerConnector = connectorWorld(d.thermometerProbe);
         d.heaterRedLead.points[d.heaterRedLead.points.length - 1].copy(heaterConnector).add(new THREE.Vector3(-.035, 0, 0));
         d.heaterBlackLead.points[d.heaterBlackLead.points.length - 1].copy(heaterConnector).add(new THREE.Vector3(.035, 0, .035));
@@ -4124,11 +4387,12 @@ export class LabRenderer3D {
       }
       else if (d.kind === 'wireResistance') {
         const stage = state.wireStage || 0, t = Math.max(0, state.wireTimer || 0), clamp = q => Math.max(0, Math.min(1, q)), smooth = q => { q = clamp(q); return q * q * (3 - 2 * q) };
-        const currentLength = Math.max(20, Math.min(100, state.wireLengthCm || 20)), currentX = d.rulerStartX + d.rulerLength * currentLength / 100, nextLength = Math.min(100, currentLength + 20), nextX = d.rulerStartX + d.rulerLength * nextLength / 100;
-        const switchQ = stage === 1 ? smooth(t / .58) : stage === 2 ? 1 : 0;
-        d.switchPivot.rotation.z = THREE.MathUtils.lerp(.42, -.02, switchQ);
-        d.powerLed.material.emissiveIntensity = switchQ * (3.1 + .28 * Math.sin(time * .012)); d.powerLed.material.color.setHex(switchQ > .02 ? 0x39d79c : 0x40575d);
-        d.wireMaterial.emissiveIntensity = switchQ * (.1 + .025 * Math.sin(time * .009));
+        const currentLength = Math.max(20, Math.min(100, state.wireLengthCm || 20)), currentX = d.rulerStartX + d.rulerDirection * d.rulerLength * currentLength / 100, nextLength = Math.min(100, currentLength + 20), nextX = d.rulerStartX + d.rulerDirection * d.rulerLength * nextLength / 100;
+        const powerQ = stage === 1 ? smooth(t / .58) : stage === 2 ? 1 : 0;
+        d.powerButton.position.z = .445 - powerQ * .025;
+        d.powerButtonMaterial.color.setHex(powerQ > .02 ? 0x1f997c : 0x334b55); d.powerButtonMaterial.emissiveIntensity = powerQ * .65;
+        d.powerLed.material.emissiveIntensity = powerQ * (3.1 + .28 * Math.sin(time * .012)); d.powerLed.material.color.setHex(powerQ > .02 ? 0x39d79c : 0x40575d);
+        d.wireMaterial.emissiveIntensity = powerQ * (.1 + .025 * Math.sin(time * .009));
         let clipX = currentX, clipY = .34, openQ = 0;
         if (stage === 4) {
           openQ = smooth(t / .36) * (1 - smooth((t - 2.05) / .4));
@@ -4136,18 +4400,18 @@ export class LabRenderer3D {
         }
         d.sliderClip.position.set(clipX, clipY, d.rulerZ + .02);
         d.sliderUpperJaw.rotation.x = -.34 * openQ; d.sliderLowerJaw.rotation.x = .16 * openQ;
-        for (const lead of [d.sliderLead, d.voltSliderLead]) { lead.points[0].x = clipX; lead.points[0].y = clipY + .02; lead.points[1].x = clipX + .18; lead.points[1].y = .13 + Math.sin(Math.PI * clamp((t - .28) / 1.78)) * .1; d.updateFlexibleLead(lead) }
-        const measuredLength = Math.max(.02, clipX - d.rulerStartX);
-        d.measuredSegment.position.set(d.rulerStartX + measuredLength / 2, .252, d.rulerZ);
+        for (const lead of [d.sliderLead, d.voltSliderLead]) { lead.points[0].x = clipX; lead.points[0].y = clipY + .02; lead.points[1].x = clipX + d.rulerDirection * .18; lead.points[1].y = .13 + Math.sin(Math.PI * clamp((t - .28) / 1.78)) * .1; d.updateFlexibleLead(lead) }
+        const measuredLength = Math.max(.02, Math.abs(clipX - d.rulerStartX));
+        d.measuredSegment.position.set(d.rulerStartX + d.rulerDirection * measuredLength / 2, .252, d.rulerZ);
         d.measuredSegment.scale.set(1, measuredLength, 1);
         const targetResistance = ({ 20: 1.8, 40: 3.6, 60: 5.4, 80: 7.2, 100: 9 })[currentLength] || 1.8, targetCurrent = 1.5 / targetResistance;
-        const settle = stage === 1 ? smooth(t / 1.45) : stage === 2 ? 1 : 0, wobble = stage === 1 ? (1 - settle) * Math.sin(t * 18) * .12 : 0, displayVoltage = switchQ * (1.5 * settle + wobble), displayCurrent = switchQ * (targetCurrent * settle + wobble * .18);
+        const settle = stage === 1 ? smooth(t / 1.45) : stage === 2 ? 1 : 0, wobble = stage === 1 ? (1 - settle) * Math.sin(t * 18) * .12 : 0, displayVoltage = powerQ * (1.5 * settle + wobble), displayCurrent = powerQ * (targetCurrent * settle + wobble * .18);
         const paintDisplay = (display, value, unit, accent, label) => {
-          const { canvas, context: dc, texture } = display; dc.clearRect(0, 0, canvas.width, canvas.height); dc.fillStyle = '#071c22'; dc.fillRect(0, 0, canvas.width, canvas.height); dc.shadowColor = accent; dc.shadowBlur = 20; dc.fillStyle = switchQ > .02 ? accent : '#8ba0a3'; dc.font = '800 88px ui-monospace, SFMono-Regular, Menlo, monospace'; dc.textAlign = 'right'; dc.textBaseline = 'middle'; dc.fillText(`${Math.max(0, value).toFixed(2)} ${unit}`, canvas.width - 25, 84); dc.shadowBlur = 0; dc.fillStyle = '#aec1c5'; dc.font = '700 26px Inter, sans-serif'; dc.textAlign = 'left'; dc.fillText(label, 24, 148); texture.needsUpdate = true
+          const { canvas, context: dc, texture } = display; dc.clearRect(0, 0, canvas.width, canvas.height); dc.fillStyle = '#071c22'; dc.fillRect(0, 0, canvas.width, canvas.height); dc.strokeStyle = 'rgba(126,170,178,.2)'; dc.lineWidth = 6; dc.strokeRect(7, 7, canvas.width - 14, canvas.height - 14); dc.shadowColor = accent; dc.shadowBlur = 18; dc.fillStyle = powerQ > .02 ? accent : '#8ba0a3'; dc.font = '800 82px ui-monospace, SFMono-Regular, Menlo, monospace'; dc.textAlign = 'center'; dc.textBaseline = 'middle'; dc.fillText(`${Math.max(0, value).toFixed(2)} ${unit}`, canvas.width / 2, 96); dc.shadowBlur = 0; dc.fillStyle = '#aec1c5'; dc.font = '700 24px Inter, sans-serif'; dc.fillText(label, canvas.width / 2, 176); texture.needsUpdate = true
         };
         paintDisplay(d.ammeterDisplay, displayCurrent, 'A', '#ff8c90', 'CURRENT THROUGH WIRE'); paintDisplay(d.voltmeterDisplay, displayVoltage, 'V', '#c59cff', 'P.D. ACROSS TEST LENGTH');
-        { const { canvas, context: dc, texture } = d.supplyDisplay; dc.clearRect(0, 0, canvas.width, canvas.height); dc.fillStyle = '#071c22'; dc.fillRect(0, 0, canvas.width, canvas.height); dc.shadowColor = switchQ > .02 ? '#75ffe0' : '#6f8589'; dc.shadowBlur = 18; dc.fillStyle = switchQ > .02 ? '#8affdf' : '#9badaf'; dc.font = '800 70px ui-monospace, Menlo, monospace'; dc.textAlign = 'center'; dc.textBaseline = 'middle'; dc.fillText(switchQ > .02 ? '1.50 V' : '0.00 V', 256, 72); dc.shadowBlur = 0; dc.fillStyle = '#b4c3c5'; dc.font = '700 26px Inter, sans-serif'; dc.fillText(switchQ > .02 ? 'OUTPUT ON' : 'OUTPUT ISOLATED', 256, 136); texture.needsUpdate = true }
-        for (const particle of d.chargeParticles) { particle.mesh.visible = switchQ > .05; if (particle.mesh.visible) { const phase = (particle.phase + time * .00018 * (.5 + targetCurrent)) % 1; particle.mesh.position.set(THREE.MathUtils.lerp(d.rulerStartX, clipX, phase), .286, d.rulerZ); particle.mesh.material.opacity = .36 + .58 * Math.sin(Math.PI * phase); particle.mesh.scale.setScalar(.72 + .25 * Math.sin(time * .01 + particle.phase * 12)) } }
+        { const { canvas, context: dc, texture } = d.supplyDisplay; dc.clearRect(0, 0, canvas.width, canvas.height); dc.fillStyle = '#071c22'; dc.fillRect(0, 0, canvas.width, canvas.height); dc.shadowColor = powerQ > .02 ? '#75ffe0' : '#6f8589'; dc.shadowBlur = 18; dc.fillStyle = powerQ > .02 ? '#8affdf' : '#9badaf'; dc.font = '800 70px ui-monospace, Menlo, monospace'; dc.textAlign = 'center'; dc.textBaseline = 'middle'; dc.fillText(powerQ > .02 ? '1.50 V' : '0.00 V', 256, 72); dc.shadowBlur = 0; dc.fillStyle = '#b4c3c5'; dc.font = '700 26px Inter, sans-serif'; dc.fillText(powerQ > .02 ? 'POWER ON' : 'POWER OFF', 256, 136); texture.needsUpdate = true }
+        for (const particle of d.chargeParticles) { particle.mesh.visible = powerQ > .05; if (particle.mesh.visible) { const phase = (particle.phase + time * .00018 * (.5 + targetCurrent)) % 1; particle.mesh.position.set(THREE.MathUtils.lerp(d.rulerStartX, clipX, phase), .286, d.rulerZ); particle.mesh.material.opacity = .36 + .58 * Math.sin(Math.PI * phase); particle.mesh.scale.setScalar(.72 + .25 * Math.sin(time * .01 + particle.phase * 12)) } }
       }
       else if (d.kind === 'ivDevices') {
         const stage = state.ivStage || 0, t = Math.max(0, state.ivTimer || 0), clamp = q => Math.max(0, Math.min(1, q)), smooth = q => { q = clamp(q); return q * q * (3 - 2 * q) };
@@ -4322,6 +4586,100 @@ export class LabRenderer3D {
         for (let i = 0; i < d.patches.length; i++) { const threshold = .39 + (i % 6) * .065, spread = stage === 7 ? smooth((q - threshold) / .22) : 0; d.patches[i].visible = spread > .01; d.patches[i].scale.setScalar(.22 + spread * .92); d.patches[i].material.opacity = spread * (.55 + iodine * .32) }
         if (d.ethanolLiquid) { const greenQ = stage < 3 ? 0 : stage === 3 ? smooth((q - .54) / .28) : 1; d.ethanolLiquid.material.color.copy(new THREE.Color(0xe7eee6).lerp(new THREE.Color(0x6f9f62), greenQ)); d.ethanolLiquid.material.opacity = .62 + greenQ * .16 }
       }
+      else if (d.kind === 'antibiotics') {
+        const stage = state.antibioticStage || 0, t = Math.max(0, state.antibioticTimer || 0), clamp = value => Math.max(0, Math.min(1, value)), smooth = value => { value = clamp(value); return value * value * (3 - 2 * value) }, durations = { 1: 5.4, 3: 5.2, 5: 5.2, 7: 7.2, 9: 5.4 }, q = durations[stage] ? clamp(t / durations[stage]) : stage >= 10 ? 1 : 0;
+        const disinfecting = stage === 1, inoculating = stage === 3, placing = stage === 5, incubating = stage === 7, measuring = stage === 9;
+
+        // Surface preparation is deliberately separated from ignition. The
+        // Bunsen's yellow safety flame goes out for the flammable alcohol,
+        // then returns only after air drying, before two marker diameters are
+        // drawn on the outside of the plate base.
+        const flameOn = !(disinfecting && q < .57);
+        if (d.burnerFlame) { d.burnerFlame.sheet.visible = flameOn; d.burnerFlame.veil.visible = flameOn; d.burnerFlame.glow.visible = flameOn; if (d.burnerFlame.jets) d.burnerFlame.jets.forEach(jet => jet.visible = flameOn); d.burnerFlame.rimMat.opacity = flameOn ? .48 : 0; d.burnerFlame.hotBaseMat.opacity = flameOn ? .72 : 0 }
+        const sprayRest = new THREE.Vector3(-3.05, 0, .72), sprayWork = new THREE.Vector3(-2.25, .62, 1.05), sprayApproach = disinfecting ? smooth(q / .24) : 0, sprayReturn = disinfecting ? smooth((q - .34) / .16) : 0;
+        d.spray.position.lerpVectors(sprayRest, sprayWork, sprayApproach); if (sprayReturn > 0) d.spray.position.lerpVectors(sprayWork, sprayRest, sprayReturn); d.spray.position.y += Math.sin(Math.PI * sprayApproach) * .18; d.spray.rotation.z = disinfecting ? -.42 * smooth((q - .13) / .12) * (1 - sprayReturn) : 0;
+        d.sprayDrops.forEach((drop, index) => { const local = (q - (.17 + drop.phase * .16)) / .16, fall = clamp(local), visible = disinfecting && local >= 0 && local <= 1; drop.mesh.visible = visible; if (visible) { drop.mesh.position.set(-2.48 + drop.lateral + fall * .42, THREE.MathUtils.lerp(1.08, .055, fall * fall), 1.05 + Math.sin(index * 2.7) * .18); drop.mesh.material.opacity = Math.sin(Math.PI * Math.min(.999, fall)) * .72; drop.mesh.scale.set(.78, 1.38 - fall * .42, .78) } });
+        if (disinfecting && q > .31 && q < .53) { const work = smooth((q - .31) / .22), lanes = 3, laneRaw = work * lanes, lane = Math.min(lanes - 1, Math.floor(laneRaw)), laneQ = laneRaw - lane, startX = lane % 2 ? -1.72 : -3.12, endX = lane % 2 ? -3.12 : -1.72; d.wipe.position.set(THREE.MathUtils.lerp(startX, endX, laneQ), .055, 1.52 - lane * .55); d.wipe.rotation.y = .08 + Math.sin(work * Math.PI * 6) * .05 } else { d.wipe.position.set(-2.72, .055, 1.58); d.wipe.rotation.y = .08 }
+
+        const lineAQ = stage > 1 ? 1 : disinfecting ? smooth((q - .58) / .17) : 0, lineBQ = stage > 1 ? 1 : disinfecting ? smooth((q - .78) / .17) : 0;
+        d.divisionLines[0].scale.x = Math.max(.001, lineAQ); d.divisionLines[1].scale.x = Math.max(.001, lineBQ);
+        const markerRest = new THREE.Vector3(-1.92, .17, 1.53), firstStart = new THREE.Vector3(-1.13, .94, .08), firstEnd = new THREE.Vector3(1.13, .94, .08), secondStart = new THREE.Vector3(0, .94, -1.05), secondEnd = new THREE.Vector3(0, .94, 1.21);
+        if (disinfecting && q >= .52 && q < .98) {
+          if (q < .58) d.marker.position.lerpVectors(markerRest, firstStart, smooth((q - .52) / .06));
+          else if (q < .77) d.marker.position.lerpVectors(firstStart, firstEnd, smooth((q - .58) / .19));
+          else if (q < .95) d.marker.position.lerpVectors(secondStart, secondEnd, smooth((q - .77) / .18));
+          else d.marker.position.lerpVectors(secondEnd, markerRest, smooth((q - .95) / .03));
+          d.marker.position.y += Math.sin(Math.PI * smooth((q - .52) / .06)) * .08; d.marker.rotation.set(.08, 0, -.07)
+        } else { d.marker.position.copy(markerRest); d.marker.rotation.set(0, 0, Math.PI / 2) }
+
+        // The lid rises only a small distance and remains between the culture
+        // and surrounding air, visibly modelling minimum-opening asepsis.
+        const lidOpen = inoculating ? smooth(q / .14) * (1 - smooth((q - .72) / .08)) : placing ? smooth(q / .16) * (1 - smooth((q - .86) / .14)) : 0;
+        d.lid.position.set(-.1 * lidOpen, .2 + .34 * lidOpen, 0); d.lid.rotation.z = -.16 * lidOpen; d.lid.rotation.x = .035 * lidOpen;
+
+        const swabRest = new THREE.Vector3(-2.55, .18, 1.08); d.binLidPivot.rotation.x = 0; d.swab.visible = stage < 4;
+        if (inoculating) {
+          const approach = smooth(q / .18), passQ = clamp((q - .18) / .54), passes = 5, raw = passQ * passes, pass = Math.min(passes - 1, Math.floor(raw)), local = raw - pass, x = pass % 2 ? THREE.MathUtils.lerp(.85, -.85, local) : THREE.MathUtils.lerp(-.85, .85, local), z = -.68 + pass * .34, target = new THREE.Vector3(x, .53, z + .08);
+          if (q < .75) { d.swab.position.lerpVectors(swabRest, target, approach); if (approach >= .99) d.swab.position.copy(target); d.swab.position.y += Math.sin(Math.PI * approach) * .2; d.swab.rotation.set(-.18, .22 + pass * .08, THREE.MathUtils.lerp(Math.PI / 2, -.48, approach)) }
+          else { const binAbove = new THREE.Vector3(-3.08, 1.34, -1.38), binInside = new THREE.Vector3(-3.08, .5, -1.45), toBin = smooth((q - .75) / .16), drop = smooth((q - .91) / .08); d.swab.position.lerpVectors(target, binAbove, toBin); if (drop > 0) d.swab.position.lerpVectors(binAbove, binInside, drop); d.swab.position.y += Math.sin(Math.PI * toBin) * .34 * (1 - drop); d.swab.rotation.set(THREE.MathUtils.lerp(-.18, .2, toBin), THREE.MathUtils.lerp(.5, 0, toBin), THREE.MathUtils.lerp(-.48, .12, toBin)); d.binLidPivot.rotation.x = -1.12 * smooth((q - .72) / .08) * (1 - smooth((q - .95) / .05)); if (q > .985) d.swab.visible = false }
+        } else { d.swab.position.copy(swabRest); d.swab.rotation.set(0, 0, Math.PI / 2) }
+
+        const inoculated = stage >= 4, growth = stage < 7 ? 0 : stage > 7 ? 1 : smooth((q - .48) / .28), lawnLevel = inoculated ? .11 + growth * .52 : 0; d.lawnMat.opacity = lawnLevel;
+        d.colonies.forEach(colony => { const insideZone = d.zones.some(zone => zone.disc.diameter > 0 && Math.hypot(colony.mesh.position.x - zone.disc.position.x, colony.mesh.position.z - zone.disc.position.z) < zone.radius * (.88 + .08 * colony.phase)), appear = smooth((growth - colony.threshold * .38) / .42), opacity = appear * (insideZone ? 1 - smooth((growth - .18) / .62) : 1); colony.mesh.visible = inoculated && (growth > .01 || stage >= 4); colony.material.opacity = stage < 7 ? .035 : opacity * (.42 + colony.phase * .28); const pulse = .6 + appear * (.75 + .15 * Math.sin(time * .003 + colony.phase * 19)); colony.mesh.scale.setScalar(Math.max(.2, pulse)) });
+
+        // Coded discs travel one-by-one from the sterile card. Forceps make a
+        // smooth high arc and release without dragging across the agar.
+        const placeRaw = placing ? q * 4 : stage > 5 ? 4 : 0, activeIndex = Math.min(3, Math.floor(placeRaw)), activeLocal = clamp(placeRaw - activeIndex);
+        d.placedDiscs.forEach((disc, index) => { const placed = stage > 5 || placing && (index < activeIndex || index === activeIndex && activeLocal > .72); disc.visible = placed; d.sourceDiscs[index].visible = !placed && stage < 7 });
+        if (placing) { const source = d.sourceDiscs[activeIndex].position, targetLocal = d.discData[activeIndex].position, target = new THREE.Vector3(targetLocal.x, .72, targetLocal.z + .08), transfer = smooth(activeLocal), arc = Math.sin(Math.PI * transfer) * .58; d.forceps.position.set(THREE.MathUtils.lerp(source.x + .12, target.x + .22, transfer), THREE.MathUtils.lerp(.46, .78, transfer) + arc, THREE.MathUtils.lerp(source.z, target.z, transfer)); d.forceps.rotation.set(.08, -.18 + transfer * .35, THREE.MathUtils.lerp(Math.PI / 2, -.35, transfer)); d.forceps.scale.setScalar(.74) } else { d.forceps.position.set(2.38, .23, 1.06); d.forceps.rotation.set(0, 0, Math.PI / 2); d.forceps.scale.setScalar(.74) }
+
+        // Two short strips form a cross. The sealed plate flips, the large
+        // glass door opens, and the whole inverted dish travels onto the shelf.
+        // The door closes for growth, then repeats the motion to return it.
+        const sealed = stage > 7 || stage === 7, tapeQ = stage < 7 ? 0 : stage > 7 ? 1 : smooth(q / .18); d.tapes.forEach((tape, index) => tape.scale.x = Math.max(.001, smooth((tapeQ - index * .18) / .72)));
+        const invertQ = stage < 7 ? 0 : stage > 7 ? 1 : smooth((q - .12) / .15), benchPoint = new THREE.Vector3(0, .36, .08), shelfPoint = new THREE.Vector3(1.86, .98, -1.85), entering = stage === 7 ? smooth((q - .34) / .13) : 0, leaving = stage === 7 ? smooth((q - .78) / .13) : 0, shelfMix = entering * (1 - leaving), enteringArc = q >= .34 && q < .47 ? Math.sin(Math.PI * clamp((q - .34) / .13)) : 0, leavingArc = q >= .78 && q < .91 ? Math.sin(Math.PI * clamp((q - .78) / .13)) : 0;
+        d.plateAssembly.rotation.set(0, .02 * Math.sin(Math.PI * invertQ), Math.PI * invertQ); d.plateAssembly.position.lerpVectors(benchPoint, shelfPoint, shelfMix); d.plateAssembly.position.y += Math.sin(Math.PI * invertQ) * .72 * (1 - entering) + (enteringArc + leavingArc) * .34;
+        const entryDoor = stage === 7 ? smooth((q - .24) / .08) * (1 - smooth((q - .47) / .08)) : 0, exitDoor = stage === 7 ? smooth((q - .72) / .08) * (1 - smooth((q - .9) / .08)) : 0, doorOpen = Math.max(entryDoor, exitDoor); d.incubatorDoorPivot.rotation.y = -1.42 * doorOpen; d.incubatorInteriorLight.intensity = .28 + (incubating ? .62 : 0) + doorOpen * .35;
+        d.zones.forEach(zone => { const show = zone.disc.diameter > 0 ? smooth((growth - .22) / .63) : 0; zone.material.opacity = show * .93; zone.ringMat.opacity = show * .55; zone.mesh.scale.setScalar(.72 + show * .28); zone.ring.scale.setScalar(.72 + show * .28) });
+
+        const rulerVisible = stage >= 9; d.ruler.visible = rulerVisible;
+        if (rulerVisible) { const index = stage > 9 ? 2 : Math.min(3, Math.floor(q * 4)), local = stage > 9 ? 1 : clamp(q * 4 - index), disc = d.discData[index], transformedX = -disc.position.x, target = new THREE.Vector3(transformedX, .77, disc.position.z + .08), entry = new THREE.Vector3(2.95, .94, 1.38); d.ruler.position.lerpVectors(entry, target, smooth(local / .28)); d.ruler.position.y += Math.sin(Math.PI * smooth(local / .28)) * .18; d.ruler.rotation.y = index % 2 ? .06 : -.06; const settle = smooth((local - .28) / .28); d.ruler.position.y = THREE.MathUtils.lerp(d.ruler.position.y, .68, settle) }
+
+        const hours = stage < 7 ? 0 : stage === 7 ? growth * 48 : 48, status = stage < 7 ? 'READY · GLASS DOOR' : stage === 7 && doorOpen > .2 ? 'DOOR OPEN · TRANSFER' : stage === 7 ? 'INCUBATING · DOOR CLOSED' : stage >= 9 ? 'SEALED · MEASURE' : '48 h COMPLETE · CLOSED', displayKey = `${stage}|${Math.round(hours * 2)}|${status}`;
+        if (d.incubatorDisplay.lastKey !== displayKey) { const { canvas, context: dc, texture } = d.incubatorDisplay; dc.clearRect(0, 0, canvas.width, canvas.height); dc.fillStyle = '#061b21'; dc.fillRect(0, 0, canvas.width, canvas.height); dc.shadowColor = stage === 7 ? '#71ffe2' : '#8fb7bd'; dc.shadowBlur = stage === 7 ? 24 : 8; dc.fillStyle = stage === 7 ? '#8effe6' : '#c4d4d5'; dc.font = '800 78px ui-monospace, Menlo, monospace'; dc.textAlign = 'center'; dc.textBaseline = 'middle'; dc.fillText('25.0 °C', canvas.width / 2, 72); dc.shadowBlur = 0; dc.fillStyle = '#eef7f5'; dc.font = '800 42px ui-monospace, Menlo, monospace'; dc.fillText(`${hours.toFixed(1)} h`, canvas.width / 2, 145); dc.fillStyle = '#9db5b8'; dc.font = '700 25px Inter, sans-serif'; dc.fillText(status, canvas.width / 2, 205); texture.needsUpdate = true; d.incubatorDisplay.lastKey = displayKey }
+        d.indicator.material.emissiveIntensity = incubating ? 2.4 + .5 * Math.sin(time * .012) : sealed ? .35 : .06
+      }
+      else if (d.kind === 'respiration') {
+        const stage = state.respirationStage || 0, t = Math.max(0, state.respirationTimer || 0), clamp = value => Math.max(0, Math.min(1, value)), smooth = value => { value = clamp(value); return value * value * (3 - 2 * value) }, durations = { 1: 3.8, 3: 4.6, 5: 4.8, 7: 7.2 }, stageQ = durations[stage] ? clamp(t / durations[stage]) : stage >= 8 ? 1 : 0;
+        d.baths.forEach((bath, index) => { const surface = bath.userData.surface, volume = bath.userData.volume, meniscus = bath.userData.meniscus, lamp = bath.userData.lamp, phase = time * .0034 + index * 1.37; surface.position.y = .842 + Math.sin(phase) * .004; surface.material.opacity = .61 + Math.sin(phase * .83) * .035; volume.material.opacity = .59 + Math.sin(phase * .71) * .018; meniscus.scale.set(1 + Math.sin(phase * 1.3) * .018, 1, .92 + Math.cos(phase) * .014); lamp.scale.set(.88 + .13 * Math.sin(time * .008 + index), .88 + .13 * Math.sin(time * .008 + index), .35) });
+        const sugarQ = stage === 1 ? stageQ : stage > 1 ? 1 : 0, sugarIndex = Math.min(4, Math.floor(sugarQ * 5)), sugarLocal = clamp(sugarQ * 5 - sugarIndex), sugarRest = new THREE.Vector3(-3.02, .38, 1.1), sugarTarget = new THREE.Vector3(d.xs[sugarIndex] + .12, 1.48, d.bathZ + .04);
+        if (stage === 1) { const approach = smooth(sugarLocal / .3), retreat = smooth((sugarLocal - .76) / .24), work = sugarTarget.clone(); d.scoop.position.lerpVectors(sugarRest, work, approach); if (retreat > 0) d.scoop.position.lerpVectors(work, sugarRest, retreat); d.scoop.position.y += Math.sin(Math.PI * approach) * .16; d.scoop.rotation.z = -1.15 * smooth((sugarLocal - .24) / .16) * (1 - smooth((sugarLocal - .68) / .12)) } else { d.scoop.position.copy(sugarRest); d.scoop.rotation.set(0, 0, 0) }
+        d.sugarDeposits.forEach((deposit, index) => { deposit.visible = stage > 1 || stage === 1 && sugarQ * 5 > index + .62 });
+        d.sugarDrops.forEach((drop, index) => { const flaskIndex = Math.floor(index / 5), dropIndex = index % 5, local = (sugarQ - (flaskIndex + .29 + dropIndex * .045) / 5) / .105, fall = clamp(local), visible = stage === 1 && local >= 0 && local <= 1; drop.visible = visible; if (visible) { drop.position.set(d.xs[flaskIndex] + (dropIndex - 2) * .024, THREE.MathUtils.lerp(1.42, .38, fall * fall), d.bathZ + (dropIndex % 2 ? -.025 : .03)); drop.rotation.set(time * .004 + index, time * .003 + index * .4, time * .005); drop.material.opacity = Math.sin(Math.PI * Math.min(.999, fall)) * .94 } });
+        const yeastQ = stage === 3 ? stageQ : stage > 3 ? 1 : 0, yeastIndex = Math.min(4, Math.floor(yeastQ * 5)), yeastLocal = clamp(yeastQ * 5 - yeastIndex), cylinderRest = new THREE.Vector3(3.05, .18, 1.08), cylinderTarget = new THREE.Vector3(d.xs[yeastIndex] - .12, 1.38, d.bathZ + .04);
+        if (stage === 3) { const approach = smooth(yeastLocal / .28), retreat = smooth((yeastLocal - .8) / .2); d.measuringCylinder.position.lerpVectors(cylinderRest, cylinderTarget, approach); if (retreat > 0) d.measuringCylinder.position.lerpVectors(cylinderTarget, cylinderRest, retreat); d.measuringCylinder.position.y += Math.sin(Math.PI * approach) * .14; d.measuringCylinder.rotation.z = 1.12 * smooth((yeastLocal - .22) / .16) * (1 - smooth((yeastLocal - .72) / .16)) } else { d.measuringCylinder.position.copy(cylinderRest); d.measuringCylinder.rotation.set(0, 0, 0) }
+        d.liquids.forEach((liquid, index) => { const filled = stage > 3 || stage === 3 && yeastQ * 5 > index + .64; liquid.visible = filled; d.flasks[index].userData.meniscus.visible = filled });
+        d.yeastDrops.forEach((drop, index) => { const flaskIndex = Math.floor(index / 5), dropIndex = index % 5, local = (yeastQ - (flaskIndex + .31 + dropIndex * .042) / 5) / .1, fall = clamp(local), visible = stage === 3 && local >= 0 && local <= 1; drop.visible = visible; if (visible) { drop.position.set(d.xs[flaskIndex] + (dropIndex - 2) * .012, THREE.MathUtils.lerp(1.35, .5, fall * fall), d.bathZ + .02); drop.material.opacity = Math.sin(Math.PI * Math.min(.999, fall)) * .88; drop.scale.set(.8, 1.4 - fall * .35, .8) } });
+        const fitQ = stage === 5 ? stageQ : stage > 5 ? 1 : 0, incubationQ = stage === 7 ? stageQ : stage > 7 ? 1 : 0;
+        d.balloons.forEach((balloon, index) => { const local = smooth((fitQ - index * .14) / .28), fitted = stage > 5 || stage === 5 && local > .995, tray = d.trayPositions[index], neck = new THREE.Vector3(d.xs[index], 1.18, d.bathZ), liftTarget = new THREE.Vector3(d.xs[index], 1.62, d.bathZ), position = balloon.position; if (stage < 5) position.copy(tray); else if (stage === 5) { if (local < .56) position.lerpVectors(tray, liftTarget, smooth(local / .56)); else position.lerpVectors(liftTarget, neck, smooth((local - .56) / .44)); position.y += Math.sin(Math.PI * local) * .22 } else position.copy(neck); balloon.rotation.x = THREE.MathUtils.lerp(-Math.PI / 2, 0, stage === 5 ? local : fitted ? 1 : 0); balloon.rotation.z = stage < 5 ? (index - 2) * .08 : Math.sin(time * .002 + index) * .012 * incubationQ;
+          const lag = d.temperatures[index] === 10 ? .2 : d.temperatures[index] === 60 ? .12 : .06, reactionQ = clamp((incubationQ - lag) / Math.max(.01, 1 - lag)), liveVolume = d.finalVolumes[index] * (1 - Math.pow(1 - reactionQ, 1.65)), inflation = Math.sqrt(liveVolume / 78), body = balloon.userData.body, highlight = balloon.userData.highlight;
+          // An empty fitted balloon is a broad, soft latex bag rather than a
+          // narrow puck. Its slightly offset, tilted lobe overlaps the upright
+          // neck, then progressively straightens as gas gives it tension.
+          const floppy = 1 - smooth(inflation / .34), flopSide = index % 2 ? -1 : 1;
+          body.position.set(flopSide * .095 * floppy, .27 + inflation * .35, .018 * floppy);
+          body.rotation.set(.07 * floppy, 0, flopSide * .29 * floppy);
+          body.scale.set(.78 + inflation * .62, .43 + inflation * 1.57, .58 + inflation * .68);
+          balloon.userData.latex.opacity = .9 + inflation * .06;
+          highlight.visible = stage > 5 || stage === 5 && local > .38;
+          highlight.position.set(body.position.x - .095, body.position.y + .045 + inflation * .16, .205 + inflation * .085);
+          highlight.rotation.set(body.rotation.x, 0, body.rotation.z);
+          highlight.scale.set(.27 + inflation * .39, .24 + inflation * 1, .14 + inflation * .28);
+          highlight.material.opacity = .085 + inflation * .035;
+          d.foams[index].visible = stage >= 7 && liveVolume > .2; d.foams[index].scale.setScalar(.7 + Math.min(1, liveVolume / 30) * .38) });
+        d.fermentationBubbles.forEach(bubble => { const { flaskIndex, bubbleIndex, phase } = bubble.userData, temperature = d.temperatures[flaskIndex], rate = d.finalVolumes[flaskIndex] / 78, cycle = (time * (.00028 + rate * .0005) + phase) % 1, active = stage >= 7 && incubationQ > .035 && rate > .04; bubble.visible = active; if (active) { const angle = bubbleIndex * 2.399 + time * .0002, radius = .035 + (bubbleIndex % 4) * .03; bubble.position.set(d.xs[flaskIndex] + Math.cos(angle) * radius, .34 + cycle * .22, d.bathZ + Math.sin(angle) * radius); bubble.material.opacity = Math.sin(Math.PI * Math.min(.999, cycle)) * (.28 + rate * .52); bubble.scale.setScalar(.62 + Math.sin(Math.PI * cycle) * (.4 + rate * .3)) } });
+        if (d.timerDisplay) { const { canvas, context: dc, texture } = d.timerDisplay, minutes = stage < 7 ? 0 : stage === 7 ? incubationQ * 10 : 10, running = stage === 7; dc.clearRect(0, 0, canvas.width, canvas.height); dc.fillStyle = '#071c22'; dc.fillRect(0, 0, canvas.width, canvas.height); dc.shadowColor = running ? '#d88cff' : '#7af4dc'; dc.shadowBlur = 18; dc.fillStyle = running ? '#e1a5ff' : '#8af4df'; dc.font = '800 82px ui-monospace, SFMono-Regular, Menlo, monospace'; dc.textAlign = 'center'; dc.textBaseline = 'middle'; dc.fillText(`${String(Math.floor(minutes)).padStart(2, '0')}:${String(Math.floor((minutes % 1) * 60)).padStart(2, '0')}`, 256, 86); dc.shadowBlur = 0; dc.fillStyle = '#b6c9cd'; dc.font = '700 27px Inter, sans-serif'; dc.fillText(running ? 'ALL FLASKS · SAME TIME' : stage >= 8 ? '10 MIN COMPLETE' : 'SIMULTANEOUS TIMER', 256, 171); texture.needsUpdate = true }
+      }
       else if (d.kind === 'lipase') {
         const stage = state.lipaseStage || 0, t = Math.max(0, state.lipaseTimer || 0), clamp = q => Math.max(0, Math.min(1, q)), smooth = q => { q = clamp(q); return q * q * (3 - 2 * q) }, reactionQ = stage < 2 ? 0 : stage > 2 ? 1 : clamp(t / (2.7 + (({ 20: 68, 30: 39, 40: 22, 50: 34, 60: 104 })[state.lipaseTargetTemp] || 68) / 25));
         if (d.solution) { const pink = new THREE.Color(0xdc669d), cream = new THREE.Color(0xf1ead7), fade = smooth((reactionQ - .08) / .86); d.solution.material.color.copy(pink.lerp(cream, fade)); d.solution.material.opacity = .88 - .08 * fade; d.solution.material.roughness = .2 + .22 * fade }
@@ -4329,6 +4687,154 @@ export class LabRenderer3D {
         for (let i = 0; i < d.drops.length; i++) { const drop = d.drops[i], local = (t - (.63 + i * .14)) / .22, fall = clamp(local), visible = stage === 1 && local >= 0 && local <= 1; drop.visible = visible; if (visible) { drop.position.set(.18 + (i % 2 ? -.018 : .018), THREE.MathUtils.lerp(2.05 + lift, 1.5 + lift, fall * fall), -.4); drop.material.opacity = Math.sin(Math.PI * Math.min(.999, fall)) * .9; drop.scale.set(.78, 1.28 - fall * .3, .78) } }
         for (let i = 0; i < d.globules.length; i++) { const globule = d.globules[i], a = i * 2.399 + time * .00045 * (stage === 2 ? 1 : 0), r = .025 + (i % 5) * .022, phase = (time * .00028 + i * .137) % 1; globule.position.set(Math.cos(a) * r, .2 + (i % 9) * .055 + Math.sin(phase * Math.PI * 2) * .012, Math.sin(a) * r); const digest = Math.max(.12, 1 - reactionQ * (.58 + (i % 4) * .08)); globule.scale.setScalar(digest); globule.material.opacity = .72 * (1 - reactionQ * .62) }
         if (d.display) { const { canvas, context: dc, texture } = d.display, seconds = Math.max(0, state.time || 0), running = stage === 2; dc.clearRect(0, 0, canvas.width, canvas.height); dc.fillStyle = '#071c22'; dc.fillRect(0, 0, canvas.width, canvas.height); dc.shadowColor = running ? '#ff7fb6' : '#7af4dc'; dc.shadowBlur = 18; dc.fillStyle = running ? '#ff9bc6' : '#8af4df'; dc.font = '800 82px ui-monospace, SFMono-Regular, Menlo, monospace'; dc.textAlign = 'center'; dc.textBaseline = 'middle'; dc.fillText(`${seconds.toFixed(1)} s`, 256, 86); dc.shadowBlur = 0; dc.fillStyle = '#b6c9cd'; dc.font = '700 29px Inter, sans-serif'; dc.fillText(`${state.lipaseTargetTemp || 20} °C  ${stage === 3 ? 'ENDPOINT' : running ? 'TIMING' : 'READY'}`, 256, 171); texture.needsUpdate = true }
+      }
+      else if (d.kind === 'geneticEngineering') {
+        const stage = state.transformationStage || 0, t = Math.max(0, state.transformationTimer || 0), clamp = value => Math.max(0, Math.min(1, value)), smooth = value => { value = clamp(value); return value * value * (3 - 2 * value) }, durations = { 1: 1.8, 3: 7.8, 5: 5.8, 7: 5.8, 9: 12.6, 11: 6.4 }, q = durations[stage] ? clamp(t / durations[stage]) : stage >= 12 ? 1 : 0;
+
+        // Labels establish the matched +DNA / −DNA control design before any liquid moves.
+        const labelQ = stage === 1 ? smooth(q) : stage > 1 ? 1 : 0;
+        for (const tube of [d.plusTube, d.minusTube]) { tube.userData.label.material.opacity = labelQ; tube.userData.label.scale.setScalar(Math.max(.001, labelQ * (.92 + .08 * Math.sin(Math.PI * labelQ)))) }
+        d.plates.forEach((plate, index) => { const local = smooth((labelQ - index * .1) / .6); plate.userData.label.material.opacity = local; plate.userData.label.scale.setScalar(Math.max(.001, local)) });
+
+        // The paired tubes remain together through ice and heat shock so DNA is the only changed variable.
+        const carriage = d.tubeCarriage.position, heatPhase = stage === 5;
+        if (heatPhase) {
+          let move = 0;
+          if (q < .18) move = 0;
+          else if (q < .36) move = smooth((q - .18) / .18);
+          else if (q < .64) move = 1;
+          else if (q < .82) move = 1 - smooth((q - .64) / .18);
+          carriage.lerpVectors(d.tubeRest, d.tubeHeat, move); carriage.y += Math.sin(Math.PI * move) * .33;
+        } else carriage.copy(d.tubeRest);
+        const heating = heatPhase && q >= .36 && q <= .64;
+        d.heatLed.material.emissiveIntensity = heating ? 1.8 + Math.sin(time * .018) * .75 : .18;
+        d.heatLed.scale.set(.92 + (heating ? Math.sin(time * .018) * .13 : 0), .92 + (heating ? Math.sin(time * .018) * .13 : 0), .34);
+        d.iceCubes.forEach((cube, index) => { cube.rotation.y += .0007 * (1 + index % 3); cube.material.opacity = .52 + Math.sin(time * .0022 + index) * .1 });
+
+        const handlingTubes = stage === 3 || stage === 7 || stage === 9;
+        const tubeOpenQ = handlingTubes ? smooth(q / .08) * (1 - smooth((q - .96) / .04)) : 0;
+        d.plusTube.userData.capPivot.rotation.z = -1.82 * tubeOpenQ;
+        d.minusTube.userData.capPivot.rotation.z = 1.82 * tubeOpenQ;
+
+        // The pipette sequence is intentionally explicit: a fresh tip is fitted,
+        // the first stop is pressed before aspiration, the liquid column rises as
+        // the plunger is released, and the second stop completes each dispense.
+        const plusTarget = () => new THREE.Vector3(carriage.x - .22, 1.99, carriage.z), minusTarget = () => new THREE.Vector3(carriage.x + .22, 1.99, carriage.z), plusSurface = () => new THREE.Vector3(carriage.x - .22, carriage.y + .52, carriage.z), minusSurface = () => new THREE.Vector3(carriage.x + .22, carriage.y + .52, carriage.z), cellSource = new THREE.Vector3(-3, 1.67, .35), plasmidSource = new THREE.Vector3(-1.95, 1.67, 1), brothSource = new THREE.Vector3(-.85, 1.67, .34);
+        const attachAction = tipIndex => ({ kind: 'attach', tipIndex, target: () => d.tipPickupTargets[tipIndex] });
+        const aspirateAction = (source, colour, bottle = null) => ({ kind: 'aspirate', source, colour, bottle, target: () => source.clone() });
+        const dispenseAction = (target, dropTarget, colour, plateIndex = -1, plasmid = false) => ({ kind: 'dispense', target, dropTarget, colour, plateIndex, plasmid });
+        const ejectAction = tipIndex => ({ kind: 'eject', tipIndex, target: () => d.tipWasteTarget.clone() });
+        const spreadAction = plateIndex => ({ kind: 'spread', plateIndex, target: () => d.pipetteRest.clone() });
+        let pipetteSequence = [];
+        if (stage === 3) {
+          pipetteSequence = [attachAction(0), aspirateAction(cellSource, 0xd7c793, d.cellBottle), dispenseAction(plusTarget, plusSurface, 0xd7c793), ejectAction(0), attachAction(1), aspirateAction(cellSource, 0xd7c793, d.cellBottle), dispenseAction(minusTarget, minusSurface, 0xd7c793), ejectAction(1), attachAction(2), aspirateAction(plasmidSource, 0x7568ca, d.plasmidBottle), dispenseAction(plusTarget, plusSurface, 0x7568ca, -1, true), ejectAction(2), { kind: 'return', target: () => d.pipetteRest.clone() }];
+        } else if (stage === 7) {
+          pipetteSequence = [attachAction(3), aspirateAction(brothSource, 0xc5dfa0, d.brothBottle), dispenseAction(plusTarget, plusSurface, 0xc5dfa0), ejectAction(3), attachAction(4), aspirateAction(brothSource, 0xc5dfa0, d.brothBottle), dispenseAction(minusTarget, minusSurface, 0xc5dfa0), ejectAction(4), { kind: 'return', target: () => d.pipetteRest.clone() }];
+        } else if (stage === 9) {
+          for (let plateIndex = 0; plateIndex < d.plates.length; plateIndex++) {
+            const positive = plateIndex < 2, source = positive ? plusTarget() : minusTarget(), sourceColour = positive ? 0x7568ca : 0x69c5ce, plate = d.plates[plateIndex], plateTarget = () => plate.userData.home.clone().setY(1.38), plateSurface = () => plate.userData.home.clone().setY(.36);
+            pipetteSequence.push(attachAction(5 + plateIndex), aspirateAction(source, sourceColour), dispenseAction(plateTarget, plateSurface, sourceColour, plateIndex), ejectAction(5 + plateIndex), spreadAction(plateIndex));
+          }
+          pipetteSequence.push({ kind: 'return', target: () => d.pipetteRest.clone() });
+        }
+
+        const pipetteActive = pipetteSequence.length > 0;
+        let pipetteActionIndex = -1, pipetteActionLocal = 0, activePipetteAction = null, takenTips = stage >= 10 ? 9 : stage >= 8 ? 5 : stage >= 4 ? 3 : 0, discardedTips = takenTips, tipAttached = false, liquidAmount = 0, liquidColour = 0xd7c793;
+        if (pipetteActive) {
+          const scaled = clamp(q) * pipetteSequence.length;
+          pipetteActionIndex = Math.min(pipetteSequence.length - 1, Math.floor(scaled));
+          pipetteActionLocal = clamp(scaled - pipetteActionIndex);
+          activePipetteAction = pipetteSequence[pipetteActionIndex];
+          const previousTarget = pipetteActionIndex === 0 ? d.pipetteRest.clone() : pipetteSequence[pipetteActionIndex - 1].target(), target = activePipetteAction.target(), moveQ = smooth(pipetteActionLocal / (activePipetteAction.kind === 'return' ? .72 : .38));
+          d.pipette.position.lerpVectors(previousTarget, target, moveQ);
+          if (activePipetteAction.kind !== 'attach') d.pipette.position.y += Math.sin(Math.PI * moveQ) * .19;
+          else d.pipette.position.y -= Math.sin(Math.PI * smooth((pipetteActionLocal - .34) / .34)) * .055;
+          let upright = 1;
+          if (pipetteActionIndex === 0) upright = smooth(pipetteActionLocal / .3);
+          if (activePipetteAction.kind === 'return') upright = 1 - smooth((pipetteActionLocal - .55) / .45);
+          d.pipette.rotation.set(0, 0, THREE.MathUtils.lerp(Math.PI / 2, 0, upright));
+          d.pipette.scale.setScalar(THREE.MathUtils.lerp(.66, .72, upright));
+
+          for (let index = 0; index < pipetteActionIndex; index++) {
+            const action = pipetteSequence[index];
+            if (action.kind === 'attach') { tipAttached = true; takenTips++ }
+            else if (action.kind === 'aspirate') { liquidAmount = 1; liquidColour = action.colour }
+            else if (action.kind === 'dispense') liquidAmount = 0;
+            else if (action.kind === 'eject') { tipAttached = false; discardedTips++ }
+          }
+          if (activePipetteAction.kind === 'attach') { if (pipetteActionLocal > .52) { tipAttached = true; takenTips++ } }
+          else if (activePipetteAction.kind === 'aspirate') { tipAttached = true; liquidColour = activePipetteAction.colour; liquidAmount = smooth((pipetteActionLocal - .52) / .38) }
+          else if (activePipetteAction.kind === 'dispense') { tipAttached = true; liquidColour = activePipetteAction.colour; liquidAmount = 1 - smooth((pipetteActionLocal - .5) / .34) }
+          else if (activePipetteAction.kind === 'eject') { liquidAmount = 0; if (pipetteActionLocal > .53) tipAttached = false; if (pipetteActionLocal > .86) discardedTips++ }
+        } else {
+          d.pipette.position.copy(d.pipetteRest); d.pipette.rotation.set(0, 0, Math.PI / 2); d.pipette.scale.setScalar(.66);
+        }
+
+        d.tipEntries.forEach((tip, index) => { tip.visible = index >= takenTips });
+        d.usedTips.forEach((tip, index) => { tip.visible = index < discardedTips });
+        d.pipetteTip.visible = tipAttached;
+        d.tipLiquid.visible = tipAttached && liquidAmount > .015;
+        if (d.tipLiquid.visible) { d.tipLiquidMaterial.color.setHex(liquidColour); d.tipLiquidMaterial.emissive.copy(new THREE.Color(liquidColour).multiplyScalar(.18)); d.tipLiquid.scale.set(1, .08 + liquidAmount * .92, 1); d.tipLiquid.position.y = -1.17 + liquidAmount * .16 }
+
+        let plungerDepth = 0, ejectPress = 0;
+        if (activePipetteAction?.kind === 'attach') plungerDepth = Math.sin(Math.PI * smooth((pipetteActionLocal - .28) / .5)) * .025;
+        else if (activePipetteAction?.kind === 'aspirate') { const firstStop = smooth((pipetteActionLocal - .25) / .18), release = smooth((pipetteActionLocal - .56) / .3); plungerDepth = .1 * firstStop * (1 - release) }
+        else if (activePipetteAction?.kind === 'dispense') { const firstStop = smooth((pipetteActionLocal - .43) / .18), secondStop = smooth((pipetteActionLocal - .66) / .17); plungerDepth = .1 * firstStop + .065 * secondStop }
+        else if (activePipetteAction?.kind === 'eject') ejectPress = smooth((pipetteActionLocal - .33) / .23) * (1 - smooth((pipetteActionLocal - .82) / .18));
+        d.plungerAssembly.position.y = -plungerDepth;
+        d.ejectorButton.position.x = d.ejectorButtonHomeX + ejectPress * .055;
+        d.ejectorSleeve.position.y = -.36 - ejectPress * .09;
+
+        const setBottleCap = (bottle, amount, side) => { const cap = bottle?.userData?.capAssembly; if (!cap) return; cap.position.set(side * amount * .18, amount * .34, 0); cap.rotation.set(0, 0, side * amount * .94) };
+        let activeBottle = null;
+        if (activePipetteAction?.kind === 'aspirate' && activePipetteAction.bottle) activeBottle = activePipetteAction.bottle;
+        setBottleCap(d.cellBottle, activeBottle === d.cellBottle ? smooth(pipetteActionLocal / .26) * (1 - smooth((pipetteActionLocal - .84) / .16)) : 0, -1);
+        setBottleCap(d.plasmidBottle, activeBottle === d.plasmidBottle ? smooth(pipetteActionLocal / .26) * (1 - smooth((pipetteActionLocal - .84) / .16)) : 0, 1);
+        setBottleCap(d.brothBottle, activeBottle === d.brothBottle ? smooth(pipetteActionLocal / .26) * (1 - smooth((pipetteActionLocal - .84) / .16)) : 0, 1);
+
+        d.ejectedTip.visible = false;
+        if (activePipetteAction?.kind === 'eject' && pipetteActionLocal >= .48 && pipetteActionLocal <= .94) {
+          d.pipette.updateWorldMatrix(true, true);
+          const source = d.pipette.localToWorld(d.tipEndLocal.clone()), fall = smooth((pipetteActionLocal - .48) / .46), target = new THREE.Vector3(d.tipWasteTarget.x, .3, d.tipWasteTarget.z);
+          d.ejectedTip.visible = true; d.ejectedTip.position.lerpVectors(source, target, fall); d.ejectedTip.position.y += Math.sin(Math.PI * fall) * .12; d.ejectedTip.rotation.set(fall * 1.6, fall * 2.4, Math.PI + fall * .9); d.ejectedTip.material.opacity = .7 + Math.sin(Math.PI * fall) * .2
+        }
+
+        // Individual droplets descend from the actual tip to the receiving
+        // surface during the first-stop/second-stop dispense movement.
+        d.pipette.updateWorldMatrix(true, true);
+        const actualTipEnd = d.pipette.localToWorld(d.tipEndLocal.clone());
+        d.drops.forEach((drop, index) => {
+          const dropletIndex = index % 3, local = activePipetteAction?.kind === 'dispense' ? (pipetteActionLocal - (.49 + dropletIndex * .065)) / .27 : -1, active = index < 3 && local >= 0 && local <= 1;
+          drop.visible = active;
+          if (active) { const fall = smooth(local), target = activePipetteAction.dropTarget(); target.x += (dropletIndex - 1) * .018; target.z += (dropletIndex % 2 ? .012 : -.01); drop.position.lerpVectors(actualTipEnd, target, fall * fall); drop.material.color.setHex(activePipetteAction.colour); drop.material.opacity = Math.sin(Math.PI * Math.min(.999, fall)) * .94; drop.scale.set(.72, 1.48 - fall * .48, .72) }
+        });
+
+        // Only +DNA cells acquire the modelled circular plasmids.
+        d.plasmidRings.forEach((ring, index) => {
+          if (stage === 3 && activePipetteAction?.plasmid) { const local = (pipetteActionLocal - (.43 + index * .025)) / .34, fly = clamp(local), active = local >= 0 && local <= 1; ring.visible = active; if (active) { ring.position.lerpVectors(new THREE.Vector3(-1.95 + (index - 3) * .018, .69, 1), new THREE.Vector3(carriage.x - .22, carriage.y + .5 + index * .018, carriage.z), smooth(fly)); ring.position.y += Math.sin(Math.PI * fly) * .36; ring.rotation.set(time * .006 + index, time * .004 + index * .7, index * .5); ring.scale.setScalar(.72 + .28 * Math.sin(Math.PI * fly)) } }
+          else if (stage >= 4 || stage === 3 && pipetteActionIndex > 10) { ring.visible = true; const angle = index * .898 + time * .00055; ring.position.set(carriage.x - .22 + Math.cos(angle) * (.035 + index % 3 * .018), carriage.y + .28 + index * .04, carriage.z + Math.sin(angle) * (.025 + index % 2 * .015)); ring.rotation.set(index * .6, angle, Math.PI / 2); ring.scale.setScalar(.43) }
+          else ring.visible = false
+        });
+        d.plusTube.userData.cells.forEach((cell, index) => { const transformed = stage >= 4; cell.material.color.setHex(transformed ? 0xd8e99e : 0xf1d38b); cell.material.emissive.setHex(transformed ? 0x1f7b31 : 0x372300); cell.material.emissiveIntensity = transformed ? .18 + Math.sin(time * .003 + index) * .05 : .04 });
+
+        d.plates.forEach((plate, index) => {
+          const spreadIndex = index * 5 + 4, spreadProgress = stage > 9 || stage === 9 && pipetteActionIndex > spreadIndex ? 1 : stage === 9 && pipetteActionIndex === spreadIndex ? smooth((pipetteActionLocal - .14) / .72) : 0;
+          plate.userData.streak.material.opacity = .68 * spreadProgress;
+          let lidLift = 0;
+          if (stage === 9) { const dispenseIndex = index * 5 + 2, ejectIndex = index * 5 + 3; if (pipetteActionIndex === dispenseIndex) lidLift = smooth(pipetteActionLocal / .28); else if (pipetteActionIndex === ejectIndex) lidLift = 1; else if (pipetteActionIndex === spreadIndex) lidLift = 1 - smooth((pipetteActionLocal - .76) / .24) }
+          plate.userData.lid.position.y = .24 + lidLift * .66; plate.userData.lid.position.z = -lidLift * .32; plate.userData.lidTop.position.y = .31 + lidLift * .66; plate.userData.lidTop.position.z = -lidLift * .32
+        });
+        if (stage === 9 && activePipetteAction?.kind === 'spread') { const plate = d.plates[activePipetteAction.plateIndex], sweep = Math.sin(pipetteActionLocal * Math.PI * 4); d.spreader.visible = true; d.spreader.position.set(plate.userData.home.x + sweep * .3, .18 + Math.sin(Math.PI * pipetteActionLocal) * .045, plate.userData.home.z); d.spreader.rotation.set(.02, pipetteActionLocal * Math.PI * 1.6, -.15) } else { d.spreader.visible = true; d.spreader.position.copy(d.spreaderRest); d.spreader.rotation.set(0, -.2, 0) }
+
+        const incubating = stage === 11, incubationQ = incubating ? q : stage >= 12 ? 1 : 0, enter = incubating ? smooth(q / .18) : 0, leave = incubating ? smooth((q - .68) / .18) : stage >= 12 ? 1 : 0;
+        const incubatorTargets = [new THREE.Vector3(2.08, .4, -1.3), new THREE.Vector3(2.82, .4, -1.3), new THREE.Vector3(2.08, .66, -1.3), new THREE.Vector3(2.82, .66, -1.3)];
+        d.plates.forEach((plate, index) => { if (incubating) { plate.position.lerpVectors(plate.userData.home, incubatorTargets[index], enter); if (leave > 0) plate.position.lerpVectors(incubatorTargets[index], plate.userData.home, leave) } else plate.position.copy(plate.userData.home) });
+        const doorClosed = incubating ? smooth((q - .14) / .1) * (1 - smooth((q - .66) / .1)) : 0; d.incubatorDoorPivot.rotation.y = THREE.MathUtils.lerp(1.28, 0, doorClosed);
+        const growth = stage < 11 ? 0 : stage === 11 ? smooth((q - .24) / .42) : 1, reveal = stage === 11 ? smooth((q - .76) / .18) : stage >= 12 ? 1 : 0;
+        d.plates.forEach(plate => plate.userData.colonyEntries.forEach((entry, index) => { const local = smooth((growth - entry.threshold) / .22), visible = local > .01; entry.mesh.visible = visible; if (visible) { const lawnBoost = plate.userData.lawn ? 1.28 : 1; entry.mesh.scale.set(local * lawnBoost, .18 + local * .24, local * lawnBoost); entry.mesh.material.opacity = .2 + local * .8; if (entry.fluorescent) { entry.mesh.material.color.setHex(reveal > .05 ? 0x55ff7d : 0x6ff291); entry.mesh.material.emissive.setHex(reveal > .05 ? 0x19ed58 : 0x26bd55); entry.mesh.material.emissiveIntensity = .08 + reveal * (3.15 + .65 * Math.sin(time * .009 + index)) } else entry.mesh.material.emissiveIntensity = .035 } }));
+        d.viewer.visible = reveal > .01; d.viewerLight.intensity = reveal * 2.4; d.viewerBase.material.emissiveIntensity = .08 + reveal * .55; d.viewerGlass.material.emissiveIntensity = .2 + reveal * 1.45; d.viewerGlass.material.opacity = .34 + reveal * .42;
+
+        if (d.clockDisplay) { const { canvas, context: dc, texture } = d.clockDisplay, hours = incubationQ * 24, running = stage === 11 && q < .7; dc.clearRect(0, 0, canvas.width, canvas.height); dc.fillStyle = '#071c22'; dc.fillRect(0, 0, canvas.width, canvas.height); dc.shadowColor = running ? '#ffae68' : '#71f3d4'; dc.shadowBlur = 16; dc.fillStyle = running ? '#ffc286' : '#90f8de'; dc.font = '800 63px ui-monospace, SFMono-Regular, Menlo, monospace'; dc.textAlign = 'center'; dc.textBaseline = 'middle'; dc.fillText(`${hours.toFixed(1)} h`, 210, 57); dc.shadowBlur = 0; dc.fillStyle = '#b6c9cd'; dc.font = '700 22px Inter, sans-serif'; dc.fillText(stage >= 12 || reveal > .6 ? 'GROWTH COMPLETE' : running ? '37 °C · INCUBATING' : 'SEALED PLATES', 210, 116); texture.needsUpdate = true }
       }
       else if (d.kind === 'potometer') {
         const stage = state.potometerStage || 0, t = Math.max(0, state.potometerTimer || 0), wind = Math.max(0, state.potometerWindSpeed || 0), clamp = q => Math.max(0, Math.min(1, q)), smooth = q => { q = clamp(q); return q * q * (3 - 2 * q) }, duration = stage === 1 ? 2.5 : stage === 3 ? 2.6 : stage === 5 ? 6.2 : 1, q = clamp(t / duration), active = stage === 5;
@@ -4417,6 +4923,7 @@ export class LabRenderer3D {
         const fromZ = index === 0 ? -.92 : d.stationZ[index - 1], toZ = d.stationZ[index], q = stage === 3 ? smooth(timer / 2.15) : stage > 3 ? 1 : 0, start = new THREE.Vector3(index === 0 ? -1.55 : 0, this.shoreHeight(index === 0 ? -1.55 : 0, fromZ) + .12, fromZ), target = new THREE.Vector3(0, this.shoreHeight(0, toZ) + .11, toZ);
         if (stage < 3) d.quadrat.position.copy(start); else d.quadrat.position.lerpVectors(start, target, q); if (stage === 3) { d.quadrat.position.y += Math.sin(Math.PI * q) * .56 + (q > .78 ? Math.abs(Math.sin((q - .78) * Math.PI * 7)) * (1 - q) * .13 : 0); d.quadrat.rotation.set(Math.sin(Math.PI * q) * .1, (1 - q) * .34, Math.sin(Math.PI * q * 2) * .06) } else d.quadrat.rotation.set(0, 0, 0);
         const highlight = stage === 5 || stage === 6; for (let i = 0; i < d.organisms.length; i++) { const organism = d.organisms[i], active = highlight && organism.userData.station === index; if (organism.material?.emissive) { organism.material.emissive.setHex(active ? 0x2b9f8b : 0x000000); organism.material.emissiveIntensity = active ? .42 : 0 } if (organism.userData.species === 'seaweed') organism.rotation.z = Math.sin(clock * 1.7 + i * .61) * (.025 + .045 * tide) }
+        d.ambientSeaweed?.forEach((clump, i) => { clump.rotation.z = Math.sin(clock * 1.24 + i * .59) * (.014 + .035 * tide); clump.rotation.x = Math.sin(clock * .91 + i * .37) * (.006 + .014 * tide) });
         d.poolSeaweed?.forEach((clump, i) => { clump.rotation.z = Math.sin(clock * 1.18 + i * .83) * (.018 + .028 * tide); clump.rotation.x = Math.sin(clock * .86 + i * .47) * .012 });
         const edgeZ = THREE.MathUtils.lerp(3.95, .62, tide); d.water.position.set(0, .16, edgeZ + d.waterDepth / 2); d.waterUniforms.uTime.value = clock; d.waterUniforms.uAlpha.value = .66 + Math.sin(clock * .53) * .035;
         d.foamBands.forEach((foam, i) => { foam.position.z = edgeZ + .03 + i * .16 + Math.sin(clock * (1.25 + i * .14) + i) * .08; foam.position.y = .02 + Math.sin(clock * 2.1 + i) * .012; foam.scale.x = 1 + Math.sin(clock * .37 + i) * .025; foam.material.opacity = (.7 - i * .14) * (.76 + .24 * Math.sin(clock * 1.7 + i)) });
@@ -4636,7 +5143,10 @@ export class LabRenderer3D {
     }
     this.renderer.render(this.scene, this.camera);
     if (this.pendingCanvasReveal && !this.sceneCompiling) { this.pendingCanvasReveal = false; this.canvas.style.visibility = 'visible' }
-    if (this.sceneWarmupFrames > 0) this.sceneWarmupFrames--;
+    if (this.sceneWarmupFrames > 0) {
+      this.sceneWarmupFrames--;
+      if (this.sceneWarmupFrames > 0) this.canvas.dispatchEvent(new CustomEvent('lab3dneedsredraw'));
+    }
     if (practicalChanged && litBunsens) this.lastRenderTime = performance.now()
   }
   get isTransitioning() {
@@ -4646,5 +5156,5 @@ export class LabRenderer3D {
       this.bunsenTransitionActive && this.bunsenLoadElapsed < this.bunsenLoadDuration ||
       this.sceneWarmupFrames > 0
   }
-  get info() { return { enabled: this.available, renderer: this.available ? 'WebGL / Three.js' : 'unavailable', objects: this.root?.children.length || 0, context_lost: this.contextLost, scene_compiling: this.sceneCompiling, scene_warmup_frames: this.sceneWarmupFrames, canvas_visible: this.canvas?.style.visibility !== 'hidden' } }
+  get info() { return { enabled: this.available, renderer: this.available ? 'WebGL / Three.js' : 'unavailable', performance_profile: this.performanceProfile || 'unknown', objects: this.root?.children.length || 0, context_lost: this.contextLost, scene_compiling: this.sceneCompiling, scene_warmup_frames: this.sceneWarmupFrames, canvas_visible: this.canvas?.style.visibility !== 'hidden' } }
 }

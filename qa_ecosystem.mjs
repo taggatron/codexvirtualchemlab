@@ -227,6 +227,9 @@ try {
   assert(shoreInitial.rocky_shore_transect_practical.landscape.rock_beach_floor_bounds_world.z[0] <= -4.6 && shoreInitial.rocky_shore_transect_practical.landscape.rock_beach_floor_bounds_world.z[1] >= 7.4, 'Rock beach depth extent is insufficient.');
   assert(shoreInitial.rocky_shore_transect_practical.landscape.irregular_rock_pools, 'Organic rock-pool geometry is missing.');
   assert(shoreInitial.rocky_shore_transect_practical.landscape.rock_pool_seaweed_clumps === 12, 'Rock-pool seaweed clumps are missing.');
+  assert(shoreInitial.rocky_shore_transect_practical.landscape.organisms_distributed_beyond_measured_belt, 'Shore organisms remain confined to the measured belt.');
+  assert(JSON.stringify(shoreInitial.rocky_shore_transect_practical.landscape.ambient_organism_counts) === JSON.stringify({ limpets: 64, barnacles: 220, green_seaweed_clumps: 24, brown_seaweed_clumps: 24 }), 'The shore-wide limpet, barnacle and seaweed populations are incomplete.');
+  assert(shoreInitial.rocky_shore_transect_practical.landscape.ambient_organism_bounds_world.x[0] < -12 && shoreInitial.rocky_shore_transect_practical.landscape.ambient_organism_bounds_world.x[1] > 12, 'Ambient organisms do not span the beach width beyond the one-metre belt.');
   assert(shoreInitial.rocky_shore_transect_practical.sampling_design.first_quadrat_clear_of_cliff_face, 'First quadrat remains buried in the cliff face.');
   assert(shoreInitial.rocky_shore_transect_practical.tide.incoming_from_bottom_foreground, 'Tide does not report an incoming foreground direction.');
   assert(shoreInitial.rocky_shore_transect_practical.tide.layered_gerstner_style_waves, 'Detailed layered wave system is missing.');

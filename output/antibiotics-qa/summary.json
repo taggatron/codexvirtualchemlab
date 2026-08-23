@@ -1,0 +1,77 @@
+{
+  "errors": [],
+  "renderer": {
+    "enabled": true,
+    "renderer": "WebGL / Three.js",
+    "performance_profile": "high",
+    "objects": 1,
+    "context_lost": false,
+    "scene_compiling": false,
+    "scene_warmup_frames": 0,
+    "canvas_visible": true,
+    "legacy_2d_apparatus": false
+  },
+  "initial_phase": "sterile field ready to prepare",
+  "disinfecting_phase": "disinfecting bench",
+  "bench_disinfected": true,
+  "inoculation_phase": "inoculating bacterial lawn",
+  "minimal_lid_opening": true,
+  "discs_placed": 4,
+  "inverted": true,
+  "growing_fraction": 0.69,
+  "incubation_hours": 48,
+  "measuring_count": 1,
+  "final_results": [
+    {
+      "id": "penicillin",
+      "code": "P",
+      "antibiotic": "Penicillin",
+      "zone_diameter_mm": 18,
+      "control": false
+    },
+    {
+      "id": "erythromycin",
+      "code": "E",
+      "antibiotic": "Erythromycin",
+      "zone_diameter_mm": 24,
+      "control": false
+    },
+    {
+      "id": "tetracycline",
+      "code": "T",
+      "antibiotic": "Tetracycline",
+      "zone_diameter_mm": 30,
+      "control": false
+    },
+    {
+      "id": "control",
+      "code": "C",
+      "antibiotic": "Sterile-water control",
+      "zone_diameter_mm": 0,
+      "control": true
+    }
+  ],
+  "conclusion": "Tetracycline produced the largest inhibition zone under these controlled conditions; the sterile-water control produced no inhibition zone.",
+  "complete": true,
+  "tab": "graph",
+  "safety": {
+    "plate_never_reopened_after_incubation": true,
+    "incubated_at_25_c_not_body_temperature": true,
+    "disinfect_before_and_after": true,
+    "microbiological_waste_pressure_sterilised_or_disinfected": true
+  },
+  "sidebar": {
+    "fills_available_vertical_space": false,
+    "adaptive_section_spacing": true,
+    "remaining_height_allocated_to_content_cards": true,
+    "excessive_blank_section_gaps_removed": true,
+    "larger_responsive_typography": true,
+    "explicit_heading_to_content_spacing": true,
+    "method_stage_cards": true,
+    "method_stage_text_wrap": "complete multiline text without clipping or ellipsis",
+    "reactant_text_wrap": "complete multiline text without clipping or ellipsis",
+    "apparatus_text_wrap": "complete multiline text without clipping or ellipsis",
+    "guidance_text_wrap": "complete multiline text",
+    "compact_landscape_supported": true
+  }
+}

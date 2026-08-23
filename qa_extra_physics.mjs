@@ -15,7 +15,8 @@ page.on('console', message => {
 });
 page.on('pageerror', error => errors.push(`page: ${error.message}`));
 
-await page.goto(`http://127.0.0.1:4173/?extra-physics-qa=${Date.now()}`, { waitUntil: 'networkidle' });
+const baseUrl = process.env.LAB_URL || 'http://127.0.0.1:4173';
+await page.goto(`${baseUrl}/?extra-physics-qa=${Date.now()}`, { waitUntil: 'networkidle' });
 await page.waitForFunction(() => typeof window.render_game_to_text === 'function');
 await page.evaluate(() => { window.__manualSimulationTime = true; });
 
@@ -31,18 +32,26 @@ const capture = async name => {
   return state();
 };
 const primary = () => click(372, 837);
+async function selectPhysicsPractical(titlePattern) {
+  await click(435, 32);
+  const discovered = new Set();
+  for (let y = 105; y <= 855; y += 20) {
+    await click(130, y);
+    const snapshot = await state();
+    if (snapshot.practical) discovered.add(snapshot.practical);
+    if (titlePattern.test(snapshot.practical || '')) return snapshot;
+  }
+  throw new Error(`Could not locate ${titlePattern} in the Physics sidebar. Saw: ${[...discovered].join(', ')}`);
+}
 
-// Physics tab and resistance-versus-length card. Hooke's law and specific
-// heat capacity now sit between density and resistance in the generated rail.
-await click(435, 32);
-await click(130, 613);
+await selectPhysicsPractical(/resistance of a wire/i);
 const wireInitial = await capture('01-wire-initial');
 await click(1270, 32);
 const wireFocusLayout = await capture('01a-wire-focus-layout');
 await click(1360, 32);
 await primary();
 await advance(650);
-const wireSettling = await capture('02-wire-switch-closing');
+const wireSettling = await capture('02-wire-power-pack-starting');
 await advance(1000);
 const wireSteady = await capture('03-wire-meters-steady');
 await primary();
@@ -65,7 +74,7 @@ for (let trial = 1; trial < 5; trial++) {
 const wireComplete = await capture('07-wire-complete-graph');
 
 // Magnetic-field-pattern card.
-await click(130, 667);
+await selectPhysicsPractical(/magnetic field patterns/i);
 const fieldInitial = await capture('08-field-single-initial');
 await primary();
 await advance(1600);
@@ -135,13 +144,31 @@ fs.writeFileSync(`${out}/summary.json`, JSON.stringify(summary, null, 2));
 if (!wireInitial.renderer.enabled || wireInitial.renderer.legacy_2d_apparatus) throw new Error('WebGL renderer is not enabled.');
 if (!wireFocusLayout.focus_mode) throw new Error('Wire focus-layout capture did not enter focus mode.');
 if (!wireInitial.wire_resistance_practical.circuit_layout?.cable_lanes_separated ||
+    !wireInitial.wire_resistance_practical.circuit_layout?.smooth_cable_corners ||
     !wireInitial.wire_resistance_practical.circuit_layout?.measured_segment_highlighted ||
+    !wireInitial.wire_resistance_practical.circuit_layout?.ruler_rotated_180_degrees ||
+    !wireInitial.wire_resistance_practical.circuit_layout?.fixed_red_clamp_retains_rotated_orientation ||
+    !wireInitial.wire_resistance_practical.circuit_layout?.black_sliding_clamp_faces_camera ||
+    !wireInitial.wire_resistance_practical.circuit_layout?.black_sliding_clamp_ferrule_faces_far_side ||
+    wireInitial.wire_resistance_practical.circuit_layout?.black_series_lead_route !== 'along the far side of the ruler' ||
+    wireInitial.wire_resistance_practical.circuit_layout?.meter_housing_shape !== 'truncated square-pyramid frustum with trapezoidal faces' ||
+    JSON.stringify(wireInitial.wire_resistance_practical.circuit_layout?.visible_meter_faces) !== JSON.stringify(['front', 'top', 'left']) ||
+    !wireInitial.wire_resistance_practical.circuit_layout?.meter_screens_fit_inside_bezels ||
+    wireInitial.wire_resistance_practical.circuit_layout?.ruler_style !== 'potometer ivory-white scale with enlarged high-contrast dark blue graduations and numbers' ||
+    wireInitial.wire_resistance_practical.circuit_layout?.ruler_scale_readability?.numbers !== 'enlarged bold labels every 10 cm' ||
+    wireInitial.wire_resistance_practical.circuit_layout?.pink_parallel_lead_route !== 'around the right-hand edge of the ruler' ||
+    wireInitial.wire_resistance_practical.circuit_layout?.separate_switch_present !== false ||
+    wireInitial.wire_resistance_practical.circuit_layout?.power_pack_is_sole_circuit_control !== true ||
+    wireInitial.wire_resistance_practical.circuit_layout?.series_path.includes('switch') ||
     wireInitial.wire_resistance_practical.circuit_layout?.ammeter_label !== 'A · SERIES' ||
     wireInitial.wire_resistance_practical.circuit_layout?.voltmeter_label !== 'V · PARALLEL') {
   throw new Error('The decluttered wire-circuit layout contract is incomplete.');
 }
-if (wireSteady.wire_resistance_practical.stage !== 2 || wireSteady.wire_resistance_practical.ammeter_current_a <= 0) {
+if (wireSteady.wire_resistance_practical.stage !== 2 || !wireSteady.wire_resistance_practical.power_pack_on || wireSteady.wire_resistance_practical.ammeter_current_a <= 0) {
   throw new Error('Wire meters did not settle to a live reading.');
+}
+if (wireFirstRecorded.wire_resistance_practical.power_pack_on || wireFirstRecorded.wire_resistance_practical.measured_results.length !== 1) {
+  throw new Error('Turning the power pack off did not record the reading and de-energise the wire.');
 }
 if (wireSecondLength.wire_resistance_practical.length_cm !== 40) throw new Error('Sliding contact did not advance to 40 cm.');
 if (!wireComplete.complete || wireComplete.graph_readings !== 5) throw new Error('Wire series did not complete with five readings.');

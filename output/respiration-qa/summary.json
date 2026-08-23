@@ -1,0 +1,321 @@
+{
+  "browser_errors": [],
+  "checkpoints": {
+    "01-five-baths-ready": {
+      "id": "respiration",
+      "renderer": {
+        "enabled": true,
+        "renderer": "WebGL / Three.js",
+        "performance_profile": "high",
+        "objects": 1,
+        "context_lost": false,
+        "scene_compiling": false,
+        "scene_warmup_frames": 0,
+        "canvas_visible": true,
+        "legacy_2d_apparatus": false
+      },
+      "practical": "Anaerobic respiration in yeast",
+      "stage": 0,
+      "temperatures_c": [
+        10,
+        20,
+        30,
+        40,
+        60
+      ],
+      "apparatus": [
+        "five white-enamel thermostatic water baths with visible water",
+        "five labelled conical flasks",
+        "powder boat and glucose scoop",
+        "25 cm³ measuring cylinder",
+        "five identical coloured latex balloons",
+        "shared digital ten-minute timer"
+      ]
+    },
+    "02-equal-glucose-transfer": {
+      "stage": 1,
+      "animation": {
+        "sequential_equal_glucose_transfer": true,
+        "sequential_equal_yeast_pour": false,
+        "balloons_stretch_airtight_over_necks": false,
+        "simultaneous_timer": false,
+        "fermentation_bubbles_and_foam": false,
+        "balloon_inflation_tracks_carbon_dioxide": false,
+        "all_baths_run_for_same_time": true
+      },
+      "guidance": "Glucose crystals are falling into the 30 °C flask; each portion is exactly 5.0 g."
+    },
+    "03-equal-yeast-transfer": {
+      "stage": 3,
+      "animation": {
+        "sequential_equal_glucose_transfer": false,
+        "sequential_equal_yeast_pour": true,
+        "balloons_stretch_airtight_over_necks": false,
+        "simultaneous_timer": false,
+        "fermentation_bubbles_and_foam": false,
+        "balloon_inflation_tracks_carbon_dioxide": false,
+        "all_baths_run_for_same_time": true
+      },
+      "guidance": "Yeast suspension pours down the wall of the 30 °C flask without spilling."
+    },
+    "04-balloons-fitting": {
+      "stage": 5,
+      "animation": {
+        "sequential_equal_glucose_transfer": false,
+        "sequential_equal_yeast_pour": false,
+        "balloons_stretch_airtight_over_necks": true,
+        "simultaneous_timer": false,
+        "fermentation_bubbles_and_foam": false,
+        "balloon_inflation_tracks_carbon_dioxide": false,
+        "all_baths_run_for_same_time": true
+      },
+      "flasks": [
+        {
+          "temperature_c": 10,
+          "glucose_g": 5,
+          "yeast_suspension_cm3": 25,
+          "balloon_fitted": false,
+          "live_carbon_dioxide_cm3": 0,
+          "final_carbon_dioxide_cm3": null
+        },
+        {
+          "temperature_c": 20,
+          "glucose_g": 5,
+          "yeast_suspension_cm3": 25,
+          "balloon_fitted": false,
+          "live_carbon_dioxide_cm3": 0,
+          "final_carbon_dioxide_cm3": null
+        },
+        {
+          "temperature_c": 30,
+          "glucose_g": 5,
+          "yeast_suspension_cm3": 25,
+          "balloon_fitted": false,
+          "live_carbon_dioxide_cm3": 0,
+          "final_carbon_dioxide_cm3": null
+        },
+        {
+          "temperature_c": 40,
+          "glucose_g": 5,
+          "yeast_suspension_cm3": 25,
+          "balloon_fitted": false,
+          "live_carbon_dioxide_cm3": 0,
+          "final_carbon_dioxide_cm3": null
+        },
+        {
+          "temperature_c": 60,
+          "glucose_g": 5,
+          "yeast_suspension_cm3": 25,
+          "balloon_fitted": false,
+          "live_carbon_dioxide_cm3": 0,
+          "final_carbon_dioxide_cm3": null
+        }
+      ]
+    },
+    "05-identical-balloons-fitted": {
+      "stage": 6,
+      "flasks": [
+        {
+          "temperature_c": 10,
+          "glucose_g": 5,
+          "yeast_suspension_cm3": 25,
+          "balloon_fitted": true,
+          "live_carbon_dioxide_cm3": 0,
+          "final_carbon_dioxide_cm3": null
+        },
+        {
+          "temperature_c": 20,
+          "glucose_g": 5,
+          "yeast_suspension_cm3": 25,
+          "balloon_fitted": true,
+          "live_carbon_dioxide_cm3": 0,
+          "final_carbon_dioxide_cm3": null
+        },
+        {
+          "temperature_c": 30,
+          "glucose_g": 5,
+          "yeast_suspension_cm3": 25,
+          "balloon_fitted": true,
+          "live_carbon_dioxide_cm3": 0,
+          "final_carbon_dioxide_cm3": null
+        },
+        {
+          "temperature_c": 40,
+          "glucose_g": 5,
+          "yeast_suspension_cm3": 25,
+          "balloon_fitted": true,
+          "live_carbon_dioxide_cm3": 0,
+          "final_carbon_dioxide_cm3": null
+        },
+        {
+          "temperature_c": 60,
+          "glucose_g": 5,
+          "yeast_suspension_cm3": 25,
+          "balloon_fitted": true,
+          "live_carbon_dioxide_cm3": 0,
+          "final_carbon_dioxide_cm3": null
+        }
+      ]
+    },
+    "06-midpoint-balloon-inflation": {
+      "stage": 7,
+      "elapsed_minutes": 5.14,
+      "flasks": [
+        {
+          "temperature_c": 10,
+          "glucose_g": 5,
+          "yeast_suspension_cm3": 25,
+          "balloon_fitted": true,
+          "live_carbon_dioxide_cm3": 3.4,
+          "final_carbon_dioxide_cm3": null
+        },
+        {
+          "temperature_c": 20,
+          "glucose_g": 5,
+          "yeast_suspension_cm3": 25,
+          "balloon_fitted": true,
+          "live_carbon_dioxide_cm3": 14.6,
+          "final_carbon_dioxide_cm3": null
+        },
+        {
+          "temperature_c": 30,
+          "glucose_g": 5,
+          "yeast_suspension_cm3": 25,
+          "balloon_fitted": true,
+          "live_carbon_dioxide_cm3": 33.8,
+          "final_carbon_dioxide_cm3": null
+        },
+        {
+          "temperature_c": 40,
+          "glucose_g": 5,
+          "yeast_suspension_cm3": 25,
+          "balloon_fitted": true,
+          "live_carbon_dioxide_cm3": 51.7,
+          "final_carbon_dioxide_cm3": null
+        },
+        {
+          "temperature_c": 60,
+          "glucose_g": 5,
+          "yeast_suspension_cm3": 25,
+          "balloon_fitted": true,
+          "live_carbon_dioxide_cm3": 2.5,
+          "final_carbon_dioxide_cm3": null
+        }
+      ],
+      "animation": {
+        "sequential_equal_glucose_transfer": false,
+        "sequential_equal_yeast_pour": false,
+        "balloons_stretch_airtight_over_necks": false,
+        "simultaneous_timer": true,
+        "fermentation_bubbles_and_foam": true,
+        "balloon_inflation_tracks_carbon_dioxide": true,
+        "all_baths_run_for_same_time": true
+      }
+    },
+    "07-final-balloon-comparison": {
+      "stage": 8,
+      "elapsed_minutes": 10,
+      "flasks": [
+        {
+          "temperature_c": 10,
+          "glucose_g": 5,
+          "yeast_suspension_cm3": 25,
+          "balloon_fitted": true,
+          "live_carbon_dioxide_cm3": 6,
+          "final_carbon_dioxide_cm3": 6
+        },
+        {
+          "temperature_c": 20,
+          "glucose_g": 5,
+          "yeast_suspension_cm3": 25,
+          "balloon_fitted": true,
+          "live_carbon_dioxide_cm3": 22,
+          "final_carbon_dioxide_cm3": 22
+        },
+        {
+          "temperature_c": 30,
+          "glucose_g": 5,
+          "yeast_suspension_cm3": 25,
+          "balloon_fitted": true,
+          "live_carbon_dioxide_cm3": 51,
+          "final_carbon_dioxide_cm3": 51
+        },
+        {
+          "temperature_c": 40,
+          "glucose_g": 5,
+          "yeast_suspension_cm3": 25,
+          "balloon_fitted": true,
+          "live_carbon_dioxide_cm3": 78,
+          "final_carbon_dioxide_cm3": 78
+        },
+        {
+          "temperature_c": 60,
+          "glucose_g": 5,
+          "yeast_suspension_cm3": 25,
+          "balloon_fitted": true,
+          "live_carbon_dioxide_cm3": 4,
+          "final_carbon_dioxide_cm3": 4
+        }
+      ]
+    },
+    "08-recorded-results-and-graph": {
+      "stage": 9,
+      "complete": true,
+      "tab": "graph",
+      "graph_axes": {
+        "x": "water-bath temperature / °C",
+        "y": "carbon dioxide volume / cm³",
+        "chart_type": "line graph"
+      },
+      "results": [
+        {
+          "temperature_c": 10,
+          "time_minutes": 10,
+          "carbon_dioxide_cm3": 6,
+          "balloon_observation": "barely inflated"
+        },
+        {
+          "temperature_c": 20,
+          "time_minutes": 10,
+          "carbon_dioxide_cm3": 22,
+          "balloon_observation": "small"
+        },
+        {
+          "temperature_c": 30,
+          "time_minutes": 10,
+          "carbon_dioxide_cm3": 51,
+          "balloon_observation": "medium"
+        },
+        {
+          "temperature_c": 40,
+          "time_minutes": 10,
+          "carbon_dioxide_cm3": 78,
+          "balloon_observation": "largest"
+        },
+        {
+          "temperature_c": 60,
+          "time_minutes": 10,
+          "carbon_dioxide_cm3": 4,
+          "balloon_observation": "almost flat"
+        }
+      ],
+      "conclusion": "Carbon dioxide production rises to an optimum near 40 °C, is slow in cold conditions and falls sharply at 60 °C as respiratory enzymes are denatured.",
+      "evaluation_ready": true
+    },
+    "09-reset-five-baths-ready": {
+      "stage": 0,
+      "complete": false,
+      "result_count": 0,
+      "tab": "bench"
+    }
+  },
+  "button_labels_fit": true,
+  "final_volumes_cm3": [
+    6,
+    22,
+    51,
+    78,
+    4
+  ],
+  "reset_ok": true
+}

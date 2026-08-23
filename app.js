@@ -1,7 +1,65 @@
-import { LabRenderer3D } from './lab3d.js?v=20260817-112';
-import { drawThermalBenchScene } from './thermalview.js';
-const canvas = document.getElementById('lab'), visibleCtx = canvas.getContext('2d'), buffer = document.createElement('canvas'), webglCanvas = document.getElementById('webgl'), lab3d = new LabRenderer3D(webglCanvas); let ctx = buffer.getContext('2d');
-webglCanvas.addEventListener('lab3dneedsredraw',()=>requestAnimationFrame(()=>draw()));
+import { drawThermalBenchScene } from './thermalview.js?v=20260823-1';
+const canvas = document.getElementById('lab'), visibleCtx = canvas.getContext('2d'), buffer = document.createElement('canvas'), webglCanvas = document.getElementById('webgl');
+
+// Keep the catalogue and 2D interface interactive while the considerably larger
+// Three.js renderer downloads and initialises. This facade preserves the renderer
+// contract while WebGL warms in the background.
+class DeferredLabRenderer {
+  constructor(target) {
+    this.canvas = target; this.impl = null; this.loading = null; this.idleHandle = 0; this.preloadTimer = 0;
+    this.resizeArgs = null; this.lastRenderArgs = null; this.pendingSignature = '';
+    target.style.visibility = 'hidden';
+  }
+  ensureLoaded() {
+    if (this.impl) return Promise.resolve(this.impl);
+    if (this.loading) return this.loading;
+    if (this.preloadTimer) clearTimeout(this.preloadTimer);
+    if (this.idleHandle && 'cancelIdleCallback' in window) cancelIdleCallback(this.idleHandle);
+    this.preloadTimer = 0; this.idleHandle = 0;
+    this.loading = import('./lab3d.js?v=20260823-4').then(({ LabRenderer3D }) => {
+      const renderer = new LabRenderer3D(this.canvas);
+      renderer.signature = this.pendingSignature;
+      this.impl = renderer;
+      if (this.resizeArgs) renderer.resize(...this.resizeArgs);
+      if (this.lastRenderArgs) renderer.render(...this.lastRenderArgs);
+      this.canvas.dispatchEvent(new CustomEvent('lab3dneedsredraw'));
+      return renderer;
+    }).catch(error => {
+      console.warn('The 3D practical renderer could not be loaded; retaining the 2D interface.', error);
+      return null;
+    });
+    return this.loading;
+  }
+  preload() {
+    if (this.impl || this.loading || this.idleHandle || this.preloadTimer) return;
+    // Leave a clear paint opportunity before starting WebGL and shader work.
+    // The first pointer interaction bypasses this delay via ensureLoaded().
+    this.preloadTimer = setTimeout(() => {
+      this.preloadTimer = 0;
+      if ('requestIdleCallback' in window) this.idleHandle = requestIdleCallback(() => this.ensureLoaded(), { timeout: 1000 });
+      else this.ensureLoaded();
+    }, 250);
+  }
+  resize(...args) { this.resizeArgs = args; this.impl?.resize(...args) }
+  render(...args) { this.lastRenderArgs = args; if (this.impl) this.impl.render(...args); else this.preload() }
+  projectToScreen(...args) { return this.impl?.projectToScreen(...args) || null }
+  posFromScreen(...args) { return this.impl?.posFromScreen(...args) || null }
+  advanceBunsenLoad(...args) { return this.impl?.advanceBunsenLoad(...args) || false }
+  bunsenLoadState() { return this.impl?.bunsenLoadState() || null }
+  get available() { return !!this.impl?.available }
+  get info() { return this.impl?.info || { enabled: false, renderer: this.loading ? 'WebGL / Three.js loading' : 'deferred', objects: 0, context_lost: false, scene_compiling: !!this.loading, scene_warmup_frames: 0, canvas_visible: false } }
+  get isTransitioning() { return !!this.impl?.isTransitioning }
+  get bunsenTransitionActive() { return !!this.impl?.bunsenTransitionActive }
+  get thermiteGlowFraction() { return this.impl?.thermiteGlowFraction || 0 }
+  get osmosisRotationState() { return this.impl?.osmosisRotationState || null }
+  get pourAlignment() { return this.impl?.pourAlignment || null }
+  get signature() { return this.impl?.signature ?? this.pendingSignature }
+  set signature(value) { this.pendingSignature = value; if (this.impl) this.impl.signature = value }
+}
+
+const lab3d = new DeferredLabRenderer(webglCanvas); let ctx = buffer.getContext('2d');
+webglCanvas.addEventListener('lab3dneedsredraw', () => requestAnimationFrame(() => draw()));
+canvas.addEventListener('pointerdown', () => lab3d.ensureLoaded(), { capture: true, once: true, passive: true });
 const C = { navy: '#102a3a', ink: '#17313e', muted: '#657881', teal: '#087f75', cyan: '#4fc3b5', paper: '#f7f8f6', line: '#d8e0e2', orange: '#e48b35', red: '#b94b44', blue: '#3c78a8' };
 const practicals = [
   { id: 'free', subject: 'chemistry', icon: '✦', color: '#6d5bd0', title: 'Free workspace', sub: 'Build your own experiment', objective: 'Choose equipment from the library and arrange your own practical.', eq: 'Your workspace — explore safely and build a setup.', word: '', steps: [], gear: [], reactants: [] },
@@ -21,6 +79,9 @@ const practicals = [
   { id: 'thermite', subject: 'chemistry', icon: '✺', color: '#d95b2f', title: 'Thermite demonstration', sub: 'Extreme exothermic reaction', objective: 'Observe a highly exothermic displacement reaction from behind a protective screen.', eq: 'Fe₂O₃(s) + 2Al(s) → 2Fe(l) + Al₂O₃(s)', word: 'iron(III) oxide + aluminium → molten iron + aluminium oxide', steps: ['Check the shield and sand containment', 'Aim the small blow torch from a safe distance', 'Ignite the magnesium fuse remotely', 'Observe sparks and molten iron behind the shield'], gear: ['Glass safety screen', 'Sand-filled metal can', 'Refractory reaction cup', 'Small blow torch'], reactants: ['Sealed thermite charge', 'Magnesium fuse'] },
   { id: 'starchleaf', subject: 'biology', icon: '🍃', color: '#3f8f4f', title: 'Test a leaf for starch', sub: 'Photosynthesis evidence', objective: 'Test a leaf for stored starch using hot water, ethanol and iodine solution.', eq: 'starch + iodine → blue-black starch–iodine complex', word: 'iodine changes from orange-brown to blue-black where starch is present', steps: ['Boil the leaf in water', 'Heat it in ethanol using a water bath', 'Rinse and spread it on a white tile', 'Add iodine and observe blue-black'], gear: ['Forceps', 'Hot-water beaker', 'Ethanol tube + water bath', 'White tile + dropping pipette'], reactants: ['Fresh green leaf', 'Ethanol', 'Iodine solution'] },
   { id: 'lipase', subject: 'biology', icon: '◌', color: '#d85c91', title: 'Lipase & milk temperature', sub: 'Enzyme activity', objective: 'Investigate how temperature affects lipase digestion of fat in milk.', eq: 'lipid + water —(lipase)→ fatty acids + glycerol', word: 'milk fat + water —(lipase)→ fatty acids + glycerol', steps: ['Condition milk mixture in a water bath', 'Add the same volume of lipase', 'Time the pink indicator turning colourless', 'Repeat at five temperatures'], gear: ['Electric water bath', 'Test tube + rack', 'Dropping pipette', 'Digital stopwatch'], reactants: ['Milk + sodium carbonate', 'Phenolphthalein', 'Lipase solution'] },
+  { id: 'transformation', subject: 'biology', icon: '🧬', color: '#5b55a5', title: 'Bacterial transformation', sub: 'Plasmids, selection & GFP', objective: 'Model genetic engineering by transforming safe teaching-strain bacteria with a GFP plasmid and testing antibiotic selection and gene expression.', eq: 'plasmid DNA + competent bacterium → transformed bacterium', word: 'a bacterial cell takes up a plasmid carrying ampicillin resistance and an arabinose-controlled green fluorescent protein gene', steps: ['Label matched +DNA and −DNA controls, then add competent bacteria', 'Add GFP plasmid to +DNA only and keep both tubes ice-cold', 'Heat shock, return to ice, then add LB broth for recovery', 'Inoculate matched LB, LB/amp and LB/amp/ara agar plates', 'Incubate the sealed plates and compare growth under blue light'], gear: ['Sterile microtubes + adjustable P20 micropipette', 'Sterile-tip rack + used-tip waste cup', 'Ice bath + 42 °C heat block', 'Four sealed agar plates', 'Blue-light viewer'], reactants: ['Teaching-strain E. coli', 'GFP plasmid DNA', 'LB recovery broth', 'Ampicillin + arabinose agar'] },
+  { id: 'respiration', subject: 'biology', icon: '◍', color: '#a462ba', title: 'Anaerobic respiration in yeast', sub: 'Temperature & carbon dioxide', objective: 'Investigate how temperature affects anaerobic respiration in equal yeast-and-sugar mixtures.', eq: 'C₆H₁₂O₆ → 2C₂H₅OH + 2CO₂', word: 'glucose → ethanol + carbon dioxide', steps: ['Add the same mass of glucose to five labelled flasks', 'Add equal volumes of yeast suspension and fit identical balloons', 'Place the flasks in 10–60 °C water baths for the same 10 minutes', 'Compare balloon inflation and record the carbon dioxide volume'], gear: ['5 conical flasks + balloons', '5 thermostatic water baths', 'Measuring cylinder', 'Digital 10-minute timer'], reactants: ['Glucose powder', 'Yeast suspension', 'Warm water'] },
+  { id: 'antibiotics', subject: 'biology', icon: '⊙', color: '#397f84', title: 'Antibiotic disc efficacy', sub: 'Bacillus subtilis & asepsis', objective: 'Compare how effectively different antibiotic discs inhibit Bacillus subtilis on nutrient agar using aseptic technique.', eq: 'zone diameter / mm = widest clear diameter through the centre of each disc', word: 'a larger zone of inhibition shows greater inhibition of bacterial growth under the controlled test conditions', steps: ['Disinfect the bench, let it dry and mark four sectors on the outside of the plate base', 'Spread Bacillus subtilis evenly while opening the Petri-dish lid as little as possible, then discard the swab safely', 'Place coded antibiotic and sterile-water control discs with sterile forceps', 'Cross-tape, invert and incubate the plate at 25 °C for 48 hours', 'Measure each clear inhibition zone through the disc centre and compare efficacy'], gear: ['Nutrient-agar Petri dish', 'Sterile swab + forceps', 'Bunsen burner (safety flame)', 'Black marker + metric ruler'], reactants: ['Bacillus subtilis culture', 'Antibiotic discs', '70% surface disinfectant'] },
   { id: 'osmosis', subject: 'biology', icon: '▥', color: '#b67b42', title: 'Osmosis in potato tissue', sub: 'Sucrose concentration', objective: 'Investigate how sucrose concentration affects the mass of equal potato cylinders.', eq: '% change in mass = (final mass − initial mass) ÷ initial mass × 100', word: 'water moves through partially permeable cell membranes from a dilute solution to a more concentrated solution', steps: ['Measure equal potato cylinders and record initial mass', 'Immerse each chip in an equal volume of sucrose solution', 'Leave for the same time, then remove and blot dry', 'Reweigh and calculate percentage change in mass'], gear: ['Electronic balance', '100 cm³ beaker', 'Forceps', 'Blotting paper'], reactants: ['0.0–0.8 mol dm⁻³ sucrose', 'Equal potato cylinders', 'Distilled water'] },
   { id: 'potometer', subject: 'biology', icon: '♧', color: '#2f8d73', title: 'Bubble potometer', sub: 'Wind & transpiration', objective: 'Investigate how wind speed affects water uptake by a leafy shoot using a bubble potometer.', eq: 'rate of water uptake = distance moved by air bubble ÷ time', word: 'water absorbed by the shoot replaces water lost from the leaves by transpiration', steps: ['Cut the leafy shoot underwater and seal it into a water-filled potometer', 'Introduce one air bubble and use the refiller to align it with zero', 'Expose the shoot to a measured wind speed for 5 minutes', 'Record bubble speed, reset and repeat at four wind speeds'], gear: ['Bubble potometer', 'Leafy shoot + bung', 'Refiller + stopcock', 'Desk fan + anemometer'], reactants: ['Fresh leafy shoot', 'Water', 'Petroleum jelly seal'] },
   { id: 'pondweed', subject: 'biology', icon: '🌿', color: '#2e7d32', title: 'Light intensity & pondweed', sub: 'Photosynthesis rate', objective: 'Investigate how light intensity affects the rate of photosynthesis in pondweed by measuring oxygen bubble production.', eq: '6CO₂ + 6H₂O —(light)→ C₆H₁₂O₆ + 6O₂', word: 'carbon dioxide + water —(light)→ glucose + oxygen', steps: ['Place pondweed in NaHCO₃ solution', 'Measure 10–50 cm from the beaker edge', 'Switch on the filament lamp to acclimatise', 'Count oxygen bubbles produced in 1 minute'], gear: ['Beaker', 'Boiling tube + pondweed', 'Funnel', 'Filament desk lamp', 'Meter ruler'], reactants: ['NaHCO₃ solution', 'Elodea pondweed', 'Water'] },
@@ -37,7 +98,7 @@ const practicals = [
   { id: 'hooke', subject: 'physics', icon: '↕', color: '#9b4f87', title: 'Force and extension of a spring', sub: 'Hooke’s law & proportionality', objective: 'Measure how a spring extends under increasing force, determine its spring constant and identify where proportionality ends.', eq: 'F = kx', word: 'force (N) = spring constant (N m⁻¹) × extension (m)', steps: ['Record the unloaded pointer position as zero extension', 'Add one 100 g slotted mass and wait for the spring to settle', 'Read total length at eye level and calculate extension', 'Repeat to 6 N, plot force against extension and find the linear gradient'], gear: ['Heavy clamp stand + boss', 'Steel helical spring', 'Vertical ruler + fiducial pointer', 'Mass hanger + safety tray'], reactants: ['Steel spring', '100 g slotted masses', 'Mass hanger and safety tray'] },
   { id: 'specificheat', subject: 'physics', icon: 'ΔT', color: '#d06b38', title: 'Specific heat capacity', sub: 'Compare heated metal blocks', objective: 'Determine and compare the specific heat capacities of 1.00 kg aluminium and copper blocks from electrical energy transferred and temperature rise.', eq: 'c = ΔE / (mΔθ)', word: 'specific heat capacity = energy transferred ÷ (mass × temperature change)', steps: ['Choose a metal, add thermal paste and insert the heater and temperature probe', 'Close the insulation, zero the joulemeter and record the initial temperature', 'Switch on the low-voltage heater and record energy and temperature', 'Calculate c from ΔE ÷ (mΔθ), then compare the other metal'], gear: ['1.00 kg metal block', 'Immersion heater + probe', 'Insulating jacket', '12 V supply + joulemeter'], reactants: ['Aluminium or copper block', 'Thermal paste', 'Low-voltage electrical energy'] },
   { id: 'latentheat', subject: 'physics', icon: '⇡⇣', color: '#c66a43', title: 'Heating & cooling curves', sub: 'Latent heat and change of state', objective: 'Plot heating and cooling curves for paraffin wax or stearic acid and identify the constant-temperature change-of-state region.', eq: 'E = mL   during a change of state', word: 'energy is transferred while intermolecular bonds change, so temperature stays nearly constant during melting or freezing', steps: ['Clamp the boiling tube in the water bath and lower the thermometer into the solid sample', 'Heat gently and record temperature at equal time intervals through the melting plateau', 'Turn off the Bunsen and continue recording as the liquid cools and solidifies', 'Plot both curves and identify the plateau where latent heat is absorbed or released'], gear: ['Clamped 500 cm³ beaker water bath', 'Boiling tube + thermometer', 'Bunsen burner + heatproof mat', 'Clamp stand + timer'], reactants: ['Paraffin wax pellets', 'Stearic acid flakes', 'Hot water bath'] },
-  { id: 'wirelength', subject: 'physics', icon: 'Ω', color: '#7a4eb0', title: 'Resistance of a wire', sub: 'Length of nichrome wire', objective: 'Investigate how the resistance of a uniform wire changes as its measured length increases.', eq: 'R = V / I   and   R = ρL / A', word: 'resistance = potential difference ÷ current; for one uniform wire, resistance increases with length', steps: ['Set the sliding contact to a measured length', 'Close the switch briefly and read V and I', 'Calculate resistance using R = V ÷ I', 'Repeat for five lengths and plot R against L'], gear: ['100 cm metre ruler', 'Nichrome wire + crocodile clips', '1.5 V DC supply + switch', 'Ammeter + voltmeter'], reactants: ['20–100 cm wire lengths', 'Constant wire material & diameter', 'Low fixed potential difference'] },
+  { id: 'wirelength', subject: 'physics', icon: 'Ω', color: '#7a4eb0', title: 'Resistance of a wire', sub: 'Length of nichrome wire', objective: 'Investigate how the resistance of a uniform wire changes as its measured length increases.', eq: 'R = V / I   and   R = ρL / A', word: 'resistance = potential difference ÷ current; for one uniform wire, resistance increases with length', steps: ['Set the sliding contact to a measured length', 'Turn the power pack on briefly and read V and I', 'Turn the power pack off and calculate R = V ÷ I', 'Repeat for five lengths and plot R against L'], gear: ['100 cm metre ruler', 'Nichrome wire + crocodile clips', '1.5 V DC power pack', 'Ammeter + voltmeter'], reactants: ['20–100 cm wire lengths', 'Constant wire material & diameter', 'Low fixed potential difference'] },
   { id: 'ivdevices', subject: 'physics', icon: 'I–V', color: '#c94f72', title: 'Ohmic & non-ohmic devices', sub: 'Resistor, filament lamp & LED', objective: 'Compare current–potential difference characteristics for an ohmic resistor, a filament lamp and a light-emitting diode.', eq: 'R = V / I', word: 'current is proportional to potential difference only for an ohmic conductor at constant temperature', steps: ['Connect the ammeter in series and the voltmeter in parallel across the selected device', 'Sweep the supply from 0 to +6 V and save each settled current and potential difference', 'Switch off, reverse the polarity and repeat the sweep from 0 to −6 V', 'Compare the resistor, filament-lamp and LED I–V curves'], gear: ['Variable ±6 V DC power pack', 'Digital ammeter in series', 'Digital voltmeter in parallel', 'Switch + component test socket'], reactants: ['100 Ω fixed resistor', '6 V laboratory filament lamp', 'Red LED + 220 Ω protection resistor'] },
   { id: 'fieldlines', subject: 'physics', icon: '⌁', color: '#d45757', title: 'Magnetic field patterns', sub: 'Iron filings over magnets', objective: 'Reveal and compare magnetic-field patterns around one or two bar magnets using iron filings above paper.', eq: 'magnetic field direction outside a magnet: N → S', word: 'iron filings become temporary magnets and align along the local magnetic field', steps: ['Place the magnet configuration below the paper', 'Sprinkle a thin, even layer of iron filings', 'Tap the paper gently so the filings can rotate', 'Record single, attraction and repulsion patterns'], gear: ['Bar magnet(s)', 'White paper on clear support', 'Perforated filings shaker', 'Gentle tapping tool'], reactants: ['Fine iron filings (sealed simulation)', 'Single N–S bar magnet', 'Unlike-pole & like-pole pairs'] },
   { id: 'nuclear', subject: 'physics', icon: '☢', color: '#ffcc00', title: 'Nuclear radiation', sub: 'Alpha, Beta & Gamma', objective: 'Compare the penetrating power of alpha, beta and gamma radiation at a fixed source–detector distance using paper, aluminium and lead absorbers.', eq: 'count rate (counts min⁻¹) = corrected count ÷ time (min)', word: 'alpha is stopped by paper, beta by aluminium, gamma is reduced by thick lead', steps: ['Use tongs to place one sealed source at the fixed distance', 'Choose an absorber and lower it into the holder', 'Measure for 10 s and note the count and equivalent count rate', 'Compare α with paper, β with aluminium and γ with lead'], gear: ['Geiger–Müller tube + clamp', 'Digital scaler / counter', 'Lead-lined source store + tongs', 'Paper, aluminium and lead absorbers'], reactants: ['Americium-241 sealed source (Alpha)', 'Strontium-90 sealed source (Beta)', 'Cobalt-60 sealed source (Gamma)'] }
@@ -55,6 +116,7 @@ const graphSpecs = {
   water: { xLabel: 'heating time / s', yLabel: 'temperature / °C', xMin: 0, xMax: 12, yMin: 20, yMax: 100, yDp: 0 },
   thermite: { xLabel: 'elapsed time / s', yLabel: 'simulated core temperature / °C', xMin: 0, xMax: 8, yMin: 0, yMax: 2600, yDp: 0 },
   lipase: { xLabel: 'temperature / °C', yLabel: 'time for pink colour to disappear / s', xMin: 20, xMax: 60, yMin: 0, yMax: 120, yDp: 0 },
+  respiration: { xLabel: 'water-bath temperature / °C', yLabel: 'carbon dioxide volume / cm³', xMin: 10, xMax: 60, yMin: 0, yMax: 90, yDp: 0 },
   osmosis: { xLabel: 'sucrose concentration / mol dm⁻³', yLabel: 'percentage change in mass / %', xMin: 0, xMax: 0.8, yMin: -20, yMax: 20, yDp: 0 },
   potometer: { xLabel: 'wind speed / m s⁻¹', yLabel: 'bubble speed / mm min⁻¹', xMin: 0, xMax: 1.5, yMin: 0, yMax: 10, yDp: 1 },
   pondweed: { xLabel: 'distance from beaker edge / cm', yLabel: 'bubbles per minute', xMin: 10, xMax: 50, yMin: 0, yMax: 60, yDp: 0 },
@@ -67,7 +129,7 @@ const graphSpecs = {
   wirelength: { xLabel: 'wire length / cm', yLabel: 'resistance / Ω', xMin: 0, xMax: 100, yMin: 0, yMax: 10, yDp: 1 },
   ivdevices: { xLabel: 'potential difference across device / V', yLabel: 'current / A', xMin: -6, xMax: 6, yMin: -.22, yMax: .22, xDp: 0, yDp: 2 }
 };
-const nonGraphResultIds = new Set(['free', 'titration', 'salts', 'mass', 'co2', 'electro', 'flame', 'displacement', 'chrom', 'starchleaf', 'quadrats', 'capture', 'shoretransect', 'ripple', 'convection', 'conduction', 'thermal', 'fieldlines', 'nuclear', 'ivdevices']);
+const nonGraphResultIds = new Set(['free', 'titration', 'salts', 'mass', 'co2', 'electro', 'flame', 'displacement', 'chrom', 'starchleaf', 'transformation', 'antibiotics', 'quadrats', 'capture', 'shoretransect', 'ripple', 'convection', 'conduction', 'thermal', 'fieldlines', 'nuclear', 'ivdevices']);
 nonGraphResultIds.add('alkali');
 const GRAPH_SIDEBAR_HEADER_Y = 134, GRAPH_SIDEBAR_DESCRIPTION_OFFSET = 32;
 function currentGraphModalKind(id = practicals[state.selected]?.id) {
@@ -258,6 +320,36 @@ const practicalEvaluations = {
       'Repeat each temperature at least three times, identify anomalies and calculate a mean time or mean rate (1 ÷ time).'
     ]
   },
+  transformation: {
+    iv: 'DNA treatment and growth medium: +plasmid or −plasmid; LB, LB + ampicillin, or LB + ampicillin + arabinose',
+    dv: 'Presence and number of bacterial colonies, plus green fluorescence under blue light',
+    cvs: 'Teaching strain and cell volume, plasmid volume, ice and heat-shock times, 42 °C heat-shock temperature, recovery time, agar volume, inoculum volume and incubation conditions.',
+    improvements: [
+      'Use a fresh sterile pipette tip for every transfer and keep lids closed wherever possible so plate growth can be attributed to the intended bacteria.',
+      'Include both −DNA controls: LB confirms the cells were viable, while LB/amp confirms untransformed cells cannot grow when ampicillin is present.',
+      'Repeat the transformation, count colonies on plates with separate colonies and calculate transformation efficiency per microgram of plasmid DNA.'
+    ]
+  },
+  respiration: {
+    iv: 'Temperature of the thermostatically controlled water bath (°C)',
+    dv: 'Volume of carbon dioxide collected in the balloon after 10 minutes (cm³)',
+    cvs: 'Yeast strain and concentration, glucose mass, yeast-suspension volume, flask and balloon size, mixing method, pH and incubation time.',
+    improvements: [
+      'Equilibrate the sugar solution and yeast separately at each target temperature before mixing so every trial starts at the intended temperature.',
+      'Use a gas syringe or carbon-dioxide sensor instead of estimating gas from balloon size, because latex balloons need different pressures to stretch.',
+      'Repeat each temperature at least three times, calculate a mean and test extra temperatures around 35–40 °C to locate the optimum more precisely.'
+    ]
+  },
+  antibiotics: {
+    iv: 'Antibiotic carried by each coded paper disc (including a sterile-water control)',
+    dv: 'Diameter of the clear zone of inhibition measured through the disc centre (mm)',
+    cvs: 'Bacillus subtilis strain and inoculum density, agar depth and composition, disc diameter and spacing, incubation temperature and time, Petri-dish size and measuring method.',
+    improvements: [
+      'Repeat each antibiotic on at least three identically inoculated plates, calculate a mean zone diameter and report the range or uncertainty.',
+      'Use a sterile-water control disc and keep antibiotic discs equally spaced so a clear zone can be attributed to the antibiotic rather than handling or overlap.',
+      'Measure two perpendicular diameters for an irregular zone with digital callipers or image analysis, then calculate their mean without opening the incubated plate.'
+    ]
+  },
   osmosis: {
     iv: 'Concentration of the surrounding sucrose solution (mol dm⁻³)',
     dv: 'Percentage change in mass of the potato cylinder (%)',
@@ -413,7 +505,7 @@ const practicalEvaluations = {
     dv: 'Resistance R (Ω), calculated from the measured potential difference and current using R = V ÷ I',
     cvs: 'Wire material and diameter, supply potential difference, wire temperature, contact pressure and the same meters/leads.',
     improvements: [
-      'Open the switch between readings and use a low potential difference so the wire does not heat and change resistance.',
+      'Turn the power pack off between readings and use a low potential difference so the wire does not heat and change resistance.',
       'Measure length from the same edge of each crocodile contact and keep the wire straight against a metre ruler.',
       'Repeat each length at least three times, calculate a mean resistance and use more length intervals before drawing a best-fit line.'
     ]
@@ -504,8 +596,10 @@ const freeReactionRules = [
   { id: 'h2so4-lime', reactants: ['h2so4', 'lime'], symbol: 'H₂SO₄(aq) + Ca(OH)₂(aq) → CaSO₄(s) + 2H₂O(l)', word: 'sulfuric acid + limewater → calcium sulfate + water', kind: 'precipitate', precipitate: true, product: 'calcium sulfate precipitate', productColor: 0xd9d4bd, heat: 6, duration: 3 },
   { id: 'lime-co2', reactants: ['lime', 'CO₂'], symbol: 'Ca(OH)₂(aq) + CO₂(g) → CaCO₃(s) + H₂O(l)', word: 'limewater + carbon dioxide → calcium carbonate + water', kind: 'precipitate', precipitate: true, product: 'milky calcium carbonate', productColor: 0xe8e6d9, duration: 3 }
 ];
-const state = { selected: 0, subject: 'chemistry', subjectTabX: 149, subjectTabW: 114, sidebarScroll: { chemistry: 0, biology: 0, physics: 0 }, running: false, complete: false, temp: 20, ph: 7, time: 0, volume: 0, progress: 0, tab: 'equipment', graphModal: false, evaluationModal: false, focusMode: false, methodDropdown: false, reactantSafety: null, points: [], hover: null, drag: null, pour: null, burner: false, coolingWater: false, particles: [], layout: null, flamePhase: 0, transferred: 0, workspace: [], nextItem: 1, dose: null, reaction: null, massStage: 0, massLidOn: true, massTransfer: null, massBefore: 4.01, massAfter: null, hydrogenStage: 0, hydrogenTimer: 0, hydrogenAudioPlayed: false, hydrogenGas: 0, saltsStage: 0, saltsTimer: 0, chromSelectedDye: null, electroRecorded: false, electroWeighing: false, electroWeighTimer: 0, titrationStage: 0, titrationVolume: 0, titrationDropTimer: 0, titrationDrops: 0, titrationIndicator: false, titrationIndicatorTimer: 0, titrationRecorded: false, ratesStage: 0, ratesStageTimer: 0, ratesTrialIndex: 0, ratesTargetTemp: 20, ratesBathTemp: 20, ratesConditioning: false, ratesResults: [], thermiteTimer: 0, thermiteAudioPlayed: false, displacementStage: 0, displacementTimer: 0, displacementRecorded: false, flameTestStage: 0, flameTestTimer: 0, flameTestSalt: 0, flameTestTested: [], starchStage: 0, starchTimer: 0, lipaseStage: 0, lipaseTimer: 0, lipaseTrialIndex: 0, lipaseTargetTemp: 20, lipaseBathTemp: 20, lipaseConditioning: false, lipaseResults: [], osmosisStage: 0, osmosisTimer: 0, osmosisTrialIndex: 0, osmosisConcentration: 0, osmosisResults: [], potometerStage: 0, potometerTimer: 0, potometerTrialIndex: 0, potometerWindSpeed: 0, potometerBubbleMm: 0, potometerResults: [], pondweedDistance: 20, pondweedLampOn: true, pondweedTimer: 0, pondweedBubbles: 0, pondweedResults: [], quadratStage: 0, quadratTimer: 0, quadratSampleIndex: 0, quadratCurrentCount: 0, quadratResults: [], captureStage: 0, captureTimer: 0, captureFirstCatch: 16, captureSecondCatch: 20, captureRecaptured: 6, meadowWindClock: 0, transectStage: 0, transectTimer: 0, transectStationIndex: 0, transectDistanceM: 0, transectCurrentObservation: null, transectResults: [], shoreTideClock: 0, shoreTideProgress: 0, rippleStage: 0, rippleTimer: 0, rippleTrialIndex: 0, rippleFrequencyHz: 4, rippleTenWavelengthCm: 0, rippleWavelengthCm: 0, rippleSpeedMs: 0, rippleResults: [], rippleWaveClock: 0, newtonForce: 0.2, newtonMass: 1.0, newtonPos: 0, newtonVel: 0, newtonAcc: 0.2, newtonTimer: 0, newtonRunning: false, newtonGate1Time: null, newtonGate2Time: null, newtonGate1Velocity: null, newtonGate2Velocity: null, newtonResults: [], electromagnetStage: 0, electromagnetTimer: 0, electromagnetTrialIndex: 0, electromagnetTurns: 10, electromagnetClips: 0, electromagnetResults: [], convectionStage: 0, convectionTimer: 0, conductionStage: 0, conductionTimer: 0, thermalStage: 0, thermalTimer: 0, thermalCaptured: false, densityStage: 0, densitySample: 0, densityTimer: 0, densityRecorded: false, densityResults: [], hookeStage: 0, hookeTimer: 0, hookeTrialIndex: 0, hookeForceN: 0, hookeResults: [], shcStage: 0, shcTimer: 0, shcEnergyJ: 0, shcTemperatureC: 20, shcResults: [], wireStage: 0, wireTimer: 0, wireTrialIndex: 0, wireLengthCm: 20, wireVoltageV: 1.5, wireResults: [], fieldStage: 0, fieldTimer: 0, fieldConfigIndex: 0, fieldResults: [], nuclearStage: 0, nuclearTimer: 0, nuclearSource: 0, nuclearPreviousSource: 0, nuclearSourceTransition: 1, nuclearAbsorber: 0, nuclearCount: 0, nuclearAnimAbsorber: 0, nuclearAnimProgress: 1, nuclearResults: [], nuclearPulseClock: 0 };
+const state = { selected: 0, subject: 'chemistry', subjectTabX: 149, subjectTabW: 114, sidebarScroll: { chemistry: 0, biology: 0, physics: 0 }, running: false, complete: false, temp: 20, ph: 7, time: 0, volume: 0, progress: 0, tab: 'equipment', graphModal: false, evaluationModal: false, focusMode: false, methodDropdown: false, reactantSafety: null, points: [], hover: null, drag: null, pour: null, burner: false, coolingWater: false, particles: [], layout: null, flamePhase: 0, transferred: 0, workspace: [], nextItem: 1, dose: null, reaction: null, massStage: 0, massLidOn: true, massTransfer: null, massBefore: 4.01, massAfter: null, hydrogenStage: 0, hydrogenTimer: 0, hydrogenAudioPlayed: false, hydrogenGas: 0, saltsStage: 0, saltsTimer: 0, chromSelectedDye: null, electroRecorded: false, electroWeighing: false, electroWeighTimer: 0, titrationStage: 0, titrationVolume: 0, titrationDropTimer: 0, titrationDrops: 0, titrationIndicator: false, titrationIndicatorTimer: 0, titrationRecorded: false, ratesStage: 0, ratesStageTimer: 0, ratesTrialIndex: 0, ratesTargetTemp: 20, ratesBathTemp: 20, ratesConditioning: false, ratesResults: [], thermiteTimer: 0, thermiteAudioPlayed: false, displacementStage: 0, displacementTimer: 0, displacementRecorded: false, flameTestStage: 0, flameTestTimer: 0, flameTestSalt: 0, flameTestTested: [], starchStage: 0, starchTimer: 0, lipaseStage: 0, lipaseTimer: 0, lipaseTrialIndex: 0, lipaseTargetTemp: 20, lipaseBathTemp: 20, lipaseConditioning: false, lipaseResults: [], respirationStage: 0, respirationTimer: 0, respirationResults: [], osmosisStage: 0, osmosisTimer: 0, osmosisTrialIndex: 0, osmosisConcentration: 0, osmosisResults: [], potometerStage: 0, potometerTimer: 0, potometerTrialIndex: 0, potometerWindSpeed: 0, potometerBubbleMm: 0, potometerResults: [], pondweedDistance: 20, pondweedLampOn: true, pondweedTimer: 0, pondweedBubbles: 0, pondweedResults: [], quadratStage: 0, quadratTimer: 0, quadratSampleIndex: 0, quadratCurrentCount: 0, quadratResults: [], captureStage: 0, captureTimer: 0, captureFirstCatch: 16, captureSecondCatch: 20, captureRecaptured: 6, meadowWindClock: 0, transectStage: 0, transectTimer: 0, transectStationIndex: 0, transectDistanceM: 0, transectCurrentObservation: null, transectResults: [], shoreTideClock: 0, shoreTideProgress: 0, rippleStage: 0, rippleTimer: 0, rippleTrialIndex: 0, rippleFrequencyHz: 4, rippleTenWavelengthCm: 0, rippleWavelengthCm: 0, rippleSpeedMs: 0, rippleResults: [], rippleWaveClock: 0, newtonForce: 0.2, newtonMass: 1.0, newtonPos: 0, newtonVel: 0, newtonAcc: 0.2, newtonTimer: 0, newtonRunning: false, newtonGate1Time: null, newtonGate2Time: null, newtonGate1Velocity: null, newtonGate2Velocity: null, newtonResults: [], electromagnetStage: 0, electromagnetTimer: 0, electromagnetTrialIndex: 0, electromagnetTurns: 10, electromagnetClips: 0, electromagnetResults: [], convectionStage: 0, convectionTimer: 0, conductionStage: 0, conductionTimer: 0, thermalStage: 0, thermalTimer: 0, thermalCaptured: false, densityStage: 0, densitySample: 0, densityTimer: 0, densityRecorded: false, densityResults: [], hookeStage: 0, hookeTimer: 0, hookeTrialIndex: 0, hookeForceN: 0, hookeResults: [], shcStage: 0, shcTimer: 0, shcEnergyJ: 0, shcTemperatureC: 20, shcResults: [], wireStage: 0, wireTimer: 0, wireTrialIndex: 0, wireLengthCm: 20, wireVoltageV: 1.5, wireResults: [], fieldStage: 0, fieldTimer: 0, fieldConfigIndex: 0, fieldResults: [], nuclearStage: 0, nuclearTimer: 0, nuclearSource: 0, nuclearPreviousSource: 0, nuclearSourceTransition: 1, nuclearAbsorber: 0, nuclearCount: 0, nuclearAnimAbsorber: 0, nuclearAnimProgress: 1, nuclearResults: [], nuclearPulseClock: 0 };
 state.shcMaterial = 'aluminium';
+Object.assign(state, { transformationStage: 0, transformationTimer: 0, transformationResults: [] });
+Object.assign(state, { antibioticStage: 0, antibioticTimer: 0, antibioticResults: [], antibioticMeasuredIndex: -1 });
 Object.assign(state, { latentStage: 0, latentTimer: 0, latentMaterial: 'paraffin', latentTemperatureC: 20, latentPhaseFraction: 0, latentHeatingResults: [], latentCoolingResults: [] });
 Object.assign(state, { ivStage: 0, ivTimer: 0, ivDeviceIndex: 0, ivPreviousDeviceIndex: 0, ivDeviceTransition: 1, ivSupplyV: 0, ivDeviceV: 0, ivCurrentA: 0, ivLastSampleIndex: 0, ivSweepReadings: [], ivResults: [], ivPulseClock: 0 });
 state.toast = 'Click equipment to add it, or drag it onto the bench.';
@@ -556,6 +650,27 @@ const lipaseTemperatures = [20, 30, 40, 50, 60];
 function lipaseMeasuredTime(temp = state.lipaseTargetTemp) { return ({ 20: 68, 30: 39, 40: 22, 50: 34, 60: 104 })[temp] || 68 }
 function lipaseVisualDuration(temp = state.lipaseTargetTemp) { return 2.7 + lipaseMeasuredTime(temp) / 25 }
 function lipaseReactionProgress() { return state.lipaseStage < 2 ? 0 : state.lipaseStage > 2 ? 1 : Math.max(0, Math.min(1, state.lipaseTimer / lipaseVisualDuration())) }
+const transformationStageDurations = { 1: 1.8, 3: 7.8, 5: 5.8, 7: 5.8, 9: 12.6, 11: 6.4 };
+const transformationPlateResults = [
+  { id: 'plus_amp_ara', treatment: '+DNA', medium: 'LB / amp / ara', colonies: 74, growth: true, fluorescent: true, explanation: 'Plasmid ampR permits growth; arabinose switches on GFP expression.' },
+  { id: 'plus_amp', treatment: '+DNA', medium: 'LB / amp', colonies: 61, growth: true, fluorescent: false, explanation: 'Plasmid ampR permits growth, but without arabinose GFP remains off.' },
+  { id: 'minus_lb', treatment: '−DNA', medium: 'LB', colonies: 'lawn', growth: true, fluorescent: false, explanation: 'Non-selective LB confirms that the untransformed control cells were viable.' },
+  { id: 'minus_amp', treatment: '−DNA', medium: 'LB / amp', colonies: 0, growth: false, fluorescent: false, explanation: 'Without the plasmid, cells lack ampR and do not form colonies.' }
+];
+function transformationStageProgress() { const duration = transformationStageDurations[state.transformationStage]; return duration ? Math.max(0, Math.min(1, state.transformationTimer / duration)) : 0 }
+const respirationTemperatures = [10, 20, 30, 40, 60], respirationFinalGasVolumes = [6, 22, 51, 78, 4], respirationStageDurations = { 1: 3.8, 3: 4.6, 5: 4.8, 7: 7.2 };
+function respirationIncubationProgress() { const stage = state.respirationStage || 0; return stage < 7 ? 0 : stage > 7 ? 1 : Math.max(0, Math.min(1, state.respirationTimer / respirationStageDurations[7])) }
+function respirationGasVolume(temperature, progress = respirationIncubationProgress()) { const index = respirationTemperatures.indexOf(temperature), finalVolume = respirationFinalGasVolumes[index] || 0, lag = temperature === 10 ? .2 : temperature === 60 ? .12 : .06, q = Math.max(0, Math.min(1, (progress - lag) / Math.max(.01, 1 - lag))); return +(finalVolume * (1 - Math.pow(1 - q, 1.65))).toFixed(1) }
+const antibioticDiscs = [
+  { id: 'penicillin', code: 'P', name: 'Penicillin', diameterMm: 18, colour: '#4e83b5', angle: -2.36 },
+  { id: 'erythromycin', code: 'E', name: 'Erythromycin', diameterMm: 24, colour: '#a45d92', angle: -.78 },
+  { id: 'tetracycline', code: 'T', name: 'Tetracycline', diameterMm: 30, colour: '#d28b3d', angle: .78 },
+  { id: 'control', code: 'C', name: 'Sterile-water control', diameterMm: 0, colour: '#6e858c', angle: 2.36 }
+];
+const antibioticStageDurations = { 1: 5.4, 3: 5.2, 5: 5.2, 7: 7.2, 9: 5.4 };
+function antibioticStageProgress() { const duration = antibioticStageDurations[state.antibioticStage]; return duration ? Math.max(0, Math.min(1, state.antibioticTimer / duration)) : 0 }
+function antibioticGrowthProgress() { const stage = state.antibioticStage || 0; return stage < 7 ? 0 : stage > 7 ? 1 : antibioticStageProgress() }
+function antibioticVisibleMeasurementCount() { if (state.antibioticStage < 9) return 0; if (state.antibioticStage > 9) return antibioticDiscs.length; return Math.min(antibioticDiscs.length, Math.floor(antibioticStageProgress() * antibioticDiscs.length + .001)) }
 const osmosisConcentrations = [0, 0.2, 0.4, 0.6, 0.8], osmosisStageDurations = { 1: 2.6, 2: 5.4, 4: 3.4, 6: 3.2 }, osmosisInitialMass = 5;
 function osmosisPercentChange(concentration = state.osmosisConcentration) { return ({ 0: 16, 0.2: 8, 0.4: 1.6, 0.6: -9, 0.8: -17 })[concentration] ?? 0 }
 function osmosisFinalMass(concentration = state.osmosisConcentration) { return +(osmosisInitialMass * (1 + osmosisPercentChange(concentration) / 100)).toFixed(2) }
@@ -885,6 +1000,17 @@ function wrappedText(t, x, y, maxWidth, size = 10, color = C.ink, weight = 600, 
 function guidedReactantSafety(name, practicalId = practicals[state.selected]?.id) {
   const key = String(name).toLowerCase(), practical = practicals.find(item => item.id === practicalId);
   const detail = (rating, color, summary, handling, response, disposal) => ({ name, practicalId, practicalTitle: practical?.title || '', rating, color, summary, handling, response, disposal });
+  if (practicalId === 'transformation') {
+    if (key.includes('e. coli')) return detail('TEACHING CULTURE — KEEP SEALED', '#397f84', 'The practical models an approved non-pathogenic teaching strain, but every microbial culture must still be treated as a potential contaminant.', 'Use aseptic technique, fresh sterile tips and minimal lid opening. Wash hands before and after the practical. Keep all plates sealed after inoculation and never open an incubated plate.', 'Do not touch a spill or colony. Keep others away, alert the teacher and follow the school biological-spill procedure. Wash exposed skin thoroughly.', 'Put tubes, tips and sealed plates into the designated microbiological-waste stream for approved disinfection or pressure sterilisation; never use a normal bin or sink.');
+    if (key.includes('plasmid')) return detail('LOW HAZARD — AVOID CONTAMINATION', '#5b55a5', 'The purified teaching plasmid is low hazard, but contaminating it or transferring it to the −DNA control would invalidate the comparison.', 'Keep the tube capped, use a fresh sterile tip and add plasmid only to the clearly labelled +DNA tube. Never mouth-pipette.', 'Tell the teacher about a spill or swapped tip. Wipe the area using the approved biological-work procedure and wash exposed skin.', 'Place the plasmid tube and used tips in the designated biological laboratory waste; do not return used liquid to the stock tube.');
+    if (key.includes('lb recovery')) return detail('LOW HAZARD — STERILE MEDIUM', '#4f8f73', 'Sterile LB broth is low hazard before use, but after contact with bacteria it becomes microbiological material.', 'Use a fresh sterile tip for each tube, keep vessels capped and avoid aerosols or splashes.', 'Alert the teacher, contain a spill and use the school biological-spill procedure. Wash exposed skin with soap and water.', 'Unused sterile broth follows the local laboratory route; inoculated broth, tubes and tips require approved microbiological decontamination.');
+    return detail('SELECTIVE AGAR — KEEP PLATES SEALED', '#8b6b45', 'The modelled agar contains ampicillin and arabinose. Avoid antibiotic contact and treat every inoculated plate as microbiological material.', 'Wear eye protection, handle plates by the base, cross-seal as directed and incubate only in the simulation or under teacher-controlled school procedures. Never reopen after incubation.', 'Keep a damaged or spilled plate contained, prevent access and alert the teacher. Wash exposed skin and follow the biological-spill procedure.', 'Dispose of every sealed inoculated plate through the approved microbiological-waste route for decontamination; never put it in a normal bin.');
+  }
+  if (practicalId === 'antibiotics') {
+    if (key.includes('bacillus')) return detail('ASEPTIC CULTURE — KEEP SEALED', '#397f84', 'Bacillus subtilis is represented as an approved non-pathogenic teaching strain, but all microbial cultures must still be treated as potential contaminants.', 'Disinfect the bench before and after work, wash hands, use sterile tools and open the Petri-dish lid only far enough and for as little time as needed. Once incubated, do not reopen the plate.', 'Keep a spill contained, prevent access and alert the teacher. Do not touch colonies. Follow the school biological-spill procedure and wash exposed skin thoroughly.', 'Place every used swab, disc and sealed plate in the designated microbiological-waste container for pressure sterilisation or approved disinfectant treatment; never put cultures in a normal bin or sink.');
+    if (key.includes('antibiotic')) return detail('LOW HAZARD / SENSITISATION', '#5a6fa2', 'Small teaching antibiotic discs are low hazard in normal use, but direct contact may trigger sensitisation or contaminate the test.', 'Handle discs only with sterile forceps. Avoid skin contact, keep discs separated and close the lid immediately after placement.', 'Wash skin after contact and tell the teacher if irritation occurs or if a disc is dropped outside the sterile field.', 'Dispose of every used disc with the sealed culture plate as microbiological waste; do not return exposed discs to the stock container.');
+    return detail('FLAMMABLE SURFACE DISINFECTANT', '#c96f43', 'A 70% alcohol surface disinfectant is flammable and may irritate eyes or damaged skin.', 'Wear eye protection, spray the bench lightly away from the face and wipe it fully. Keep the bottle capped and far from flames, sparks and hot equipment.', 'Remove ignition sources, tell the teacher and absorb a small spill with the approved material. Rinse eyes or skin with water if exposed.', 'Let the cleaned surface air-dry. Put used wipes in the designated waste container according to the school procedure.');
+  }
   if (practicalId === 'nuclear') return detail('IONISING RADIATION — SEALED SOURCE', '#c99500', 'A radioactive source emits ionising radiation. The simulation shows sealed school sources; the animated tracks are an explanatory model and are not visible in a real experiment.', 'Teacher-controlled use only. Keep exposure time short, maximise distance, use the long-handled tongs, never touch a source and keep it in the lead-lined store whenever it is not clamped in the holder.', 'Do not approach or pick up a dropped or damaged source. Clear the area, prevent access and alert the responsible teacher or radiation-protection supervisor immediately.', 'Never discard a source. Use tongs to return an intact source to its labelled shielded store under the school’s local rules and source-accounting procedure.');
   if (practicalId === 'ivdevices') return detail('LOW VOLTAGE / HOT LAMP', '#b96b38', 'The school power pack is low voltage, but a filament lamp can become hot and an LED can be damaged by excessive forward current or reverse voltage.', 'Keep the supply off while changing devices or polarity. Use the LED protection resistor, begin at 0 V and do not touch the lamp until it has cooled.', 'Switch off and disconnect the power pack if a component overheats, smells unusual or a lead becomes damaged; report it to the teacher.', 'Allow the lamp to cool. Return intact components and leads to the electrical-equipment tray; damaged electronic parts follow the school e-waste route.');
   if (practicalId === 'alkali') return detail('HIGHLY REACTIVE — SIMULATION ONLY', '#944f8f', 'Lithium, sodium and potassium react exothermically with water, releasing flammable hydrogen and strongly alkaline hydroxide solution.', 'Do not carry out this comparison as a student practical. The screen, tiny stored-under-oil samples and remote forceps are represented only in this simulation or an approved teacher demonstration.', 'Keep clear of any real reaction and alert staff immediately for a spill, fire or splash. Never add water to an alkali-metal fire.', 'Only trained staff may quench and dispose of alkali-metal residues using the current school procedure; never put residues or contaminated water into a normal sink.');
@@ -1005,7 +1131,7 @@ function drawTestTube(x, y, scale = 1, opt = {}) { ctx.save(); ctx.translate(x, 
 function drawTripod(x, baseY, scale = 1) { ctx.save(); ctx.translate(x, baseY); ctx.scale(scale, scale); ctx.strokeStyle = '#596a70'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(-44, -82); ctx.lineTo(-60, 0); ctx.moveTo(44, -82); ctx.lineTo(60, 0); ctx.moveTo(0, -82); ctx.lineTo(0, 0); ctx.stroke(); ctx.fillStyle = '#738489'; ctx.fillRect(-52, -89, 104, 9); ctx.strokeStyle = '#d2d8d9'; ctx.lineWidth = 1; for (let i = -45; i <= 45; i += 10) { ctx.beginPath(); ctx.moveTo(i, -89); ctx.lineTo(i, -80); ctx.stroke() } ctx.restore() }
 function drawBalance(x, y, scale = 1, opt = {}) { ctx.save(); ctx.translate(x, y); ctx.scale(scale, scale); ctx.fillStyle = 'rgba(20,40,48,.2)'; ctx.filter = 'blur(5px)'; ctx.beginPath(); ctx.ellipse(0, 38, 64, 9, 0, 0, 7); ctx.fill(); ctx.filter = 'none'; let g = ctx.createLinearGradient(0, -34, 0, 40); g.addColorStop(0, '#6d7d84'); g.addColorStop(.5, '#35474f'); g.addColorStop(1, '#20333c'); ctx.fillStyle = g; ctx.beginPath(); ctx.roundRect(-65, -32, 130, 72, 12); ctx.fill(); ctx.strokeStyle = '#152b34'; ctx.stroke(); ctx.fillStyle = '#0c252d'; ctx.beginPath(); ctx.roundRect(-47, -19, 94, 28, 5); ctx.fill(); text(`${(opt.mass || 0).toFixed(2)} g`, 0, -5, 17, '#63e4ce', 750, 'center'); let tray = ctx.createRadialGradient(0, 18, 2, 0, 18, 38); tray.addColorStop(0, '#f5f7f7'); tray.addColorStop(1, '#87979c'); ctx.fillStyle = tray; ctx.beginPath(); ctx.ellipse(0, 22, 39, 10, 0, 0, 7); ctx.fill(); ctx.restore() }
 function drawMeter(x, y, reading = null) { ctx.save(); ctx.translate(x, y); ctx.rotate(-.08); const body = ctx.createLinearGradient(-18, 0, 18, 0); body.addColorStop(0, '#8e1722'); body.addColorStop(.3, '#e3474f'); body.addColorStop(.62, '#c82332'); body.addColorStop(1, '#74111b'); ctx.fillStyle = body; ctx.strokeStyle = '#6f1019'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(-4, 58); ctx.quadraticCurveTo(-7, 48, -8, 25); ctx.lineTo(-12, -25); ctx.quadraticCurveTo(-22, -35, -23, -52); ctx.lineTo(-23, -98); ctx.quadraticCurveTo(-22, -113, -10, -119); ctx.quadraticCurveTo(0, -125, 10, -119); ctx.quadraticCurveTo(22, -113, 23, -98); ctx.lineTo(23, -52); ctx.quadraticCurveTo(22, -35, 12, -25); ctx.lineTo(8, 25); ctx.quadraticCurveTo(7, 48, 4, 58); ctx.quadraticCurveTo(0, 68, -4, 58); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillStyle = 'rgba(255,255,255,.3)'; ctx.beginPath(); ctx.roundRect(-16, -109, 5, 71, 3); ctx.fill(); rr(-18, -91, 36, 24, 4, '#121d22', '#ff7e80'); text(reading == null ? '– –' : reading.toFixed(2), 0, -79, reading == null ? 10 : 11, '#f4fff9', 800, 'center'); text('pH', 0, -101, 6.5, '#ffd7d8', 800, 'center'); ctx.fillStyle = '#343c3f'; ctx.beginPath(); ctx.ellipse(0, 58, 4.2, 7, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore() }
-function tripodGauzeScreenPoint(tripod) { if (!tripod) return null; const world = lab3d.posFromScreen(tripod.x, tripod.y); return lab3d.projectToScreen(world.x, 2.1, world.z) }
+function tripodGauzeScreenPoint(tripod) { if (!tripod) return null; const world = lab3d.posFromScreen(tripod.x, tripod.y); return world ? lab3d.projectToScreen(world.x, 2.1, world.z) : { x: tripod.x, y: tripod.y - 84 } }
 function isHeatVessel(it) { return it?.type === 'beaker' || it?.type === 'flask' }
 function isPhVessel(it) { return it?.type === 'beaker' || it?.type === 'tube' }
 function workspaceScreenAnchor(it) { if (it?.type === 'phmeter' && it.attachedTo) { const target = state.workspace.find(a => a.uid === it.attachedTo && isPhVessel(a)); if (target) return workspaceScreenAnchor(target) } if (isHeatVessel(it) && it.snappedTo) { const support = state.workspace.find(a => a.uid === it.snappedTo && a.type === 'tripod'), point = tripodGauzeScreenPoint(support); if (point) return point } return { x: it.x, y: it.y } }
@@ -1116,6 +1242,9 @@ function drawChemicalTags(id) {
     thermite: [['Sand-filled safety can', [0, 0, .18], 15]],
     starchleaf: [['BOILING WATER', [-2.35, 0, .05], 22, { size: 8.2, minWidth: 104 }], ['ETHANOL · WATER BATH', [-.35, 0, -.42], 37, { size: 8.1, minWidth: 134 }], ['WARM RINSE', [1.28, 0, .16], 22, { size: 8.2, minWidth: 90 }], ['IODINE TILE', [2.55, 0, .15], 22, { size: 8.2, minWidth: 86 }]],
     lipase: [['LIPASE', [-2.05, 0, .05], 24], ['MILK + INDICATOR', [.24, .2, -.15], 27, { size: 8.2, minWidth: 118 }], ['ELECTRIC WATER BATH', [.55, 0, -.38], 44, { size: 8.1, minWidth: 128 }]],
+    transformation: [],
+    respiration: [['GLUCOSE', [-2.78, 0, .92], 24], ['YEAST SUSPENSION', [2.75, 0, .92], 26, { size: 8.1, minWidth: 108 }], ['SAME 10 MINUTES', [0, 0, -.92], 30, { size: 8.1, minWidth: 104 }]],
+    antibiotics: state.antibioticStage >= 7 ? [['SEALED · INVERTED · 25 °C', [0, .12, .05], 34, { size: 8.1, minWidth: 146 }]] : [['B. SUBTILIS · NUTRIENT AGAR', [0, .12, .05], 38, { size: 8.1, minWidth: 158 }], ['STERILE DISC SET', [2.35, .05, .74], 27, { size: 8.1, minWidth: 104 }]],
     osmosis: [[state.osmosisConcentration === 0 ? 'DISTILLED WATER · 0.0 M' : `${state.osmosisConcentration.toFixed(1)} M SUCROSE`, [0, 0, -.3], 30, { size: 8.1, minWidth: 126 }], ['BLOT DRY', [2.28, 0, .12], 25, { size: 8.1, minWidth: 72 }]],
     potometer: [['SEALED LEAFY SHOOT', [-.15, 2.48, -.15], -5, { size: 8.1, minWidth: 112 }], ['GRADUATED CAPILLARY', [1.32, .3, .02], 34, { size: 7.9, minWidth: 124 }], [`WIND ${state.potometerWindSpeed.toFixed(1)} m s⁻¹`, [-2.42, .38, -.25], 23, { size: 8.1, minWidth: 104 }]],
     pondweed: [['FILAMENT LAMP', [pondweedWorld.lampBaseX + .26, 1.72, -.6], -8], [`Elodea (${state.pondweedDistance} cm)`, [pondweedWorld.beakerX, -0.22, -.6], 48, { size: 8.2, minWidth: 110 }], ['Meter ruler', [pondweedWorld.beakerEdgeX - 1.15, -0.22, -.05], 48, { size: 8.2, minWidth: 96 }]],
@@ -1167,6 +1296,26 @@ function starchPrimaryLabel() { return ['BOIL LEAF', 'BOILING…', 'MOVE TO ETHA
 function drawStarchControls(x, benchY) { const stage = state.starchStage || 0, busy = [1, 3, 5, 7].includes(stage), statuses = ['FRESH GREEN LEAF', 'IN BOILING WATER', 'LEAF SOFTENED', 'CHLOROPHYLL REMOVING', 'PALE LEAF READY', 'RINSING LEAF', 'ON WHITE TILE', 'IODINE SPREADING', 'BLUE-BLACK · STARCH']; progressButton(starchPrimaryLabel(), x + 30, benchY + 46, 166, 38, timedRatio(state.starchTimer, starchStageDurations[stage], busy), busy); rr(x + 206, benchY + 46, 164, 38, 8, '#f5f7f6', C.line); text(statuses[stage], x + 288, benchY + 65, (statuses[stage] || '').length > 19 ? 8.1 : 9.1, stage === 8 ? '#26344f' : C.ink, 800, 'center'); button('RESULT', x + 380, benchY + 46, 78, 38, state.tab === 'graph') }
 function lipasePrimaryLabel() { if (state.lipaseConditioning) return 'HEATING BATH…'; if (state.lipaseStage === 0) return 'ADD LIPASE'; if (state.lipaseStage === 1) return 'ADDING LIPASE…'; if (state.lipaseStage === 2) return 'REACTION RUNNING…'; return state.lipaseResults.length < lipaseTemperatures.length ? 'NEXT TEMPERATURE' : 'VIEW GRAPH' }
 function drawLipaseControls(x, benchY) { const busy = state.lipaseConditioning || state.lipaseStage === 1 || state.lipaseStage === 2, q = lipaseReactionProgress(), conditioningSpan = Math.max(.01, Math.abs(state.lipaseTargetTemp - 20)), fill = state.lipaseConditioning ? timedRatio(Math.abs(state.lipaseBathTemp - 20), conditioningSpan) : state.lipaseStage === 1 ? timedRatio(state.lipaseTimer, 1.8) : q; progressButton(lipasePrimaryLabel(), x + 30, benchY + 46, 166, 38, fill, busy); button('RESET SERIES', x + 206, benchY + 46, 110, 38, false); button('GRAPH', x + 326, benchY + 46, 76, 38, state.tab === 'graph'); text(`TRIAL ${Math.min(lipaseTemperatures.length, state.lipaseTrialIndex + 1)} / ${lipaseTemperatures.length}  ·  ${state.lipaseTargetTemp} °C  ·  ${Math.round(q * 100)}%`, x + 30, benchY + 31, 9.3, '#d8e8ed', 750) }
+function transformationPrimaryLabel() { return ['LABEL CONTROLS', 'LABELLING…', 'ADD CELLS + DNA', 'PIPETTING…', 'ICE + HEAT SHOCK', 'HEAT SHOCK…', 'ADD LB + RECOVER', 'RECOVERING…', 'PLATE CELLS', 'SPREADING…', 'INCUBATE PLATES', 'INCUBATING…', 'VIEW RESULTS'][state.transformationStage || 0] || 'LABEL CONTROLS' }
+function transformationStatus() { return ['STERILE SETUP READY', '+DNA / −DNA LABELS', 'CONTROLS LABELLED', 'PLASMID TO +DNA ONLY', 'TUBES ICE-COLD', '42 °C · 50 s', 'HEAT-SHOCK COMPLETE', 'LB RECOVERY', 'CELLS RECOVERED', 'FOUR PLATES INOCULATED', 'SEALED PLATES READY', '37 °C · OVERNIGHT', 'GFP RESULT REVEALED'][state.transformationStage || 0] || 'STERILE SETUP READY' }
+function drawTransformationControls(x, benchY) { const stage = state.transformationStage || 0, busy = !!transformationStageDurations[stage]; progressButton(transformationPrimaryLabel(), x + 20, benchY + 46, 176, 38, transformationStageProgress(), busy && state.running); button('RESET', x + 206, benchY + 46, 82, 38, false); button('PLATES', x + 298, benchY + 46, 82, 38, state.tab === 'graph'); text(`pGLO-STYLE MODEL  ·  ${transformationStatus()}`, x + 20, benchY + 31, 8.8, '#d8e8ed', 750) }
+function respirationPrimaryLabel() { return ['ADD GLUCOSE', 'ADDING GLUCOSE…', 'ADD YEAST', 'POURING YEAST…', 'FIT BALLOONS', 'FITTING BALLOONS…', 'START 10 MIN RUN', 'INCUBATING…', 'RECORD RESULTS', 'VIEW GRAPH'][state.respirationStage || 0] }
+function respirationStageProgress() { const duration = respirationStageDurations[state.respirationStage]; return duration ? timedRatio(state.respirationTimer, duration, state.running) : state.respirationStage >= 8 ? 1 : 0 }
+function drawRespirationControls(x, benchY) {
+  const busy = [1, 3, 5, 7].includes(state.respirationStage), elapsedMinutes = state.respirationStage < 7 ? 0 : state.respirationStage === 7 ? respirationIncubationProgress() * 10 : 10;
+  progressButton(respirationPrimaryLabel(), x + 20, benchY + 46, 174, 38, respirationStageProgress(), busy);
+  button('RESET PRACTICAL', x + 204, benchY + 46, 116, 38, false);
+  button('GRAPH', x + 330, benchY + 46, 76, 38, state.tab === 'graph');
+  text(`5 TEMPERATURES  ·  EQUAL YEAST + GLUCOSE  ·  ${elapsedMinutes.toFixed(1)} / 10.0 min`, x + 20, benchY + 31, 8.7, '#d8e8ed', 750);
+}
+function antibioticPrimaryLabel() { return ['PREPARE ASEPTICALLY', 'CLEANING + MARKING…', 'INOCULATE AGAR', 'INOCULATING + DISPOSING…', 'PLACE DISCS', 'PLACING DISCS…', 'SEAL + INCUBATE', 'INCUBATOR RUNNING…', 'MEASURE ZONES', 'MEASURING ZONES…', 'VIEW RESULTS'][state.antibioticStage || 0] || 'PREPARE ASEPTICALLY' }
+function drawAntibioticControls(x, benchY) {
+  const stage = state.antibioticStage || 0, busy = !!antibioticStageDurations[stage] && state.running, measured = antibioticVisibleMeasurementCount(), growth = antibioticGrowthProgress();
+  progressButton(antibioticPrimaryLabel(), x + 20, benchY + 46, 182, 38, busy ? antibioticStageProgress() : stage >= 8 ? 1 : 0, busy);
+  button('RESET', x + 212, benchY + 46, 82, 38, false);
+  button('RESULTS', x + 304, benchY + 46, 88, 38, state.tab === 'graph');
+  text(stage >= 7 && stage <= 8 ? `GLASS-DOOR INCUBATOR  ·  25 °C  ·  ${(growth * 48).toFixed(0)} / 48 h` : stage >= 9 ? `${measured} / 4 ZONES MEASURED  ·  LID REMAINS CLOSED` : stage >= 2 ? '4 MARKED SECTORS  ·  SAFETY FLAME  ·  BIOHAZARD DISPOSAL' : 'ASEPTIC FIELD  ·  FLAME OFF WHILE DISINFECTING', x + 20, benchY + 31, 8.25, '#d8e8ed', 750);
+}
 function osmosisPrimaryLabel() { return ['LOWER CHIP', 'TRANSFERRING…', 'SOAKING…', 'REMOVE & BLOT', 'BLOTTING…', 'REWEIGH CHIP', 'REWEIGHING…', state.osmosisResults.length < osmosisConcentrations.length ? 'NEXT CONCENTRATION' : 'VIEW GRAPH'][state.osmosisStage || 0] }
 function drawOsmosisControls(x, benchY) { const busy = [1, 2, 4, 6].includes(state.osmosisStage), q = osmosisProcessProgress(); progressButton(osmosisPrimaryLabel(), x + 30, benchY + 46, 174, 38, timedRatio(state.osmosisTimer, osmosisStageDurations[state.osmosisStage], busy), busy); button('RESET SERIES', x + 214, benchY + 46, 108, 38, false); button('GRAPH', x + 332, benchY + 46, 76, 38, state.tab === 'graph'); text(`TRIAL ${Math.min(osmosisConcentrations.length, state.osmosisTrialIndex + 1)} / ${osmosisConcentrations.length}  ·  ${state.osmosisConcentration.toFixed(1)} mol dm⁻³  ·  ${Math.round(q * 30)} min`, x + 30, benchY + 31, 9.1, '#d8e8ed', 750) }
 function potometerPrimaryLabel() { return ['INTRODUCE BUBBLE', 'INTRODUCING…', 'ALIGN TO ZERO', 'ALIGNING…', 'START 5 MIN RUN', 'MEASURING…', state.potometerResults.length < potometerWindSpeeds.length ? 'NEXT WIND SPEED' : 'VIEW GRAPH'][state.potometerStage || 0] }
@@ -1326,7 +1475,7 @@ function drawMethodDropdownPanel() {
 }
 
 function main() {
-  const L = state.focusMode ? 0 : 270, R = state.focusMode ? 0 : Math.max(260, Math.min(330, W * .23)), x = L, w = W - L - R, p = practicals[state.selected], free = p.id === 'free', wrappedObjective = ['titration', 'displacement', 'alkali', 'starchleaf', 'lipase', 'osmosis', 'potometer', 'quadrats', 'capture', 'shoretransect', 'ripple', 'electromagnet', 'convection', 'conduction', 'thermal', 'hooke', 'specificheat', 'latentheat', 'wirelength', 'ivdevices', 'fieldlines'].includes(p.id), equationY = wrappedObjective ? 151 : 143;
+  const L = state.focusMode ? 0 : 270, R = state.focusMode ? 0 : Math.max(260, Math.min(330, W * .23)), x = L, w = W - L - R, p = practicals[state.selected], free = p.id === 'free', wrappedObjective = ['titration', 'displacement', 'alkali', 'starchleaf', 'lipase', 'transformation', 'respiration', 'antibiotics', 'osmosis', 'potometer', 'quadrats', 'capture', 'shoretransect', 'ripple', 'electromagnet', 'convection', 'conduction', 'thermal', 'hooke', 'specificheat', 'latentheat', 'wirelength', 'ivdevices', 'fieldlines'].includes(p.id), equationY = wrappedObjective ? 151 : 143;
   if (!state.focusMode) {
     ctx.fillStyle = '#fff'; ctx.fillRect(x, 64, w, H - 64); text(p.title.toUpperCase(), x + 28, 91, 11, p.color || C.teal, 800); if (wrappedObjective) wrappedText(p.objective, x + 28, 113, Math.min(w - 56, 700), 17, C.ink, 650, 21, 2); else text(p.objective, x + 28, 119, 17, C.ink, 650); if (free) { if (state.reaction) drawFreeReactionCard(x, w); else { rr(x + 26, 143, w - 52, 54, 8, '#f1eefb'); text('QUICK START', x + 40, 158, 9, C.muted, 800); text(p.eq, x + 40, 179, 13, C.ink, 600) } } else { rr(x + 26, equationY, w - 52, 72, 8, '#f2f6f5'); text('SYMBOL EQUATION', x + 40, equationY + 17, 8.5, C.muted, 800); text(p.eq, x + 145, equationY + 17, 12, C.ink, 650); text('WORD EQUATION', x + 40, equationY + 47, 8.5, C.muted, 800); wrappedText(p.word, x + 145, equationY + 47, w - 190, 10.2, C.ink, 600, 12, 2) }
   }
@@ -1359,11 +1508,11 @@ function main() {
   if (p.id === 'alkali') {
     drawAlkaliControls(x, benchY);
   } else {
-  if (free) { button('CLEAR BENCH', x + 30, benchY + 46, 112, 38, false); button('UNDO LAST', x + 152, benchY + 46, 105, 38, false); text(`${state.workspace.length} item${state.workspace.length === 1 ? '' : 's'} on bench`, x + 278, benchY + 65, 11, '#d8e8ed', 650) } else if (p.id === 'rates') drawRatesControls(x, benchY); else if (p.id === 'mass') drawMassControls(x, benchY); else if (p.id === 'hydrogen') drawHydrogenControls(x, benchY); else if (p.id === 'titration') drawTitrationControls(x, benchY); else if (p.id === 'salts') drawSaltsControls(x, benchY); else if (p.id === 'water') drawWaterControls(x, benchY); else if (p.id === 'electro') drawElectroControls(x, benchY); else if (p.id === 'flame') drawFlameTestControls(x, benchY); else if (p.id === 'displacement') drawDisplacementControls(x, benchY); else if (p.id === 'thermite') drawThermiteControls(x, benchY); else if (p.id === 'starchleaf') drawStarchControls(x, benchY); else if (p.id === 'lipase') drawLipaseControls(x, benchY); else if (p.id === 'osmosis') drawOsmosisControls(x, benchY); else if (p.id === 'potometer') drawPotometerControls(x, benchY); else if (p.id === 'pondweed') drawPondweedControls(x, benchY, w); else if (p.id === 'quadrats') drawQuadratControls(x, benchY); else if (p.id === 'capture') drawCaptureControls(x, benchY, w); else if (p.id === 'shoretransect') drawShoreTransectControls(x, benchY); else if (p.id === 'ripple') drawRippleControls(x, benchY); else if (p.id === 'newton2') drawNewton2Controls(x, benchY, w); else if (p.id === 'electromagnet') drawElectromagnetControls(x, benchY); else if (p.id === 'convection') drawConvectionControls(x, benchY); else if (p.id === 'conduction') drawConductionControls(x, benchY); else if (p.id === 'thermal') drawThermalControls(x, benchY); else if (p.id === 'density') drawDensityControls(x, benchY); else if (p.id === 'hooke') drawHookeControls(x, benchY); else if (p.id === 'specificheat') drawSpecificHeatControls(x, benchY); else if (p.id === 'latentheat') drawLatentHeatControls(x, benchY); else if (p.id === 'wirelength') drawWireLengthControls(x, benchY); else if (p.id === 'ivdevices') drawIvDeviceControls(x, benchY); else if (p.id === 'fieldlines') drawFieldLineControls(x, benchY); else if (p.id === 'nuclear') drawNuclearControls(x, benchY); else { progressButton(state.running ? 'RESET' : 'START', x + 30, benchY + 46, 112, 38, state.progress, state.running); progressButton('ADD REAGENT', x + 152, benchY + 46, 120, 38, state.pour ? timedRatio(state.pour.t, 3.6) : 0, !!state.pour); button('RECORD', x + 282, benchY + 46, 90, 38, false) }
+  if (free) { button('CLEAR BENCH', x + 30, benchY + 46, 112, 38, false); button('UNDO LAST', x + 152, benchY + 46, 105, 38, false); text(`${state.workspace.length} item${state.workspace.length === 1 ? '' : 's'} on bench`, x + 278, benchY + 65, 11, '#d8e8ed', 650) } else if (p.id === 'rates') drawRatesControls(x, benchY); else if (p.id === 'mass') drawMassControls(x, benchY); else if (p.id === 'hydrogen') drawHydrogenControls(x, benchY); else if (p.id === 'titration') drawTitrationControls(x, benchY); else if (p.id === 'salts') drawSaltsControls(x, benchY); else if (p.id === 'water') drawWaterControls(x, benchY); else if (p.id === 'electro') drawElectroControls(x, benchY); else if (p.id === 'flame') drawFlameTestControls(x, benchY); else if (p.id === 'displacement') drawDisplacementControls(x, benchY); else if (p.id === 'thermite') drawThermiteControls(x, benchY); else if (p.id === 'starchleaf') drawStarchControls(x, benchY); else if (p.id === 'lipase') drawLipaseControls(x, benchY); else if (p.id === 'transformation') drawTransformationControls(x, benchY); else if (p.id === 'respiration') drawRespirationControls(x, benchY); else if (p.id === 'antibiotics') drawAntibioticControls(x, benchY); else if (p.id === 'osmosis') drawOsmosisControls(x, benchY); else if (p.id === 'potometer') drawPotometerControls(x, benchY); else if (p.id === 'pondweed') drawPondweedControls(x, benchY, w); else if (p.id === 'quadrats') drawQuadratControls(x, benchY); else if (p.id === 'capture') drawCaptureControls(x, benchY, w); else if (p.id === 'shoretransect') drawShoreTransectControls(x, benchY); else if (p.id === 'ripple') drawRippleControls(x, benchY); else if (p.id === 'newton2') drawNewton2Controls(x, benchY, w); else if (p.id === 'electromagnet') drawElectromagnetControls(x, benchY); else if (p.id === 'convection') drawConvectionControls(x, benchY); else if (p.id === 'conduction') drawConductionControls(x, benchY); else if (p.id === 'thermal') drawThermalControls(x, benchY); else if (p.id === 'density') drawDensityControls(x, benchY); else if (p.id === 'hooke') drawHookeControls(x, benchY); else if (p.id === 'specificheat') drawSpecificHeatControls(x, benchY); else if (p.id === 'latentheat') drawLatentHeatControls(x, benchY); else if (p.id === 'wirelength') drawWireLengthControls(x, benchY); else if (p.id === 'ivdevices') drawIvDeviceControls(x, benchY); else if (p.id === 'fieldlines') drawFieldLineControls(x, benchY); else if (p.id === 'nuclear') drawNuclearControls(x, benchY); else { progressButton(state.running ? 'RESET' : 'START', x + 30, benchY + 46, 112, 38, state.progress, state.running); progressButton('ADD REAGENT', x + 152, benchY + 46, 120, 38, state.pour ? timedRatio(state.pour.t, 3.6) : 0, !!state.pour); button('RECORD', x + 282, benchY + 46, 90, 38, false) }
   }
   // meters
   rr(x + w - 190, benchY + 35, 164, 58, 8, '#f5f7f6');
-  text(p.id === 'thermite' ? 'SIMULATED CORE' : p.id === 'displacement' ? 'SERIES STATUS' : p.id === 'flame' ? 'ACTIVE SAMPLE' : p.id === 'starchleaf' ? 'LEAF TEST' : p.id === 'lipase' ? 'ENZYME TRIAL' : p.id === 'osmosis' ? 'OSMOSIS TRIAL' : p.id === 'potometer' ? 'WATER UPTAKE' : p.id === 'pondweed' ? 'PHOTOSYNTHESIS' : p.id === 'quadrats' ? 'QUADRAT SAMPLE' : p.id === 'capture' ? 'CAPTURE COUNTS' : p.id === 'shoretransect' ? 'SHORE ZONATION' : p.id === 'ripple' ? 'WAVE SPEED' : p.id === 'newton2' ? 'ACCELERATION' : p.id === 'electromagnet' ? 'MAGNETIC LIFT' : p.id === 'convection' ? 'WATER FLOW' : p.id === 'conduction' ? 'PIN FALL TEST' : p.id === 'thermal' ? 'INFRARED VIEW' : p.id === 'density' ? 'DENSITY MEASURE' : p.id === 'hooke' ? 'FORCE / EXTENSION' : p.id === 'specificheat' ? 'ENERGY / TEMPERATURE' : p.id === 'latentheat' ? 'PHASE / TEMPERATURE' : p.id === 'wirelength' ? 'ELECTRICAL READING' : p.id === 'ivdevices' ? 'LIVE I–V READING' : p.id === 'fieldlines' ? 'FIELD PATTERN' : p.id === 'nuclear' ? 'RADIATION COUNT' : 'LIVE READINGS', x + w - 177, benchY + 49, 9, C.muted, 800);
+  text(p.id === 'thermite' ? 'SIMULATED CORE' : p.id === 'displacement' ? 'SERIES STATUS' : p.id === 'flame' ? 'ACTIVE SAMPLE' : p.id === 'starchleaf' ? 'LEAF TEST' : p.id === 'lipase' ? 'ENZYME TRIAL' : p.id === 'transformation' ? 'TRANSFORMATION' : p.id === 'respiration' ? 'CARBON DIOXIDE' : p.id === 'antibiotics' ? 'INHIBITION ZONES' : p.id === 'osmosis' ? 'OSMOSIS TRIAL' : p.id === 'potometer' ? 'WATER UPTAKE' : p.id === 'pondweed' ? 'PHOTOSYNTHESIS' : p.id === 'quadrats' ? 'QUADRAT SAMPLE' : p.id === 'capture' ? 'CAPTURE COUNTS' : p.id === 'shoretransect' ? 'SHORE ZONATION' : p.id === 'ripple' ? 'WAVE SPEED' : p.id === 'newton2' ? 'ACCELERATION' : p.id === 'electromagnet' ? 'MAGNETIC LIFT' : p.id === 'convection' ? 'WATER FLOW' : p.id === 'conduction' ? 'PIN FALL TEST' : p.id === 'thermal' ? 'INFRARED VIEW' : p.id === 'density' ? 'DENSITY MEASURE' : p.id === 'hooke' ? 'FORCE / EXTENSION' : p.id === 'specificheat' ? 'ENERGY / TEMPERATURE' : p.id === 'latentheat' ? 'PHASE / TEMPERATURE' : p.id === 'wirelength' ? 'ELECTRICAL READING' : p.id === 'ivdevices' ? 'LIVE I–V READING' : p.id === 'fieldlines' ? 'FIELD PATTERN' : p.id === 'nuclear' ? 'RADIATION COUNT' : 'LIVE READINGS', x + w - 177, benchY + 49, 9, C.muted, 800);
   if (p.id === 'titration') {
     text(`${state.titrationVolume.toFixed(2)} cm³`, x + w - 177, benchY + 72, 15, '#b23678', 750);
     text(`pH ${state.ph.toFixed(1)}`, x + w - 78, benchY + 72, 14, C.blue, 700);
@@ -1388,6 +1537,17 @@ function main() {
   } else if (p.id === 'lipase') {
     text(`${state.lipaseBathTemp.toFixed(1)} °C`, x + w - 177, benchY + 72, 15, '#d85c91', 800);
     text(state.lipaseStage >= 3 ? `${lipaseMeasuredTime()} s` : `pH ${state.ph.toFixed(1)}`, x + w - 74, benchY + 72, 10, state.lipaseStage >= 3 ? C.teal : C.ink, 800, 'center');
+  } else if (p.id === 'transformation') {
+    text(state.complete ? 'GFP ON' : `${state.transformationStage}/12`, x + w - 177, benchY + 72, state.complete ? 14 : 12, state.complete ? '#35b968' : '#5b55a5', 800);
+    text(state.complete ? '3/4 GROW' : `${state.temp.toFixed(0)} °C`, x + w - 74, benchY + 72, 9.5, state.complete ? '#35b968' : C.teal, 800, 'center');
+  } else if (p.id === 'respiration') {
+    const q = respirationIncubationProgress(), peakVolume = respirationGasVolume(40, q);
+    text(`${peakVolume.toFixed(1)} cm³`, x + w - 177, benchY + 72, 13.5, '#a462ba', 800);
+    text(state.respirationStage >= 7 ? `${(q * 10).toFixed(1)} min` : `${state.respirationStage}/9`, x + w - 74, benchY + 72, 9.5, state.respirationStage >= 7 ? C.teal : C.ink, 800, 'center');
+  } else if (p.id === 'antibiotics') {
+    const measured = antibioticVisibleMeasurementCount(), largest = state.antibioticStage >= 8 ? 30 : 0;
+    text(largest ? `${largest} mm max` : 'no growth yet', x + w - 177, benchY + 72, largest ? 12.5 : 10.2, '#397f84', 800);
+    text(state.antibioticStage >= 9 ? `${measured}/4 read` : state.antibioticStage >= 7 ? '25 °C' : 'ASEPTIC', x + w - 74, benchY + 72, 9.2, C.teal, 800, 'center');
   } else if (p.id === 'osmosis') {
     const osmosisMass = state.osmosisStage >= 7 ? osmosisFinalMass() : state.osmosisStage >= 2 ? osmosisInitialMass + (osmosisFinalMass() - osmosisInitialMass) * osmosisProcessProgress() : osmosisInitialMass;
     text(`${osmosisMass.toFixed(2)} g`, x + w - 177, benchY + 72, 15, '#b67b42', 800);
@@ -1590,7 +1750,7 @@ function drawLatentHeatControls(x, benchY, w = W - x - (state.focusMode ? 0 : Ma
 }
 function wirePrimaryLabel() {
   if (state.complete) return 'VIEW GRAPH';
-  return ['CLOSE SWITCH', 'READING SETTLING…', 'RECORD READING', 'NEXT LENGTH', 'MOVING CONTACT…'][state.wireStage] || 'CLOSE SWITCH';
+  return ['POWER PACK ON', 'POWER PACK STARTING…', 'POWER PACK OFF', 'NEXT LENGTH', 'MOVING CONTACT…'][state.wireStage] || 'POWER PACK ON';
 }
 function drawWireLengthControls(x, benchY) {
   const busy = state.wireStage === 1 || state.wireStage === 4;
@@ -1598,7 +1758,7 @@ function drawWireLengthControls(x, benchY) {
   button('RESET SERIES', x + 194, benchY + 46, 108, 38, false);
   button('GRAPH', x + 312, benchY + 46, 78, 38, state.tab === 'graph');
   const live = state.wireStage >= 1 && state.wireStage <= 2;
-  text(`TRIAL ${Math.min(5, state.wireTrialIndex + 1)} / 5  ·  ${state.wireLengthCm} cm  ·  ${live ? `${wireCurrent().toFixed(2)} A` : 'SWITCH OPEN'}`, x + 20, benchY + 31, 9.1, '#d8e8ed', 750);
+  text(`TRIAL ${Math.min(5, state.wireTrialIndex + 1)} / 5  ·  ${state.wireLengthCm} cm  ·  ${live ? `${wireCurrent().toFixed(2)} A` : 'POWER PACK OFF'}`, x + 20, benchY + 31, 9.1, '#d8e8ed', 750);
 }
 function ivPrimaryLabel() {
   if (state.ivStage === 1) return 'SWEEP RUNNING…';
@@ -1692,7 +1852,7 @@ function rightbar() {
   ctx.fillStyle = '#f4f6f5';
   ctx.fillRect(x, 64, R, H - 64);
 
-  const resultLabel = p.id === 'flame' ? 'SPECTRA' : p.id === 'starchleaf' ? 'RESULT' : p.id === 'shoretransect' ? 'ZONATION' : ['quadrats', 'capture', 'ripple', 'alkali'].includes(p.id) ? 'RESULTS' : p.id === 'convection' ? 'OBSERVATION' : p.id === 'thermal' ? 'THERMAL VIEW' : p.id === 'fieldlines' ? 'PATTERNS' : ['latentheat', 'ivdevices'].includes(p.id) ? 'CURVES' : ['mass', 'electro', 'titration', 'displacement', 'conduction'].includes(p.id) ? 'RESULTS' : p.id === 'chrom' ? 'MEASURE' : p.id === 'salts' ? 'VIEW RESULTS' : p.id === 'co2' ? "BIRD'S EYE" : 'GRAPH';
+  const resultLabel = p.id === 'flame' ? 'SPECTRA' : p.id === 'starchleaf' ? 'RESULT' : p.id === 'transformation' ? 'PLATES' : p.id === 'shoretransect' ? 'ZONATION' : ['quadrats', 'capture', 'ripple', 'alkali', 'antibiotics'].includes(p.id) ? 'RESULTS' : p.id === 'convection' ? 'OBSERVATION' : p.id === 'thermal' ? 'THERMAL VIEW' : p.id === 'fieldlines' ? 'PATTERNS' : ['latentheat', 'ivdevices'].includes(p.id) ? 'CURVES' : ['mass', 'electro', 'titration', 'displacement', 'conduction'].includes(p.id) ? 'RESULTS' : p.id === 'chrom' ? 'MEASURE' : p.id === 'salts' ? 'VIEW RESULTS' : p.id === 'co2' ? "BIRD'S EYE" : 'GRAPH';
   if (p.id === 'rates') {
     if (mobileLandscapeLayout && state.tab === 'graph') {
       button('METHOD', x + 10, 82, 60, 32, state.tab === 'bench');
@@ -1712,7 +1872,7 @@ function rightbar() {
   const graphContentY = graphSidebarContentY(p.id);
   if (state.tab === 'bench') {
     const compact = mobileLandscapeLayout || UI_SCALE < .995 || H < 790, contentTop = compact ? 122 : 126, contentBottom = H - (compact ? 9 : 14), cardX = x + 18, cardW = R - 36;
-    const activeStep = state.complete ? p.steps.length - 1 : p.id === 'rates' ? ratesStepIndex() : p.id === 'mass' ? massStepIndex() : p.id === 'hydrogen' ? hydrogenStepIndex() : p.id === 'titration' ? titrationStepIndex() : p.id === 'salts' ? saltsStepIndex() : p.id === 'flame' ? flameTestStepIndex() : p.id === 'displacement' ? displacementStepIndex() : p.id === 'alkali' ? alkaliStepIndex() : p.id === 'thermite' ? thermiteStepIndex() : p.id === 'starchleaf' ? starchStepIndex() : p.id === 'lipase' ? lipaseStepIndex() : p.id === 'osmosis' ? osmosisStepIndex() : p.id === 'potometer' ? potometerStepIndex() : p.id === 'quadrats' ? quadratStepIndex() : p.id === 'capture' ? captureStepIndex() : p.id === 'shoretransect' ? transectStepIndex() : p.id === 'ripple' ? rippleStepIndex() : p.id === 'electromagnet' ? electromagnetStepIndex() : p.id === 'convection' ? convectionStepIndex() : p.id === 'conduction' ? conductionStepIndex() : p.id === 'thermal' ? thermalStepIndex() : p.id === 'density' ? densityStepIndex() : p.id === 'hooke' ? hookeStepIndex() : p.id === 'specificheat' ? shcStepIndex() : p.id === 'latentheat' ? latentStepIndex() : p.id === 'wirelength' ? wireStepIndex() : p.id === 'ivdevices' ? ivStepIndex() : p.id === 'fieldlines' ? fieldStepIndex() : p.id === 'nuclear' ? nuclearStepIndex() : Math.floor(state.progress * 3);
+    const activeStep = state.complete ? p.steps.length - 1 : p.id === 'rates' ? ratesStepIndex() : p.id === 'mass' ? massStepIndex() : p.id === 'hydrogen' ? hydrogenStepIndex() : p.id === 'titration' ? titrationStepIndex() : p.id === 'salts' ? saltsStepIndex() : p.id === 'flame' ? flameTestStepIndex() : p.id === 'displacement' ? displacementStepIndex() : p.id === 'alkali' ? alkaliStepIndex() : p.id === 'thermite' ? thermiteStepIndex() : p.id === 'starchleaf' ? starchStepIndex() : p.id === 'lipase' ? lipaseStepIndex() : p.id === 'transformation' ? transformationStepIndex() : p.id === 'respiration' ? respirationStepIndex() : p.id === 'antibiotics' ? antibioticStepIndex() : p.id === 'osmosis' ? osmosisStepIndex() : p.id === 'potometer' ? potometerStepIndex() : p.id === 'quadrats' ? quadratStepIndex() : p.id === 'capture' ? captureStepIndex() : p.id === 'shoretransect' ? transectStepIndex() : p.id === 'ripple' ? rippleStepIndex() : p.id === 'electromagnet' ? electromagnetStepIndex() : p.id === 'convection' ? convectionStepIndex() : p.id === 'conduction' ? conductionStepIndex() : p.id === 'thermal' ? thermalStepIndex() : p.id === 'density' ? densityStepIndex() : p.id === 'hooke' ? hookeStepIndex() : p.id === 'specificheat' ? shcStepIndex() : p.id === 'latentheat' ? latentStepIndex() : p.id === 'wirelength' ? wireStepIndex() : p.id === 'ivdevices' ? ivStepIndex() : p.id === 'fieldlines' ? fieldStepIndex() : p.id === 'nuclear' ? nuclearStepIndex() : Math.floor(state.progress * 3);
     const headingHeight = compact ? 12 : 15, headingToContentGap = compact ? 3 : 7, baseSectionGap = compact ? 4 : 9, headingSize = compact ? 10.1 : 10.8;
     const methodSize = compact ? 9.2 : 10.6, methodLineHeight = compact ? 11.2 : 13.4, methodTextWidth = cardW - 58, methodCardGap = compact ? 3 : 5;
     const methodCards = p.steps.map(step => { const lines = wrapTextLines(step, methodTextWidth, methodSize, 650); return { step, lines, baseHeight: Math.max(compact ? 28 : 42, lines.length * methodLineHeight + (compact ? 7 : 16)), minHeight: Math.max(compact ? 24 : 42, lines.length * methodLineHeight + (compact ? 3 : 16)) } });
@@ -1749,7 +1909,7 @@ function rightbar() {
       drawTextLines(card.lines, cardX + 40, centreY, methodSize, C.ink, current ? 700 : 625, methodLineHeight); cursorY += cardHeight + (i < methodCards.length - 1 ? methodCardGap : 0)
     });
 
-    const safetyHeading = ['quadrats', 'shoretransect'].includes(p.id) ? 'BIOLOGICAL SAMPLES — CLICK FOR SAFETY' : ['ripple', 'hooke', 'specificheat', 'latentheat', 'ivdevices'].includes(p.id) ? 'MATERIALS — CLICK FOR SAFETY' : p.id === 'nuclear' ? 'SEALED SOURCES — CLICK FOR SAFETY' : 'REACTANTS — CLICK FOR SAFETY';
+    const safetyHeading = ['quadrats', 'shoretransect', 'antibiotics'].includes(p.id) ? 'BIOLOGICAL SAMPLES — CLICK FOR SAFETY' : ['ripple', 'hooke', 'specificheat', 'latentheat', 'ivdevices'].includes(p.id) ? 'MATERIALS — CLICK FOR SAFETY' : p.id === 'nuclear' ? 'SEALED SOURCES — CLICK FOR SAFETY' : 'REACTANTS — CLICK FOR SAFETY';
     cursorY += sectionGap; text(safetyHeading, x + 22, cursorY + headingHeight / 2, headingSize, C.muted, 800); cursorY += sectionHeadingBlock;
     const reactantRows = [];
     reactantCards.forEach((card, i) => {
@@ -1805,6 +1965,9 @@ function rightbar() {
   else if (p.id === 'salts') drawSaltMicroscopeResults(x + 18, graphContentY, R - 36, Math.min(520, H - graphContentY - 30));
   else if (p.id === 'starchleaf') drawStarchLeafResult(x + 18, graphContentY, R - 36);
   else if (p.id === 'lipase') drawLipaseTemperatureChart(x + 18, graphContentY, R - 36);
+  else if (p.id === 'transformation') drawTransformationResults(x + 18, graphContentY, R - 36);
+  else if (p.id === 'respiration') drawRespirationResults(x + 18, graphContentY, R - 36);
+  else if (p.id === 'antibiotics') drawAntibioticResults(x + 18, graphContentY, R - 36);
   else if (p.id === 'osmosis') drawOsmosisMassChart(x + 18, graphContentY, R - 36);
   else if (p.id === 'quadrats') drawQuadratSamplingResults(x + 18, graphContentY, R - 36);
   else if (p.id === 'capture') drawCaptureSamplingResults(x + 18, graphContentY, R - 36);
@@ -2054,6 +2217,9 @@ function displacementStepIndex() { return state.displacementStage === 0 ? 1 : st
 function flameTestStepIndex() { return state.flameTestStage === 0 ? 0 : state.flameTestStage <= 2 ? 1 : state.flameTestStage === 3 ? 2 : 3 }
 function starchStepIndex() { const stage = state.starchStage || 0; return stage < 2 ? 0 : stage < 4 ? 1 : stage < 6 ? 2 : 3 }
 function lipaseStepIndex() { if (state.lipaseConditioning || state.lipaseStage === 0) return 0; if (state.lipaseStage === 1) return 1; if (state.lipaseStage === 2) return 2; return 3 }
+function transformationStepIndex() { const stage = state.transformationStage || 0; return stage < 2 ? 0 : stage < 4 ? 1 : stage < 8 ? 2 : stage < 10 ? 3 : 4 }
+function respirationStepIndex() { const stage = state.respirationStage || 0; return stage < 2 ? 0 : stage < 6 ? 1 : stage < 8 ? 2 : 3 }
+function antibioticStepIndex() { const stage = state.antibioticStage || 0; return stage < 2 ? 0 : stage < 4 ? 1 : stage < 6 ? 2 : stage < 9 ? 3 : 4 }
 function osmosisStepIndex() { const stage = state.osmosisStage || 0; return stage < 1 ? 0 : stage < 3 ? 1 : stage < 6 ? 2 : 3 }
 function potometerStepIndex() { const stage = state.potometerStage || 0; return stage < 1 ? 0 : stage < 4 ? 1 : stage < 6 ? 2 : 3 }
 function quadratStepIndex() { const stage = state.quadratStage || 0; return stage < 2 ? 0 : stage < 5 ? 1 : stage < 7 ? 2 : stage < 9 ? 3 : 4 }
@@ -2092,6 +2258,35 @@ function drawStarchLeafResult(x, y, w) {
   const noteY = cardY + cardH + 18; rr(x, noteY, w, 78, 8, revealed ? '#e7f4ec' : '#eef3f2', revealed ? '#9bc9a6' : C.line);
   text(revealed ? 'CONCLUSION' : 'WHY ETHANOL?', x + 14, noteY + 17, 8.2, revealed ? '#2f7a42' : C.muted, 800);
   wrappedText(revealed ? 'The blue-black colour shows that the leaf contained starch made from glucose during photosynthesis.' : 'Ethanol removes green chlorophyll so the iodine colour change can be seen clearly.', x + 14, noteY + 38, w - 28, 9.2, C.ink, 600, 12, 3);
+}
+function drawTransformationPlateMiniature(cx, cy, radius, result, revealed) {
+  ctx.save();
+  ctx.shadowColor = revealed && result.fluorescent ? 'rgba(52,255,126,.7)' : 'rgba(20,43,50,.16)'; ctx.shadowBlur = revealed && result.fluorescent ? 16 : 5;
+  ctx.fillStyle = revealed && result.fluorescent ? '#102d35' : '#f3ddb0'; ctx.strokeStyle = '#8fa4a8'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); ctx.shadowBlur = 0;
+  ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(cx - 3, cy - 3, radius - 5, Math.PI * 1.05, Math.PI * 1.72); ctx.stroke();
+  if (revealed && result.growth) {
+    const count = result.colonies === 'lawn' ? 35 : 18;
+    for (let i = 0; i < count; i++) { const angle = i * 2.399, rradius = 4 + (i % 6) * (radius - 10) / 6, px = cx + Math.cos(angle) * rradius, py = cy + Math.sin(angle) * rradius * .82; ctx.globalAlpha = result.colonies === 'lawn' ? .42 : .96; ctx.fillStyle = result.fluorescent ? (i % 3 ? '#59ee84' : '#baff78') : '#f7f0d1'; ctx.beginPath(); ctx.arc(px, py, result.colonies === 'lawn' ? 2.2 : 2.7 + i % 2, 0, Math.PI * 2); ctx.fill() }
+  }
+  ctx.globalAlpha = 1; ctx.restore();
+}
+function drawTransformationResults(x, y, w) {
+  const revealed = state.complete && state.transformationResults.length === 4;
+  text('PLASMID TRANSFORMATION', x, y, 10, C.muted, 800);
+  wrappedText('Growth tests antibiotic selection; green fluorescence tests arabinose-controlled GFP expression.', x, y + 18, w, 9, C.ink, 600, 11, 3);
+  const top = y + 58;
+  transformationPlateResults.forEach((result, index) => {
+    const cardY = top + index * 82, outcome = !revealed ? 'AWAITING INCUBATION' : result.fluorescent ? 'GROWTH · GREEN GFP' : result.growth ? result.colonies === 'lawn' ? 'HEAVY GROWTH · NO GFP' : 'GROWTH · NO GFP' : 'NO GROWTH';
+    rr(x, cardY, w, 74, 8, revealed && result.fluorescent ? '#e9f8ee' : '#fff', revealed && result.fluorescent ? '#75c990' : C.line);
+    drawTransformationPlateMiniature(x + 39, cardY + 37, 27, result, revealed);
+    text(`${result.treatment}  ·  ${result.medium}`, x + 77, cardY + 18, 8.5, result.fluorescent && revealed ? '#23854c' : C.ink, 800);
+    text(outcome, x + 77, cardY + 38, 8, !revealed ? C.muted : result.fluorescent ? '#28a85b' : result.growth ? '#8b6d37' : '#a04f4b', 800);
+    wrappedText(revealed ? result.explanation : 'Complete the transformation and incubation to reveal this control.', x + 77, cardY + 55, w - 86, 7.5, C.muted, 600, 9, 2);
+  });
+  const noteY = top + 4 * 82 + 4; rr(x, noteY, w, 90, 8, revealed ? '#eceaf8' : '#eef3f2', revealed ? '#aca6d5' : C.line);
+  text(revealed ? 'CONCLUSION' : 'CONTROL LOGIC', x + 14, noteY + 18, 8.3, revealed ? '#5b55a5' : C.muted, 800);
+  wrappedText(revealed ? 'Ampicillin selects cells carrying the plasmid. Arabinose activates the GFP switch, so only +DNA LB/amp/ara colonies fluoresce.' : '−DNA LB checks viability; −DNA LB/amp checks selection; the two +DNA plates separate plasmid uptake from GFP induction.', x + 14, noteY + 40, w - 28, 9, C.ink, 600, 11.5, 4);
 }
 function drawLipaseTemperatureChart(x, y, w) {
   text('TEMPERATURE SERIES', x, y, 10, C.muted, 800);
@@ -2591,6 +2786,66 @@ function drawGraph(x, y, w, h) {
   }
   text(`${state.points.length} reading${state.points.length === 1 ? '' : 's'} recorded`, x, cardY + h + 18, 11, C.muted, 600);
 }
+function drawRespirationResults(x, y, w) {
+  const compact = H < 700, graphH = compact ? 136 : 182;
+  drawGraph(x, y, w, graphH);
+  const tableY = y + (compact ? 208 : 256), rowH = compact ? 19 : 24;
+  text('EQUAL 10-MINUTE INCUBATIONS', x, tableY, 8.8, C.muted, 800);
+  rr(x, tableY + 13, w, 24, 5, '#f3eaf6', C.line);
+  text('BATH / °C', x + 10, tableY + 25, 7.2, C.muted, 800);
+  text('BALLOON', x + w * .54, tableY + 25, 7.2, C.muted, 800, 'center');
+  text('CO₂ / cm³', x + w - 10, tableY + 25, 7.2, C.muted, 800, 'right');
+  respirationTemperatures.forEach((temperature, index) => {
+    const result = state.respirationResults.find(item => item.temperature === temperature), ry = tableY + 40 + index * rowH, optimum = temperature === 40;
+    rr(x, ry, w, compact ? 17 : 21, 4, optimum ? '#f7edf9' : index % 2 ? '#fff' : '#faf7fb', optimum && result ? '#b786c7' : C.line);
+    text(String(temperature), x + 10, ry + (compact ? 10 : 11), 8, result ? C.ink : C.muted, 750);
+    text(result ? result.balloon : 'pending', x + w * .54, ry + (compact ? 10 : 11), 7.8, result ? '#87519a' : C.muted, 700, 'center');
+    text(result ? result.volume.toFixed(1) : '—', x + w - 10, ry + (compact ? 10 : 11), 8.2, result ? '#87519a' : C.muted, 800, 'right');
+  });
+  const summaryY = tableY + 48 + respirationTemperatures.length * rowH;
+  rr(x, summaryY, w, 62, 7, state.complete ? '#f4eaf7' : '#eef3f2', state.complete ? '#b98bc8' : C.line);
+  text('CONCLUSION', x + 12, summaryY + 16, 7.6, C.muted, 800);
+  text(state.complete ? 'FASTEST NEAR 40 °C' : 'complete the equal-time run', x + 12, summaryY + 35, 10.8, '#87519a', 800);
+  wrappedText(state.complete ? 'Cold slows enzyme activity; 60 °C damages yeast enzymes, so little CO₂ forms.' : 'Balloon inflation is an indirect measure of carbon dioxide production.', x + 12, summaryY + 51, w - 24, 7.7, C.ink, 600, 9, 2);
+}
+function drawAntibioticResults(x, y, w) {
+  const compact = H < 700, revealedCount = antibioticVisibleMeasurementCount(), grown = state.antibioticStage >= 8, accent = '#397f84';
+  text('INHIBITION-ZONE RESULTS', x, y, 10, C.muted, 800);
+  wrappedText('Measure the widest clear diameter through each disc centre.', x, y + 17, w, 8.6, C.ink, 600, 11, 2);
+  const dishCardY = y + 43, dishCardH = compact ? 158 : 190, cx = x + w / 2, cy = dishCardY + dishCardH / 2 + 2, radius = compact ? 62 : 76;
+  rr(x, dishCardY, w, dishCardH, 8, '#fbfcf9', C.line);
+  ctx.save();
+  ctx.shadowColor = 'rgba(17,49,48,.18)'; ctx.shadowBlur = 12; ctx.shadowOffsetY = 5;
+  ctx.fillStyle = '#dbe4c5'; ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+  ctx.strokeStyle = '#95aaa4'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI * 2); ctx.stroke();
+  ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(cx - 3, cy - 4, radius - 8, 0, Math.PI * 2); ctx.stroke();
+  if (grown) {
+    ctx.fillStyle = 'rgba(104,126,74,.34)';
+    for (let i = 0; i < 76; i++) { const a = i * 2.399, rradius = 14 + (i % 12) * (radius - 24) / 12, px = cx + Math.cos(a) * rradius, py = cy + Math.sin(a) * rradius; ctx.beginPath(); ctx.arc(px, py, 1 + (i % 3) * .45, 0, Math.PI * 2); ctx.fill() }
+  }
+  const positions = [[-.39, -.39], [.39, -.39], [.39, .39], [-.39, .39]];
+  antibioticDiscs.forEach((disc, index) => {
+    const px = cx + positions[index][0] * radius, py = cy + positions[index][1] * radius, measured = index < revealedCount || state.antibioticResults.some(result => result.id === disc.id), zoneR = Math.max(0, disc.diameterMm / 30 * radius * .42);
+    if (grown && disc.diameterMm) { ctx.fillStyle = 'rgba(246,249,226,.92)'; ctx.beginPath(); ctx.arc(px, py, zoneR, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = measured ? disc.colour : 'rgba(76,106,94,.4)'; ctx.lineWidth = measured ? 2.2 : 1.1; ctx.setLineDash(measured ? [] : [3, 3]); ctx.stroke(); ctx.setLineDash([]) }
+    ctx.fillStyle = '#fffdf1'; ctx.strokeStyle = disc.colour; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(px, py, 8, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); text(disc.code, px, py + .3, 7.2, disc.colour, 850, 'center');
+    if (measured) { ctx.strokeStyle = disc.colour; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(px - Math.max(9, zoneR), py); ctx.lineTo(px + Math.max(9, zoneR), py); ctx.stroke(); text(`${disc.diameterMm} mm`, px, py - Math.max(14, zoneR + 8), 7, disc.colour, 800, 'center') }
+  });
+  const tableY = dishCardY + dishCardH + 16;
+  rr(x, tableY, w, 25, 5, '#eaf2f0', C.line); text('DISC', x + 10, tableY + 13, 7.3, C.muted, 800); text('ZONE / mm', x + w - 10, tableY + 13, 7.3, C.muted, 800, 'right');
+  antibioticDiscs.forEach((disc, index) => {
+    const ry = tableY + 31 + index * (compact ? 26 : 31), measured = index < revealedCount || state.antibioticResults.some(result => result.id === disc.id), rowH = compact ? 22 : 27;
+    rr(x, ry, w, rowH, 5, index % 2 ? '#fff' : '#f8faf8', measured ? `${disc.colour}66` : C.line);
+    ctx.fillStyle = disc.colour; ctx.beginPath(); ctx.arc(x + 12, ry + rowH / 2, 4, 0, Math.PI * 2); ctx.fill();
+    text(`${disc.code} · ${disc.name}`, x + 22, ry + rowH / 2, compact ? 7.7 : 8.4, measured ? C.ink : C.muted, 700);
+    text(measured ? String(disc.diameterMm) : '—', x + w - 10, ry + rowH / 2, 8.7, measured ? disc.colour : C.muted, 850, 'right');
+  });
+  const summaryY = tableY + 40 + antibioticDiscs.length * (compact ? 26 : 31);
+  rr(x, summaryY, w, compact ? 67 : 82, 7, state.complete ? '#e7f1ef' : '#eef3f2', state.complete ? '#82b9b4' : C.line);
+  text('CONCLUSION', x + 12, summaryY + 16, 7.5, C.muted, 800);
+  text(state.complete ? 'TETRACYCLINE · 30 mm' : 'complete all measurements', x + 12, summaryY + 35, compact ? 9.3 : 10.4, accent, 850);
+  wrappedText(state.complete ? 'Largest zone under these conditions. Diffusion, agar depth and inoculum affect zone size; the water control has no clear zone.' : 'Keep the incubated plate closed and read diameters through the lid.', x + 12, summaryY + 51, w - 24, compact ? 7.1 : 7.8, C.ink, 600, compact ? 8.5 : 9.5, compact ? 2 : 3);
+}
 function drawHookeResults(x, y, w) {
   const compact = H < 700, graphH = compact ? 132 : 176;
   drawGraph(x, y, w, graphH);
@@ -2895,6 +3150,7 @@ function draw(skipWebGL = false) {
   visibleCtx.drawImage(buffer, 0, 0);
   visibleCtx.restore();
   if (!portraitPromptVisible && !state.dose && !state.evaluationModal && !state.graphModal && !state.reactantSafety && !skipWebGL && !state.drag) lab3d.render(performance.now(), state, practicals[state.selected])
+  requestSimulationFrame();
 }
 function addWorkspaceItem(type, x = null, y = null) { const slot = state.workspace.length, benchY = H - 128, item = { uid: state.nextItem++, type, x: x ?? (345 + (slot % 5) * 105), y: y ?? (benchY - 64 - Math.floor(slot / 5) * 105), lit: false, mass: 0, contents: [], snappedTo: null, attachedTo: null, temperature: 20, heating: false, ph: null }; state.workspace.push(item); if (type === 'phmeter') { const target = nearestPhVessel(item)?.target; if (target) { dockPhMeter(item, target); state.toast = `pH meter auto-positioned in the ${target.type === 'tube' ? 'test tube' : 'beaker'} — its display will follow this liquid.` } else state.toast = 'pH meter added — add a beaker or test tube and it will position itself automatically.' } else if (isPhVessel(item)) { const waiting = state.workspace.find(candidate => candidate.type === 'phmeter' && !candidate.attachedTo); autoPositionPhMeters(item); state.toast = waiting ? `pH meter auto-positioned in the new ${type === 'tube' ? 'test tube' : 'beaker'}.` : `${equipment.find(e => e.id === type)?.name || type} added — drag it to reposition.` } else state.toast = `${equipment.find(e => e.id === type)?.name || type} added — drag it to reposition.`; refreshWorkspacePh() }
 function positionWorkspaceItem(it, pointerX, pointerY, dx = 0, dy = 0) { const R = Math.max(260, Math.min(330, W * .23)); it.x = Math.max(310, Math.min(W - R - 42, pointerX - dx)); it.y = Math.max(285, Math.min(H - 145, pointerY - dy)) }
@@ -2920,6 +3176,92 @@ function activateLipase(label) {
   else if (label === 'NEXT TEMPERATURE' && state.lipaseStage === 3 && state.lipaseResults.length < lipaseTemperatures.length) { const previous = state.lipaseTargetTemp; state.lipaseTrialIndex = state.lipaseResults.length; state.lipaseTargetTemp = lipaseTemperatures[state.lipaseTrialIndex]; state.lipaseBathTemp = previous; state.lipaseConditioning = true; state.lipaseStage = 0; state.lipaseTimer = 0; state.running = true; state.complete = false; state.time = 0; state.progress = 0; state.ph = 10; state.tab = 'bench'; state.toast = `Conditioning fresh milk mixture and lipase from ${previous} °C to ${state.lipaseTargetTemp} °C.` }
   else if (label === 'VIEW GRAPH' || label === 'GRAPH') { state.tab = 'graph'; state.toast = 'The temperature series shows the shortest reaction time near the lipase optimum.' }
   else if (label === 'RESET SERIES') resetLipasePractical();
+}
+function resetTransformationPractical() {
+  state.running = false; state.complete = false; state.time = 0; state.progress = 0; state.points = [];
+  state.temp = 4; state.ph = 7; state.transformationStage = 0; state.transformationTimer = 0; state.transformationResults = []; state.tab = 'bench';
+  state.toast = 'A sterile pGLO-style simulation is ready. Label matched +DNA and −DNA controls before any transfer.';
+}
+function activateTransformation(label) {
+  const stage = state.transformationStage || 0;
+  if (label === 'LABEL CONTROLS' && stage === 0) {
+    state.transformationStage = 1; state.transformationTimer = 0; state.running = true; state.complete = false;
+    state.toast = 'Labelling two chilled microtubes +DNA and −DNA and matching the four sealed agar-plate controls.';
+  } else if (label === 'ADD CELLS + DNA' && stage === 2) {
+    state.transformationStage = 3; state.transformationTimer = 0; state.running = true;
+    state.toast = 'A sterile tip transfers competent teaching-strain bacteria to both tubes, then plasmid DNA to +DNA only.';
+  } else if (label === 'ICE + HEAT SHOCK' && stage === 4) {
+    state.transformationStage = 5; state.transformationTimer = 0; state.running = true;
+    state.toast = 'Both tubes remain ice-cold, enter the 42 °C block together for the simulated 50-second heat shock, then return to ice.';
+  } else if (label === 'ADD LB + RECOVER' && stage === 6) {
+    state.transformationStage = 7; state.transformationTimer = 0; state.running = true;
+    state.toast = 'Sterile LB broth enters both tubes. The cells recover before antibiotic selection.';
+  } else if (label === 'PLATE CELLS' && stage === 8) {
+    state.transformationStage = 9; state.transformationTimer = 0; state.running = true;
+    state.toast = 'Fresh tips inoculate the matched control plates and sterile spreaders distribute the cells over the agar.';
+  } else if (label === 'INCUBATE PLATES' && stage === 10) {
+    state.transformationStage = 11; state.transformationTimer = 0; state.running = true;
+    state.toast = 'The sealed plates incubate inverted in the simulation, then move onto the blue-light viewer for comparison.';
+  } else if (label === 'VIEW RESULTS' || label === 'PLATES') {
+    state.tab = 'graph';
+    state.toast = state.complete ? 'Compare selection with gene expression: ampicillin selects transformed cells; arabinose induces GFP.' : 'Complete the plating and incubation stages to reveal all four controls.';
+  } else if (label === 'RESET') resetTransformationPractical();
+}
+function resetRespirationPractical() {
+  state.running = false; state.complete = false; state.time = 0; state.progress = 0; state.points = []; state.temp = 20; state.ph = 6.2;
+  state.respirationStage = 0; state.respirationTimer = 0; state.respirationResults = []; state.tab = 'bench';
+  state.toast = 'Five dry, labelled flasks are seated in separate 10, 20, 30, 40 and 60 °C water baths. Add the same 5.0 g mass of glucose to each flask.';
+}
+function activateRespiration(label) {
+  const stage = state.respirationStage || 0;
+  if (label === 'ADD GLUCOSE' && stage === 0) {
+    state.respirationStage = 1; state.respirationTimer = 0; state.running = true; state.complete = false; state.progress = 0;
+    state.toast = 'A level 5.0 g glucose portion is being tipped into each labelled flask in turn.';
+  } else if (label === 'ADD YEAST' && stage === 2) {
+    state.respirationStage = 3; state.respirationTimer = 0; state.running = true;
+    state.toast = 'The measuring cylinder is adding the same 25.0 cm³ volume of yeast suspension to every glucose portion.';
+  } else if (label === 'FIT BALLOONS' && stage === 4) {
+    state.respirationStage = 5; state.respirationTimer = 0; state.running = true;
+    state.toast = 'Five identical empty balloons are lifting from the tray and stretching airtight over the flask necks.';
+  } else if (label === 'START 10 MIN RUN' && stage === 6) {
+    state.respirationStage = 7; state.respirationTimer = 0; state.running = true; state.time = 0; state.progress = .6;
+    state.toast = 'All five flasks begin the same ten-minute incubation together. Carbon dioxide bubbles form and collect in the balloons.';
+  } else if (label === 'RECORD RESULTS' && stage === 8) {
+    const balloonLabels = ['barely inflated', 'small', 'medium', 'largest', 'almost flat'];
+    state.respirationResults = respirationTemperatures.map((temperature, index) => ({ temperature, time_minutes: 10, volume: respirationFinalGasVolumes[index], balloon: balloonLabels[index] }));
+    state.points = state.respirationResults.map(result => ({ x: (result.temperature - 10) / 50, y: result.volume / 90, xValue: result.temperature, yValue: result.volume }));
+    state.respirationStage = 9; state.running = false; state.complete = true; state.progress = 1; state.tab = 'graph';
+    state.toast = 'Results recorded: carbon dioxide production peaks at 40 °C, is slower in cold baths and collapses at 60 °C because yeast enzymes are denatured.';
+  } else if (label === 'VIEW GRAPH' || label === 'GRAPH') {
+    state.tab = 'graph'; state.toast = state.complete ? 'The curve rises to an optimum near 40 °C then drops sharply at 60 °C.' : 'Complete and record the equal-time incubation to plot all five temperatures.';
+  } else if (label === 'RESET PRACTICAL') resetRespirationPractical();
+}
+function resetAntibioticPractical() {
+  state.running = false; state.complete = false; state.time = 0; state.progress = 0; state.points = []; state.temp = 20; state.ph = 7;
+  state.antibioticStage = 0; state.antibioticTimer = 0; state.antibioticResults = []; state.antibioticMeasuredIndex = -1; state.tab = 'bench';
+  state.toast = 'Begin with aseptic technique: tie back hair, wash hands, keep the capped disinfectant well away from the Bunsen, then disinfect, air-dry and mark the sealed plate base into four sectors.';
+}
+function activateAntibiotics(label) {
+  const stage = state.antibioticStage || 0;
+  if (label === 'PREPARE ASEPTICALLY' && stage === 0) {
+    state.antibioticStage = 1; state.antibioticTimer = 0; state.running = true; state.complete = false; state.progress = 0;
+    state.toast = 'The yellow safety flame is extinguished while 70% disinfectant is sprayed and wiped. After the surface air-dries, a black marker divides the outside of the plate base into four sectors.';
+  } else if (label === 'INOCULATE AGAR' && stage === 2) {
+    state.antibioticStage = 3; state.antibioticTimer = 0; state.running = true;
+    state.toast = 'A sterile swab takes the teaching-strain Bacillus subtilis culture. The lid opens only a small amount while the agar is spread in three directions, then the swab goes straight into biohazard waste.';
+  } else if (label === 'PLACE DISCS' && stage === 4) {
+    state.antibioticStage = 5; state.antibioticTimer = 0; state.running = true;
+    state.toast = 'Sterile forceps place P, E, T and sterile-water control discs at equal spacing. Each disc is pressed once and the lid is closed immediately.';
+  } else if (label === 'SEAL + INCUBATE' && stage === 6) {
+    state.antibioticStage = 7; state.antibioticTimer = 0; state.running = true; state.time = 0; state.temp = 25;
+    state.toast = 'Two short tape strips secure the lid without sealing the whole circumference. The labelled plate is inverted, the glass incubator door opens to accept it, and incubation runs at 25 °C for 48 hours.';
+  } else if (label === 'MEASURE ZONES' && stage === 8) {
+    state.antibioticStage = 9; state.antibioticTimer = 0; state.running = true; state.antibioticResults = []; state.antibioticMeasuredIndex = -1;
+    state.toast = 'The incubated plate remains closed. A transparent ruler aligns through each disc centre and records the widest clear-zone diameter in millimetres.';
+  } else if (label === 'VIEW RESULTS' || label === 'RESULTS') {
+    state.tab = 'graph';
+    state.toast = state.complete ? 'Tetracycline produced the largest zone in this controlled plate. The sterile-water control confirms that handling alone did not inhibit growth.' : 'Complete incubation and measure every zone before comparing antibiotic efficacy.';
+  } else if (label === 'RESET PRACTICAL' || label === 'RESET') resetAntibioticPractical();
 }
 function resetOsmosisPractical() { state.running = false; state.complete = false; state.time = 0; state.progress = 0; state.points = []; state.temp = 22; state.ph = 7; state.osmosisStage = 0; state.osmosisTimer = 0; state.osmosisTrialIndex = 0; state.osmosisConcentration = 0; state.osmosisResults = []; state.tab = 'bench'; state.toast = 'An equal potato cylinder has an initial mass of 5.00 g. Lower it into 50 cm³ of distilled water for the first trial.' }
 function activateOsmosis(label) {
@@ -3090,9 +3432,14 @@ function activateMass(label) { if (label === 'MOVE TO TRIPOD' && state.massStage
 function resetHydrogenPractical() { state.running = false; state.complete = false; state.time = 0; state.progress = 0; state.points = []; state.temp = 25; state.ph = 7; state.volume = 0; state.transferred = 0; state.hydrogenStage = 0; state.hydrogenTimer = 0; state.hydrogenAudioPlayed = false; state.hydrogenGas = 0; state.tab = 'bench'; state.toast = 'A coil of magnesium ribbon is ready in the test tube. Add the dilute hydrochloric acid.' }
 function activateHydrogen(label) { primePopAudio(); if (label === 'POUR DILUTE HCl' && state.hydrogenStage === 0) { state.hydrogenStage = 1; state.hydrogenTimer = 0; state.running = true; state.time = 0; state.toast = 'Pouring dilute hydrochloric acid onto the magnesium ribbon.' } else if (label === 'TEST WITH LIT SPLINT' && state.hydrogenStage === 3) { state.hydrogenStage = 4; state.hydrogenTimer = 0; state.running = true; state.hydrogenAudioPlayed = false; state.toast = 'Thumb removed — the lit splint is approaching the trapped hydrogen.' } else if (label === 'RESET PRACTICAL' && state.hydrogenStage === 5) resetHydrogenPractical(); else if (label === 'RECORD') { state.points.push(graphReading()); state.toast = 'Hydrogen gas volume recorded.' } }
 function startAcidPour() { const id = practicals[state.selected].id; if (id !== 'rates' && id !== 'temp') return; if (state.pour) { state.toast = 'The hydrochloric acid is already being poured.'; return } if (id === 'rates') { if (state.ratesStage !== 2) { state.toast = state.ratesStage === 0 ? 'Move the conditioned sodium thiosulfate flask onto the paper cross before adding acid.' : 'Wait until the flask is settled over the paper cross.'; return } state.transferred = 0; state.progress = 0; state.time = 0; state.ratesStage = 3; state.ratesStageTimer = 0; state.pour = { t: 0 }; state.running = true; state.complete = false; state.temp = state.ratesTargetTemp; state.lastReactant = 'Hydrochloric acid'; state.toast = 'Starting the timer and lifting HCl(aq) above the flask on the paper cross.'; return } if (state.transferred >= .98) { state.transferred = 0; state.progress = 0; state.time = 0; state.temp = 25; state.points = [] } state.pour = { t: 0 }; state.running = true; state.complete = false; state.lastReactant = 'Hydrochloric acid'; state.ph = 13; state.toast = 'Lifting the HCl(aq) flask towards the NaOH(aq) flask.' }
-function applyGuidedReactant(name) { const id = practicals[state.selected].id, lower = name.toLowerCase(); if (id === 'flame') { const index = flameTestSalts.findIndex(s => s.salt === name); if (index < 0) return; if (state.running) { state.toast = 'Finish the current scoop or flame test before changing salt.'; return } state.flameTestSalt = index; state.flameTestStage = 0; state.flameTestTimer = 0; state.complete = state.flameTestTested.length === flameTestSalts.length; state.tab = 'bench'; state.toast = `${name} selected. Use the clean metal spatula to scoop a small sample.`; return } if (id === 'starchleaf') { state.toast = lower.includes('ethanol') ? 'Ethanol is already in the test tube inside the electric water bath. Never heat it over a naked flame.' : lower.includes('iodine') ? 'The iodine dropping pipette is ready above the white tile.' : 'The fresh leaf is held securely in forceps above the hot-water beaker.'; return } if (id === 'lipase') { state.toast = lower.includes('lipase') ? 'The measured lipase pipette is ready. Use ADD LIPASE once both mixtures are at the target temperature.' : lower.includes('phenolphthalein') ? 'Phenolphthalein is pink in the alkaline milk mixture and becomes colourless as fatty acids lower the pH.' : 'Equal milk and sodium carbonate volumes are already prepared in the test tube.'; return } if (id === 'osmosis') { state.toast = lower.includes('potato') ? 'Each fresh potato cylinder has the same diameter, length and 5.00 g initial mass.' : lower.includes('distilled') ? 'Distilled water is the 0.0 mol dm⁻³ solution and gives the greatest net water entry.' : `The current beaker contains 50 cm³ of ${state.osmosisConcentration.toFixed(1)} mol dm⁻³ sucrose solution.`; return } if (id === 'potometer') { state.toast = lower.includes('shoot') ? 'The fresh shoot was cut at an angle and fitted underwater so no air entered the xylem.' : lower.includes('jelly') ? 'A visible petroleum-jelly collar seals the bung and every glass joint against air leaks.' : 'The glass chamber, reservoir and capillary are completely filled with water before the measurement bubble is introduced.'; return } if (id === 'titration') { if (lower.includes('phenolphthalein')) activateTitration('ADD INDICATOR'); else if (lower.includes('naoh')) state.toast = 'The 50 cm³ burette has been rinsed and filled with 0.100 mol dm⁻³ NaOH to the 0.00 cm³ mark.'; else state.toast = '25.0 cm³ HCl has been transferred by pipette into the conical flask on the white tile.'; return } if (id === 'mass') { state.toast = name === 'Oxygen' ? 'Oxygen is supplied by the air around the open crucible.' : 'The magnesium ribbon is already weighed inside the covered crucible.'; return } if (id === 'hydrogen') { state.toast = lower.includes('acid') ? 'Use POUR DILUTE HCl to animate the measured acid addition.' : 'The magnesium ribbon is already coiled in the test tube.'; return } if (id === 'electro') { state.toast = lower.includes('litmus') ? 'Use damp litmus paper to identify chlorine at the positive anode.' : 'Copper chloride solution is already in the beaker. Switch on the connected power pack.'; return } if ((id === 'rates' || id === 'temp') && lower.includes('hydrochloric')) { startAcidPour(); return } if (id === 'temp' && lower.includes('sodium hydroxide')) { state.lastReactant = name; state.ph = 13; state.progress = Math.max(.04, state.progress); state.toast = 'Sodium hydroxide is ready in the receiving flask. Now add the hydrochloric acid.'; return } if (id === 'rates' && lower.includes('thiosulfate')) { state.lastReactant = name; state.toast = state.ratesStage === 0 ? `The ${state.ratesTargetTemp} °C sodium thiosulfate flask is in the electric water bath. Move it onto the cross.` : 'Sodium thiosulfate is ready above the paper cross.'; return } state.lastReactant = name; state.running = true; state.progress = Math.max(.14, state.progress); state.transferred = Math.min(1, state.transferred + .28); state.toast = `${name} added to the correct container — observe the reaction.`; if (lower.includes('hydrochloric')) state.ph = Math.max(1, state.ph - 2); if (lower.includes('sodium hydroxide')) state.ph = Math.min(13, state.ph + 3) }
+function applyGuidedReactant(name) { const id = practicals[state.selected].id, lower = name.toLowerCase(); if (id === 'flame') { const index = flameTestSalts.findIndex(s => s.salt === name); if (index < 0) return; if (state.running) { state.toast = 'Finish the current scoop or flame test before changing salt.'; return } state.flameTestSalt = index; state.flameTestStage = 0; state.flameTestTimer = 0; state.complete = state.flameTestTested.length === flameTestSalts.length; state.tab = 'bench'; state.toast = `${name} selected. Use the clean metal spatula to scoop a small sample.`; return } if (id === 'starchleaf') { state.toast = lower.includes('ethanol') ? 'Ethanol is already in the test tube inside the electric water bath. Never heat it over a naked flame.' : lower.includes('iodine') ? 'The iodine dropping pipette is ready above the white tile.' : 'The fresh leaf is held securely in forceps above the hot-water beaker.'; return } if (id === 'lipase') { state.toast = lower.includes('lipase') ? 'The measured lipase pipette is ready. Use ADD LIPASE once both mixtures are at the target temperature.' : lower.includes('phenolphthalein') ? 'Phenolphthalein is pink in the alkaline milk mixture and becomes colourless as fatty acids lower the pH.' : 'Equal milk and sodium carbonate volumes are already prepared in the test tube.'; return } if (id === 'respiration') { state.toast = lower.includes('glucose') ? 'Five equal 5.0 g glucose portions are ready in the powder boat.' : lower.includes('yeast') ? 'The yeast suspension is freshly mixed; every flask receives the same 25.0 cm³ volume.' : 'Each thermostatic bath contains water at its labelled temperature and all five incubations last exactly ten minutes.'; return } if (id === 'osmosis') { state.toast = lower.includes('potato') ? 'Each fresh potato cylinder has the same diameter, length and 5.00 g initial mass.' : lower.includes('distilled') ? 'Distilled water is the 0.0 mol dm⁻³ solution and gives the greatest net water entry.' : `The current beaker contains 50 cm³ of ${state.osmosisConcentration.toFixed(1)} mol dm⁻³ sucrose solution.`; return } if (id === 'potometer') { state.toast = lower.includes('shoot') ? 'The fresh shoot was cut at an angle and fitted underwater so no air entered the xylem.' : lower.includes('jelly') ? 'A visible petroleum-jelly collar seals the bung and every glass joint against air leaks.' : 'The glass chamber, reservoir and capillary are completely filled with water before the measurement bubble is introduced.'; return } if (id === 'titration') { if (lower.includes('phenolphthalein')) activateTitration('ADD INDICATOR'); else if (lower.includes('naoh')) state.toast = 'The 50 cm³ burette has been rinsed and filled with 0.100 mol dm⁻³ NaOH to the 0.00 cm³ mark.'; else state.toast = '25.0 cm³ HCl has been transferred by pipette into the conical flask on the white tile.'; return } if (id === 'mass') { state.toast = name === 'Oxygen' ? 'Oxygen is supplied by the air around the open crucible.' : 'The magnesium ribbon is already weighed inside the covered crucible.'; return } if (id === 'hydrogen') { state.toast = lower.includes('acid') ? 'Use POUR DILUTE HCl to animate the measured acid addition.' : 'The magnesium ribbon is already coiled in the test tube.'; return } if (id === 'electro') { state.toast = lower.includes('litmus') ? 'Use damp litmus paper to identify chlorine at the positive anode.' : 'Copper chloride solution is already in the beaker. Switch on the connected power pack.'; return } if ((id === 'rates' || id === 'temp') && lower.includes('hydrochloric')) { startAcidPour(); return } if (id === 'temp' && lower.includes('sodium hydroxide')) { state.lastReactant = name; state.ph = 13; state.progress = Math.max(.04, state.progress); state.toast = 'Sodium hydroxide is ready in the receiving flask. Now add the hydrochloric acid.'; return } if (id === 'rates' && lower.includes('thiosulfate')) { state.lastReactant = name; state.toast = state.ratesStage === 0 ? `The ${state.ratesTargetTemp} °C sodium thiosulfate flask is in the electric water bath. Move it onto the cross.` : 'Sodium thiosulfate is ready above the paper cross.'; return } state.lastReactant = name; state.running = true; state.progress = Math.max(.14, state.progress); state.transferred = Math.min(1, state.transferred + .28); state.toast = `${name} added to the correct container — observe the reaction.`; if (lower.includes('hydrochloric')) state.ph = Math.max(1, state.ph - 2); if (lower.includes('sodium hydroxide')) state.ph = Math.min(13, state.ph + 3) }
 const baseApplyGuidedReactant = applyGuidedReactant;
 applyGuidedReactant = name => {
+  if (practicals[state.selected].id === 'antibiotics') {
+    const lower = name.toLowerCase();
+    state.toast = lower.includes('bacillus') ? 'The approved teaching culture stays capped except for the brief sterile-swab transfer. Use INOCULATE AGAR to demonstrate minimal lid opening.' : lower.includes('antibiotic') ? 'The coded P, E, T and sterile-water control discs remain in their sterile card until forceps place them at equal spacing.' : 'The 70% surface disinfectant is for the bench only. Keep it away from ignition sources and let the wiped field air-dry.';
+    return
+  }
   if (practicals[state.selected].id === 'thermite') {
     state.toast = name.toLowerCase().includes('fuse')
       ? 'The magnesium fuse is already secured to the sealed charge. Use IGNITE FUSE for the remote simulation.'
@@ -3517,14 +3864,14 @@ function resetWireLengthPractical() {
   state.wireVoltageV = 1.5;
   state.wireResults = [];
   state.tab = 'bench';
-  state.toast = 'The fixed contact is at 0 cm and the sliding crocodile clip grips 20 cm of straight nichrome wire. Close the switch briefly.';
+  state.toast = 'The fixed contact is at 0 cm and the sliding crocodile clip grips 20 cm of straight nichrome wire. Turn the power pack on briefly.';
 }
 function activateWireLength(label) {
   const stage = state.wireStage || 0;
-  if (label === 'CLOSE SWITCH' && stage === 0) {
+  if (label === 'POWER PACK ON' && stage === 0) {
     state.wireStage = 1; state.wireTimer = 0; state.running = true; state.complete = false;
-    state.toast = `The switch closes and both digital meters settle for the ${state.wireLengthCm} cm test length.`;
-  } else if (label === 'RECORD READING' && stage === 2) {
+    state.toast = `The power pack turns on and both digital meters settle for the ${state.wireLengthCm} cm test length.`;
+  } else if (label === 'POWER PACK OFF' && stage === 2) {
     const result = { length_cm: state.wireLengthCm, voltage_v: state.wireVoltageV, current_a: wireCurrent(), resistance_ohm: wireResistance() };
     if (!state.wireResults.some(item => item.length_cm === result.length_cm)) state.wireResults.push(result);
     state.wireResults.sort((a, b) => a.length_cm - b.length_cm);
@@ -3532,7 +3879,7 @@ function activateWireLength(label) {
     state.wireStage = 3; state.running = false; state.progress = state.wireResults.length / wireLengthsCm.length;
     state.complete = state.wireResults.length === wireLengthsCm.length;
     if (state.complete) state.tab = 'graph';
-    state.toast = state.complete ? 'Five readings complete. Resistance increases in direct proportion to the length of this uniform wire.' : `${result.length_cm} cm: ${result.voltage_v.toFixed(2)} V ÷ ${result.current_a.toFixed(2)} A = ${result.resistance_ohm.toFixed(1)} Ω. Open switch; move to the next length.`;
+    state.toast = state.complete ? 'The power pack is off. Five readings complete: resistance increases in direct proportion to the length of this uniform wire.' : `Power pack off. ${result.length_cm} cm: ${result.voltage_v.toFixed(2)} V ÷ ${result.current_a.toFixed(2)} A = ${result.resistance_ohm.toFixed(1)} Ω. Move to the next length.`;
   } else if (label === 'NEXT LENGTH' && stage === 3 && !state.complete) {
     state.wireStage = 4; state.wireTimer = 0; state.running = true;
     state.toast = 'The sliding crocodile clip opens, lifts clear of the wire and glides to the next ruler mark.';
@@ -3648,6 +3995,9 @@ function activate(label) {
   const id = practicals[state.selected].id;
   if (id === 'starchleaf' && ['BOIL LEAF', 'BOILING…', 'MOVE TO ETHANOL', 'DECOLOURISING…', 'RINSE LEAF', 'RINSING…', 'ADD IODINE', 'ADDING IODINE…', 'RESET PRACTICAL', 'RESULT'].includes(label)) { activateStarch(label); draw(); return }
   if (id === 'lipase' && ['ADD LIPASE', 'ADDING LIPASE…', 'REACTION RUNNING…', 'NEXT TEMPERATURE', 'VIEW GRAPH', 'RESET SERIES', 'GRAPH', 'HEATING BATH…'].includes(label)) { activateLipase(label); draw(); return }
+  if (id === 'transformation' && ['LABEL CONTROLS', 'LABELLING…', 'ADD CELLS + DNA', 'PIPETTING…', 'ICE + HEAT SHOCK', 'HEAT SHOCK…', 'ADD LB + RECOVER', 'RECOVERING…', 'PLATE CELLS', 'SPREADING…', 'INCUBATE PLATES', 'INCUBATING…', 'VIEW RESULTS', 'PLATES', 'RESET'].includes(label)) { activateTransformation(label); draw(); return }
+  if (id === 'respiration' && ['ADD GLUCOSE', 'ADDING GLUCOSE…', 'ADD YEAST', 'POURING YEAST…', 'FIT BALLOONS', 'FITTING BALLOONS…', 'START 10 MIN RUN', 'INCUBATING…', 'RECORD RESULTS', 'VIEW GRAPH', 'RESET PRACTICAL', 'GRAPH'].includes(label)) { activateRespiration(label); draw(); return }
+  if (id === 'antibiotics' && ['PREPARE ASEPTICALLY', 'DISINFECTING…', 'INOCULATE AGAR', 'SPREADING CULTURE…', 'PLACE DISCS', 'PLACING DISCS…', 'SEAL + INCUBATE', 'INCUBATING 25 °C…', 'MEASURE ZONES', 'MEASURING ZONES…', 'VIEW RESULTS', 'RESULTS', 'RESET PRACTICAL', 'RESET'].includes(label)) { activateAntibiotics(label); draw(); return }
   if (id === 'osmosis' && ['LOWER CHIP', 'TRANSFERRING…', 'SOAKING…', 'REMOVE & BLOT', 'BLOTTING…', 'REWEIGH CHIP', 'REWEIGHING…', 'NEXT CONCENTRATION', 'VIEW GRAPH', 'RESET SERIES', 'GRAPH'].includes(label)) { activateOsmosis(label); draw(); return }
   if (id === 'potometer' && ['INTRODUCE BUBBLE', 'INTRODUCING…', 'ALIGN TO ZERO', 'ALIGNING…', 'START 5 MIN RUN', 'MEASURING…', 'NEXT WIND SPEED', 'VIEW GRAPH', 'RESET SERIES', 'GRAPH'].includes(label)) { activatePotometer(label); draw(); return }
   if (id === 'pondweed' && ['- 10cm', '+ 10cm', 'LAMP ON', 'LAMP OFF', 'COUNT 1 MIN', 'RESET PRACTICAL', 'METHOD', 'RESULTS', 'GRAPH'].includes(label)) { activatePondweed(label); draw(); return }
@@ -3664,7 +4014,7 @@ function activate(label) {
   if (id === 'hooke' && ['RECORD ZERO', 'ADDING + SETTLING…', 'RECORD READING', 'ADD 100 g MASS', 'VIEW GRAPH', 'RESET SERIES', 'GRAPH'].includes(label)) { activateHooke(label); draw(); return }
   if (id === 'specificheat' && (label.startsWith('MATERIAL:') || ['PREPARE BLOCK', 'INSERTING + INSULATING…', 'START HEATING', 'HEATING…', 'CALCULATE c', 'VIEW GRAPH', 'RESET PRACTICAL', 'RESET', 'GRAPH'].includes(label))) { activateSpecificHeat(label); draw(); return }
   if (id === 'latentheat' && (label.startsWith('SAMPLE:') || ['ASSEMBLE BATH', 'ASSEMBLING…', 'START HEATING', 'HEATING + LOGGING…', 'START COOLING', 'COOLING + LOGGING…', 'VIEW CURVES', 'CURVES', 'RESET', 'RESET PRACTICAL', 'GRAPH'].includes(label))) { activateLatentHeat(label); draw(); return }
-  if (id === 'wirelength' && ['CLOSE SWITCH', 'READING SETTLING…', 'RECORD READING', 'NEXT LENGTH', 'MOVING CONTACT…', 'VIEW GRAPH', 'RESET SERIES', 'GRAPH'].includes(label)) { activateWireLength(label); draw(); return }
+  if (id === 'wirelength' && ['POWER PACK ON', 'POWER PACK STARTING…', 'POWER PACK OFF', 'NEXT LENGTH', 'MOVING CONTACT…', 'VIEW GRAPH', 'RESET SERIES', 'GRAPH'].includes(label)) { activateWireLength(label); draw(); return }
   if (id === 'ivdevices' && (label.startsWith('DEVICE · ') || ['RUN I–V SWEEP', 'SWEEP RUNNING…', 'SAVE CURVE', 'NEXT DEVICE', 'CHANGING DEVICE…', 'VIEW CURVES', 'CURVES', 'GRAPH', 'RESET'].includes(label))) { activateIvDevices(label); draw(); return }
   if (id === 'nuclear' && (label.startsWith('SOURCE · ') || label.startsWith('ABSORBER · ') || ['MEASURE 10 s', 'STOP COUNT', 'RESET'].includes(label))) { activateNuclear(label); draw(); return }
   if (id === 'fieldlines' && ['SPRINKLE FILINGS', 'SPRINKLING…', 'TAP PAPER', 'FILINGS ALIGNING…', 'RECORD PATTERN', 'CHANGING MAGNETS…', 'VIEW PATTERNS', 'RESET STUDY', 'PATTERNS'].includes(label)) { activateFieldLines(label); draw(); return }
@@ -3789,6 +4139,9 @@ canvas.addEventListener('pointerdown', e => {
       state.toast = `${practicals[state.selected].title} loaded.`;
       if (practicals[state.selected].id === 'starchleaf') resetStarchPractical();
       else if (practicals[state.selected].id === 'lipase') resetLipasePractical();
+      else if (practicals[state.selected].id === 'transformation') resetTransformationPractical();
+      else if (practicals[state.selected].id === 'respiration') resetRespirationPractical();
+      else if (practicals[state.selected].id === 'antibiotics') resetAntibioticPractical();
       else if (practicals[state.selected].id === 'osmosis') resetOsmosisPractical();
       else if (practicals[state.selected].id === 'potometer') resetPotometerPractical();
       else if (practicals[state.selected].id === 'quadrats') resetQuadratPractical();
@@ -3806,7 +4159,7 @@ canvas.addEventListener('pointerdown', e => {
     state.pour = null; state.drag = null; state.dose = null; state.graphModal = false; state.reactantSafety = null; state.hookeFocusModal = false; state.hookeFocusProgress = 0; state.lastReactant = null; state.particles = []; state.chromSelectedDye = null; state.electroRecorded = false;
     state.tab = practicals[r.data].id === 'free' ? 'equipment' : 'bench';
     const selectedId = practicals[r.data].id;
-    if (selectedId === 'rates') resetRatesPractical(); else if (selectedId === 'mass') resetMassPractical(); else if (selectedId === 'hydrogen') resetHydrogenPractical(); else if (selectedId === 'electro') resetElectroPractical(); else if (selectedId === 'titration') resetTitrationPractical(); else if (selectedId === 'thermite') resetThermitePractical(); else if (selectedId === 'starchleaf') resetStarchPractical(); else if (selectedId === 'lipase') resetLipasePractical(); else if (selectedId === 'osmosis') resetOsmosisPractical(); else if (selectedId === 'potometer') resetPotometerPractical(); else if (selectedId === 'quadrats') resetQuadratPractical(); else if (selectedId === 'capture') resetCapturePractical(); else if (selectedId === 'shoretransect') resetShoreTransectPractical(); else if (selectedId === 'ripple') resetRipplePractical(); else if (selectedId === 'electromagnet') resetElectromagnetPractical(); else if (selectedId === 'convection') resetConvectionPractical(); else if (selectedId === 'conduction') resetConductionPractical(); else if (selectedId === 'thermal') resetThermalPractical(); else if (selectedId === 'density') resetDensityPractical(); else if (selectedId === 'hooke') resetHookePractical(); else if (selectedId === 'specificheat') resetSpecificHeatPractical(); else if (selectedId === 'latentheat') resetLatentHeatPractical(); else if (selectedId === 'wirelength') resetWireLengthPractical(); else if (selectedId === 'ivdevices') resetIvDevicePractical(); else if (selectedId === 'fieldlines') resetFieldLinePractical(); else if (selectedId === 'nuclear') resetNuclearPractical(); else state.toast = selectedId === 'free' ? 'Click equipment to add it, or drag it onto the bench.' : selectedId === 'water' ? 'Glassware assembled. Start the cooling water before switching on the electric heating mantle.' : `${practicals[r.data].gear.join(', ')} loaded onto the bench.`;
+    if (selectedId === 'rates') resetRatesPractical(); else if (selectedId === 'mass') resetMassPractical(); else if (selectedId === 'hydrogen') resetHydrogenPractical(); else if (selectedId === 'electro') resetElectroPractical(); else if (selectedId === 'titration') resetTitrationPractical(); else if (selectedId === 'thermite') resetThermitePractical(); else if (selectedId === 'starchleaf') resetStarchPractical(); else if (selectedId === 'lipase') resetLipasePractical(); else if (selectedId === 'transformation') resetTransformationPractical(); else if (selectedId === 'respiration') resetRespirationPractical(); else if (selectedId === 'antibiotics') resetAntibioticPractical(); else if (selectedId === 'osmosis') resetOsmosisPractical(); else if (selectedId === 'potometer') resetPotometerPractical(); else if (selectedId === 'quadrats') resetQuadratPractical(); else if (selectedId === 'capture') resetCapturePractical(); else if (selectedId === 'shoretransect') resetShoreTransectPractical(); else if (selectedId === 'ripple') resetRipplePractical(); else if (selectedId === 'electromagnet') resetElectromagnetPractical(); else if (selectedId === 'convection') resetConvectionPractical(); else if (selectedId === 'conduction') resetConductionPractical(); else if (selectedId === 'thermal') resetThermalPractical(); else if (selectedId === 'density') resetDensityPractical(); else if (selectedId === 'hooke') resetHookePractical(); else if (selectedId === 'specificheat') resetSpecificHeatPractical(); else if (selectedId === 'latentheat') resetLatentHeatPractical(); else if (selectedId === 'wirelength') resetWireLengthPractical(); else if (selectedId === 'ivdevices') resetIvDevicePractical(); else if (selectedId === 'fieldlines') resetFieldLinePractical(); else if (selectedId === 'nuclear') resetNuclearPractical(); else state.toast = selectedId === 'free' ? 'Click equipment to add it, or drag it onto the bench.' : selectedId === 'water' ? 'Glassware assembled. Start the cooling water before switching on the electric heating mantle.' : `${practicals[r.data].gear.join(', ')} loaded onto the bench.`;
     draw()
   }
   else if (r.id === 'crucible-lid') { removeMassLid(); draw() }
@@ -4014,6 +4367,103 @@ function update(dt, skipDraw = false) {
       }
     }
     if (!skipDraw && (state.running || state.lipaseConditioning || state.complete)) draw();
+    return;
+  }
+  if (id === 'transformation') {
+    const stage = state.transformationStage || 0, duration = transformationStageDurations[stage];
+    if (state.running && duration) {
+      state.transformationTimer += dt;
+      const q = Math.max(0, Math.min(1, state.transformationTimer / duration));
+      state.progress = Math.min(1, (stage - 1 + q * 2) / 12);
+      state.time = stage === 5 ? q * 50 : stage === 7 ? q * 600 : stage === 11 ? q * 57600 : state.transformationTimer;
+      if (stage === 1) state.toast = q < .5 ? 'Colour-coded labels are wrapping around the +DNA and −DNA tubes.' : 'Four plate labels preserve the DNA treatment and medium for every comparison.';
+      else if (stage === 3) state.toast = q < .31 ? 'A fresh sterile tip is fitted. The P20 reaches its first stop, then releases to draw competent cells into the visible tip column.' : q < .62 ? 'A new tip repeats the first-stop aspiration and second-stop dispense for the −DNA control.' : q < .9 ? 'Another fresh tip draws up the circular GFP plasmid and dispenses it into +DNA only.' : 'The used tip is ejected into the waste cup; both control tubes remain chilled.';
+      else if (stage === 5) { state.temp = q < .3 || q > .72 ? 4 : 42; state.toast = q < .3 ? 'The labelled tubes remain nestled in ice so the cells stay competent.' : q < .72 ? 'Both controls are together in the 42 °C heat block for a simulated 50 seconds.' : 'The tubes have returned to ice; the +DNA cells now contain the plasmid.'; }
+      else if (stage === 7) { state.temp = 25; state.toast = q < .48 ? 'A fresh tip aspirates sterile LB, then the two-stop plunger dispenses it into +DNA.' : 'A second fresh tip adds LB to −DNA before being ejected; both samples then recover together.'; }
+      else if (stage === 9) state.toast = q < .25 ? 'Fresh-tip cycle 1: +DNA cells are aspirated, dispensed and spread over LB/amp/ara.' : q < .5 ? 'Fresh-tip cycle 2: +DNA cells are plated on LB/amp without cross-contamination.' : q < .75 ? 'Fresh-tip cycle 3: −DNA cells are plated on LB as the viability control.' : 'Fresh-tip cycle 4: −DNA cells are plated on LB/amp; each used tip is ejected to waste.';
+      else if (stage === 11) { state.temp = 37; state.toast = q < .22 ? 'The four sealed plates move into the 37 °C simulation incubator in an inverted orientation.' : q < .72 ? 'Simulated overnight growth: transformed colonies survive ampicillin while the controls test cell viability and selection.' : 'The plates move onto the blue-light viewer; GFP fluorescence appears only where plasmid, ampicillin and arabinose are all present.'; }
+      if (q >= 1) {
+        state.transformationStage = stage + 1; state.transformationTimer = 0; state.running = false; state.progress = (stage + 1) / 12;
+        if (stage === 1) state.toast = 'Controls labelled. Add identical competent-cell samples to both tubes and plasmid DNA to +DNA only.';
+        else if (stage === 3) state.toast = 'Cells and DNA are assigned correctly. Keep both tubes ice-cold before the heat shock.';
+        else if (stage === 5) { state.temp = 4; state.toast = 'Heat shock complete. Add sterile LB broth so both cell samples can recover before plating.'; }
+        else if (stage === 7) state.toast = 'Recovery complete. Use the labelled plate map to inoculate all four agar conditions.';
+        else if (stage === 9) state.toast = 'Four plates are inoculated and sealed. Incubate them to reveal growth, selection and GFP expression.';
+        else if (stage === 11) { state.temp = 22; state.complete = true; state.progress = 1; state.transformationResults = transformationPlateResults.map(result => ({ ...result })); state.tab = 'graph'; state.toast = 'Transformation result: ampicillin selects plasmid-bearing cells, while arabinose activates GFP so only +DNA LB/amp/ara colonies glow green.'; }
+      }
+    }
+    if (!skipDraw && (state.running || state.complete)) draw();
+    return;
+  }
+  if (id === 'respiration') {
+    const stage = state.respirationStage || 0, duration = respirationStageDurations[stage];
+    if (state.running && duration) {
+      state.respirationTimer += dt;
+      const q = Math.max(0, Math.min(1, state.respirationTimer / duration));
+      if (stage === 1) {
+        state.progress = q * .18;
+        const flaskIndex = Math.min(4, Math.floor(q * 5));
+        state.toast = q < .12 ? 'The powder boat lifts from the balance tray.' : `Glucose crystals are falling into the ${respirationTemperatures[flaskIndex]} °C flask; each portion is exactly 5.0 g.`;
+        if (q >= 1) { state.respirationStage = 2; state.respirationTimer = 0; state.running = false; state.progress = .18; state.toast = 'All five flasks contain the same 5.0 g glucose mass. Add equal volumes of yeast suspension.'; }
+      } else if (stage === 3) {
+        state.progress = .18 + q * .2;
+        const flaskIndex = Math.min(4, Math.floor(q * 5));
+        state.toast = q < .1 ? 'The 25.0 cm³ measuring cylinder lifts from the yeast bottle.' : `Yeast suspension pours down the wall of the ${respirationTemperatures[flaskIndex]} °C flask without spilling.`;
+        if (q >= 1) { state.respirationStage = 4; state.respirationTimer = 0; state.running = false; state.progress = .38; state.toast = 'Equal yeast, glucose and total liquid volumes are ready. Seal every flask with an identical balloon.'; }
+      } else if (stage === 5) {
+        state.progress = .38 + q * .22;
+        const balloonIndex = Math.min(4, Math.floor(q * 5));
+        state.toast = `Balloon ${balloonIndex + 1} is stretching over its flask neck; the latex forms an airtight seal without trapping extra air.`;
+        if (q >= 1) { state.respirationStage = 6; state.respirationTimer = 0; state.running = false; state.progress = .6; state.toast = 'All five empty balloons are sealed and every bath is stable at its labelled temperature. Start the simultaneous ten-minute run.'; }
+      } else if (stage === 7) {
+        state.time = 600 * q; state.progress = .6 + q * .32; state.temp = 40;
+        state.toast = q < .18 ? 'The yeast is rehydrating and the first carbon dioxide bubbles enter the balloons.' : q < .68 ? 'Balloon inflation differs while the timer remains identical: the 30 °C and 40 °C flasks are producing carbon dioxide fastest.' : 'Ten minutes is nearly complete. The 60 °C balloon stays almost flat because high temperature damages respiratory enzymes.';
+        if (q >= 1) { state.respirationStage = 8; state.respirationTimer = 0; state.running = false; state.time = 600; state.progress = .92; state.toast = 'The simultaneous ten-minute timer has stopped. Compare the five balloon sizes, then record the carbon dioxide volumes.'; }
+      }
+    }
+    if (!skipDraw && (state.running || state.complete)) draw();
+    return;
+  }
+  if (id === 'antibiotics') {
+    const stage = state.antibioticStage || 0, duration = antibioticStageDurations[stage];
+    if (state.running && duration) {
+      state.antibioticTimer += dt;
+      const q = Math.max(0, Math.min(1, state.antibioticTimer / duration));
+      if (stage === 1) {
+        state.progress = .16 * q;
+        state.toast = q < .16 ? 'The yellow safety flame is off before the flammable surface disinfectant is sprayed.' : q < .48 ? 'A fresh wipe cleans the free bench area without travelling underneath the Petri dish.' : q < .57 ? 'The field air-dries fully before the Bunsen is relit.' : q < .78 ? 'A black marker draws the first diameter on the outside underside of the sealed plate base.' : 'The second perpendicular marker line completes four labelled sectors without opening the plate.';
+        if (q >= 1) { state.antibioticStage = 2; state.antibioticTimer = 0; state.running = false; state.progress = .16; state.toast = 'The dry bench is organised, four sectors are marked and the Bunsen has returned to a yellow safety flame. Inoculate using minimum lid opening.'; }
+      } else if (stage === 3) {
+        state.progress = .16 + .24 * q;
+        state.toast = q < .18 ? 'The sterile swab is moistened with the Bacillus subtilis teaching culture.' : q < .78 ? 'The lid is held like a shield while the swab sweeps the agar in overlapping directions and the plate rotates between passes.' : 'The lid closes and the used swab travels directly into the biohazard waste bin.';
+        if (q >= 1) { state.antibioticStage = 4; state.antibioticTimer = 0; state.running = false; state.progress = .4; state.toast = 'An even bacterial lawn has been inoculated and the swab safely discarded. Open the sterile disc card only when the forceps are ready.'; }
+      } else if (stage === 5) {
+        state.progress = .4 + .22 * q;
+        const discIndex = Math.min(3, Math.floor(q * 4));
+        state.toast = `Sterile forceps are placing disc ${antibioticDiscs[discIndex].code} (${antibioticDiscs[discIndex].name}) without sliding it across the agar.`;
+        if (q >= 1) { state.antibioticStage = 6; state.antibioticTimer = 0; state.running = false; state.progress = .62; state.toast = 'P, E, T and the sterile-water control are equally spaced. Cross-tape the lid, invert the plate and incubate at 25 °C.'; }
+      } else if (stage === 7) {
+        state.time = 48 * 3600 * q; state.progress = .62 + .26 * q; state.temp = 25;
+        state.toast = q < .14 ? 'Two short tape strips cross over the closed lid, leaving gas exchange possible.' : q < .27 ? 'The plate turns agar-side-up so condensation cannot drip across the bacterial lawn.' : q < .43 ? 'The incubator glass door swings open and the inverted plate slides onto the shelf.' : q < .76 ? `The door is closed while incubation advances to ${(48 * q).toFixed(0)} hours at the school-safe 25 °C.` : q < .92 ? 'The glass door reopens and the sealed grown plate returns to the bench.' : 'The incubator door closes; clear inhibition zones are stable while the water control shows continuous growth.';
+        if (q >= 1) { state.antibioticStage = 8; state.antibioticTimer = 0; state.running = false; state.time = 48 * 3600; state.progress = .88; state.toast = 'Incubation complete and the glass door is closed again. Keep the returned plate sealed and measure every clear zone through its centre.'; }
+      } else if (stage === 9) {
+        state.progress = .88 + .12 * q;
+        const count = Math.min(4, Math.floor(q * 4 + .001));
+        while (state.antibioticResults.length < count) {
+          const disc = antibioticDiscs[state.antibioticResults.length];
+          state.antibioticResults.push({ id: disc.id, code: disc.code, antibiotic: disc.name, zone_diameter_mm: disc.diameterMm, control: disc.id === 'control' });
+        }
+        state.antibioticMeasuredIndex = Math.max(-1, count - 1);
+        const index = Math.min(3, Math.floor(q * 4));
+        state.toast = `The ruler aligns through disc ${antibioticDiscs[index].code}; read the widest clear diameter from edge to edge without opening the plate.`;
+        if (q >= 1) {
+          state.antibioticResults = antibioticDiscs.map(disc => ({ id: disc.id, code: disc.code, antibiotic: disc.name, zone_diameter_mm: disc.diameterMm, control: disc.id === 'control' }));
+          state.antibioticMeasuredIndex = 3; state.antibioticStage = 10; state.antibioticTimer = 0; state.running = false; state.complete = true; state.progress = 1; state.tab = 'graph';
+          state.toast = 'All sealed-plate readings are recorded: tetracycline 30 mm, erythromycin 24 mm, penicillin 18 mm and sterile-water control 0 mm.';
+        }
+      }
+    }
+    if (!skipDraw && (state.running || state.complete)) draw();
     return;
   }
   if (id === 'osmosis') {
@@ -4465,10 +4915,10 @@ function update(dt, skipDraw = false) {
       const q = Math.max(0, Math.min(1, state.wireTimer / wireStageDurations[stage]));
       if (stage === 1) {
         state.progress = Math.min(1, (state.wireResults.length + q * .72) / wireLengthsCm.length);
-        state.toast = q < .34 ? 'The knife switch closes; the power-supply indicator lights.' : q < .78 ? 'The ammeter and voltmeter digits settle without heating the wire.' : `Steady readings: ${state.wireVoltageV.toFixed(2)} V and ${wireCurrent().toFixed(2)} A. Open the switch by recording promptly.`;
+        state.toast = q < .34 ? 'The power pack turns on and its output indicator lights.' : q < .78 ? 'The ammeter and voltmeter digits settle without heating the wire.' : `Steady readings: ${state.wireVoltageV.toFixed(2)} V and ${wireCurrent().toFixed(2)} A. Turn the power pack off promptly.`;
         if (q >= 1) {
           state.wireStage = 2; state.wireTimer = 0; state.running = false;
-          state.toast = `Meters steady at ${state.wireVoltageV.toFixed(2)} V and ${wireCurrent().toFixed(2)} A. Calculate and record R = V ÷ I.`;
+          state.toast = `Meters steady at ${state.wireVoltageV.toFixed(2)} V and ${wireCurrent().toFixed(2)} A. Turn the power pack off to record and calculate R = V ÷ I.`;
         }
       } else if (stage === 4) {
         state.toast = q < .24 ? 'The black crocodile jaws open and lift from the nichrome wire.' : q < .76 ? 'The clip glides above the metre ruler to the next measured position.' : 'The clip lowers and its serrated jaws close firmly on the wire.';
@@ -4476,7 +4926,7 @@ function update(dt, skipDraw = false) {
           state.wireTrialIndex = Math.min(wireLengthsCm.length - 1, state.wireResults.length);
           state.wireLengthCm = wireLengthsCm[state.wireTrialIndex];
           state.wireStage = 0; state.wireTimer = 0; state.running = false;
-          state.toast = `Sliding contact set to ${state.wireLengthCm} cm. The switch remains open so the wire can cool before the next reading.`;
+          state.toast = `Sliding contact set to ${state.wireLengthCm} cm. The power pack remains off so the wire can cool before the next reading.`;
         }
       }
     }
@@ -4667,7 +5117,58 @@ function installPhotosynthesisMessageApi() {
   });
 }
 
-let last = performance.now(); function loop(now) { let dt = Math.min(.05, (now - last) / 1000); last = now; if (!window.__manualSimulationTime) update(dt); requestAnimationFrame(loop) }
+let last = performance.now(), animationFrameId = 0, animationTimerId = 0;
+function simulationFrameMode() {
+  if (document.hidden || portraitPromptVisible || window.__manualSimulationTime) return 'idle';
+  const id = practicals[state.selected]?.id;
+  const active = state.running || state.burner || state.coolingWater || state.electroWeighing || state.pour || state.drag || state.massTransfer ||
+    (state.reaction && !state.reaction.complete) || state.particles.length || lab3d.isTransitioning || lab3d.bunsenTransitionActive ||
+    state.workspace.some(item => item.type === 'bunsen' && item.lit) || state.workspace.some(item => item.type === 'beaker' && (item.temperature || 20) > 20.05);
+  if (active) return 'active';
+  const ambient = ['quadrats', 'capture', 'shoretransect'].includes(id) ||
+    id === 'ripple' && (state.rippleStage || 0) >= 3 ||
+    id === 'pondweed' && state.pondweedLampOn ||
+    id === 'thermal' && (state.thermalStage || 0) >= 1 ||
+    state.complete && ['potometer', 'convection', 'conduction', 'fieldlines'].includes(id);
+  return ambient ? 'ambient' : 'idle';
+}
+function requestSimulationFrame() {
+  const mode = simulationFrameMode();
+  if (mode === 'idle') return;
+  if (mode === 'active') {
+    if (animationTimerId) { clearTimeout(animationTimerId); animationTimerId = 0 }
+    if (!animationFrameId) animationFrameId = requestAnimationFrame(loop);
+    return;
+  }
+  if (!animationFrameId && !animationTimerId) {
+    animationTimerId = setTimeout(() => {
+      animationTimerId = 0;
+      animationFrameId = requestAnimationFrame(loop);
+    }, 50);
+  }
+}
+function loop(now) {
+  animationFrameId = 0;
+  const dt = Math.min(.05, Math.max(0, (now - last) / 1000));
+  last = now;
+  if (!window.__manualSimulationTime) update(dt);
+  requestSimulationFrame();
+}
+window.__labPerformance = {
+  frameMode: () => simulationFrameMode(),
+  rendererLoaded: () => lab3d.available,
+  rendererLoading: () => !lab3d.available && !!lab3d.loading
+};
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    if (animationTimerId) clearTimeout(animationTimerId);
+    animationFrameId = 0; animationTimerId = 0;
+  } else {
+    last = performance.now();
+    draw();
+  }
+});
 window.advanceTime = ms => { for (let t = 0; t < ms; t += 16.67)update(1 / 60, true); draw() };
 window.render_game_to_text = () => {
   const p = practicals[state.selected], id = p.id, free = id === 'free', chrom = id === 'chrom', spec = free || ['mass', 'displacement', 'starchleaf', 'quadrats', 'shoretransect', 'ripple', 'convection', 'conduction', 'thermal', 'fieldlines'].includes(id) ? null : currentGraphSpec(), freeBurnerLit = state.workspace.some(it => it.type === 'bunsen' && it.lit), snapTargets = free ? state.workspace.filter(it => it.type === 'tripod').map(it => { const point = tripodGauzeScreenPoint(it); return { uid: it.uid, x: Math.round(point?.x || it.x), y: Math.round(point?.y || it.y) } }) : [];
@@ -5075,7 +5576,7 @@ const addedPhysicsAwareRenderGameToText = window.render_game_to_text;
 window.render_game_to_text = () => {
   const payload = JSON.parse(addedPhysicsAwareRenderGameToText()), id = practicals[state.selected].id;
   if (id === 'wirelength') {
-    const phases = ['switch open at measured length', 'switch closing and meters settling', 'steady voltage and current ready to record', 'reading recorded with switch open', 'crocodile contact moving to next ruler mark'];
+    const phases = ['power pack off at measured length', 'power pack starting and meters settling', 'power pack on with steady voltage and current', 'reading recorded with power pack off', 'crocodile contact moving to next ruler mark'];
     payload.wire_resistance_practical = {
       stage: state.wireStage,
       phase: state.complete ? 'five-length series complete' : phases[state.wireStage],
@@ -5086,29 +5587,43 @@ window.render_game_to_text = () => {
       sliding_contact_cm: state.wireLengthCm,
       wire: { material: 'nichrome', uniform_diameter: true, straight_against_metre_ruler: true },
       circuit_layout: {
-        series_path: 'supply positive → switch → ammeter → fixed contact → nichrome test length → sliding contact → supply negative',
+        series_path: 'power pack positive → ammeter → fixed contact → nichrome test length → sliding contact → power pack negative',
         voltmeter_parallel_path: 'voltmeter connected directly across the fixed and sliding contacts',
         cable_lanes_separated: true,
+        cable_geometry: 'continuous tube routes with straight runs and quadratic rounded bends',
+        smooth_cable_corners: true,
         measured_segment_highlighted: true,
-        component_zones: ['rear supply and meters', 'middle safety switch', 'foreground ruler and test wire'],
-        switch_in_separate_middle_row: true,
+        ruler_rotated_180_degrees: true,
+        fixed_red_clamp_retains_rotated_orientation: true,
+        black_sliding_clamp_faces_camera: true,
+        black_sliding_clamp_ferrule_faces_far_side: true,
+        black_series_lead_route: 'along the far side of the ruler',
+        component_zones: ['rear power pack and meters', 'foreground ruler and test wire'],
+        separate_switch_present: false,
+        power_pack_is_sole_circuit_control: true,
         compact_meter_displays: true,
         meter_displays_clear_of_terminals: true,
+        meter_housing_shape: 'truncated square-pyramid frustum with trapezoidal faces',
+        visible_meter_faces: ['front', 'top', 'left'],
+        meter_screens_fit_inside_bezels: true,
+        ruler_style: 'potometer ivory-white scale with enlarged high-contrast dark blue graduations and numbers',
+        ruler_scale_readability: { centimetre_marks: 'three-level major, mid and minor hierarchy', numbers: 'enlarged bold labels every 10 cm' },
+        pink_parallel_lead_route: 'around the right-hand edge of the ruler',
         ammeter_label: 'A · SERIES',
         voltmeter_label: 'V · PARALLEL'
       },
-      switch_closed: state.wireStage === 1 || state.wireStage === 2,
+      power_pack_on: state.wireStage === 1 || state.wireStage === 2,
       supply_voltage_v: state.wireStage === 1 || state.wireStage === 2 ? state.wireVoltageV : 0,
       ammeter_current_a: state.wireStage === 1 || state.wireStage === 2 ? wireCurrent() : 0,
       calculated_resistance_ohm: wireResistance(),
       calculation: `${state.wireVoltageV.toFixed(2)} V ÷ ${wireCurrent().toFixed(2)} A = ${wireResistance().toFixed(1)} Ω`,
       contact_motion: state.wireStage === 4 ? 'jaws open, lift, glide, lower and close' : 'stationary',
-      switch_open_between_readings_to_limit_heating: true,
+      power_pack_off_between_readings_to_limit_heating: true,
       measured_results: state.wireResults,
       graph_axes: { x: 'wire length / cm', y: 'resistance / Ω' },
       smooth_stage_animation: true
     };
-    payload.controls = ['CLOSE SWITCH', 'RECORD READING', 'NEXT LENGTH', 'RESET SERIES', 'GRAPH', 'METHOD', 'F fullscreen'];
+    payload.controls = ['POWER PACK ON', 'POWER PACK OFF', 'NEXT LENGTH', 'RESET SERIES', 'GRAPH', 'METHOD', 'F fullscreen'];
 
   } else if (id === 'fieldlines') {
     const configuration = fieldConfigurations[state.fieldConfigIndex];
@@ -5180,8 +5695,9 @@ window.render_game_to_text = () => {
       elapsed_stage_s: +state.shcTimer.toFixed(2),
       material: state.shcMaterial,
       reference_specific_heat_j_per_kg_c: currentShcMaterial().specificHeat,
-      apparatus: [`1.00 kg ${state.shcMaterial} block with two separate bores`, '12 V cartridge heater', 'digital temperature probe', 'thermal paste collars', 'close-fitting foam jacket with bored lid', 'low-voltage supply', 'ammeter and joulemeter'],
-      preparation: { thermal_paste_applied: state.shcStage >= 2, heater_fully_inserted: state.shcStage >= 2, probe_fully_inserted: state.shcStage >= 2, insulation_closed: state.shcStage >= 2, bored_insulating_lid_closed: state.shcStage >= 2 },
+      apparatus: [`1.00 kg ${state.shcMaterial} block with two separate pre-drilled bores`, '12 V cartridge heater', 'digital temperature probe', 'thermal paste collars', 'close-fitting foam jacket with bored lid', 'low-voltage supply', 'ammeter and joulemeter'],
+      preparation: { block_bores_pre_drilled_before_practical: true, drilling_is_not_a_method_step: true, drilling_sparks_shown: false, bore_inspection_animated: state.shcStage <= 1, thermal_paste_applied: state.shcStage >= 2, heater_fully_inserted: state.shcStage >= 2, probe_fully_inserted: state.shcStage >= 2, insulation_starts_off_camera: state.shcStage === 0, insulation_panels_fly_in_individually: state.shcStage === 1, insulation_closed: state.shcStage >= 2, bored_insulating_lid_closed: state.shcStage >= 2 },
+      instrument_layout: { all_four_displays_visible: true, left_of_block: ['12 V supply', 'ammeter'], right_of_block: ['joulemeter', 'digital thermometer'] },
       electrical_circuit: { complete: true, route: 'supply positive → ammeter → joulemeter → heater → supply negative', thermometer_probe_has_separate_data_lead: true },
       mass_kg: 1,
       supply_voltage_v: state.shcStage === 3 ? 12 : 0,
@@ -5324,6 +5840,52 @@ window.render_game_to_text = () => {
       denaturation_visible_in_results: state.lipaseResults.some(r => r.temperature === 60)
     };
     payload.controls = ['ADD LIPASE', 'NEXT TEMPERATURE', 'RESET SERIES', 'GRAPH', 'METHOD', 'F fullscreen'];
+  } else if (id === 'transformation') {
+    const phases = ['sterile setup ready', 'labelling matched controls', 'controls labelled', 'adding cells and plasmid', 'chilled tubes ready', 'ice–heat shock–ice sequence', 'heat shock complete', 'adding LB and recovering cells', 'cells recovered', 'inoculating and spreading four plates', 'sealed plates ready to incubate', 'overnight incubation and blue-light reveal', 'selection and GFP results complete'];
+    const stage = state.transformationStage || 0, stageOperations = stage === 3 ? ['fit fresh tip for +DNA cells', 'press first stop and aspirate competent cells', 'dispense into +DNA through the second stop', 'eject used tip to waste', 'fit fresh tip for −DNA cells', 'press first stop and aspirate competent cells', 'dispense into −DNA through the second stop', 'eject used tip to waste', 'fit fresh tip for plasmid DNA', 'press first stop and aspirate plasmid DNA', 'dispense plasmid into +DNA through the second stop', 'eject used tip to waste', 'return micropipette to stand'] : stage === 7 ? ['fit fresh tip for +DNA recovery broth', 'press first stop and aspirate LB broth', 'dispense LB into +DNA through the second stop', 'eject used tip to waste', 'fit fresh tip for −DNA recovery broth', 'press first stop and aspirate LB broth', 'dispense LB into −DNA through the second stop', 'eject used tip to waste', 'return micropipette to stand'] : stage === 9 ? ['+DNA LB/amp/ara', '+DNA LB/amp', '−DNA LB', '−DNA LB/amp'].flatMap(condition => [`fit fresh tip for ${condition}`, `press first stop and aspirate cells for ${condition}`, `dispense onto ${condition} through the second stop`, 'eject used tip to waste', `spread inoculum on ${condition}`]).concat('return micropipette to stand') : [], operationQ = transformationStageDurations[stage] ? Math.max(0, Math.min(1, state.transformationTimer / transformationStageDurations[stage])) : 0, activePipetteOperation = stageOperations.length ? stageOperations[Math.min(stageOperations.length - 1, Math.floor(operationQ * stageOperations.length))] : 'resting horizontally in its stand';
+    payload.graph_axes = null;
+    payload.results_view = 'four-condition agar plate comparison';
+    payload.bacterial_transformation_practical = {
+      stage: state.transformationStage,
+      phase: phases[state.transformationStage],
+      elapsed_stage_s: +state.transformationTimer.toFixed(2),
+      simulated_time_s: +state.time.toFixed(1),
+      temperature_c: +state.temp.toFixed(1),
+      organism: 'non-pathogenic teaching-strain E. coli simulation',
+      plasmid: { circular: true, genes: ['ampR — ampicillin resistance', 'gfp — green fluorescent protein'], gfp_control: 'arabinose-inducible promoter' },
+      controls: { plus_dna_receives_plasmid: true, minus_dna_receives_plasmid: false, both_receive_equal_competent_cells: true, processed_together: true },
+      thermal_sequence: { initial_ice_c: 4, heat_shock_c: 42, simulated_heat_shock_s: 50, returned_to_ice: state.transformationStage >= 6 },
+      recovery: { medium: 'LB broth', simulated_minutes: 10, complete: state.transformationStage >= 8 },
+      plates: transformationPlateResults.map(result => ({ ...result, observed: state.complete })),
+      apparatus: ['colour-coded sterile microtubes', 'adjustable P20 micropipette with volume window', 'open sterile-tip rack and used-tip waste cup', 'ice bath with modelled ice cubes', 'digital 42 °C heat block', 'four labelled sealed agar plates', '37 °C simulation incubator', 'blue-light fluorescence viewer'],
+      micropipette: { model: 'adjustable P20', active_operation: activePipetteOperation, visual_details: ['contoured handle and rubber grip', 'digital volume window', 'metal nozzle and ejector sleeve', 'separate plunger and tip-ejector controls', 'detachable transparent tip with visible liquid column'], fresh_tip_for_each_transfer: true, plunger_stops: 2, used_tips_ejected_to_waste: true },
+      animations: { tube_and_plate_labelling: state.transformationStage === 1, sequential_sterile_pipetting: state.transformationStage === 3 || state.transformationStage === 7 || state.transformationStage === 9, fresh_tip_pickup: activePipetteOperation.startsWith('fit fresh tip'), two_stop_plunger: activePipetteOperation.includes('first stop') || activePipetteOperation.includes('second stop'), liquid_visible_in_tip: activePipetteOperation.includes('aspirate') || activePipetteOperation.includes('dispense'), tip_ejection_to_waste: activePipetteOperation.includes('eject used tip'), tubes_move_ice_to_heat_block_and_back: state.transformationStage === 5, plasmid_enters_plus_dna_cells_only: state.transformationStage >= 3, agar_spreading: state.transformationStage === 9, sealed_plates_move_through_incubator: state.transformationStage === 11, colonies_grow_progressively: state.transformationStage === 11, gfp_glow_under_blue_light: state.complete },
+      complete: state.complete,
+      conclusion: state.complete ? 'Ampicillin selects bacteria carrying the plasmid; arabinose activates GFP expression, so only +DNA LB/amp/ara colonies glow green.' : null
+    };
+    payload.controls = ['LABEL CONTROLS', 'ADD CELLS + DNA', 'ICE + HEAT SHOCK', 'ADD LB + RECOVER', 'PLATE CELLS', 'INCUBATE PLATES', 'VIEW RESULTS', 'RESET', 'PLATES', 'METHOD', 'F fullscreen'];
+  } else if (id === 'respiration') {
+    const phases = ['dry labelled flasks in thermostatic baths', 'adding equal glucose masses', 'glucose added', 'adding equal yeast volumes', 'yeast and glucose mixed', 'fitting identical balloons', 'sealed flasks ready', 'simultaneous ten-minute incubation', 'incubation complete', 'results recorded'];
+    const incubationQ = respirationIncubationProgress();
+    payload.graph_axes = { x: 'water-bath temperature / °C', y: 'carbon dioxide volume / cm³', chart_type: 'line graph' };
+    payload.graph_readings = state.respirationResults.length;
+    payload.anaerobic_respiration_practical = {
+      stage: state.respirationStage,
+      phase: phases[state.respirationStage],
+      independent_variable: 'water-bath temperature',
+      dependent_variable: 'carbon dioxide volume collected in an identical balloon after 10 minutes',
+      controlled_variables: ['5.0 g glucose', '25.0 cm³ yeast suspension', 'same yeast batch and concentration', 'identical conical flasks', 'identical empty balloons', 'same 10-minute incubation'],
+      equation: 'C₆H₁₂O₆ → 2C₂H₅OH + 2CO₂',
+      oxygen_excluded_by: 'airtight balloon fitted directly over each flask neck',
+      temperatures_c: respirationTemperatures,
+      elapsed_minutes: +(10 * incubationQ).toFixed(2),
+      flasks: respirationTemperatures.map((temperature, index) => ({ temperature_c: temperature, glucose_g: 5, yeast_suspension_cm3: 25, balloon_fitted: state.respirationStage >= 6, live_carbon_dioxide_cm3: respirationGasVolume(temperature, incubationQ), final_carbon_dioxide_cm3: state.respirationStage >= 8 ? respirationFinalGasVolumes[index] : null })),
+      apparatus: ['five white-enamel thermostatic water baths with visible water', 'five labelled conical flasks', 'powder boat and glucose scoop', '25 cm³ measuring cylinder', 'five identical coloured latex balloons', 'shared digital ten-minute timer'],
+      animation: { sequential_equal_glucose_transfer: state.respirationStage === 1, sequential_equal_yeast_pour: state.respirationStage === 3, balloons_stretch_airtight_over_necks: state.respirationStage === 5, simultaneous_timer: state.respirationStage === 7, fermentation_bubbles_and_foam: state.respirationStage >= 7, balloon_inflation_tracks_carbon_dioxide: state.respirationStage >= 7, all_baths_run_for_same_time: true },
+      results: state.respirationResults.map(result => ({ temperature_c: result.temperature, time_minutes: result.time_minutes, carbon_dioxide_cm3: result.volume, balloon_observation: result.balloon })),
+      conclusion: state.complete ? 'Carbon dioxide production rises to an optimum near 40 °C, is slow in cold conditions and falls sharply at 60 °C as respiratory enzymes are denatured.' : null
+    };
+    payload.controls = ['ADD GLUCOSE', 'ADD YEAST', 'FIT BALLOONS', 'START 10 MIN RUN', 'RECORD RESULTS', 'RESET PRACTICAL', 'GRAPH', 'METHOD', 'F fullscreen'];
   } else if (id === 'osmosis') {
     const phases = ['initial mass recorded on balance', 'moving chip into solution', '30-minute osmosis soak', 'soak complete', 'removing and blotting', 'blotted chip ready to reweigh', 'moving chip to balance', 'trial result recorded'];
     payload.graph_axes = { x: 'sucrose concentration / mol dm⁻³', y: 'percentage change in mass / %', zero_line: true };
@@ -5490,7 +6052,7 @@ window.render_game_to_text = () => {
       sampling_design: { method: 'systematic belt transect within upper, middle and lower shore strata', belt_length_m: 10, belt_width_m: 1, station_interval_m: 2, stations_per_stratum: 2, quadrat_area_m2: 1, tape_perpendicular_to_waterline: true, first_quadrat_clear_of_cliff_face: true },
       current_observation: state.transectStage >= 6 ? { limpets: station.limpets, barnacle_cover_percent: station.barnacleCover, brown_seaweed_cover_percent: station.seaweedCover } : null,
       results: state.transectResults.map(result => ({ station: result.station, distance_m: result.distanceM, stratum: result.zone.toLowerCase(), limpets: result.limpets, barnacle_cover_percent: result.barnacleCover, brown_seaweed_cover_percent: result.seaweedCover })),
-      landscape: { laboratory_tiles_visible: false, realistic_rocky_shore: true, realistic_eroded_cliff: true, detailed_cliffs: true, cliff_face_grid: [75, 12], continuous_cliff_top: true, grass_topped_cliff: true, cliff_top_grass_blades: 680, cliff_top_grass_geometry: 'short tapered strip with a pointed tip', cliff_top_grass_subtle_tone_variation: true, broken_projecting_rock_ledges: 19, recessed_branched_fissures: true, exposed_peat_soil_edge: true, cliff_lichen_patches: 48, cliff_maximum_world_y: 3.02, cliff_within_canvas: true, cliff_bounds_world: { x: [-12.2, 12.2], maximum_y: 3.02 }, supported_max_scene_aspect: 2.17, rock_beach_floor_bounds_world: { x: [-13.5, 13.5], z: [-4.6, 7.4] }, rock_beach_floor_extends_beyond_visible_view: true, minimum_compact_lateral_overdraw_world: 1.7, foreground_depth_overdraw_world: 2.5, shore_gravel_count: 300, irregular_rock_pools: true, rock_pool_count: 3, rock_pool_seaweed_clumps: 12, wet_and_dry_rock_zones: true, organisms: ['limpets', 'barnacles', 'mussels', 'brown seaweed', 'lichen'] },
+      landscape: { laboratory_tiles_visible: false, realistic_rocky_shore: true, realistic_eroded_cliff: true, detailed_cliffs: true, cliff_face_grid: [75, 12], continuous_cliff_top: true, grass_topped_cliff: true, cliff_top_grass_blades: 680, cliff_top_grass_geometry: 'short tapered strip with a pointed tip', cliff_top_grass_subtle_tone_variation: true, broken_projecting_rock_ledges: 19, recessed_branched_fissures: true, exposed_peat_soil_edge: true, cliff_lichen_patches: 48, cliff_maximum_world_y: 3.02, cliff_within_canvas: true, cliff_bounds_world: { x: [-12.2, 12.2], maximum_y: 3.02 }, supported_max_scene_aspect: 2.17, rock_beach_floor_bounds_world: { x: [-13.5, 13.5], z: [-4.6, 7.4] }, rock_beach_floor_extends_beyond_visible_view: true, minimum_compact_lateral_overdraw_world: 1.7, foreground_depth_overdraw_world: 2.5, shore_gravel_count: 300, irregular_rock_pools: true, rock_pool_count: 3, rock_pool_seaweed_clumps: 12, wet_and_dry_rock_zones: true, organisms: ['limpets', 'barnacles', 'green seaweed', 'brown seaweed', 'lichen'], organisms_distributed_beyond_measured_belt: true, ambient_organism_bounds_world: { x: [-12.65, 12.65], z: [-1.65, 3.75] }, ambient_organism_counts: { limpets: 64, barnacles: 220, green_seaweed_clumps: 24, brown_seaweed_clumps: 24 } },
       tide: { incoming_from_bottom_foreground: true, progress: +state.shoreTideProgress.toFixed(3), clock_s: +state.shoreTideClock.toFixed(2), layered_gerstner_style_waves: true, translucent_shallow_water: true, water_world_dimensions: [22, 12], animated_foam_bands: 3, foam_world_span: 22.4, wet_rock_front: true, safe_working_line_observed: true },
       lab_drawers_hidden: true,
       animation: { tape_unreels_smoothly: state.transectStage === 1, quadrat_moves_and_settles: state.transectStage === 3, organisms_highlight_during_survey: state.transectStage === 5 || state.transectStage === 6, rock_pool_seaweed_sways: true, tide_continuously_animated: true },
@@ -5734,7 +6296,7 @@ window.render_game_to_text = () => {
     click_enabled: true,
     drag_enabled: false,
     experiment_setup_action_hidden: true,
-    heading: ['quadrats', 'capture', 'shoretransect'].includes(activePractical.id) ? 'BIOLOGICAL SAMPLES — CLICK FOR SAFETY' : ['ripple', 'hooke', 'specificheat', 'latentheat', 'ivdevices'].includes(activePractical.id) ? 'MATERIALS — CLICK FOR SAFETY' : activePractical.id === 'nuclear' ? 'SEALED SOURCES — CLICK FOR SAFETY' : 'REACTANTS — CLICK FOR SAFETY',
+    heading: ['quadrats', 'capture', 'shoretransect', 'antibiotics'].includes(activePractical.id) ? 'BIOLOGICAL SAMPLES — CLICK FOR SAFETY' : ['ripple', 'hooke', 'specificheat', 'latentheat', 'ivdevices'].includes(activePractical.id) ? 'MATERIALS — CLICK FOR SAFETY' : activePractical.id === 'nuclear' ? 'SEALED SOURCES — CLICK FOR SAFETY' : 'REACTANTS — CLICK FOR SAFETY',
     popup: state.reactantSafety ? {
       open: true,
       reactant: state.reactantSafety.name,
@@ -5818,7 +6380,7 @@ window.render_game_to_text = () => {
 };
 installPhotosynthesisMessageApi();
 applyPhotosynthesisFocusFromUrl();
-resize(); requestAnimationFrame(loop);
+resize(); requestSimulationFrame();
 function drawChromatogramSoakPanel(x, y, w, h) {
   const q = Math.max(0, Math.min(1, state.progress)), splitQ = Math.max(0, Math.min(1, (q - .03) / .2)), selected = state.chromSelectedDye, measurements = chromMeasurementData(), frontFinished = q >= .94;
   text('CHROMATOGRAM', x, y, 10, C.muted, 800); wrappedText('Click a coloured pigment to measure from the graphite baseline.', x, y + 18, w, 9.1, C.ink, 600, 12, 2);
@@ -5898,6 +6460,37 @@ window.render_game_to_text = () => {
       safety: { low_voltage_supply: true, switch_off_before_changing_component_or_polarity: true, hot_lamp_cool_before_touching: true, led_protection_resistor_fitted: true }
     };
     payload.controls = [ivPrimaryLabel(), `DEVICE · ${device.short}`, 'RESET', 'CURVES', 'METHOD', 'F fullscreen'];
+  }
+  return JSON.stringify(payload)
+};
+const antibioticAwareRenderGameToText = window.render_game_to_text;
+window.render_game_to_text = () => {
+  const payload = JSON.parse(antibioticAwareRenderGameToText());
+  if (practicals[state.selected].id === 'antibiotics') {
+    const phases = ['sterile field ready to prepare', 'disinfecting, air-drying and marking four sectors', 'four-sector aseptic field prepared', 'inoculating bacterial lawn and disposing swab', 'lawn inoculated; swab in biohazard waste', 'placing coded discs', 'discs placed', 'cross-taping, inverting and using glass-door incubator', 'grown plate returned; incubator closed', 'measuring zones through closed lid', 'measurements complete'];
+    const growth = antibioticGrowthProgress(), measured = antibioticVisibleMeasurementCount(), stageQ = antibioticStageProgress();
+    const incubatorDoorOpen = state.antibioticStage === 7 && ((stageQ >= .27 && stageQ < .51) || (stageQ >= .76 && stageQ < .96));
+    const plateInIncubator = state.antibioticStage === 7 && stageQ >= .39 && stageQ < .84;
+    payload.graph_axes = null;
+    payload.results_columns = ['disc_code', 'treatment', 'zone_diameter_mm', 'control'];
+    payload.results_view = 'sealed Petri-dish map and ranked inhibition-zone table';
+    payload.antibiotic_disc_practical = {
+      stage: state.antibioticStage,
+      phase: phases[state.antibioticStage] || phases[0],
+      stage_progress: +antibioticStageProgress().toFixed(3),
+      organism: { name: 'Bacillus subtilis', role: 'approved non-pathogenic teaching strain', growth_medium: 'nutrient agar', lawn_inoculated: state.antibioticStage >= 4 },
+      aseptic_technique: { bench_disinfected: state.antibioticStage >= 2, surface_air_dried_before_flame_relit: state.antibioticStage >= 2, four_marked_sectors: state.antibioticStage >= 2, marker_lines_drawn_on_outside_of_base: state.antibioticStage >= 2, sterile_swab: true, sterile_forceps: true, sterile_disc_card: true, minimal_lid_opening: true, lid_used_as_shield: true, used_swab_discarded_in_biohazard_bin: state.antibioticStage >= 4, post_incubation_plate_opened: false },
+      flame: { burner_present_near_plate: true, mode: state.antibioticStage === 1 && stageQ < .57 ? 'off during flammable disinfectant use and air-drying' : 'yellow safety flame', disinfectant_kept_away_from_ignition_source: true },
+      plate: { petri_dish_diameter_mm: 90, visual_scale_reduced_for_bench_clearance: true, discs_equally_spaced: state.antibioticStage >= 6, cross_taped_not_circumference_sealed: state.antibioticStage >= 7, inverted_for_incubation: state.antibioticStage >= 7, location: plateInIncubator ? 'inside incubator on shelf' : 'on bench', bacterial_lawn_growth_fraction: +growth.toFixed(3), lid_closed_during_measurement: true },
+      incubation: { temperature_c: 25, duration_hours: state.antibioticStage < 7 ? 0 : +(48 * growth).toFixed(1), school_safe_temperature: true, large_incubator_against_tiled_wall: true, transparent_glass_front_door: true, door_open: incubatorDoorOpen, plate_accepted_through_open_door: state.antibioticStage > 7 || state.antibioticStage === 7 && stageQ >= .39 },
+      discs: antibioticDiscs.map((disc, index) => ({ code: disc.code, treatment: disc.name, placed: state.antibioticStage > 5 || state.antibioticStage === 5 && antibioticStageProgress() * 4 > index, clear_zone_visible: growth > .12 && disc.diameterMm > 0, expected_zone_diameter_mm: disc.diameterMm, measured_zone_diameter_mm: index < measured || state.antibioticStage >= 10 ? disc.diameterMm : null, control: disc.id === 'control' })),
+      measurement: { method: 'widest clear diameter edge-to-edge through the disc centre', unit: 'mm', ruler_outside_closed_lid: true, measured_count: measured, active_disc_index: state.antibioticMeasuredIndex },
+      results: state.antibioticResults.map(result => ({ ...result })),
+      conclusion: state.complete ? 'Tetracycline produced the largest inhibition zone under these controlled conditions; the sterile-water control produced no inhibition zone.' : null,
+      interpretation_limit: 'Zone size is affected by diffusion, inoculum density and agar depth, so it is a comparative classroom result rather than a prescribing recommendation.',
+      safety: { plate_never_reopened_after_incubation: true, incubated_at_25_c_not_body_temperature: true, disinfect_before_and_after: true, alcohol_disinfectant_used_only_with_flame_off: true, contaminated_swab_goes_directly_to_biohazard_waste: true, microbiological_waste_pressure_sterilised_or_disinfected: true }
+    };
+    payload.controls = [antibioticPrimaryLabel(), 'RESET PRACTICAL', 'RESULTS', 'METHOD', 'F fullscreen'];
   }
   return JSON.stringify(payload)
 };

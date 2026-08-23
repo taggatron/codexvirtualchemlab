@@ -1,0 +1,16 @@
+{
+  "errors": [],
+  "renderer": {
+    "enabled": true,
+    "renderer": "WebGL / Three.js",
+    "performance_profile": "high",
+    "objects": 1,
+    "context_lost": false,
+    "scene_compiling": false,
+    "scene_warmup_frames": 1,
+    "canvas_visible": true,
+    "legacy_2d_apparatus": false
+  },
+  "final_stage": 8,
+  "controls_fit": true
+}

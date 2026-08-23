@@ -3,17 +3,18 @@
   "renderer": {
     "enabled": true,
     "renderer": "WebGL / Three.js",
+    "performance_profile": "high",
     "objects": 1,
     "context_lost": false,
     "scene_compiling": false,
-    "scene_warmup_frames": 2,
+    "scene_warmup_frames": 0,
     "canvas_visible": true,
     "legacy_2d_apparatus": false
   },
   "wire": {
     "initial": {
       "stage": 0,
-      "phase": "switch open at measured length",
+      "phase": "power pack off at measured length",
       "elapsed_stage_s": 0,
       "independent_variable": "wire length between crocodile contacts",
       "length_cm": 20,
@@ -25,21 +26,48 @@
         "straight_against_metre_ruler": true
       },
       "circuit_layout": {
-        "series_path": "supply positive → switch → ammeter → fixed contact → nichrome test length → sliding contact → supply negative",
+        "series_path": "power pack positive → ammeter → fixed contact → nichrome test length → sliding contact → power pack negative",
         "voltmeter_parallel_path": "voltmeter connected directly across the fixed and sliding contacts",
         "cable_lanes_separated": true,
+        "cable_geometry": "continuous tube routes with straight runs and quadratic rounded bends",
+        "smooth_cable_corners": true,
         "measured_segment_highlighted": true,
-        "switch_aligned_with_instrument_row": true,
+        "ruler_rotated_180_degrees": true,
+        "fixed_red_clamp_retains_rotated_orientation": true,
+        "black_sliding_clamp_faces_camera": true,
+        "black_sliding_clamp_ferrule_faces_far_side": true,
+        "black_series_lead_route": "along the far side of the ruler",
+        "component_zones": [
+          "rear power pack and meters",
+          "foreground ruler and test wire"
+        ],
+        "separate_switch_present": false,
+        "power_pack_is_sole_circuit_control": true,
+        "compact_meter_displays": true,
+        "meter_displays_clear_of_terminals": true,
+        "meter_housing_shape": "truncated square-pyramid frustum with trapezoidal faces",
+        "visible_meter_faces": [
+          "front",
+          "top",
+          "left"
+        ],
+        "meter_screens_fit_inside_bezels": true,
+        "ruler_style": "potometer ivory-white scale with enlarged high-contrast dark blue graduations and numbers",
+        "ruler_scale_readability": {
+          "centimetre_marks": "three-level major, mid and minor hierarchy",
+          "numbers": "enlarged bold labels every 10 cm"
+        },
+        "pink_parallel_lead_route": "around the right-hand edge of the ruler",
         "ammeter_label": "A · SERIES",
         "voltmeter_label": "V · PARALLEL"
       },
-      "switch_closed": false,
+      "power_pack_on": false,
       "supply_voltage_v": 0,
       "ammeter_current_a": 0,
       "calculated_resistance_ohm": 1.8,
       "calculation": "1.50 V ÷ 0.83 A = 1.8 Ω",
       "contact_motion": "stationary",
-      "switch_open_between_readings_to_limit_heating": true,
+      "power_pack_off_between_readings_to_limit_heating": true,
       "measured_results": [],
       "graph_axes": {
         "x": "wire length / cm",
@@ -50,18 +78,45 @@
     "focus_layout": {
       "focus_mode": true,
       "circuit_layout": {
-        "series_path": "supply positive → switch → ammeter → fixed contact → nichrome test length → sliding contact → supply negative",
+        "series_path": "power pack positive → ammeter → fixed contact → nichrome test length → sliding contact → power pack negative",
         "voltmeter_parallel_path": "voltmeter connected directly across the fixed and sliding contacts",
         "cable_lanes_separated": true,
+        "cable_geometry": "continuous tube routes with straight runs and quadratic rounded bends",
+        "smooth_cable_corners": true,
         "measured_segment_highlighted": true,
-        "switch_aligned_with_instrument_row": true,
+        "ruler_rotated_180_degrees": true,
+        "fixed_red_clamp_retains_rotated_orientation": true,
+        "black_sliding_clamp_faces_camera": true,
+        "black_sliding_clamp_ferrule_faces_far_side": true,
+        "black_series_lead_route": "along the far side of the ruler",
+        "component_zones": [
+          "rear power pack and meters",
+          "foreground ruler and test wire"
+        ],
+        "separate_switch_present": false,
+        "power_pack_is_sole_circuit_control": true,
+        "compact_meter_displays": true,
+        "meter_displays_clear_of_terminals": true,
+        "meter_housing_shape": "truncated square-pyramid frustum with trapezoidal faces",
+        "visible_meter_faces": [
+          "front",
+          "top",
+          "left"
+        ],
+        "meter_screens_fit_inside_bezels": true,
+        "ruler_style": "potometer ivory-white scale with enlarged high-contrast dark blue graduations and numbers",
+        "ruler_scale_readability": {
+          "centimetre_marks": "three-level major, mid and minor hierarchy",
+          "numbers": "enlarged bold labels every 10 cm"
+        },
+        "pink_parallel_lead_route": "around the right-hand edge of the ruler",
         "ammeter_label": "A · SERIES",
         "voltmeter_label": "V · PARALLEL"
       }
     },
     "settling": {
       "stage": 1,
-      "phase": "switch closing and meters settling",
+      "phase": "power pack starting and meters settling",
       "elapsed_stage_s": 0.65,
       "independent_variable": "wire length between crocodile contacts",
       "length_cm": 20,
@@ -73,21 +128,48 @@
         "straight_against_metre_ruler": true
       },
       "circuit_layout": {
-        "series_path": "supply positive → switch → ammeter → fixed contact → nichrome test length → sliding contact → supply negative",
+        "series_path": "power pack positive → ammeter → fixed contact → nichrome test length → sliding contact → power pack negative",
         "voltmeter_parallel_path": "voltmeter connected directly across the fixed and sliding contacts",
         "cable_lanes_separated": true,
+        "cable_geometry": "continuous tube routes with straight runs and quadratic rounded bends",
+        "smooth_cable_corners": true,
         "measured_segment_highlighted": true,
-        "switch_aligned_with_instrument_row": true,
+        "ruler_rotated_180_degrees": true,
+        "fixed_red_clamp_retains_rotated_orientation": true,
+        "black_sliding_clamp_faces_camera": true,
+        "black_sliding_clamp_ferrule_faces_far_side": true,
+        "black_series_lead_route": "along the far side of the ruler",
+        "component_zones": [
+          "rear power pack and meters",
+          "foreground ruler and test wire"
+        ],
+        "separate_switch_present": false,
+        "power_pack_is_sole_circuit_control": true,
+        "compact_meter_displays": true,
+        "meter_displays_clear_of_terminals": true,
+        "meter_housing_shape": "truncated square-pyramid frustum with trapezoidal faces",
+        "visible_meter_faces": [
+          "front",
+          "top",
+          "left"
+        ],
+        "meter_screens_fit_inside_bezels": true,
+        "ruler_style": "potometer ivory-white scale with enlarged high-contrast dark blue graduations and numbers",
+        "ruler_scale_readability": {
+          "centimetre_marks": "three-level major, mid and minor hierarchy",
+          "numbers": "enlarged bold labels every 10 cm"
+        },
+        "pink_parallel_lead_route": "around the right-hand edge of the ruler",
         "ammeter_label": "A · SERIES",
         "voltmeter_label": "V · PARALLEL"
       },
-      "switch_closed": true,
+      "power_pack_on": true,
       "supply_voltage_v": 1.5,
       "ammeter_current_a": 0.83,
       "calculated_resistance_ohm": 1.8,
       "calculation": "1.50 V ÷ 0.83 A = 1.8 Ω",
       "contact_motion": "stationary",
-      "switch_open_between_readings_to_limit_heating": true,
+      "power_pack_off_between_readings_to_limit_heating": true,
       "measured_results": [],
       "graph_axes": {
         "x": "wire length / cm",
@@ -97,7 +179,7 @@
     },
     "steady": {
       "stage": 2,
-      "phase": "steady voltage and current ready to record",
+      "phase": "power pack on with steady voltage and current",
       "elapsed_stage_s": 0,
       "independent_variable": "wire length between crocodile contacts",
       "length_cm": 20,
@@ -109,21 +191,48 @@
         "straight_against_metre_ruler": true
       },
       "circuit_layout": {
-        "series_path": "supply positive → switch → ammeter → fixed contact → nichrome test length → sliding contact → supply negative",
+        "series_path": "power pack positive → ammeter → fixed contact → nichrome test length → sliding contact → power pack negative",
         "voltmeter_parallel_path": "voltmeter connected directly across the fixed and sliding contacts",
         "cable_lanes_separated": true,
+        "cable_geometry": "continuous tube routes with straight runs and quadratic rounded bends",
+        "smooth_cable_corners": true,
         "measured_segment_highlighted": true,
-        "switch_aligned_with_instrument_row": true,
+        "ruler_rotated_180_degrees": true,
+        "fixed_red_clamp_retains_rotated_orientation": true,
+        "black_sliding_clamp_faces_camera": true,
+        "black_sliding_clamp_ferrule_faces_far_side": true,
+        "black_series_lead_route": "along the far side of the ruler",
+        "component_zones": [
+          "rear power pack and meters",
+          "foreground ruler and test wire"
+        ],
+        "separate_switch_present": false,
+        "power_pack_is_sole_circuit_control": true,
+        "compact_meter_displays": true,
+        "meter_displays_clear_of_terminals": true,
+        "meter_housing_shape": "truncated square-pyramid frustum with trapezoidal faces",
+        "visible_meter_faces": [
+          "front",
+          "top",
+          "left"
+        ],
+        "meter_screens_fit_inside_bezels": true,
+        "ruler_style": "potometer ivory-white scale with enlarged high-contrast dark blue graduations and numbers",
+        "ruler_scale_readability": {
+          "centimetre_marks": "three-level major, mid and minor hierarchy",
+          "numbers": "enlarged bold labels every 10 cm"
+        },
+        "pink_parallel_lead_route": "around the right-hand edge of the ruler",
         "ammeter_label": "A · SERIES",
         "voltmeter_label": "V · PARALLEL"
       },
-      "switch_closed": true,
+      "power_pack_on": true,
       "supply_voltage_v": 1.5,
       "ammeter_current_a": 0.83,
       "calculated_resistance_ohm": 1.8,
       "calculation": "1.50 V ÷ 0.83 A = 1.8 Ω",
       "contact_motion": "stationary",
-      "switch_open_between_readings_to_limit_heating": true,
+      "power_pack_off_between_readings_to_limit_heating": true,
       "measured_results": [],
       "graph_axes": {
         "x": "wire length / cm",
@@ -153,21 +262,48 @@
         "straight_against_metre_ruler": true
       },
       "circuit_layout": {
-        "series_path": "supply positive → switch → ammeter → fixed contact → nichrome test length → sliding contact → supply negative",
+        "series_path": "power pack positive → ammeter → fixed contact → nichrome test length → sliding contact → power pack negative",
         "voltmeter_parallel_path": "voltmeter connected directly across the fixed and sliding contacts",
         "cable_lanes_separated": true,
+        "cable_geometry": "continuous tube routes with straight runs and quadratic rounded bends",
+        "smooth_cable_corners": true,
         "measured_segment_highlighted": true,
-        "switch_aligned_with_instrument_row": true,
+        "ruler_rotated_180_degrees": true,
+        "fixed_red_clamp_retains_rotated_orientation": true,
+        "black_sliding_clamp_faces_camera": true,
+        "black_sliding_clamp_ferrule_faces_far_side": true,
+        "black_series_lead_route": "along the far side of the ruler",
+        "component_zones": [
+          "rear power pack and meters",
+          "foreground ruler and test wire"
+        ],
+        "separate_switch_present": false,
+        "power_pack_is_sole_circuit_control": true,
+        "compact_meter_displays": true,
+        "meter_displays_clear_of_terminals": true,
+        "meter_housing_shape": "truncated square-pyramid frustum with trapezoidal faces",
+        "visible_meter_faces": [
+          "front",
+          "top",
+          "left"
+        ],
+        "meter_screens_fit_inside_bezels": true,
+        "ruler_style": "potometer ivory-white scale with enlarged high-contrast dark blue graduations and numbers",
+        "ruler_scale_readability": {
+          "centimetre_marks": "three-level major, mid and minor hierarchy",
+          "numbers": "enlarged bold labels every 10 cm"
+        },
+        "pink_parallel_lead_route": "around the right-hand edge of the ruler",
         "ammeter_label": "A · SERIES",
         "voltmeter_label": "V · PARALLEL"
       },
-      "switch_closed": false,
+      "power_pack_on": false,
       "supply_voltage_v": 0,
       "ammeter_current_a": 0,
       "calculated_resistance_ohm": 1.8,
       "calculation": "1.50 V ÷ 0.83 A = 1.8 Ω",
       "contact_motion": "jaws open, lift, glide, lower and close",
-      "switch_open_between_readings_to_limit_heating": true,
+      "power_pack_off_between_readings_to_limit_heating": true,
       "measured_results": [
         {
           "length_cm": 20,

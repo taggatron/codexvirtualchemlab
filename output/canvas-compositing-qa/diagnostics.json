@@ -2,9 +2,12 @@
   "diagnostics": {
     "state": {
       "coordinates": "origin top-left, x right, y down",
+      "id": "flame",
+      "subject": "chemistry",
       "renderer": {
         "enabled": true,
         "renderer": "WebGL / Three.js",
+        "performance_profile": "high",
         "objects": 1,
         "context_lost": false,
         "scene_compiling": false,
@@ -18,6 +21,23 @@
       "symbol_equation": "M⁺(excited) → M⁺ + light",
       "word_equation": "heated metal ions release characteristic wavelengths of visible light",
       "tab": "bench",
+      "focus_mode": false,
+      "method_dropdown": false,
+      "graph_modal": {
+        "available": false,
+        "button_visible": false,
+        "button_label": null,
+        "button_icon": null,
+        "button_text_visible": false,
+        "button_row": null,
+        "open": false,
+        "chart_kind": null,
+        "sidebar_header_layout": null,
+        "scaled_view": null
+      },
+      "evaluation_modal": {
+        "open": false
+      },
       "running": false,
       "complete": false,
       "practical_evaluation": {
@@ -108,8 +128,19 @@
           "hose_minimum_centre_height_scene_units": 0.14,
           "hose_minimum_ground_clearance_scene_units": 0.083,
           "hose_kink_reduced": true,
-          "hose_overlaps_brass_valve_scene_units": 0.14,
+          "hose_overlaps_brass_valve_scene_units": 0.2,
           "hose_valve_overlap_sleeve": true,
+          "hose_valve_sleeve_profile": "rubber cuff flares from 0.059 to 0.094 scene-unit radius over the brass barbs",
+          "hose_valve_sleeve_flared": true,
+          "hose_valve_final_approach_axis": "+x coaxial with the gas-tap outlet",
+          "hose_valve_final_tangent": [
+            1,
+            0,
+            0
+          ],
+          "gas_tap_outlet_profile": "tapered brass spigot, narrow at the hose entry and widening toward the valve body",
+          "gas_tap_outlet_entry_radius_scene_units": 0.06,
+          "gas_tap_outlet_base_radius_scene_units": 0.078,
           "flame_width_scale_from_previous_geometry": 0.881,
           "dependent_animations_realigned": true,
           "collar_turn_uses_updated_geometry": true,
@@ -197,7 +228,7 @@
           "elapsed_s": 0.08,
           "progress": 0.02,
           "phase": "wavy red-orange safety flame",
-          "collar_rotation_degrees": 41.2,
+          "collar_rotation_degrees": 41.1,
           "collar_open_fraction": 0,
           "flame_heat_mix": 0,
           "safety_flame_visible": true,
@@ -205,18 +236,6 @@
           "complete": false
         },
         "safety_flame_visible": true
-      },
-      "graph_modal": {
-        "available": false,
-        "button_visible": false,
-        "button_label": null,
-        "button_icon": null,
-        "button_text_visible": false,
-        "button_row": null,
-        "open": false,
-        "chart_kind": null,
-        "sidebar_header_layout": null,
-        "scaled_view": null
       },
       "responsive_layout": {
         "viewport_css_px": {
@@ -264,8 +283,19 @@
         "hose_minimum_centre_height_scene_units": 0.14,
         "hose_minimum_ground_clearance_scene_units": 0.083,
         "hose_kink_reduced": true,
-        "hose_overlaps_brass_valve_scene_units": 0.14,
+        "hose_overlaps_brass_valve_scene_units": 0.2,
         "hose_valve_overlap_sleeve": true,
+        "hose_valve_sleeve_profile": "rubber cuff flares from 0.059 to 0.094 scene-unit radius over the brass barbs",
+        "hose_valve_sleeve_flared": true,
+        "hose_valve_final_approach_axis": "+x coaxial with the gas-tap outlet",
+        "hose_valve_final_tangent": [
+          1,
+          0,
+          0
+        ],
+        "gas_tap_outlet_profile": "tapered brass spigot, narrow at the hose entry and widening toward the valve body",
+        "gas_tap_outlet_entry_radius_scene_units": 0.06,
+        "gas_tap_outlet_base_radius_scene_units": 0.078,
         "flame_width_scale_from_previous_geometry": 0.881,
         "dependent_animations_realigned": true,
         "collar_turn_uses_updated_geometry": true,
@@ -282,27 +312,84 @@
       "right_sidebar_layout": {
         "fills_available_vertical_space": true,
         "adaptive_section_spacing": true,
+        "remaining_height_allocated_to_content_cards": true,
+        "excessive_blank_section_gaps_removed": true,
+        "larger_responsive_typography": true,
+        "explicit_heading_to_content_spacing": true,
         "method_stage_cards": true,
         "method_stage_text_wrap": "complete multiline text without clipping or ellipsis",
+        "reactant_text_wrap": "complete multiline text without clipping or ellipsis",
+        "apparatus_text_wrap": "complete multiline text without clipping or ellipsis",
         "guidance_text_wrap": "complete multiline text",
         "compact_landscape_supported": true,
         "content_top_y": 126,
         "content_bottom_y": 886,
         "available_bottom_y": 886,
-        "evaluation_button_top_y": 830,
+        "evaluation_button_top_y": 823.86,
         "evaluation_button_bottom_y": 886,
         "unused_vertical_space_px": 0,
         "overflow_vertical_space_px": 0,
+        "compression_ratio": 0,
         "method_stage_count": 4,
         "method_stage_line_counts": [
           1,
           1,
           1,
-          1
+          2
         ],
+        "reactant_rows": [
+          {
+            "name": "Lithium chloride",
+            "top_y": 402.77,
+            "bottom_y": 433.61
+          },
+          {
+            "name": "Sodium chloride",
+            "top_y": 437.61,
+            "bottom_y": 468.44
+          },
+          {
+            "name": "Potassium chloride",
+            "top_y": 472.44,
+            "bottom_y": 503.27
+          },
+          {
+            "name": "Calcium chloride",
+            "top_y": 507.27,
+            "bottom_y": 538.11
+          },
+          {
+            "name": "Copper(II) chloride",
+            "top_y": 542.11,
+            "bottom_y": 572.94
+          }
+        ],
+        "heading_to_content_gap_px": 7,
+        "method_font_size_px": 10.6,
+        "reactant_font_size_px": 10.3,
+        "guidance_font_size_px": 10,
         "all_method_stage_text_visible": true,
+        "all_reactant_text_visible": true,
+        "all_apparatus_text_visible": true,
         "all_sidebar_components_visible": true,
         "compact": false
+      },
+      "reactant_interaction": {
+        "mode": "health and safety information",
+        "listed_reactants": [
+          "Lithium chloride",
+          "Sodium chloride",
+          "Potassium chloride",
+          "Calcium chloride",
+          "Copper(II) chloride"
+        ],
+        "click_enabled": true,
+        "drag_enabled": false,
+        "experiment_setup_action_hidden": true,
+        "heading": "REACTANTS — CLICK FOR SAFETY",
+        "popup": {
+          "open": false
+        }
       },
       "canvas_compositing": {
         "webgl_arena_ui_overlay_alpha": 0,
@@ -317,12 +404,73 @@
         "elapsed_s": 0.08,
         "progress": 0.02,
         "phase": "wavy red-orange safety flame",
-        "collar_rotation_degrees": 41.2,
+        "collar_rotation_degrees": 41.1,
         "collar_open_fraction": 0,
         "flame_heat_mix": 0,
         "safety_flame_visible": true,
         "powerful_blue_heating_flame_visible": false,
         "complete": false
+      },
+      "left_practical_sidebar": {
+        "scroll_enabled": true,
+        "scrollbar_visible": false,
+        "input": "mouse wheel or trackpad over the clipped practical rail",
+        "subject": "chemistry",
+        "scroll_offset_px": 0,
+        "maximum_scroll_offset_px": 38,
+        "visible_card_count": 15
+      },
+      "control_label_layout": {
+        "all_visible_button_labels_fit": true,
+        "visible_button_count": 4,
+        "wrapped_button_labels": [],
+        "minimum_font_size_px": 12,
+        "labels": [
+          {
+            "label": "SCOOP SALT",
+            "lines": [
+              "SCOOP SALT"
+            ],
+            "font_size_px": 12,
+            "widest_line_px": 77.89,
+            "available_width_px": 140.4,
+            "button_width_px": 156,
+            "fits": true
+          },
+          {
+            "label": "SPECTRA",
+            "lines": [
+              "SPECTRA"
+            ],
+            "font_size_px": 12,
+            "widest_line_px": 57.42,
+            "available_width_px": 78,
+            "button_width_px": 88,
+            "fits": true
+          },
+          {
+            "label": "METHOD",
+            "lines": [
+              "METHOD"
+            ],
+            "font_size_px": 12,
+            "widest_line_px": 54.08,
+            "available_width_px": 82,
+            "button_width_px": 92,
+            "fits": true
+          },
+          {
+            "label": "SPECTRA",
+            "lines": [
+              "SPECTRA"
+            ],
+            "font_size_px": 12,
+            "widest_line_px": 57.42,
+            "available_width_px": 82,
+            "button_width_px": 92,
+            "fits": true
+          }
+        ]
       }
     },
     "lab_css": "",

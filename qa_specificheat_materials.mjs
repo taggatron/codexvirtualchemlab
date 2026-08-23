@@ -20,12 +20,20 @@ for (let y = 105; y <= 690; y += 24) {
 }
 await page.waitForTimeout(300);
 await page.screenshot({ path: `${out}/01-aluminium-initial.png`, fullPage: true });
-await click(550, 657); // MATERIAL: ALUMINIUM -> COPPER
 let state = await snapshot();
+const initial = state.specific_heat_capacity_practical;
+if (!initial?.preparation?.insulation_starts_off_camera || !initial?.instrument_layout?.all_four_displays_visible) throw new Error('Initial specific-heat organisation contract is missing.');
+if (!initial?.preparation?.block_bores_pre_drilled_before_practical || initial?.preparation?.drilling_sparks_shown !== false) throw new Error('Specific-heat bores should be supplied pre-drilled without a classroom drilling/sparks step.');
+await click(550, 657); // MATERIAL: ALUMINIUM -> COPPER
+state = await snapshot();
 if (state.specific_heat_capacity_practical?.material !== 'copper') throw new Error('Copper material selection failed.');
 await page.screenshot({ path: `${out}/02-copper-initial.png`, fullPage: true });
 await click(376, 657); // PREPARE BLOCK
-await page.evaluate(() => window.advanceTime(3900));
+await page.evaluate(() => window.advanceTime(3100));
+state = await snapshot();
+if (state.specific_heat_capacity_practical?.stage !== 1 || !state.specific_heat_capacity_practical?.preparation?.insulation_panels_fly_in_individually) throw new Error('Insulation fly-in did not remain active at the mid-assembly checkpoint.');
+await page.screenshot({ path: `${out}/02a-copper-insulation-arriving.png`, fullPage: true });
+await page.evaluate(() => window.advanceTime(800));
 await click(376, 657); // START HEATING
 await page.evaluate(() => window.advanceTime(8100));
 await page.waitForTimeout(250);

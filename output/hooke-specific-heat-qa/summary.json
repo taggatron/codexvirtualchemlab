@@ -3,10 +3,11 @@
   "renderer": {
     "enabled": true,
     "renderer": "WebGL / Three.js",
+    "performance_profile": "high",
     "objects": 1,
     "context_lost": false,
     "scene_compiling": false,
-    "scene_warmup_frames": 2,
+    "scene_warmup_frames": 0,
     "canvas_visible": true,
     "legacy_2d_apparatus": false
   },
@@ -493,7 +494,7 @@
       "material": "aluminium",
       "reference_specific_heat_j_per_kg_c": 900,
       "apparatus": [
-        "1.00 kg aluminium block with two separate bores",
+        "1.00 kg aluminium block with two separate pre-drilled bores",
         "12 V cartridge heater",
         "digital temperature probe",
         "thermal paste collars",
@@ -502,11 +503,28 @@
         "ammeter and joulemeter"
       ],
       "preparation": {
+        "block_bores_pre_drilled_before_practical": true,
+        "drilling_is_not_a_method_step": true,
+        "drilling_sparks_shown": false,
+        "bore_inspection_animated": true,
         "thermal_paste_applied": false,
         "heater_fully_inserted": false,
         "probe_fully_inserted": false,
+        "insulation_starts_off_camera": true,
+        "insulation_panels_fly_in_individually": false,
         "insulation_closed": false,
         "bored_insulating_lid_closed": false
+      },
+      "instrument_layout": {
+        "all_four_displays_visible": true,
+        "left_of_block": [
+          "12 V supply",
+          "ammeter"
+        ],
+        "right_of_block": [
+          "joulemeter",
+          "digital thermometer"
+        ]
       },
       "electrical_circuit": {
         "complete": true,
@@ -539,7 +557,7 @@
       "material": "aluminium",
       "reference_specific_heat_j_per_kg_c": 900,
       "apparatus": [
-        "1.00 kg aluminium block with two separate bores",
+        "1.00 kg aluminium block with two separate pre-drilled bores",
         "12 V cartridge heater",
         "digital temperature probe",
         "thermal paste collars",
@@ -548,11 +566,28 @@
         "ammeter and joulemeter"
       ],
       "preparation": {
+        "block_bores_pre_drilled_before_practical": true,
+        "drilling_is_not_a_method_step": true,
+        "drilling_sparks_shown": false,
+        "bore_inspection_animated": false,
         "thermal_paste_applied": true,
         "heater_fully_inserted": true,
         "probe_fully_inserted": true,
+        "insulation_starts_off_camera": false,
+        "insulation_panels_fly_in_individually": false,
         "insulation_closed": true,
         "bored_insulating_lid_closed": true
+      },
+      "instrument_layout": {
+        "all_four_displays_visible": true,
+        "left_of_block": [
+          "12 V supply",
+          "ammeter"
+        ],
+        "right_of_block": [
+          "joulemeter",
+          "digital thermometer"
+        ]
       },
       "electrical_circuit": {
         "complete": true,
@@ -585,7 +620,7 @@
       "material": "aluminium",
       "reference_specific_heat_j_per_kg_c": 900,
       "apparatus": [
-        "1.00 kg aluminium block with two separate bores",
+        "1.00 kg aluminium block with two separate pre-drilled bores",
         "12 V cartridge heater",
         "digital temperature probe",
         "thermal paste collars",
@@ -594,11 +629,28 @@
         "ammeter and joulemeter"
       ],
       "preparation": {
+        "block_bores_pre_drilled_before_practical": true,
+        "drilling_is_not_a_method_step": true,
+        "drilling_sparks_shown": false,
+        "bore_inspection_animated": false,
         "thermal_paste_applied": true,
         "heater_fully_inserted": true,
         "probe_fully_inserted": true,
+        "insulation_starts_off_camera": false,
+        "insulation_panels_fly_in_individually": false,
         "insulation_closed": true,
         "bored_insulating_lid_closed": true
+      },
+      "instrument_layout": {
+        "all_four_displays_visible": true,
+        "left_of_block": [
+          "12 V supply",
+          "ammeter"
+        ],
+        "right_of_block": [
+          "joulemeter",
+          "digital thermometer"
+        ]
       },
       "electrical_circuit": {
         "complete": true,
@@ -650,7 +702,7 @@
       "material": "aluminium",
       "reference_specific_heat_j_per_kg_c": 900,
       "apparatus": [
-        "1.00 kg aluminium block with two separate bores",
+        "1.00 kg aluminium block with two separate pre-drilled bores",
         "12 V cartridge heater",
         "digital temperature probe",
         "thermal paste collars",
@@ -659,11 +711,28 @@
         "ammeter and joulemeter"
       ],
       "preparation": {
+        "block_bores_pre_drilled_before_practical": true,
+        "drilling_is_not_a_method_step": true,
+        "drilling_sparks_shown": false,
+        "bore_inspection_animated": false,
         "thermal_paste_applied": true,
         "heater_fully_inserted": true,
         "probe_fully_inserted": true,
+        "insulation_starts_off_camera": false,
+        "insulation_panels_fly_in_individually": false,
         "insulation_closed": true,
         "bored_insulating_lid_closed": true
+      },
+      "instrument_layout": {
+        "all_four_displays_visible": true,
+        "left_of_block": [
+          "12 V supply",
+          "ammeter"
+        ],
+        "right_of_block": [
+          "joulemeter",
+          "digital thermometer"
+        ]
       },
       "electrical_circuit": {
         "complete": true,
@@ -733,7 +802,7 @@
       "material": "aluminium",
       "reference_specific_heat_j_per_kg_c": 900,
       "apparatus": [
-        "1.00 kg aluminium block with two separate bores",
+        "1.00 kg aluminium block with two separate pre-drilled bores",
         "12 V cartridge heater",
         "digital temperature probe",
         "thermal paste collars",
@@ -742,11 +811,28 @@
         "ammeter and joulemeter"
       ],
       "preparation": {
+        "block_bores_pre_drilled_before_practical": true,
+        "drilling_is_not_a_method_step": true,
+        "drilling_sparks_shown": false,
+        "bore_inspection_animated": false,
         "thermal_paste_applied": true,
         "heater_fully_inserted": true,
         "probe_fully_inserted": true,
+        "insulation_starts_off_camera": false,
+        "insulation_panels_fly_in_individually": false,
         "insulation_closed": true,
         "bored_insulating_lid_closed": true
+      },
+      "instrument_layout": {
+        "all_four_displays_visible": true,
+        "left_of_block": [
+          "12 V supply",
+          "ammeter"
+        ],
+        "right_of_block": [
+          "joulemeter",
+          "digital thermometer"
+        ]
       },
       "electrical_circuit": {
         "complete": true,
