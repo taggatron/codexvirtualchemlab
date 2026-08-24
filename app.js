@@ -1,4 +1,9 @@
+import { inject } from './vendor/@vercel/analytics.mjs';
 import { drawThermalBenchScene } from './thermalview.js?v=20260823-1';
+
+// Initialize Vercel Web Analytics
+inject();
+
 const canvas = document.getElementById('lab'), visibleCtx = canvas.getContext('2d'), buffer = document.createElement('canvas'), webglCanvas = document.getElementById('webgl');
 
 // Keep the catalogue and 2D interface interactive while the considerably larger
