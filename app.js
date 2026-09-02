@@ -4292,6 +4292,16 @@ function regionAtPoint(point) {
 canvas.addEventListener('pointerdown', e => { const r = regionAtPoint(pointerPosition(e)); if (r?.id === 'practical' && practicals[r.data]?.id === 'displacement') resetDisplacementPractical() }, { capture: true });
 canvas.addEventListener('pointermove', e => {
   const point = pointerPosition(e);
+  if (state.assessmentMode && state.assessmentDrag) {
+    const moved = Math.hypot(point.x - state.assessmentDrag.startX, point.y - state.assessmentDrag.startY) > 5;
+    state.assessmentDrag.moved = state.assessmentDrag.moved || moved;
+    state.assessmentDrag.x = point.x;
+    state.assessmentDrag.y = point.y;
+    state.assessmentDrag.targetSlotId = assessment.getHoveredBenchSlot(point, state);
+    canvas.style.cursor = 'grabbing';
+    draw();
+    return;
+  }
   if (state.drag) {
     const moved = Math.hypot(point.x - state.drag.startX, point.y - state.drag.startY) > 7;
     state.drag.moved = state.drag.moved || moved;
@@ -4316,12 +4326,12 @@ canvas.addEventListener('pointermove', e => {
     canvas.style.cursor = 'grabbing'; draw(); return
   }
   const r = regionAtPoint(point);
-  canvas.style.cursor = r && ['palette', 'free-reactant', 'reagent', 'workspace-item', 'dose-slider'].includes(r.id) ? 'grab' : r ? 'pointer' : 'default'
+  canvas.style.cursor = r && ['palette', 'free-reactant', 'reagent', 'workspace-item', 'dose-slider', 'assessment-toggle-equipment', 'assessment-bench-slot', 'assessment-slot-assign'].includes(r.id) ? 'grab' : r ? 'pointer' : 'default'
 });
 canvas.addEventListener('pointerdown', e => {
   const point = pointerPosition(e), r = regionAtPoint(point);
   if (!r) return;
-  if (state.assessmentMode && assessment.handleAssessmentPointerDown(r, point, state, practicals, draw)) return;
+  if (state.assessmentMode && assessment.handleAssessmentPointerDown(r, point, state, practicals, draw, e, canvas)) return;
   if (r.id === 'toggle-assessment-mode') {
     state.assessmentMode = !state.assessmentMode;
     if (state.assessmentMode) {
@@ -4414,6 +4424,11 @@ canvas.addEventListener('pointerdown', e => {
 canvas.addEventListener('pointerdown', e => { const r = regionAtPoint(pointerPosition(e)); if (r?.id === 'practical' && practicals[r.data]?.id === 'flame') { resetFlameTestPractical(); draw() } else if (r?.id === 'flame-spectrum' && practicals[state.selected].id === 'flame' && !state.running) { state.flameTestSalt = r.data; state.flameTestStage = 0; state.flameTestTimer = 0; state.tab = 'bench'; state.toast = `${flameTestSalts[r.data].salt} selected from the spectrum. Scoop it with the clean spatula.`; draw() } });
 canvas.addEventListener('pointerdown', e => { const r = regionAtPoint(pointerPosition(e)); if (r?.id === 'practical' && practicals[r.data]?.id === 'alkali') { resetAlkaliPractical(); draw() } });
 canvas.addEventListener('pointerup', e => {
+  if (state.assessmentMode && state.assessmentDrag) {
+    assessment.handleAssessmentPointerUp(pointerPosition(e), state, practicals, draw);
+    canvas.style.cursor = 'default';
+    return;
+  }
   if (!state.drag) return;
   const d = state.drag, point = pointerPosition(e);
   if (d.kind === 'palette') {
@@ -4444,7 +4459,14 @@ canvas.addEventListener('pointerup', e => {
   state.drag = null;
   draw()
 });
-canvas.addEventListener('pointercancel', () => { if (!state.drag) return; if (state.drag.kind === 'workspace') { const it = state.workspace.find(a => a.uid === state.drag.uid); if (it && state.drag.origin) Object.assign(it, state.drag.origin) } state.toast = 'Interaction cancelled.'; state.drag = null; draw() });
+canvas.addEventListener('pointercancel', () => {
+  if (state.assessmentMode && state.assessmentDrag) {
+    state.assessmentDrag = null;
+    draw();
+    return;
+  }
+  if (!state.drag) return;
+  if (state.drag.kind === 'workspace') { const it = state.workspace.find(a => a.uid === state.drag.uid); if (it && state.drag.origin) Object.assign(it, state.drag.origin) } state.toast = 'Interaction cancelled.'; state.drag = null; draw() });
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     if (state.graphModal || state.evaluationModal || state.reactantSafety || state.hookeFocusModal) {
@@ -6815,7 +6837,10 @@ window.render_game_to_text = () => {
     method_questions_checked: !!session?.methodQuestionsChecked,
     limitations_checked: !!session?.limitationsChecked,
     lowest_accuracy_identified: !!session?.benchInspection?.lowestAccuracyIdentified,
-    upgraded_apparatus: session?.benchInspection?.upgradedApparatus || null
+    upgraded_apparatus: session?.benchInspection?.upgradedApparatus || null,
+    dragged_apparatus_id: state.assessmentDrag?.itemId || null,
+    dragged_apparatus_moved: !!state.assessmentDrag?.moved,
+    slot_assignments: session?.slotAssignments || {}
   };
   return JSON.stringify(payload);
 };

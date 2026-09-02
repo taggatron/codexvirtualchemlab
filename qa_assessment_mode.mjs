@@ -19,8 +19,9 @@ try {
   await page.waitForFunction(() => typeof window.render_game_to_text === 'function' && window.__lab);
 
   const getState = () => page.evaluate(() => JSON.parse(window.render_game_to_text()));
-  const clickRegion = async (id, dataMatch = null) => {
-    const pt = await page.evaluate(({ id, dataMatch }) => {
+
+  const getRegionCenter = async (id, dataMatch = null) => {
+    return page.evaluate(({ id, dataMatch }) => {
       const regions = window.__lab.getRegions();
       const reg = regions.find(r => {
         if (r.id !== id) return false;
@@ -39,10 +40,26 @@ try {
         y: rect.top + (reg.y + reg.h / 2) * scale
       };
     }, { id, dataMatch });
+  };
 
+  const clickRegion = async (id, dataMatch = null) => {
+    const pt = await getRegionCenter(id, dataMatch);
     if (!pt) throw new Error(`Region ${id} (data: ${JSON.stringify(dataMatch)}) not found`);
     await page.mouse.click(pt.x, pt.y);
     await page.waitForTimeout(140);
+  };
+
+  const dragRegion = async (sourceId, sourceData, targetId, targetData) => {
+    const src = await getRegionCenter(sourceId, sourceData);
+    if (!src) throw new Error(`Source region ${sourceId} not found`);
+    const tgt = await getRegionCenter(targetId, targetData);
+    if (!tgt) throw new Error(`Target region ${targetId} not found`);
+    await page.mouse.move(src.x, src.y);
+    await page.mouse.down();
+    await page.mouse.move((src.x + tgt.x) / 2, (src.y + tgt.y) / 2, { steps: 5 });
+    await page.mouse.move(tgt.x, tgt.y, { steps: 5 });
+    await page.mouse.up();
+    await page.waitForTimeout(120);
   };
 
   // 1. Initial State Check
@@ -71,22 +88,49 @@ try {
   if (!s2.assessment_mode?.active) throw new Error('Assessment mode failed to activate');
   await page.screenshot({ path: `${out}/01-apparatus-initial.png`, fullPage: true });
 
-  // 4. Activity 1: Apparatus Selection & Bench Assignment via mouse clicks
-  // Select required apparatus from the equipment library:
-  const requiredEquip = ['conical_flask', 'bung_delivery_tube', 'gas_syringe', 'water_bath', 'stopwatch'];
-  for (const eqId of requiredEquip) {
-    await clickRegion('assessment-toggle-equipment', eqId);
+  // 4. Activity 1: Direct Tactical Drag & Drop Apparatus Assembly
+  // A. Test dragging gas_syringe from library palette directly onto the gas collector slot
+  console.log('4a. Dragging gas_syringe onto gas collector slot...');
+  await dragRegion('assessment-toggle-equipment', 'gas_syringe', 'assessment-bench-slot', 'collector');
+  const sDrag1 = await getState();
+  console.log('   Slot assignments after drag 1:', sDrag1.assessment_mode?.slot_assignments);
+  if (sDrag1.assessment_mode?.slot_assignments?.collector !== 'gas_syringe') {
+    throw new Error(`Expected collector slot to be gas_syringe, got ${sDrag1.assessment_mode?.slot_assignments?.collector}`);
   }
 
-  // Assign items to bench slots
-  await page.evaluate(() => {
-    const { state, draw } = window.__lab;
-    const session = state.assessmentSession;
-    session.data.apparatusChallenge.slots.forEach(slot => {
-      session.slotAssignments[slot.id] = slot.requiredItem;
-    });
-    draw();
-  });
+  // B. Test dragging between bench slots (move collector item to temperature slot, then restore)
+  console.log('4b. Dragging from bench slot collector to temperature slot...');
+  await dragRegion('assessment-bench-slot', 'collector', 'assessment-bench-slot', 'temperature');
+  const sDragMove = await getState();
+  if (sDragMove.assessment_mode?.slot_assignments?.temperature !== 'gas_syringe') {
+    throw new Error(`Expected temperature slot to hold moved item, got ${sDragMove.assessment_mode?.slot_assignments?.temperature}`);
+  }
+  await dragRegion('assessment-bench-slot', 'temperature', 'assessment-bench-slot', 'collector');
+
+  // C. Drag & drop remaining pieces to fully assemble the apparatus rig on the workbench
+  console.log('4c. Dragging remaining equipment onto workbench stations...');
+  await dragRegion('assessment-toggle-equipment', 'conical_flask', 'assessment-bench-slot', 'vessel');
+  await dragRegion('assessment-toggle-equipment', 'bung_delivery_tube', 'assessment-bench-slot', 'seal');
+  await dragRegion('assessment-toggle-equipment', 'water_bath', 'assessment-bench-slot', 'temperature');
+  await dragRegion('assessment-toggle-equipment', 'stopwatch', 'assessment-bench-slot', 'timer');
+
+  const sDragAll = await getState();
+  console.log('   All stations assembled via drag-and-drop:', sDragAll.assessment_mode?.slot_assignments);
+  for (const slotId of ['vessel', 'seal', 'collector', 'temperature', 'timer']) {
+    if (!sDragAll.assessment_mode?.slot_assignments?.[slotId]) {
+      throw new Error(`Slot ${slotId} is missing assignment after drag-and-drop assembly`);
+    }
+  }
+
+  // Capture screenshot during floating drag preview (drag gas_syringe towards workbench)
+  const dragSrc = await getRegionCenter('assessment-toggle-equipment', 'gas_syringe');
+  const dragDest = await getRegionCenter('assessment-bench-slot', 'collector');
+  await page.mouse.move(dragSrc.x, dragSrc.y);
+  await page.mouse.down();
+  await page.mouse.move((dragSrc.x + dragDest.x) / 2, (dragSrc.y + dragDest.y) / 2, { steps: 5 });
+  await page.screenshot({ path: `${out}/10-apparatus-drag-preview.png`, fullPage: true });
+  await page.mouse.move(dragDest.x, dragDest.y, { steps: 5 });
+  await page.mouse.up();
 
   // Click Check Apparatus Setup button
   await clickRegion('assessment-check-apparatus');
@@ -165,6 +209,32 @@ try {
   console.log('8. Clicked RETURN TO SIMULATION LAB -> assessment_mode:', s7.assessment_mode?.active);
   if (s7.assessment_mode?.active !== false) throw new Error('Failed to exit assessment mode');
   await page.screenshot({ path: `${out}/08-lab-resumed.png`, fullPage: true });
+
+  // 9. Test Mass Practical (Conservation of Mass, 4 stations - verify scaled workbench layout)
+  await page.evaluate(() => {
+    const { state, practicals, draw } = window.__lab;
+    const pIdx = practicals.findIndex(p => p.id === 'mass');
+    if (pIdx >= 0) {
+      state.selected = pIdx;
+      state.subject = 'chemistry';
+      state.assessmentMode = true;
+      delete state.assessmentSession;
+      draw();
+    }
+  });
+  await page.waitForTimeout(150);
+  const sMass = await getState();
+  console.log('9. Loaded Conservation of Mass in assessment mode:', sMass.practical);
+  await page.screenshot({ path: `${out}/09-mass-apparatus-scaled.png`, fullPage: true });
+
+  // Test drag and drop on mass practical (item_0 is Balance, slot_0 is Station 1: Balance)
+  console.log('9b. Dragging Balance onto Station 1...');
+  await dragRegion('assessment-toggle-equipment', 'item_0', 'assessment-bench-slot', 'slot_0');
+  const sMassDrag = await getState();
+  if (sMassDrag.assessment_mode?.slot_assignments?.slot_0 !== 'item_0') {
+    throw new Error(`Expected mass slot_0 to have item_0, got ${sMassDrag.assessment_mode?.slot_assignments?.slot_0}`);
+  }
+  await page.screenshot({ path: `${out}/09-mass-apparatus-assigned.png`, fullPage: true });
 
   console.log('--- ALL ASSESMENT INTERACTIONS PASSED CLEANLY! ---');
   console.log('Console / page errors logged:', errors.length);

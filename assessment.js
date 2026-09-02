@@ -1132,7 +1132,7 @@ export function drawAssessmentMode(ctx, W, H, state, practicals, hit) {
   const bodyH = H - bodyY;
   
   if (session.currentPhase === 'apparatus') {
-    drawApparatusPhase(ctx, W, bodyY, bodyH, session, practical, hit);
+    drawApparatusPhase(ctx, W, bodyY, bodyH, session, practical, hit, state);
   } else if (session.currentPhase === 'method') {
     drawMethodPhase(ctx, W, bodyY, bodyH, session, practical, hit);
   } else if (session.currentPhase === 'limitations') {
@@ -1195,7 +1195,7 @@ function drawAssessmentTopBar(ctx, W, H, session, practical, hit) {
 // Phase 1: Apparatus Selection & Bench Arrangement
 // ----------------------------------------------------------------------------
 
-function drawApparatusPhase(ctx, W, topY, bodyH, session, practical, hit) {
+function drawApparatusPhase(ctx, W, topY, bodyH, session, practical, hit, state) {
   const challenge = session.data.apparatusChallenge;
   const pad = 24;
   const contentW = W - pad * 2;
@@ -1213,10 +1213,10 @@ function drawApparatusPhase(ctx, W, topY, bodyH, session, practical, hit) {
   const benchW = contentW - paletteW - 18;
   const benchX = pad + paletteW + 18;
   
-  // LEFT COLUMN: Equipment Selection Palette
+  // LEFT COLUMN: Equipment Selection Palette (Drag or Click)
   rr(ctx, pad, colY, paletteW, colH, 14, 'rgba(12, 28, 40, 0.88)', 'rgba(79, 195, 181, 0.3)');
-  text(ctx, 'EQUIPMENT LIBRARY (SELECT REQUISITE APPARATUS)', pad + 18, colY + 20, 10.5, C.cyan, 800);
-  text(ctx, 'Click items to include. Beware of realistic GCSE distractors!', pad + 18, colY + 36, 9.8, C.muted, 550);
+  text(ctx, 'EQUIPMENT LIBRARY (SELECT OR DRAG APPARATUS)', pad + 18, colY + 20, 10.5, C.cyan, 800);
+  text(ctx, 'Click or drag items onto the workbench stations. Beware of distractors!', pad + 18, colY + 36, 9.8, C.muted, 550);
   
   const itemH = 46;
   const itemGap = 7;
@@ -1228,9 +1228,10 @@ function drawApparatusPhase(ctx, W, topY, bodyH, session, practical, hit) {
     
     const isSelected = session.selectedEquipment.has(item.id);
     const isAssigned = Object.values(session.slotAssignments).includes(item.id);
+    const isDraggingThis = state.assessmentDrag?.itemId === item.id && state.assessmentDrag?.moved;
     
-    let bg = isSelected ? 'rgba(8, 127, 117, 0.32)' : 'rgba(255,255,255,0.04)';
-    let stroke = isSelected ? C.teal : 'rgba(255,255,255,0.12)';
+    let bg = isDraggingThis ? 'rgba(79, 195, 181, 0.2)' : isSelected ? 'rgba(8, 127, 117, 0.32)' : 'rgba(255,255,255,0.04)';
+    let stroke = isDraggingThis ? C.cyan : isSelected ? C.teal : 'rgba(255,255,255,0.12)';
     
     if (session.apparatusChecked) {
       if (isSelected && item.isCorrect) {
@@ -1242,7 +1243,7 @@ function drawApparatusPhase(ctx, W, topY, bodyH, session, practical, hit) {
       }
     }
     
-    rr(ctx, pad + 14, iy, paletteW - 28, itemH, 9, bg, stroke, isSelected ? 1.5 : 1);
+    rr(ctx, pad + 14, iy, paletteW - 28, itemH, 9, bg, stroke, isSelected || isDraggingThis ? 1.5 : 1);
     
     // Icon badge
     ctx.fillStyle = 'rgba(255,255,255,0.1)';
@@ -1271,7 +1272,7 @@ function drawApparatusPhase(ctx, W, topY, bodyH, session, practical, hit) {
   
   // Workbench container header
   text(ctx, 'VIRTUAL APPARATUS BENCH (PHYSICAL SETUP)', benchX + 20, colY + 20, 10.5, C.cyan, 800);
-  text(ctx, 'Assemble selected equipment into their physical positions on the workbench.', benchX + 20, colY + 36, 9.8, C.muted, 550);
+  text(ctx, 'Drag equipment from the library and snap onto workbench stations, or click to assign.', benchX + 20, colY + 36, 9.8, C.muted, 550);
   
   // Mini Laboratory Workbench canvas inside container
   const worktopTop = colY + 48;
@@ -1301,20 +1302,31 @@ function drawApparatusPhase(ctx, W, topY, bodyH, session, practical, hit) {
   ctx.fillRect(benchX + 16, benchSurfaceY, benchW - 32, 2);
   ctx.restore();
   
+  // Dynamic slot height calculation to fill the workbench area cleanly without large empty gaps
   const slotCount = challenge.slots.length;
-  const slotH = Math.min(76, (worktopH - 18) / slotCount);
-  const slotGap = 6;
-  const slotStartY = worktopTop + 8;
+  const slotGap = 8;
+  const availableH = worktopH - 24;
+  const slotH = Math.min(105, Math.max(76, (availableH - (slotCount - 1) * slotGap) / slotCount));
+  const slotStartY = worktopTop + 12;
+  
+  session.benchSlotBounds = [];
+  session.workbenchBounds = { x: benchX, y: colY, w: benchW, h: colH };
   
   challenge.slots.forEach((slot, idx) => {
     const sy = slotStartY + idx * (slotH + slotGap);
     const assignedId = session.slotAssignments[slot.id];
     const assignedItem = challenge.palette.find(p => p.id === assignedId);
+    const isHovered = state.assessmentDrag?.targetSlotId === slot.id;
+    
+    session.benchSlotBounds.push({ id: slot.id, x: benchX + 22, y: sy, w: benchW - 44, h: slotH });
     
     let slotBg = 'rgba(10, 24, 34, 0.72)';
     let slotBorder = 'rgba(255,255,255,0.18)';
     
-    if (session.apparatusChecked) {
+    if (isHovered) {
+      slotBg = 'rgba(40, 135, 79, 0.40)';
+      slotBorder = C.green;
+    } else if (session.apparatusChecked) {
       const isCorrectSlot = assignedId === slot.requiredItem;
       slotBg = isCorrectSlot ? 'rgba(40, 135, 79, 0.35)' : 'rgba(201, 69, 59, 0.35)';
       slotBorder = isCorrectSlot ? C.green : C.red;
@@ -1323,34 +1335,70 @@ function drawApparatusPhase(ctx, W, topY, bodyH, session, practical, hit) {
       slotBorder = C.teal;
     }
     
-    rr(ctx, benchX + 22, sy, benchW - 44, slotH, 8, slotBg, slotBorder, 1.2);
+    rr(ctx, benchX + 22, sy, benchW - 44, slotH, 8, slotBg, slotBorder, isHovered ? 2.2 : 1.2);
+    if (isHovered) {
+      ctx.save();
+      ctx.strokeStyle = C.green;
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 6]);
+      ctx.strokeRect(benchX + 22, sy, benchW - 44, slotH);
+      ctx.restore();
+    }
     hit('assessment-bench-slot', benchX + 22, sy, benchW - 44, slotH, slot.id);
     
     // Position Number
-    ctx.fillStyle = C.teal;
+    ctx.fillStyle = isHovered ? C.green : C.teal;
     ctx.beginPath();
-    ctx.arc(benchX + 44, sy + slotH / 2, 13, 0, Math.PI * 2);
+    ctx.arc(benchX + 44, sy + slotH / 2, 14, 0, Math.PI * 2);
     ctx.fill();
-    text(ctx, String(idx + 1), benchX + 44, sy + slotH / 2, 10.5, '#ffffff', 800, 'center');
+    text(ctx, String(idx + 1), benchX + 44, sy + slotH / 2, 11, '#ffffff', 800, 'center');
     
     // Slot details
-    text(ctx, slot.label.toUpperCase(), benchX + 68, sy + 18, 10, C.cyan, 800);
-    text(ctx, slot.hint, benchX + 68, sy + 35, 9, C.muted, 550);
+    text(ctx, slot.label.toUpperCase(), benchX + 68, sy + (slotH * 0.32), 10.5, isHovered ? '#a3f0dd' : C.cyan, 800);
+    text(ctx, slot.hint, benchX + 68, sy + (slotH * 0.62), 9.2, C.muted, 550);
     
     // Assigned item box or placeholder
-    const assignBtnW = 190;
+    const assignBtnW = 200;
     const assignBtnX = benchX + benchW - assignBtnW - 36;
-    const assignBtnY = sy + (slotH - 32) / 2;
+    const assignBtnH = Math.min(42, slotH - 24);
+    const assignBtnY = sy + (slotH - assignBtnH) / 2;
     
-    if (assignedItem) {
-      rr(ctx, assignBtnX, assignBtnY, assignBtnW, 32, 6, 'rgba(8, 127, 117, 0.75)', C.cyan);
-      text(ctx, `${assignedItem.icon} ${assignedItem.name}`, assignBtnX + 10, assignBtnY + 16, 9.5, '#ffffff', 700);
+    if (isHovered) {
+      rr(ctx, assignBtnX, assignBtnY, assignBtnW, assignBtnH, 6, 'rgba(40, 135, 79, 0.75)', C.green);
+      text(ctx, '⇣ RELEASE TO SNAP HERE', assignBtnX + assignBtnW / 2, assignBtnY + assignBtnH / 2 + 3, 9.5, '#ffffff', 800, 'center');
+    } else if (assignedItem) {
+      rr(ctx, assignBtnX, assignBtnY, assignBtnW, assignBtnH, 6, 'rgba(8, 127, 117, 0.75)', C.cyan);
+      text(ctx, `${assignedItem.icon} ${assignedItem.name}`, assignBtnX + 10, assignBtnY + assignBtnH / 2 + 3, 9.5, '#ffffff', 700);
+      text(ctx, '⋮⋮', assignBtnX + assignBtnW - 14, assignBtnY + assignBtnH / 2 + 3, 10, C.line, 700, 'center');
     } else {
-      rr(ctx, assignBtnX, assignBtnY, assignBtnW, 32, 6, 'rgba(255,255,255,0.06)', 'rgba(255,255,255,0.2)');
-      text(ctx, '+ Click to Place Apparatus', assignBtnX + assignBtnW / 2, assignBtnY + 16, 9, C.line, 650, 'center');
+      rr(ctx, assignBtnX, assignBtnY, assignBtnW, assignBtnH, 6, 'rgba(255,255,255,0.06)', 'rgba(255,255,255,0.2)');
+      text(ctx, '+ Click or Drag Apparatus', assignBtnX + assignBtnW / 2, assignBtnY + assignBtnH / 2 + 3, 9, C.line, 650, 'center');
     }
-    hit('assessment-slot-assign', assignBtnX, assignBtnY, assignBtnW, 32, slot.id);
+    hit('assessment-slot-assign', assignBtnX, assignBtnY, assignBtnW, assignBtnH, slot.id);
   });
+  
+  // Render floating dragged apparatus following cursor
+  if (state.assessmentDrag && state.assessmentDrag.moved) {
+    const dragItem = challenge.palette.find(p => p.id === state.assessmentDrag.itemId);
+    if (dragItem) {
+      ctx.save();
+      const dw = 205, dh = 44;
+      const dx = state.assessmentDrag.x - dw / 2;
+      const dy = state.assessmentDrag.y - dh / 2;
+      ctx.shadowColor = 'rgba(0,0,0,0.65)';
+      ctx.shadowBlur = 18;
+      ctx.shadowOffsetY = 6;
+      rr(ctx, dx, dy, dw, dh, 8, 'rgba(10, 32, 45, 0.95)', C.cyan, 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.12)';
+      ctx.beginPath();
+      ctx.arc(dx + 22, dy + dh / 2, 13, 0, Math.PI * 2);
+      ctx.fill();
+      text(ctx, dragItem.icon, dx + 22, dy + dh / 2, 13, '#ffffff', 800, 'center');
+      text(ctx, dragItem.name, dx + 42, dy + dh / 2 - 3, 9.5, '#ffffff', 800);
+      text(ctx, 'Snap onto workbench station…', dx + 42, dy + dh / 2 + 10, 8.5, C.cyan, 600);
+      ctx.restore();
+    }
+  }
   
   // Bench Action Buttons: CHECK SETUP & PROCEED TO METHOD
   const bottomBarY = colY + colH - 68;
@@ -1867,7 +1915,101 @@ function drawSummaryPhase(ctx, W, topY, bodyH, session, practical, hit) {
 // Pointer / Hit Event Handling
 // ----------------------------------------------------------------------------
 
-export function handleAssessmentPointerDown(region, point, state, practicals, draw) {
+export function getHoveredBenchSlot(point, state) {
+  const session = state.assessmentSession;
+  if (!session?.benchSlotBounds) return null;
+  const pad = 14;
+  for (const sb of session.benchSlotBounds) {
+    if (point.x >= sb.x - pad && point.x <= sb.x + sb.w + pad &&
+        point.y >= sb.y - pad && point.y <= sb.y + sb.h + pad) {
+      return sb.id;
+    }
+  }
+  return null;
+}
+
+export function handleAssessmentPointerUp(point, state, practicals, draw) {
+  if (!state.assessmentDrag) return false;
+  const d = state.assessmentDrag;
+  const session = state.assessmentSession;
+  const practical = practicals[state.selected] || practicals[0];
+  const challenge = practical.apparatusChallenge || session?.data?.apparatusChallenge;
+  const item = challenge?.palette?.find(p => p.id === d.itemId);
+  
+  if (d.moved) {
+    if (d.targetSlotId) {
+      if (d.fromSlotId && d.fromSlotId !== d.targetSlotId) {
+        const existing = session.slotAssignments[d.targetSlotId];
+        session.slotAssignments[d.targetSlotId] = d.itemId;
+        if (existing) session.slotAssignments[d.fromSlotId] = existing;
+        else delete session.slotAssignments[d.fromSlotId];
+        state.toast = `✓ Moved ${item?.name || 'apparatus'} to ${d.targetSlotId}!`;
+      } else {
+        const prevAssigned = session.slotAssignments[d.targetSlotId];
+        if (prevAssigned && prevAssigned !== d.itemId) {
+          const isAssignedElsewhere = Object.entries(session.slotAssignments).some(([k, v]) => k !== d.targetSlotId && v === prevAssigned);
+          if (!isAssignedElsewhere) session.selectedEquipment.delete(prevAssigned);
+        }
+        session.slotAssignments[d.targetSlotId] = d.itemId;
+        session.selectedEquipment.add(d.itemId);
+        state.toast = `✓ Snapped ${item?.name || 'apparatus'} onto workbench station!`;
+      }
+      session.apparatusChecked = false;
+    } else if (session.workbenchBounds &&
+               point.x >= session.workbenchBounds.x && point.x <= session.workbenchBounds.x + session.workbenchBounds.w &&
+               point.y >= session.workbenchBounds.y && point.y <= session.workbenchBounds.y + session.workbenchBounds.h) {
+      const emptySlot = challenge?.slots?.find(s => !session.slotAssignments[s.id]);
+      if (emptySlot) {
+        session.slotAssignments[emptySlot.id] = d.itemId;
+        session.selectedEquipment.add(d.itemId);
+        session.apparatusChecked = false;
+        state.toast = `✓ Snapped ${item?.name || 'apparatus'} into ${emptySlot.label}!`;
+      }
+    } else if (d.fromSlotId) {
+      const removedItem = session.slotAssignments[d.fromSlotId];
+      delete session.slotAssignments[d.fromSlotId];
+      if (removedItem) {
+        const isAssignedElsewhere = Object.values(session.slotAssignments).includes(removedItem);
+        if (!isAssignedElsewhere) session.selectedEquipment.delete(removedItem);
+      }
+      session.apparatusChecked = false;
+      state.toast = `✓ Removed ${item?.name || 'apparatus'} from workbench.`;
+    }
+  } else {
+    // Click without moving
+    if (d.kind === 'palette') {
+      if (session.selectedEquipment.has(d.itemId)) {
+        session.selectedEquipment.delete(d.itemId);
+        for (const k in session.slotAssignments) {
+          if (session.slotAssignments[k] === d.itemId) delete session.slotAssignments[k];
+        }
+      } else {
+        session.selectedEquipment.add(d.itemId);
+        const matchingSlot = challenge?.slots?.find(s => s.requiredItem === d.itemId && !session.slotAssignments[s.id]);
+        const firstEmpty = matchingSlot || challenge?.slots?.find(s => !session.slotAssignments[s.id]);
+        if (firstEmpty) session.slotAssignments[firstEmpty.id] = d.itemId;
+      }
+      session.apparatusChecked = false;
+    } else if (d.kind === 'bench-slot') {
+      const selectedList = Array.from(session.selectedEquipment);
+      if (selectedList.length > 0) {
+        const curIdx = selectedList.indexOf(d.itemId);
+        const nextItem = selectedList[(curIdx + 1) % (selectedList.length + 1)];
+        if (nextItem) session.slotAssignments[d.fromSlotId] = nextItem;
+        else delete session.slotAssignments[d.fromSlotId];
+      } else {
+        delete session.slotAssignments[d.fromSlotId];
+      }
+      session.apparatusChecked = false;
+    }
+  }
+  
+  state.assessmentDrag = null;
+  draw();
+  return true;
+}
+
+export function handleAssessmentPointerDown(region, point, state, practicals, draw, e = null, canvas = null) {
   if (!state.assessmentSession) return false;
   const session = state.assessmentSession;
   
@@ -1884,18 +2026,17 @@ export function handleAssessmentPointerDown(region, point, state, practicals, dr
       
     case 'assessment-toggle-equipment': {
       const itemId = region.data;
-      if (session.selectedEquipment.has(itemId)) {
-        session.selectedEquipment.delete(itemId);
-        // Also remove from any slot assignment
-        for (const slotKey in session.slotAssignments) {
-          if (session.slotAssignments[slotKey] === itemId) {
-            delete session.slotAssignments[slotKey];
-          }
-        }
-      } else {
-        session.selectedEquipment.add(itemId);
-      }
-      session.apparatusChecked = false;
+      state.assessmentDrag = {
+        kind: 'palette',
+        itemId,
+        startX: point.x,
+        startY: point.y,
+        x: point.x,
+        y: point.y,
+        moved: false,
+        targetSlotId: null
+      };
+      if (e && canvas) canvas.setPointerCapture?.(e.pointerId);
       draw();
       return true;
     }
@@ -1921,22 +2062,32 @@ export function handleAssessmentPointerDown(region, point, state, practicals, dr
     case 'assessment-bench-slot':
     case 'assessment-slot-assign': {
       const slotId = region.data;
-      // Cycle through selected equipment to assign to this slot
-      const selectedList = Array.from(session.selectedEquipment);
-      if (selectedList.length === 0) {
-        state.toast = 'Select equipment from the left library first, then assign it here.';
+      const currentAssigned = session.slotAssignments[slotId];
+      if (currentAssigned) {
+        state.assessmentDrag = {
+          kind: 'bench-slot',
+          itemId: currentAssigned,
+          fromSlotId: slotId,
+          startX: point.x,
+          startY: point.y,
+          x: point.x,
+          y: point.y,
+          moved: false,
+          targetSlotId: null
+        };
+        if (e && canvas) canvas.setPointerCapture?.(e.pointerId);
         draw();
         return true;
       }
-      const currentAssigned = session.slotAssignments[slotId];
-      const curIdx = selectedList.indexOf(currentAssigned);
-      const nextItem = selectedList[(curIdx + 1) % (selectedList.length + 1)];
-      if (nextItem) {
-        session.slotAssignments[slotId] = nextItem;
-      } else {
-        delete session.slotAssignments[slotId];
+      const selectedList = Array.from(session.selectedEquipment);
+      if (selectedList.length > 0) {
+        const unassigned = selectedList.find(it => !Object.values(session.slotAssignments).includes(it)) || selectedList[0];
+        session.slotAssignments[slotId] = unassigned;
+        session.apparatusChecked = false;
+        draw();
+        return true;
       }
-      session.apparatusChecked = false;
+      state.toast = 'Drag an item from the library onto this slot, or click an item to select it.';
       draw();
       return true;
     }
