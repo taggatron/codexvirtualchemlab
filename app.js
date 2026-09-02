@@ -1,4 +1,5 @@
 import { drawThermalBenchScene } from './thermalview.js?v=20260823-1';
+import * as assessment from './assessment.js?v=20260902-1';
 const canvas = document.getElementById('lab'), visibleCtx = canvas.getContext('2d'), buffer = document.createElement('canvas'), webglCanvas = document.getElementById('webgl');
 
 // Keep the catalogue and 2D interface interactive while the considerably larger
@@ -610,7 +611,7 @@ const freeReactionRules = [
   { id: 'h2so4-lime', reactants: ['h2so4', 'lime'], symbol: 'H₂SO₄(aq) + Ca(OH)₂(aq) → CaSO₄(s) + 2H₂O(l)', word: 'sulfuric acid + limewater → calcium sulfate + water', kind: 'precipitate', precipitate: true, product: 'calcium sulfate precipitate', productColor: 0xd9d4bd, heat: 6, duration: 3 },
   { id: 'lime-co2', reactants: ['lime', 'CO₂'], symbol: 'Ca(OH)₂(aq) + CO₂(g) → CaCO₃(s) + H₂O(l)', word: 'limewater + carbon dioxide → calcium carbonate + water', kind: 'precipitate', precipitate: true, product: 'milky calcium carbonate', productColor: 0xe8e6d9, duration: 3 }
 ];
-const state = { selected: 0, subject: 'chemistry', subjectTabX: 149, subjectTabW: 114, sidebarScroll: { chemistry: 0, biology: 0, physics: 0 }, running: false, complete: false, temp: 20, ph: 7, time: 0, volume: 0, progress: 0, tab: 'equipment', graphModal: false, evaluationModal: false, focusMode: false, methodDropdown: false, methodStepSelection: null, reactantSafety: null, points: [], hover: null, drag: null, pour: null, burner: false, coolingWater: false, particles: [], layout: null, flamePhase: 0, transferred: 0, workspace: [], nextItem: 1, dose: null, reaction: null, massStage: 0, massLidOn: true, massTransfer: null, massBefore: 4.01, massAfter: null, hydrogenStage: 0, hydrogenTimer: 0, hydrogenAudioPlayed: false, hydrogenGas: 0, saltsStage: 0, saltsTimer: 0, chromSelectedDye: null, electroRecorded: false, electroWeighing: false, electroWeighTimer: 0, titrationStage: 0, titrationVolume: 0, titrationDropTimer: 0, titrationDrops: 0, titrationIndicator: false, titrationIndicatorTimer: 0, titrationRecorded: false, ratesStage: 0, ratesStageTimer: 0, ratesTrialIndex: 0, ratesTargetTemp: 20, ratesBathTemp: 20, ratesConditioning: false, ratesResults: [], thermiteTimer: 0, thermiteAudioPlayed: false, displacementStage: 0, displacementTimer: 0, displacementRecorded: false, flameTestStage: 0, flameTestTimer: 0, flameTestSalt: 0, flameTestTested: [], starchStage: 0, starchTimer: 0, lipaseStage: 0, lipaseTimer: 0, lipaseTrialIndex: 0, lipaseTargetTemp: 20, lipaseBathTemp: 20, lipaseConditioning: false, lipaseResults: [], respirationStage: 0, respirationTimer: 0, respirationResults: [], osmosisStage: 0, osmosisTimer: 0, osmosisTrialIndex: 0, osmosisConcentration: 0, osmosisResults: [], potometerStage: 0, potometerTimer: 0, potometerTrialIndex: 0, potometerWindSpeed: 0, potometerBubbleMm: 0, potometerResults: [], pondweedDistance: 20, pondweedLampOn: true, pondweedTimer: 0, pondweedBubbles: 0, pondweedResults: [], quadratStage: 0, quadratTimer: 0, quadratSampleIndex: 0, quadratCurrentCount: 0, quadratResults: [], captureStage: 0, captureTimer: 0, captureFirstCatch: 16, captureSecondCatch: 20, captureRecaptured: 6, meadowWindClock: 0, transectStage: 0, transectTimer: 0, transectStationIndex: 0, transectDistanceM: 0, transectCurrentObservation: null, transectResults: [], shoreTideClock: 0, shoreTideProgress: 0, rippleStage: 0, rippleTimer: 0, rippleTrialIndex: 0, rippleFrequencyHz: 4, rippleTenWavelengthCm: 0, rippleWavelengthCm: 0, rippleSpeedMs: 0, rippleResults: [], rippleWaveClock: 0, newtonForce: 0.2, newtonMass: 1.0, newtonPos: 0, newtonVel: 0, newtonAcc: 0.2, newtonTimer: 0, newtonRunning: false, newtonGate1Time: null, newtonGate2Time: null, newtonGate1Velocity: null, newtonGate2Velocity: null, newtonResults: [], electromagnetStage: 0, electromagnetTimer: 0, electromagnetTrialIndex: 0, electromagnetTurns: 10, electromagnetClips: 0, electromagnetResults: [], convectionStage: 0, convectionTimer: 0, conductionStage: 0, conductionTimer: 0, thermalStage: 0, thermalTimer: 0, thermalCaptured: false, densityStage: 0, densitySample: 0, densityTimer: 0, densityRecorded: false, densityResults: [], hookeStage: 0, hookeTimer: 0, hookeTrialIndex: 0, hookeForceN: 0, hookeResults: [], shcStage: 0, shcTimer: 0, shcEnergyJ: 0, shcTemperatureC: 20, shcResults: [], wireStage: 0, wireTimer: 0, wireTrialIndex: 0, wireLengthCm: 20, wireVoltageV: 1.5, wireResults: [], fieldStage: 0, fieldTimer: 0, fieldConfigIndex: 0, fieldResults: [], nuclearStage: 0, nuclearTimer: 0, nuclearSource: 0, nuclearPreviousSource: 0, nuclearSourceTransition: 1, nuclearAbsorber: 0, nuclearCount: 0, nuclearAnimAbsorber: 0, nuclearAnimProgress: 1, nuclearResults: [], nuclearPulseClock: 0 };
+const state = { selected: 0, subject: 'chemistry', subjectTabX: 149, subjectTabW: 114, sidebarScroll: { chemistry: 0, biology: 0, physics: 0 }, running: false, complete: false, temp: 20, ph: 7, time: 0, volume: 0, progress: 0, tab: 'equipment', graphModal: false, evaluationModal: false, assessmentMode: false, assessmentSession: null, focusMode: false, methodDropdown: false, methodStepSelection: null, reactantSafety: null, points: [], hover: null, drag: null, pour: null, burner: false, coolingWater: false, particles: [], layout: null, flamePhase: 0, transferred: 0, workspace: [], nextItem: 1, dose: null, reaction: null, massStage: 0, massLidOn: true, massTransfer: null, massBefore: 4.01, massAfter: null, hydrogenStage: 0, hydrogenTimer: 0, hydrogenAudioPlayed: false, hydrogenGas: 0, saltsStage: 0, saltsTimer: 0, chromSelectedDye: null, electroRecorded: false, electroWeighing: false, electroWeighTimer: 0, titrationStage: 0, titrationVolume: 0, titrationDropTimer: 0, titrationDrops: 0, titrationIndicator: false, titrationIndicatorTimer: 0, titrationRecorded: false, ratesStage: 0, ratesStageTimer: 0, ratesTrialIndex: 0, ratesTargetTemp: 20, ratesBathTemp: 20, ratesConditioning: false, ratesResults: [], thermiteTimer: 0, thermiteAudioPlayed: false, displacementStage: 0, displacementTimer: 0, displacementRecorded: false, flameTestStage: 0, flameTestTimer: 0, flameTestSalt: 0, flameTestTested: [], starchStage: 0, starchTimer: 0, lipaseStage: 0, lipaseTimer: 0, lipaseTrialIndex: 0, lipaseTargetTemp: 20, lipaseBathTemp: 20, lipaseConditioning: false, lipaseResults: [], respirationStage: 0, respirationTimer: 0, respirationResults: [], osmosisStage: 0, osmosisTimer: 0, osmosisTrialIndex: 0, osmosisConcentration: 0, osmosisResults: [], potometerStage: 0, potometerTimer: 0, potometerTrialIndex: 0, potometerWindSpeed: 0, potometerBubbleMm: 0, potometerResults: [], pondweedDistance: 20, pondweedLampOn: true, pondweedTimer: 0, pondweedBubbles: 0, pondweedResults: [], quadratStage: 0, quadratTimer: 0, quadratSampleIndex: 0, quadratCurrentCount: 0, quadratResults: [], captureStage: 0, captureTimer: 0, captureFirstCatch: 16, captureSecondCatch: 20, captureRecaptured: 6, meadowWindClock: 0, transectStage: 0, transectTimer: 0, transectStationIndex: 0, transectDistanceM: 0, transectCurrentObservation: null, transectResults: [], shoreTideClock: 0, shoreTideProgress: 0, rippleStage: 0, rippleTimer: 0, rippleTrialIndex: 0, rippleFrequencyHz: 4, rippleTenWavelengthCm: 0, rippleWavelengthCm: 0, rippleSpeedMs: 0, rippleResults: [], rippleWaveClock: 0, newtonForce: 0.2, newtonMass: 1.0, newtonPos: 0, newtonVel: 0, newtonAcc: 0.2, newtonTimer: 0, newtonRunning: false, newtonGate1Time: null, newtonGate2Time: null, newtonGate1Velocity: null, newtonGate2Velocity: null, newtonResults: [], electromagnetStage: 0, electromagnetTimer: 0, electromagnetTrialIndex: 0, electromagnetTurns: 10, electromagnetClips: 0, electromagnetResults: [], convectionStage: 0, convectionTimer: 0, conductionStage: 0, conductionTimer: 0, thermalStage: 0, thermalTimer: 0, thermalCaptured: false, densityStage: 0, densitySample: 0, densityTimer: 0, densityRecorded: false, densityResults: [], hookeStage: 0, hookeTimer: 0, hookeTrialIndex: 0, hookeForceN: 0, hookeResults: [], shcStage: 0, shcTimer: 0, shcEnergyJ: 0, shcTemperatureC: 20, shcResults: [], wireStage: 0, wireTimer: 0, wireTrialIndex: 0, wireLengthCm: 20, wireVoltageV: 1.5, wireResults: [], fieldStage: 0, fieldTimer: 0, fieldConfigIndex: 0, fieldResults: [], nuclearStage: 0, nuclearTimer: 0, nuclearSource: 0, nuclearPreviousSource: 0, nuclearSourceTransition: 1, nuclearAbsorber: 0, nuclearCount: 0, nuclearAnimAbsorber: 0, nuclearAnimProgress: 1, nuclearResults: [], nuclearPulseClock: 0 };
 state.shcMaterial = 'aluminium';
 Object.assign(state, { transformationStage: 0, transformationTimer: 0, transformationResults: [] });
 Object.assign(state, { antibioticStage: 0, antibioticTimer: 0, antibioticResults: [], antibioticMeasuredIndex: -1 });
@@ -1199,10 +1200,15 @@ function header() {
     hit('subject-tab', tx, tabY + 4, tabW, tabH - 8, s.id);
   });
 
-  text('OCR GCSE Combined Science', W - 245, 33, 12, '#9fb2b8', 600, 'right');
-  rr(W - 225, 16, 110, 32, 16, state.focusMode ? C.teal : '#122b3b', '#2e4e63');
-  text('FOCUS MODE ⛶', W - 170, 32, 10, '#ffffff', 800, 'center');
-  hit('toggle-focus-mode', W - 225, 16, 110, 32);
+  const focusW = 104, assessW = 146;
+  const focusX = W - focusW - 14, assessX = focusX - assessW - 10;
+  text('OCR GCSE Combined Science', assessX - 16, 33, 11, '#9fb2b8', 600, 'right');
+  rr(assessX, 16, assessW, 32, 16, state.assessmentMode ? C.teal : '#122b3b', state.assessmentMode ? '#4fc3b5' : '#2e4e63');
+  text('📝 ASSESSMENT MODE', assessX + assessW / 2, 32, 10, '#ffffff', 800, 'center');
+  hit('toggle-assessment-mode', assessX, 16, assessW, 32);
+  rr(focusX, 16, focusW, 32, 16, state.focusMode ? C.teal : '#122b3b', '#2e4e63');
+  text('FOCUS MODE ⛶', focusX + focusW / 2, 32, 10, '#ffffff', 800, 'center');
+  hit('toggle-focus-mode', focusX, 16, focusW, 32);
 }
 function sidebarMetrics(subject = state.subject || 'chemistry') {
   const visible = practicals.map((p, i) => ({ ...p, originalIndex: i })).filter(p => (p.subject || 'chemistry') === subject);
@@ -2152,12 +2158,18 @@ function drawEvaluationModal() {
     curY += impH + impGap;
   });
 
-  // Bottom CLOSE EVALUATION button
-  const btnW = 240;
-  const btnX = x + (w - btnW) / 2;
-  rr(btnX, btnY, btnW, bottomBtnH, 10, C.teal, C.teal);
-  text('CLOSE EVALUATION', btnX + btnW / 2, btnY + bottomBtnH / 2, 12, '#ffffff', 800, 'center');
+  // Bottom action buttons: CLOSE and START ASSESSMENT
+  const btnW = 210, btnGap = 16;
+  const totalBtnW = btnW * 2 + btnGap;
+  const btnX = x + (w - totalBtnW) / 2;
+  rr(btnX, btnY, btnW, bottomBtnH, 10, 'rgba(8, 127, 117, 0.15)', C.teal);
+  text('CLOSE EVALUATION', btnX + btnW / 2, btnY + bottomBtnH / 2, 11, C.teal, 800, 'center');
   hit('close-evaluation-modal', btnX, btnY, btnW, bottomBtnH);
+
+  const testBtnX = btnX + btnW + btnGap;
+  rr(testBtnX, btnY, btnW, bottomBtnH, 10, C.teal, C.teal);
+  text('START ASSESSMENT 📝', testBtnX + btnW / 2, btnY + bottomBtnH / 2, 11, '#ffffff', 800, 'center');
+  hit('start-practical-assessment', testBtnX, btnY, btnW, bottomBtnH);
 }
 function drawReactantSafetyModal() {
   const safety = state.reactantSafety;
@@ -3293,17 +3305,21 @@ function draw(skipWebGL = false) {
   ctx.setLineDash([]);
   ctx.clearRect(0, 0, W, H);
   if (!portraitPromptVisible) {
-    if (state.selected !== lastSelectedPractical) { state.reaction = null; lastSelectedPractical = state.selected }
-    header(); sidebar(); main(); rightbar();
-    if (state.focusMode && state.methodDropdown) drawMethodDropdownPanel();
-    if (state.dose) drawDosePanel();
-    if (state.evaluationModal) drawEvaluationModal();
-    if (state.graphModal) drawGraphModal();
-    if (state.reactantSafety) drawReactantSafetyModal();
-    if (state.hookeFocusModal) {
-      drawHookeFocusModal();
-      const view = hookeFocusViewport();
-      lab3d.resize(view.x, view.y, view.width, view.height, UI_SCALE);
+    if (state.assessmentMode) {
+      assessment.drawAssessmentMode(ctx, W, H, state, practicals, hit);
+    } else {
+      if (state.selected !== lastSelectedPractical) { state.reaction = null; lastSelectedPractical = state.selected }
+      header(); sidebar(); main(); rightbar();
+      if (state.focusMode && state.methodDropdown) drawMethodDropdownPanel();
+      if (state.dose) drawDosePanel();
+      if (state.evaluationModal) drawEvaluationModal();
+      if (state.graphModal) drawGraphModal();
+      if (state.reactantSafety) drawReactantSafetyModal();
+      if (state.hookeFocusModal) {
+        drawHookeFocusModal();
+        const view = hookeFocusViewport();
+        lab3d.resize(view.x, view.y, view.width, view.height, UI_SCALE);
+      }
     }
   }
   visibleCtx.save();
@@ -3311,7 +3327,7 @@ function draw(skipWebGL = false) {
   visibleCtx.globalCompositeOperation = 'copy';
   visibleCtx.drawImage(buffer, 0, 0);
   visibleCtx.restore();
-  if (!portraitPromptVisible && !state.dose && !state.evaluationModal && !state.graphModal && !state.reactantSafety && !skipWebGL && !state.drag) lab3d.render(performance.now(), state, practicals[state.selected])
+  if (!portraitPromptVisible && !state.assessmentMode && !state.dose && !state.evaluationModal && !state.graphModal && !state.reactantSafety && !skipWebGL && !state.drag) lab3d.render(performance.now(), state, practicals[state.selected])
   requestSimulationFrame();
 }
 function addWorkspaceItem(type, x = null, y = null) { const slot = state.workspace.length, benchY = H - 128, item = { uid: state.nextItem++, type, x: x ?? (345 + (slot % 5) * 105), y: y ?? (benchY - 64 - Math.floor(slot / 5) * 105), lit: false, mass: 0, contents: [], snappedTo: null, attachedTo: null, temperature: 20, heating: false, ph: null }; state.workspace.push(item); if (type === 'phmeter') { const target = nearestPhVessel(item)?.target; if (target) { dockPhMeter(item, target); state.toast = `pH meter auto-positioned in the ${target.type === 'tube' ? 'test tube' : 'beaker'} — its display will follow this liquid.` } else state.toast = 'pH meter added — add a beaker or test tube and it will position itself automatically.' } else if (isPhVessel(item)) { const waiting = state.workspace.find(candidate => candidate.type === 'phmeter' && !candidate.attachedTo); autoPositionPhMeters(item); state.toast = waiting ? `pH meter auto-positioned in the new ${type === 'tube' ? 'test tube' : 'beaker'}.` : `${equipment.find(e => e.id === type)?.name || type} added — drag it to reposition.` } else state.toast = `${equipment.find(e => e.id === type)?.name || type} added — drag it to reposition.`; refreshWorkspacePh() }
@@ -4305,6 +4321,30 @@ canvas.addEventListener('pointermove', e => {
 canvas.addEventListener('pointerdown', e => {
   const point = pointerPosition(e), r = regionAtPoint(point);
   if (!r) return;
+  if (state.assessmentMode && assessment.handleAssessmentPointerDown(r, point, state, practicals, draw)) return;
+  if (r.id === 'toggle-assessment-mode') {
+    state.assessmentMode = !state.assessmentMode;
+    if (state.assessmentMode) {
+      state.graphModal = false;
+      state.evaluationModal = false;
+      state.reactantSafety = null;
+      state.hookeFocusModal = false;
+      const p = practicals[state.selected] || practicals[0];
+      state.assessmentSession = assessment.createAssessmentSession(p);
+    }
+    draw();
+    return;
+  } else if (r.id === 'start-practical-assessment') {
+    state.assessmentMode = true;
+    state.evaluationModal = false;
+    state.graphModal = false;
+    state.reactantSafety = null;
+    state.hookeFocusModal = false;
+    const p = practicals[state.selected] || practicals[0];
+    state.assessmentSession = assessment.createAssessmentSession(p);
+    draw();
+    return;
+  }
   if (r.id === 'subject-tab') {
     state.subject = r.data;
     state.methodStepSelection = null;
@@ -6757,5 +6797,23 @@ window.render_game_to_text = () => {
     visible_hit_targets: methodHitTargets
   };
   return JSON.stringify(payload)
+};
+const assessmentAwareRenderGameToText = window.render_game_to_text;
+window.render_game_to_text = () => {
+  const payload = JSON.parse(assessmentAwareRenderGameToText());
+  const session = state.assessmentSession;
+  payload.assessment_mode = {
+    active: !!state.assessmentMode,
+    practical_id: session?.practicalId || practicals[state.selected]?.id,
+    phase: session?.currentPhase || null,
+    total_score: session?.totalScore || 0,
+    max_score: session?.maxPossibleScore || 0,
+    grade: session?.grade || null,
+    apparatus_checked: !!session?.apparatusChecked,
+    method_order_checked: !!session?.methodOrderChecked,
+    method_questions_checked: !!session?.methodQuestionsChecked,
+    limitations_checked: !!session?.limitationsChecked
+  };
+  return JSON.stringify(payload);
 };
 draw();
