@@ -3305,10 +3305,10 @@ function draw(skipWebGL = false) {
   ctx.setLineDash([]);
   ctx.clearRect(0, 0, W, H);
   if (!portraitPromptVisible) {
+    if (state.selected !== lastSelectedPractical) { state.reaction = null; lastSelectedPractical = state.selected }
     if (state.assessmentMode) {
       assessment.drawAssessmentMode(ctx, W, H, state, practicals, hit);
     } else {
-      if (state.selected !== lastSelectedPractical) { state.reaction = null; lastSelectedPractical = state.selected }
       header(); sidebar(); main(); rightbar();
       if (state.focusMode && state.methodDropdown) drawMethodDropdownPanel();
       if (state.dose) drawDosePanel();
@@ -6813,7 +6813,9 @@ window.render_game_to_text = () => {
     apparatus_checked: !!session?.apparatusChecked,
     method_order_checked: !!session?.methodOrderChecked,
     method_questions_checked: !!session?.methodQuestionsChecked,
-    limitations_checked: !!session?.limitationsChecked
+    limitations_checked: !!session?.limitationsChecked,
+    lowest_accuracy_identified: !!session?.benchInspection?.lowestAccuracyIdentified,
+    upgraded_apparatus: session?.benchInspection?.upgradedApparatus || null
   };
   return JSON.stringify(payload);
 };

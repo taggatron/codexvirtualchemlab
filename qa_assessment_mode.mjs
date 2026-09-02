@@ -130,6 +130,13 @@ try {
   if (s5a.assessment_mode?.phase !== 'limitations') throw new Error('Expected phase: limitations');
   await page.screenshot({ path: `${out}/05-limitations-phase.png`, fullPage: true });
 
+  // ON-BENCH ACCURACY CHALLENGE:
+  // Click directly on the Rubber Balloon on the live bench canvas!
+  await clickRegion('assessment-bench-apparatus-click', { id: 'balloon' });
+  const s5bench = await getState();
+  console.log('6b. Clicked Rubber Balloon on bench -> Lowest accuracy identified:', s5bench.assessment_mode?.lowest_accuracy_identified);
+  if (!s5bench.assessment_mode?.lowest_accuracy_identified) throw new Error('Failed to identify lowest accuracy apparatus on bench');
+
   // Click experimental upgrades via mouse clicks:
   // Limitation 1 (Gas collection): 100 cm³ Gas Syringe (index 0)
   await clickRegion('assessment-select-upgrade', { limitationId: 'lim_gas_collection', optionIndex: 0 });

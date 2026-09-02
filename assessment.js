@@ -236,6 +236,42 @@ export const assessmentDatabase = {
         ],
         markScheme: 'Award 1 mark for 3 repeats; 1 mark for identifying anomalies and calculating a mean.'
       }
+    ],
+    benchApparatus: [
+      {
+        id: 'water_bath',
+        name: 'Thermostatic Water Bath',
+        role: 'Temperature Regulator',
+        xPct: 0.20, yPct: 0.52, w: 140, h: 95,
+        isLowestAccuracy: false,
+        critique: 'The electric water bath maintains temperature accurately to ±0.5 °C, providing good control.'
+      },
+      {
+        id: 'flask',
+        name: '250 cm³ Conical Flask',
+        role: 'Reaction Vessel',
+        xPct: 0.40, yPct: 0.52, w: 130, h: 95,
+        isLowestAccuracy: false,
+        critique: 'The conical flask holds the reacting glucose-yeast mixture securely and is a standard lab vessel (not the limiting instrument).'
+      },
+      {
+        id: 'balloon',
+        name: 'Rubber Balloon (Gas Collector)',
+        role: 'Gas Collection Apparatus',
+        xPct: 0.62, yPct: 0.52, w: 135, h: 95,
+        isLowestAccuracy: true,
+        critique: 'The rubber balloon has the lowest accuracy: elastic tension exerts variable back-pressure on the respiring yeast, and volume cannot be read in calibrated cm³.',
+        upgradeChallengeId: 'lim_gas_collection',
+        recommendedUpgrade: '100 cm³ Gas Syringe with airtight bung and delivery tube'
+      },
+      {
+        id: 'stopwatch',
+        name: 'Digital Stopwatch',
+        role: 'Timing Instrument',
+        xPct: 0.84, yPct: 0.52, w: 125, h: 80,
+        isLowestAccuracy: false,
+        critique: 'The digital stopwatch provides 0.01 s precision, which is well within experimental tolerance.'
+      }
     ]
   },
 
@@ -361,6 +397,42 @@ export const assessmentDatabase = {
           }
         ],
         markScheme: 'Award 1 mark for wide range (20–60 °C at 10 °C intervals); 1 mark for thermostatically controlled water bath.'
+      }
+    ],
+    benchApparatus: [
+      {
+        id: 'cross',
+        name: 'Paper Cross & Eye Observation',
+        role: 'Visual End-point Indicator',
+        xPct: 0.51, yPct: 0.54, w: 125, h: 110,
+        isLowestAccuracy: true,
+        critique: 'Human eye observation of the disappearing cross has the lowest accuracy: determining when the cross is fully obscured is subjective and varies between observers.',
+        upgradeChallengeId: 'lim_colorimeter',
+        recommendedUpgrade: 'Digital Colorimeter / Light Sensor with data logger'
+      },
+      {
+        id: 'flask',
+        name: 'Conical Flask (100 cm³)',
+        role: 'Reaction Vessel',
+        xPct: 0.50, yPct: 0.42, w: 130, h: 120,
+        isLowestAccuracy: false,
+        critique: 'The flat-bottom conical flask allows clear vertical viewing and holds reagents securely.'
+      },
+      {
+        id: 'water_bath',
+        name: 'Thermostatic Water Bath',
+        role: 'Temperature Control',
+        xPct: 0.28, yPct: 0.54, w: 160, h: 140,
+        isLowestAccuracy: false,
+        critique: 'The water bath accurately equilibrates reactant temperatures.'
+      },
+      {
+        id: 'cylinder',
+        name: 'Measuring Cylinder (50 cm³)',
+        role: 'Volume Dispenser',
+        xPct: 0.70, yPct: 0.54, w: 90, h: 140,
+        isLowestAccuracy: false,
+        critique: 'Adequate precision (±0.5 cm³) for dispensing fixed reactant volumes.'
       }
     ]
   },
@@ -822,6 +894,42 @@ export function getPracticalAssessment(practical) {
         ],
         markScheme: 'Award 1 mark for testing 5+ values across a broad range; 1 mark for regular intervals.'
       }
+    ],
+    benchApparatus: [
+      {
+        id: 'manual_indicator',
+        name: 'Manual Visual Observer / Qualitative Tube',
+        role: 'Subjective Measurement',
+        xPct: 0.52, yPct: 0.40, w: 125, h: 110,
+        isLowestAccuracy: true,
+        critique: 'Manual visual estimation has the lowest accuracy and largest uncertainty due to human reaction time and subjective end-points.',
+        upgradeChallengeId: 'gen_lim1',
+        recommendedUpgrade: 'Calibrated digital sensor with data logger'
+      },
+      {
+        id: 'reaction_vessel',
+        name: 'Primary Reaction Vessel',
+        role: 'Container',
+        xPct: 0.48, yPct: 0.56, w: 140, h: 130,
+        isLowestAccuracy: false,
+        critique: 'The reaction vessel is an appropriate standard container.'
+      },
+      {
+        id: 'regulator',
+        name: 'Environmental Controller',
+        role: 'Condition Regulator',
+        xPct: 0.28, yPct: 0.56, w: 160, h: 140,
+        isLowestAccuracy: false,
+        critique: 'Maintains environmental control variables reliably.'
+      },
+      {
+        id: 'timer',
+        name: 'Digital Timer',
+        role: 'Interval Recorder',
+        xPct: 0.72, yPct: 0.62, w: 120, h: 80,
+        isLowestAccuracy: false,
+        critique: 'Digital timer provides high resolution (0.01 s).'
+      }
     ]
   };
 }
@@ -837,6 +945,15 @@ export function createAssessmentSession(practical) {
     practicalId: practical.id,
     data,
     currentPhase: 'apparatus', // 'apparatus' | 'method' | 'limitations' | 'summary'
+    
+    // On-Bench Inspection & Accuracy Challenge
+    benchInspection: {
+      active: true,
+      selectedItemId: null,
+      lowestAccuracyIdentified: false,
+      upgradedApparatus: null,
+      feedback: null
+    },
     
     // Phase 1: Apparatus state
     selectedEquipment: new Set(),
@@ -994,14 +1111,14 @@ export function drawAssessmentMode(ctx, W, H, state, practicals, hit) {
   }
   const session = state.assessmentSession;
   
-  // Clear full backdrop with dark slate theme
+  // Clean dark slate theme background for assessment mode
   ctx.save();
   ctx.fillStyle = C.navy;
   ctx.fillRect(0, 0, W, H);
   
   // Subtle top grid glow
   const grad = ctx.createLinearGradient(0, 0, 0, 240);
-  grad.addColorStop(0, 'rgba(8, 127, 117, 0.18)');
+  grad.addColorStop(0, 'rgba(8, 127, 117, 0.22)');
   grad.addColorStop(1, 'rgba(11, 29, 40, 0)');
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, W, 240);
@@ -1097,7 +1214,7 @@ function drawApparatusPhase(ctx, W, topY, bodyH, session, practical, hit) {
   const benchX = pad + paletteW + 18;
   
   // LEFT COLUMN: Equipment Selection Palette
-  rr(ctx, pad, colY, paletteW, colH, 14, '#102431', 'rgba(255,255,255,0.1)');
+  rr(ctx, pad, colY, paletteW, colH, 14, 'rgba(12, 28, 40, 0.88)', 'rgba(79, 195, 181, 0.3)');
   text(ctx, 'EQUIPMENT LIBRARY (SELECT REQUISITE APPARATUS)', pad + 18, colY + 20, 10.5, C.cyan, 800);
   text(ctx, 'Click items to include. Beware of realistic GCSE distractors!', pad + 18, colY + 36, 9.8, C.muted, 550);
   
@@ -1149,61 +1266,90 @@ function drawApparatusPhase(ctx, W, topY, bodyH, session, practical, hit) {
     hit('assessment-toggle-equipment', pad + 14, iy, paletteW - 28, itemH, item.id);
   });
   
-  // RIGHT COLUMN: Virtual Workbench Arrangement Slots
-  rr(ctx, benchX, colY, benchW, colH, 14, '#0d1f2b', 'rgba(255,255,255,0.1)');
+  // RIGHT COLUMN: Virtual Laboratory Workbench Container (Self-contained Mini-Lab Bench)
+  rr(ctx, benchX, colY, benchW, colH, 14, '#0e222f', 'rgba(79, 195, 181, 0.35)');
   
-  // Workbench header
+  // Workbench container header
   text(ctx, 'VIRTUAL APPARATUS BENCH (PHYSICAL SETUP)', benchX + 20, colY + 20, 10.5, C.cyan, 800);
-  text(ctx, 'Assign selected equipment into functional positions from left to right.', benchX + 20, colY + 36, 9.8, C.muted, 550);
+  text(ctx, 'Assemble selected equipment into their physical positions on the workbench.', benchX + 20, colY + 36, 9.8, C.muted, 550);
+  
+  // Mini Laboratory Workbench canvas inside container
+  const worktopTop = colY + 48;
+  const worktopH = colH - 124;
+  ctx.save();
+  rr(ctx, benchX + 16, worktopTop, benchW - 32, worktopH, 10, '#102736', 'rgba(255,255,255,0.08)');
+  
+  // Laboratory glazed tile grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 1;
+  for (let gx = benchX + 16; gx < benchX + benchW - 16; gx += 44) {
+    ctx.beginPath(); ctx.moveTo(gx, worktopTop); ctx.lineTo(gx, worktopTop + worktopH * 0.58); ctx.stroke();
+  }
+  for (let gy = worktopTop; gy < worktopTop + worktopH * 0.58; gy += 30) {
+    ctx.beginPath(); ctx.moveTo(benchX + 16, gy); ctx.lineTo(benchX + benchW - 16, gy); ctx.stroke();
+  }
+  
+  // Laboratory blue resin worktop bench floor
+  const benchSurfaceY = worktopTop + worktopH * 0.58;
+  let benchGrad = ctx.createLinearGradient(benchX + 16, benchSurfaceY, benchX + 16, worktopTop + worktopH);
+  benchGrad.addColorStop(0, '#2b5f79');
+  benchGrad.addColorStop(0.18, '#1e485c');
+  benchGrad.addColorStop(1, '#13303e');
+  ctx.fillStyle = benchGrad;
+  ctx.fillRect(benchX + 16, benchSurfaceY, benchW - 32, (worktopTop + worktopH) - benchSurfaceY);
+  ctx.fillStyle = '#4fa8c8';
+  ctx.fillRect(benchX + 16, benchSurfaceY, benchW - 32, 2);
+  ctx.restore();
   
   const slotCount = challenge.slots.length;
-  const slotH = Math.min(80, (colH - 180) / slotCount);
-  const slotGap = 8;
-  const slotStartY = colY + 52;
+  const slotH = Math.min(76, (worktopH - 18) / slotCount);
+  const slotGap = 6;
+  const slotStartY = worktopTop + 8;
   
   challenge.slots.forEach((slot, idx) => {
     const sy = slotStartY + idx * (slotH + slotGap);
     const assignedId = session.slotAssignments[slot.id];
     const assignedItem = challenge.palette.find(p => p.id === assignedId);
     
-    let slotBg = 'rgba(255,255,255,0.03)';
-    let slotBorder = 'rgba(255,255,255,0.15)';
+    let slotBg = 'rgba(10, 24, 34, 0.72)';
+    let slotBorder = 'rgba(255,255,255,0.18)';
     
     if (session.apparatusChecked) {
       const isCorrectSlot = assignedId === slot.requiredItem;
-      slotBg = isCorrectSlot ? 'rgba(40, 135, 79, 0.22)' : 'rgba(201, 69, 59, 0.22)';
+      slotBg = isCorrectSlot ? 'rgba(40, 135, 79, 0.35)' : 'rgba(201, 69, 59, 0.35)';
       slotBorder = isCorrectSlot ? C.green : C.red;
     } else if (assignedItem) {
-      slotBg = 'rgba(8, 127, 117, 0.22)';
+      slotBg = 'rgba(8, 127, 117, 0.35)';
       slotBorder = C.teal;
     }
     
-    rr(ctx, benchX + 18, sy, benchW - 36, slotH, 10, slotBg, slotBorder, 1.2);
+    rr(ctx, benchX + 22, sy, benchW - 44, slotH, 8, slotBg, slotBorder, 1.2);
+    hit('assessment-bench-slot', benchX + 22, sy, benchW - 44, slotH, slot.id);
     
     // Position Number
     ctx.fillStyle = C.teal;
     ctx.beginPath();
-    ctx.arc(benchX + 42, sy + slotH / 2, 14, 0, Math.PI * 2);
+    ctx.arc(benchX + 44, sy + slotH / 2, 13, 0, Math.PI * 2);
     ctx.fill();
-    text(ctx, String(idx + 1), benchX + 42, sy + slotH / 2, 11, '#ffffff', 800, 'center');
+    text(ctx, String(idx + 1), benchX + 44, sy + slotH / 2, 10.5, '#ffffff', 800, 'center');
     
     // Slot details
-    text(ctx, slot.label.toUpperCase(), benchX + 66, sy + 20, 10.5, C.cyan, 800);
-    text(ctx, slot.hint, benchX + 66, sy + 38, 9.5, C.muted, 550);
+    text(ctx, slot.label.toUpperCase(), benchX + 68, sy + 18, 10, C.cyan, 800);
+    text(ctx, slot.hint, benchX + 68, sy + 35, 9, C.muted, 550);
     
     // Assigned item box or placeholder
-    const assignBtnW = 185;
-    const assignBtnX = benchX + benchW - assignBtnW - 30;
-    const assignBtnY = sy + (slotH - 34) / 2;
+    const assignBtnW = 190;
+    const assignBtnX = benchX + benchW - assignBtnW - 36;
+    const assignBtnY = sy + (slotH - 32) / 2;
     
     if (assignedItem) {
-      rr(ctx, assignBtnX, assignBtnY, assignBtnW, 34, 7, 'rgba(8, 127, 117, 0.65)', C.cyan);
-      text(ctx, `${assignedItem.icon} ${assignedItem.name}`, assignBtnX + 10, assignBtnY + 17, 9.5, '#ffffff', 700);
+      rr(ctx, assignBtnX, assignBtnY, assignBtnW, 32, 6, 'rgba(8, 127, 117, 0.75)', C.cyan);
+      text(ctx, `${assignedItem.icon} ${assignedItem.name}`, assignBtnX + 10, assignBtnY + 16, 9.5, '#ffffff', 700);
     } else {
-      rr(ctx, assignBtnX, assignBtnY, assignBtnW, 34, 7, 'rgba(255,255,255,0.06)', 'rgba(255,255,255,0.2)');
-      text(ctx, '+ Click to Assign Selected', assignBtnX + assignBtnW / 2, assignBtnY + 17, 9.5, C.line, 650, 'center');
+      rr(ctx, assignBtnX, assignBtnY, assignBtnW, 32, 6, 'rgba(255,255,255,0.06)', 'rgba(255,255,255,0.2)');
+      text(ctx, '+ Click to Place Apparatus', assignBtnX + assignBtnW / 2, assignBtnY + 16, 9, C.line, 650, 'center');
     }
-    hit('assessment-slot-assign', assignBtnX, assignBtnY, assignBtnW, 34, slot.id);
+    hit('assessment-slot-assign', assignBtnX, assignBtnY, assignBtnW, 32, slot.id);
   });
   
   // Bench Action Buttons: CHECK SETUP & PROCEED TO METHOD
@@ -1394,45 +1540,159 @@ function drawLimitationsPhase(ctx, W, topY, bodyH, session, practical, hit) {
   const contentW = W - pad * 2;
   
   // Instruction banner
-  const bannerH = 58;
-  rr(ctx, pad, topY + 12, contentW, bannerH, 12, C.slate, 'rgba(255,255,255,0.1)');
-  text(ctx, 'ACTIVITY 3: ADDRESSING LIMITATIONS & SELECTING PROCEDURAL UPGRADES', pad + 18, topY + 28, 11.5, C.cyan, 800);
-  text(ctx, 'Evaluate limitations in standard procedures (e.g. gas collection apparatus, temperature ranges, sensors) and choose scientifically sound improvements.', pad + 18, topY + 48, 11, C.line, 550);
+  const bannerH = 44;
+  rr(ctx, pad, topY + 6, contentW, bannerH, 10, 'rgba(8, 22, 33, 0.82)', 'rgba(79, 195, 181, 0.3)');
+  text(ctx, 'ACTIVITY 3: ADDRESSING LIMITATIONS & ON-BENCH ACCURACY AUDIT', pad + 18, topY + 20, 11, C.cyan, 800);
+  text(ctx, '🎯 Step 1: Click the inaccurate equipment on the bench below. Step 2: Select quantitative and procedural upgrades.', pad + 18, topY + 35, 9.5, C.line, 550);
   
-  const colY = topY + bannerH + 20;
-  const colH = bodyH - bannerH - 34;
-  const limCardCount = challenges.length;
-  const cardW = (contentW - (limCardCount - 1) * 16) / limCardCount;
+  const colY = topY + bannerH + 16;
+  const bottomBarH = 50;
+  const colH = bodyH - bannerH - bottomBarH - 26;
   
-  challenges.forEach((lim, idx) => {
-    const lx = pad + idx * (cardW + 16);
-    rr(ctx, lx, colY, cardW, colH - 64, 14, '#0f2330', 'rgba(255,255,255,0.1)');
+  const leftW = Math.round((contentW - 16) * 0.54);
+  const rightW = contentW - leftW - 16;
+  const rightX = pad + leftW + 16;
+  
+  // LEFT CONTAINER: Practical Apparatus Audit & Upgrade (Self-contained Mini-Lab Bench)
+  rr(ctx, pad, colY, leftW, colH, 14, '#0e222f', 'rgba(79, 195, 181, 0.35)');
+  
+  // Header
+  text(ctx, 'CHALLENGE 1: EXPERIMENTAL APPARATUS AUDIT', pad + 18, colY + 18, 10.5, C.cyan, 800);
+  text(ctx, 'Inspect the rig on the bench below. Click the equipment with the lowest accuracy.', pad + 18, colY + 33, 9, C.muted, 550);
+  
+  // Mini Laboratory Bench canvas inside Container 1
+  const miniBenchY = colY + 44;
+  const miniBenchH = Math.min(155, colH * 0.40);
+  
+  ctx.save();
+  rr(ctx, pad + 12, miniBenchY, leftW - 24, miniBenchH, 10, '#102736', 'rgba(255,255,255,0.08)');
+  
+  // Tiled wall pattern inside mini-bench
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 1;
+  for (let gx = pad + 12; gx < pad + leftW - 12; gx += 36) {
+    ctx.beginPath(); ctx.moveTo(gx, miniBenchY); ctx.lineTo(gx, miniBenchY + miniBenchH * 0.58); ctx.stroke();
+  }
+  for (let gy = miniBenchY; gy < miniBenchY + miniBenchH * 0.58; gy += 26) {
+    ctx.beginPath(); ctx.moveTo(pad + 12, gy); ctx.lineTo(pad + leftW - 12, gy); ctx.stroke();
+  }
+  
+  // Blue resin worktop surface inside mini-bench
+  const benchSurfaceY = miniBenchY + miniBenchH * 0.58;
+  let benchGrad = ctx.createLinearGradient(pad + 12, benchSurfaceY, pad + 12, miniBenchY + miniBenchH);
+  benchGrad.addColorStop(0, '#2b5f79');
+  benchGrad.addColorStop(0.18, '#1e485c');
+  benchGrad.addColorStop(1, '#13303e');
+  ctx.fillStyle = benchGrad;
+  ctx.fillRect(pad + 12, benchSurfaceY, leftW - 24, (miniBenchY + miniBenchH) - benchSurfaceY);
+  ctx.fillStyle = '#4fa8c8';
+  ctx.fillRect(pad + 12, benchSurfaceY, leftW - 24, 2);
+  ctx.restore();
+  
+  const benchApparatus = session.data.benchApparatus || [];
+  const innerW = leftW - 24;
+  benchApparatus.forEach(item => {
+    const itemX = pad + 12 + item.xPct * innerW - (item.w / 2);
+    const itemY = miniBenchY + item.yPct * miniBenchH - (item.h / 2) + 4;
+    const isSelected = session.benchInspection.selectedItemId === item.id;
+    const isLowest = item.isLowestAccuracy;
+    const isIdentified = isLowest && session.benchInspection.lowestAccuracyIdentified;
     
-    // Header Badge
-    rr(ctx, lx + 14, colY + 14, cardW - 28, 26, 6, 'rgba(224, 152, 30, 0.2)', C.yellow);
-    text(ctx, `LIMITATION CHALLENGE ${idx + 1}`, lx + (cardW / 2), colY + 27, 9.5, C.yellow, 800, 'center');
+    let reticleBorder = isIdentified ? C.green : isSelected ? (isLowest ? C.green : C.yellow) : 'rgba(79, 195, 181, 0.5)';
+    let reticleBg = isIdentified ? 'rgba(40, 135, 79, 0.25)' : isSelected ? (isLowest ? 'rgba(40, 135, 79, 0.2)' : 'rgba(224, 152, 30, 0.2)') : 'rgba(255,255,255,0.03)';
     
-    // Title
-    text(ctx, lim.title, lx + 16, colY + 54, 12, '#ffffff', 800);
+    rr(ctx, itemX, itemY, item.w, item.h, 7, reticleBg, reticleBorder, isSelected || isIdentified ? 1.8 : 1);
     
-    // Scenario & Limitation description box
-    const descH = 92;
-    rr(ctx, lx + 14, colY + 68, cardW - 28, descH, 8, 'rgba(255,255,255,0.03)', 'rgba(255,255,255,0.08)');
-    text(ctx, 'PROCEDURAL LIMITATION:', lx + 22, colY + 80, 9.2, C.orange, 800);
-    drawWrapped(ctx, lim.limitation, lx + 22, colY + 92, cardW - 44, 9.5, C.line, 600, 13.5, 4);
+    // Tag pill above the apparatus
+    const tagH = 20;
+    const tagW = Math.max(96, item.w);
+    const tagX = itemX + (item.w - tagW) / 2;
+    const tagY = itemY - tagH - 3;
     
-    // Upgrade prompt
-    const promptY = colY + 68 + descH + 12;
-    text(ctx, 'CHOOSE EXPERIMENTAL UPGRADE:', lx + 16, promptY, 9.5, C.cyan, 800);
+    const tagBg = isIdentified ? 'rgba(40, 135, 79, 0.90)' : isSelected ? 'rgba(8, 22, 33, 0.92)' : 'rgba(8, 22, 33, 0.78)';
+    rr(ctx, tagX, tagY, tagW, tagH, 5, tagBg, reticleBorder, 1);
     
-    // Selectable Upgrades
-    const optStartY = promptY + 12;
-    const optH = 68;
-    const optGap = 8;
+    const tagLabel = isIdentified && session.benchInspection.upgradedApparatus ? '✓ Gas Syringe (UPGRADED)' : (isIdentified ? '✓ ' : '🔍 ') + item.name;
+    text(ctx, tagLabel, tagX + tagW / 2, tagY + 10, 8, '#ffffff', 750, 'center');
+    
+    hit('assessment-bench-apparatus-click', itemX, tagY, item.w, item.h + tagH + 3, item);
+  });
+  
+  // Feedback note inside container
+  const afterBenchY = miniBenchY + miniBenchH + 8;
+  if (session.benchInspection.feedback) {
+    const isGood = session.benchInspection.lowestAccuracyIdentified;
+    rr(ctx, pad + 12, afterBenchY, leftW - 24, 22, 5, 'rgba(6, 18, 28, 0.92)', isGood ? C.green : C.yellow);
+    text(ctx, session.benchInspection.feedback, pad + 20, afterBenchY + 11, 8, isGood ? '#a3f0dd' : '#ffd494', 650);
+  }
+  
+  // Upgrade choices for Challenge 1 (Gas Collection Apparatus)
+  const gasChallenge = challenges[0];
+  if (gasChallenge) {
+    const optStartY = afterBenchY + (session.benchInspection.feedback ? 28 : 6);
+    text(ctx, 'SELECT QUANTITATIVE APPARATUS UPGRADE:', pad + 16, optStartY + 8, 9, C.cyan, 800);
+    
+    const optH = 44;
+    const optGap = 6;
+    const listTopY = optStartY + 18;
+    
+    gasChallenge.options.forEach((opt, optIdx) => {
+      const oy = listTopY + optIdx * (optH + optGap);
+      if (oy + optH > colY + colH - 8) return;
+      
+      const isSelected = session.limitationAnswers[gasChallenge.id] === optIdx;
+      let bg = isSelected ? 'rgba(8, 127, 117, 0.35)' : 'rgba(255,255,255,0.04)';
+      let stroke = isSelected ? C.cyan : 'rgba(255,255,255,0.12)';
+      
+      if (session.limitationsChecked) {
+        if (opt.correct) {
+          bg = 'rgba(40, 135, 79, 0.38)';
+          stroke = C.green;
+        } else if (isSelected && !opt.correct) {
+          bg = 'rgba(201, 69, 59, 0.38)';
+          stroke = C.red;
+        }
+      }
+      
+      rr(ctx, pad + 12, oy, leftW - 24, optH, 7, bg, stroke, isSelected ? 1.5 : 1);
+      
+      // Radio indicator
+      ctx.fillStyle = isSelected ? C.cyan : 'rgba(255,255,255,0.15)';
+      ctx.beginPath();
+      ctx.arc(pad + 26, oy + optH / 2, 6, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Option text & advantage
+      text(ctx, opt.text, pad + 40, oy + 13, 9, '#ffffff', 750);
+      text(ctx, opt.advantage, pad + 40, oy + 28, 8, isSelected ? C.cyan : C.muted, 550);
+      
+      hit('assessment-select-upgrade', pad + 12, oy, leftW - 24, optH, { limitationId: gasChallenge.id, optionIndex: optIdx });
+    });
+  }
+  
+  // RIGHT CONTAINER: Procedural Limitations & Scientific Validity (Range & Repeats)
+  rr(ctx, rightX, colY, rightW, colH, 14, '#0e222f', 'rgba(79, 195, 181, 0.35)');
+  text(ctx, 'PROCEDURAL LIMITATIONS & VALIDITY', rightX + 18, colY + 18, 10.5, C.yellow, 800);
+  text(ctx, 'Address testing range and repeat protocol limitations to improve reliability.', rightX + 18, colY + 33, 9, C.muted, 550);
+  
+  const otherChallenges = challenges.slice(1);
+  const cardH = (colH - 52) / otherChallenges.length - 8;
+  
+  otherChallenges.forEach((lim, cIdx) => {
+    const cardY = colY + 44 + cIdx * (cardH + 8);
+    rr(ctx, rightX + 12, cardY, rightW - 24, cardH, 9, 'rgba(15, 35, 48, 0.85)', 'rgba(255,255,255,0.1)');
+    
+    // Header
+    text(ctx, `CHALLENGE ${cIdx + 2}: ${lim.title.toUpperCase()}`, rightX + 20, cardY + 16, 9.5, C.yellow, 800);
+    drawWrapped(ctx, `Limitation: ${lim.limitation}`, rightX + 20, cardY + 30, rightW - 40, 8.2, C.line, 550, 11, 2);
+    
+    const optH = 34;
+    const optGap = 5;
+    const optStartY = cardY + 54;
     
     lim.options.forEach((opt, optIdx) => {
       const oy = optStartY + optIdx * (optH + optGap);
-      if (oy + optH > colY + colH - 74) return;
+      if (oy + optH > cardY + cardH - 6) return;
       
       const isSelected = session.limitationAnswers[lim.id] === optIdx;
       let bg = isSelected ? 'rgba(8, 127, 117, 0.35)' : 'rgba(255,255,255,0.04)';
@@ -1448,44 +1708,39 @@ function drawLimitationsPhase(ctx, W, topY, bodyH, session, practical, hit) {
         }
       }
       
-      rr(ctx, lx + 14, oy, cardW - 28, optH, 8, bg, stroke, isSelected ? 1.5 : 1);
+      rr(ctx, rightX + 20, oy, rightW - 40, optH, 6, bg, stroke, isSelected ? 1.5 : 1);
       
-      // Selector pill
-      const radioX = lx + 26;
-      const radioY = oy + 22;
       ctx.fillStyle = isSelected ? C.cyan : 'rgba(255,255,255,0.15)';
       ctx.beginPath();
-      ctx.arc(radioX, radioY, 7, 0, Math.PI * 2);
+      ctx.arc(rightX + 32, oy + optH / 2, 5, 0, Math.PI * 2);
       ctx.fill();
       
-      // Upgrade text
-      drawWrapped(ctx, opt.text, lx + 42, oy + 8, cardW - 74, 9.5, '#ffffff', 750, 13, 2);
-      // Advantage note
-      drawWrapped(ctx, opt.advantage, lx + 42, oy + 36, cardW - 74, 8.8, isSelected ? C.cyan : C.muted, 550, 12, 2);
+      text(ctx, opt.text, rightX + 44, oy + 12, 8.5, '#ffffff', 750);
+      text(ctx, opt.advantage, rightX + 44, oy + 24, 7.8, isSelected ? C.cyan : C.muted, 550);
       
-      hit('assessment-select-upgrade', lx + 14, oy, cardW - 28, optH, { limitationId: lim.id, optionIndex: optIdx });
+      hit('assessment-select-upgrade', rightX + 20, oy, rightW - 40, optH, { limitationId: lim.id, optionIndex: optIdx });
     });
   });
   
   // Bottom Action Bar: Check Limitations & View Score
-  const bottomY = colY + colH - 54;
-  rr(ctx, pad, bottomY, contentW, 50, 10, 'rgba(255,255,255,0.04)', 'rgba(255,255,255,0.1)');
+  const bottomY = topY + bodyH - 46;
+  rr(ctx, pad, bottomY, contentW, 44, 8, 'rgba(255,255,255,0.04)', 'rgba(255,255,255,0.1)');
   
-  const checkLimW = 200;
-  rr(ctx, pad + 16, bottomY + 7, checkLimW, 36, 8, C.teal, C.cyan);
-  text(ctx, session.limitationsChecked ? '✓ UPGRADES EVALUATED' : 'CHECK UPGRADE CHOICES', pad + 16 + checkLimW / 2, bottomY + 25, 10.5, '#ffffff', 800, 'center');
-  hit('assessment-check-limitations', pad + 16, bottomY + 7, checkLimW, 36);
+  const checkLimW = 190;
+  rr(ctx, pad + 14, bottomY + 5, checkLimW, 34, 7, C.teal, C.cyan);
+  text(ctx, session.limitationsChecked ? '✓ UPGRADES EVALUATED' : 'CHECK UPGRADE CHOICES', pad + 14 + checkLimW / 2, bottomY + 22, 10, '#ffffff', 800, 'center');
+  hit('assessment-check-limitations', pad + 14, bottomY + 5, checkLimW, 34);
   
   if (session.limitationsChecked) {
     const maxMarks = challenges.length * 3;
-    text(ctx, `Limitations Score: ${session.limitationsScore} / ${maxMarks} marks`, pad + checkLimW + 36, bottomY + 25, 11, C.cyan, 800);
+    text(ctx, `Limitations Score: ${session.limitationsScore} / ${maxMarks} marks`, pad + checkLimW + 30, bottomY + 22, 10.5, C.cyan, 800);
   }
   
   const summaryBtnW = 220;
-  const summaryBtnX = pad + contentW - summaryBtnW - 16;
-  rr(ctx, summaryBtnX, bottomY + 7, summaryBtnW, 36, 8, 'rgba(8, 127, 117, 0.45)', C.teal);
-  text(ctx, 'VIEW FINAL GCSE SCORE & REPORT →', summaryBtnX + summaryBtnW / 2, bottomY + 25, 10.5, '#ffffff', 800, 'center');
-  hit('assessment-next-phase', summaryBtnX, bottomY + 7, summaryBtnW, 36, 'summary');
+  const summaryBtnX = pad + contentW - summaryBtnW - 14;
+  rr(ctx, summaryBtnX, bottomY + 5, summaryBtnW, 34, 7, 'rgba(8, 127, 117, 0.45)', C.teal);
+  text(ctx, 'VIEW FINAL GCSE SCORE & REPORT →', summaryBtnX + summaryBtnW / 2, bottomY + 22, 10, '#ffffff', 800, 'center');
+  hit('assessment-next-phase', summaryBtnX, bottomY + 5, summaryBtnW, 34, 'summary');
 }
 
 // ----------------------------------------------------------------------------
@@ -1645,6 +1900,25 @@ export function handleAssessmentPointerDown(region, point, state, practicals, dr
       return true;
     }
     
+    case 'assessment-bench-apparatus-click': {
+      const item = region.data;
+      session.benchInspection.selectedItemId = item.id;
+      session.benchInspection.feedback = item.critique;
+      if (item.isLowestAccuracy) {
+        session.benchInspection.lowestAccuracyIdentified = true;
+        if (item.upgradeChallengeId) {
+          session.limitationAnswers[item.upgradeChallengeId] = 0; // Select optimal upgrade (e.g. gas syringe)
+          session.benchInspection.upgradedApparatus = 'gas_syringe';
+        }
+        state.toast = `✓ Lowest accuracy identified: ${item.name}! Upgraded on the bench.`;
+      } else {
+        state.toast = `ℹ ${item.name}: ${item.critique}`;
+      }
+      draw();
+      return true;
+    }
+    
+    case 'assessment-bench-slot':
     case 'assessment-slot-assign': {
       const slotId = region.data;
       // Cycle through selected equipment to assign to this slot
@@ -1722,6 +1996,10 @@ export function handleAssessmentPointerDown(region, point, state, practicals, dr
     case 'assessment-select-upgrade': {
       const { limitationId, optionIndex } = region.data;
       session.limitationAnswers[limitationId] = optionIndex;
+      if (limitationId === 'lim_gas_collection' && optionIndex === 0) {
+        session.benchInspection.lowestAccuracyIdentified = true;
+        session.benchInspection.upgradedApparatus = 'gas_syringe';
+      }
       session.limitationsChecked = false;
       draw();
       return true;
