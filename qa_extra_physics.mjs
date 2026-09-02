@@ -151,6 +151,9 @@ if (!wireInitial.wire_resistance_practical.circuit_layout?.cable_lanes_separated
     !wireInitial.wire_resistance_practical.circuit_layout?.black_sliding_clamp_faces_camera ||
     !wireInitial.wire_resistance_practical.circuit_layout?.black_sliding_clamp_ferrule_faces_far_side ||
     wireInitial.wire_resistance_practical.circuit_layout?.black_series_lead_route !== 'along the far side of the ruler' ||
+    wireInitial.wire_resistance_practical.circuit_layout?.meter_display_scale !== 0.76 ||
+    !wireInitial.wire_resistance_practical.circuit_layout?.meter_displays_parallel_to_sloped_faces ||
+    wireInitial.wire_resistance_practical.circuit_layout?.meter_display_pitch_away_from_camera_deg !== 7.64 ||
     wireInitial.wire_resistance_practical.circuit_layout?.meter_housing_shape !== 'truncated square-pyramid frustum with trapezoidal faces' ||
     JSON.stringify(wireInitial.wire_resistance_practical.circuit_layout?.visible_meter_faces) !== JSON.stringify(['front', 'top', 'left']) ||
     !wireInitial.wire_resistance_practical.circuit_layout?.meter_screens_fit_inside_bezels ||

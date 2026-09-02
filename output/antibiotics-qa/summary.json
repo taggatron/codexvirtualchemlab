@@ -12,13 +12,28 @@
     "legacy_2d_apparatus": false
   },
   "initial_phase": "sterile field ready to prepare",
-  "disinfecting_phase": "disinfecting bench",
+  "disinfecting_phase": "disinfecting, air-drying and marking four sectors",
+  "plate_lifted_for_underplate_wipe": true,
+  "wipe_under_plate": true,
+  "wipe_moving_to_waste": true,
+  "used_wipe_disposed": true,
+  "plate_flip_fraction_before_marker": 1,
+  "marker_on_exposed_underside": true,
+  "disinfectant_label": "70% IMS",
   "bench_disinfected": true,
-  "inoculation_phase": "inoculating bacterial lawn",
+  "inoculation_phase": "inoculating bacterial lawn and disposing swab",
   "minimal_lid_opening": true,
+  "swab_tip": {
+    "tip_y": 0.292,
+    "agar_surface_y": 0.274,
+    "table_surface_y": 0,
+    "clearance_above_agar": 0.018,
+    "above_table": true,
+    "above_or_touching_agar": true
+  },
   "discs_placed": 4,
   "inverted": true,
-  "growing_fraction": 0.69,
+  "growing_fraction": 0.556,
   "incubation_hours": 48,
   "measuring_count": 1,
   "final_results": [
@@ -58,6 +73,8 @@
     "plate_never_reopened_after_incubation": true,
     "incubated_at_25_c_not_body_temperature": true,
     "disinfect_before_and_after": true,
+    "alcohol_disinfectant_used_only_with_flame_off": true,
+    "contaminated_swab_goes_directly_to_biohazard_waste": true,
     "microbiological_waste_pressure_sterilised_or_disinfected": true
   },
   "sidebar": {

@@ -144,9 +144,13 @@ const hookeFinal = await capture('05-hooke-final-graph');
 let specificInitial = await selectPhysicsPractical(/specific heat|heat capacity/i);
 specificInitial = await capture('06-specific-heat-initial');
 await primary(); // PREPARE BLOCK
-await advance(3100);
+await advance(1800);
 const specificAssembling = await capture('06a-specific-heat-insulation-arriving');
+await advance(600);
+const specificInsulated = await capture('06b-specific-heat-insulated-before-probes');
 await advance(800);
+const specificInserting = await capture('06c-specific-heat-probes-inserting');
+await advance(700);
 const specificPrepared = await capture('07-specific-heat-prepared');
 await primary(); // START HEATING
 await advance(4000);
@@ -210,6 +214,8 @@ const hookeMidSection = practicalSection(hookeMid, ['hookes_law_practical', 'hoo
 const hookeLoadedSection = practicalSection(hookeLoaded, ['hookes_law_practical', 'hooke_law_practical', 'hooke_practical'], 'hooke');
 const specificInitialSection = practicalSection(specificInitial, ['specific_heat_capacity_practical', 'specific_heat_practical', 'shc_practical'], 'specificheat');
 const specificAssemblingSection = practicalSection(specificAssembling, ['specific_heat_capacity_practical', 'specific_heat_practical', 'shc_practical'], 'specificheat');
+const specificInsulatedSection = practicalSection(specificInsulated, ['specific_heat_capacity_practical', 'specific_heat_practical', 'shc_practical'], 'specificheat');
+const specificInsertingSection = practicalSection(specificInserting, ['specific_heat_capacity_practical', 'specific_heat_practical', 'shc_practical'], 'specificheat');
 const specificPreparedSection = practicalSection(specificPrepared, ['specific_heat_capacity_practical', 'specific_heat_practical', 'shc_practical'], 'specificheat');
 const specificHeatingSection = practicalSection(specificHeating, ['specific_heat_capacity_practical', 'specific_heat_practical', 'shc_practical'], 'specificheat');
 const specificHeatedSection = practicalSection(specificHeated, ['specific_heat_capacity_practical', 'specific_heat_practical', 'shc_practical'], 'specificheat');
@@ -237,6 +243,8 @@ const summary = {
   specific_heat_capacity: {
     initial: specificInitialSection,
     assembling: specificAssemblingSection,
+    insulated_before_probes: specificInsulatedSection,
+    probes_inserting: specificInsertingSection,
     prepared: specificPreparedSection,
     heating: specificHeatingSection,
     heated: specificHeatedSection,
@@ -278,8 +286,13 @@ check(!!specific, 'Specific-heat render_game_to_text payload is missing.');
 check(specificInitialSection?.preparation?.block_bores_pre_drilled_before_practical && specificInitialSection?.preparation?.drilling_sparks_shown === false, 'Specific-heat setup should identify the supplied bores as pre-drilled and omit drilling sparks.');
 check(specificInitialSection?.preparation?.insulation_starts_off_camera && specificInitialSection?.instrument_layout?.all_four_displays_visible, 'Specific-heat initial organisation contract is missing off-camera insulation or four visible displays.');
 check(JSON.stringify(specificInitialSection?.instrument_layout?.left_of_block) === JSON.stringify(['12 V supply', 'ammeter']) && JSON.stringify(specificInitialSection?.instrument_layout?.right_of_block) === JSON.stringify(['joulemeter', 'digital thermometer']), 'Specific-heat instruments are not split into the requested two-left/two-right arrangement.');
+check(specificInitialSection?.instrument_layout?.spread_farther_from_block && specificInitialSection?.instrument_layout?.outer_meter_x_scene_units?.[1] === 3.15 && specificInitialSection?.instrument_layout?.inner_meter_x_scene_units?.[1] === 2.02, 'Specific-heat meters were not moved farther outward from the block.');
+check(specificInitialSection?.electrical_circuit?.continuous_curved_leads, 'Specific-heat electrical leads are not reported as continuous curved cables.');
 check(specificAssemblingSection?.stage === 1 && specificAssemblingSection?.preparation?.insulation_panels_fly_in_individually, 'Specific-heat mid-assembly state did not report the individual insulation fly-in.');
-check(specificPreparedSection?.stage === 2 && specificPreparedSection?.preparation?.thermal_paste_applied && specificPreparedSection?.preparation?.insulation_closed, 'PREPARE BLOCK did not finish with paste, probes and insulation in place.');
+check(specificAssemblingSection?.preparation?.heater_fully_inserted === false && specificAssemblingSection?.preparation?.probe_fully_inserted === false, 'A probe moved before the insulation fly-in completed.');
+check(specificInsulatedSection?.stage === 1 && specificInsulatedSection?.preparation?.insulation_closed && !specificInsulatedSection?.preparation?.heater_fully_inserted && !specificInsulatedSection?.preparation?.probe_fully_inserted, 'Specific-heat insulation was not fully closed before either probe was inserted.');
+check(specificInsertingSection?.preparation?.insulation_closed && specificInsertingSection?.preparation?.heater_fully_inserted && !specificInsertingSection?.preparation?.probe_fully_inserted, 'Specific-heat staged probe insertion did not follow the completed insulation step.');
+check(specificPreparedSection?.stage === 2 && specificPreparedSection?.preparation?.thermal_paste_applied && specificPreparedSection?.preparation?.insulation_closed, 'PREPARE BLOCK did not finish with paste, insulation and probes in place.');
 check(specificPreparedSection?.preparation?.bored_insulating_lid_closed && specificPreparedSection?.electrical_circuit?.complete, 'Specific-heat lid or complete electrical circuit contract is missing.');
 check(specificHeatingSection?.stage === 3 && specificHeatingSection.energy_j > 0 && specificHeatingSection.energy_j < 18000, 'Specific-heat mid-stage capture did not show live heating and an intermediate energy reading.');
 check(specificHeatedSection?.stage === 4, `Specific-heat run did not finish ready to calculate (stage=${specificHeatedSection?.stage}).`);

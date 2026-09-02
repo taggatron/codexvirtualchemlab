@@ -24,16 +24,25 @@ let state = await snapshot();
 const initial = state.specific_heat_capacity_practical;
 if (!initial?.preparation?.insulation_starts_off_camera || !initial?.instrument_layout?.all_four_displays_visible) throw new Error('Initial specific-heat organisation contract is missing.');
 if (!initial?.preparation?.block_bores_pre_drilled_before_practical || initial?.preparation?.drilling_sparks_shown !== false) throw new Error('Specific-heat bores should be supplied pre-drilled without a classroom drilling/sparks step.');
+if (initial?.instrument_layout?.outer_meter_x_scene_units?.[1] !== 3.15 || initial?.instrument_layout?.inner_meter_x_scene_units?.[1] !== 2.02 || !initial?.electrical_circuit?.continuous_curved_leads) throw new Error('Wider meter spacing or smooth cable contract is missing.');
 await click(550, 657); // MATERIAL: ALUMINIUM -> COPPER
 state = await snapshot();
 if (state.specific_heat_capacity_practical?.material !== 'copper') throw new Error('Copper material selection failed.');
 await page.screenshot({ path: `${out}/02-copper-initial.png`, fullPage: true });
 await click(376, 657); // PREPARE BLOCK
-await page.evaluate(() => window.advanceTime(3100));
+await page.evaluate(() => window.advanceTime(1800));
 state = await snapshot();
 if (state.specific_heat_capacity_practical?.stage !== 1 || !state.specific_heat_capacity_practical?.preparation?.insulation_panels_fly_in_individually) throw new Error('Insulation fly-in did not remain active at the mid-assembly checkpoint.');
 await page.screenshot({ path: `${out}/02a-copper-insulation-arriving.png`, fullPage: true });
+await page.evaluate(() => window.advanceTime(600));
+state = await snapshot();
+if (!state.specific_heat_capacity_practical?.preparation?.insulation_closed || state.specific_heat_capacity_practical?.preparation?.heater_fully_inserted || state.specific_heat_capacity_practical?.preparation?.probe_fully_inserted) throw new Error('Insulation was not completed before both probes began moving.');
+await page.screenshot({ path: `${out}/02b-copper-insulated-before-probes.png`, fullPage: true });
 await page.evaluate(() => window.advanceTime(800));
+state = await snapshot();
+if (!state.specific_heat_capacity_practical?.preparation?.heater_fully_inserted || state.specific_heat_capacity_practical?.preparation?.probe_fully_inserted) throw new Error('Sequential probe insertion checkpoint is incorrect.');
+await page.screenshot({ path: `${out}/02c-copper-probes-inserting.png`, fullPage: true });
+await page.evaluate(() => window.advanceTime(700));
 await click(376, 657); // START HEATING
 await page.evaluate(() => window.advanceTime(8100));
 await page.waitForTimeout(250);

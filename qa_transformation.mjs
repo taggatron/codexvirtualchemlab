@@ -41,7 +41,10 @@ try {
     const snapshot = JSON.parse(window.render_game_to_text());
     return snapshot.id === 'transformation' && snapshot.renderer?.enabled;
   });
-  const initial = await capture('01-sterile-setup', snapshot => ({ renderer: snapshot.renderer, stage: snapshot.bacterial_transformation_practical?.stage, controls: snapshot.controls, micropipette: snapshot.bacterial_transformation_practical?.micropipette }));
+  const initial = await capture('01-sterile-setup', snapshot => ({ renderer: snapshot.renderer, stage: snapshot.bacterial_transformation_practical?.stage, controls: snapshot.controls, micropipette: snapshot.bacterial_transformation_practical?.micropipette, tip_management: snapshot.bacterial_transformation_practical?.tip_management }));
+  assert(initial.bacterial_transformation_practical.tip_management.sterile_tip_rack_label_fully_visible && initial.bacterial_transformation_practical.tip_management.used_tip_label_conforms_to_cup_curvature, 'Tip-rack/waste-label layout contract is missing.');
+  assert(initial.bacterial_transformation_practical.tip_management.resting_micropipette_tip_direction === 'toward the tiled back wall', 'Resting micropipette is not documented as pointing toward the back wall.');
+  assert(initial.bacterial_transformation_practical.tip_management.waste_cup_position === 'to the left of the ice bath', 'Used-tip waste cup is not positioned to the left of the ice bath.');
 
   await clickPrimary();
   await advance(900);
@@ -54,7 +57,10 @@ try {
   const tipPickup = await capture('03a-fresh-tip-pickup', snapshot => ({ stage: snapshot.bacterial_transformation_practical?.stage, animation: snapshot.bacterial_transformation_practical?.animations, micropipette: snapshot.bacterial_transformation_practical?.micropipette }));
   await advance(700);
   const aspirationMid = await capture('03b-first-stop-aspiration', snapshot => ({ stage: snapshot.bacterial_transformation_practical?.stage, animation: snapshot.bacterial_transformation_practical?.animations, micropipette: snapshot.bacterial_transformation_practical?.micropipette }));
-  await advance(5300);
+  await advance(1200);
+  const firstTipEjection = await capture('03b2-first-tip-ejection-left-of-ice-bath', snapshot => ({ stage: snapshot.bacterial_transformation_practical?.stage, animation: snapshot.bacterial_transformation_practical?.animations, micropipette: snapshot.bacterial_transformation_practical?.micropipette, tip_management: snapshot.bacterial_transformation_practical?.tip_management }));
+  assert(firstTipEjection.bacterial_transformation_practical.animations.tip_ejection_to_waste, 'First used-tip ejection did not become active.');
+  await advance(4100);
   const plasmidMid = await capture('03c-plasmid-to-plus-dna', snapshot => ({ stage: snapshot.bacterial_transformation_practical?.stage, animation: snapshot.bacterial_transformation_practical?.animations, controls: snapshot.bacterial_transformation_practical?.controls, micropipette: snapshot.bacterial_transformation_practical?.micropipette }));
   await advance(1550);
   assert((await state()).bacterial_transformation_practical.stage === 4, 'Cell/plasmid addition did not finish.');

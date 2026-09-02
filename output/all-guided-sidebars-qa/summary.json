@@ -169,7 +169,47 @@
     },
     {
       "subject": "biology",
+      "practical": "Bacterial transformation",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Anaerobic respiration in yeast",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Antibiotic disc efficacy",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
       "practical": "Osmosis in potato tissue",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Agar cube diffusion",
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
@@ -210,36 +250,6 @@
     {
       "subject": "biology",
       "practical": "Mark-release-recapture",
-      "overflow": 0,
-      "unused": 0,
-      "all_visible": true,
-      "control_labels_fit": true,
-      "wrapped_controls": [],
-      "drag_enabled": false
-    },
-    {
-      "subject": "biology",
-      "practical": "Rocky-shore belt transect",
-      "overflow": 0,
-      "unused": 0,
-      "all_visible": true,
-      "control_labels_fit": true,
-      "wrapped_controls": [],
-      "drag_enabled": false
-    },
-    {
-      "subject": "biology",
-      "practical": "Rocky-shore belt transect",
-      "overflow": 0,
-      "unused": 0,
-      "all_visible": true,
-      "control_labels_fit": true,
-      "wrapped_controls": [],
-      "drag_enabled": false
-    },
-    {
-      "subject": "biology",
-      "practical": "Rocky-shore belt transect",
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
@@ -610,7 +620,47 @@
     },
     {
       "subject": "biology",
+      "practical": "Bacterial transformation",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Anaerobic respiration in yeast",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Antibiotic disc efficacy",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
       "practical": "Osmosis in potato tissue",
+      "overflow": 0,
+      "unused": 0,
+      "all_visible": true,
+      "control_labels_fit": true,
+      "wrapped_controls": [],
+      "drag_enabled": false
+    },
+    {
+      "subject": "biology",
+      "practical": "Agar cube diffusion",
       "overflow": 0,
       "unused": 0,
       "all_visible": true,
@@ -651,36 +701,6 @@
     {
       "subject": "biology",
       "practical": "Mark-release-recapture",
-      "overflow": 0,
-      "unused": 0,
-      "all_visible": true,
-      "control_labels_fit": true,
-      "wrapped_controls": [],
-      "drag_enabled": false
-    },
-    {
-      "subject": "biology",
-      "practical": "Rocky-shore belt transect",
-      "overflow": 0,
-      "unused": 0,
-      "all_visible": true,
-      "control_labels_fit": true,
-      "wrapped_controls": [],
-      "drag_enabled": false
-    },
-    {
-      "subject": "biology",
-      "practical": "Rocky-shore belt transect",
-      "overflow": 0,
-      "unused": 0,
-      "all_visible": true,
-      "control_labels_fit": true,
-      "wrapped_controls": [],
-      "drag_enabled": false
-    },
-    {
-      "subject": "biology",
-      "practical": "Rocky-shore belt transect",
       "overflow": 0,
       "unused": 0,
       "all_visible": true,

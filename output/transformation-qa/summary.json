@@ -26,13 +26,38 @@
         "PLATES",
         "METHOD",
         "F fullscreen"
-      ]
+      ],
+      "micropipette": {
+        "model": "adjustable P20",
+        "active_operation": "resting horizontally in its stand",
+        "visual_details": [
+          "contoured handle and rubber grip",
+          "digital volume window",
+          "metal nozzle and ejector sleeve",
+          "separate plunger and tip-ejector controls",
+          "detachable transparent tip with visible liquid column"
+        ],
+        "fresh_tip_for_each_transfer": true,
+        "plunger_stops": 2,
+        "used_tips_ejected_to_waste": true
+      },
+      "tip_management": {
+        "sterile_tip_rack_label_fully_visible": true,
+        "sterile_tip_rack_raised": true,
+        "used_tip_label_conforms_to_cup_curvature": true,
+        "resting_micropipette_tip_direction": "toward the tiled back wall",
+        "waste_cup_position": "to the left of the ice bath"
+      }
     },
     "02-labels-appearing": {
       "stage": 1,
       "animation": {
         "tube_and_plate_labelling": true,
         "sequential_sterile_pipetting": false,
+        "fresh_tip_pickup": false,
+        "two_stop_plunger": false,
+        "liquid_visible_in_tip": false,
+        "tip_ejection_to_waste": false,
         "tubes_move_ice_to_heat_block_and_back": false,
         "plasmid_enters_plus_dna_cells_only": false,
         "agar_spreading": false,
@@ -41,11 +66,115 @@
         "gfp_glow_under_blue_light": false
       }
     },
-    "03-plasmid-to-plus-dna": {
+    "03a-fresh-tip-pickup": {
       "stage": 3,
       "animation": {
         "tube_and_plate_labelling": false,
         "sequential_sterile_pipetting": true,
+        "fresh_tip_pickup": true,
+        "two_stop_plunger": false,
+        "liquid_visible_in_tip": false,
+        "tip_ejection_to_waste": false,
+        "tubes_move_ice_to_heat_block_and_back": false,
+        "plasmid_enters_plus_dna_cells_only": true,
+        "agar_spreading": false,
+        "sealed_plates_move_through_incubator": false,
+        "colonies_grow_progressively": false,
+        "gfp_glow_under_blue_light": false
+      },
+      "micropipette": {
+        "model": "adjustable P20",
+        "active_operation": "fit fresh tip for +DNA cells",
+        "visual_details": [
+          "contoured handle and rubber grip",
+          "digital volume window",
+          "metal nozzle and ejector sleeve",
+          "separate plunger and tip-ejector controls",
+          "detachable transparent tip with visible liquid column"
+        ],
+        "fresh_tip_for_each_transfer": true,
+        "plunger_stops": 2,
+        "used_tips_ejected_to_waste": true
+      }
+    },
+    "03b-first-stop-aspiration": {
+      "stage": 3,
+      "animation": {
+        "tube_and_plate_labelling": false,
+        "sequential_sterile_pipetting": true,
+        "fresh_tip_pickup": false,
+        "two_stop_plunger": true,
+        "liquid_visible_in_tip": true,
+        "tip_ejection_to_waste": false,
+        "tubes_move_ice_to_heat_block_and_back": false,
+        "plasmid_enters_plus_dna_cells_only": true,
+        "agar_spreading": false,
+        "sealed_plates_move_through_incubator": false,
+        "colonies_grow_progressively": false,
+        "gfp_glow_under_blue_light": false
+      },
+      "micropipette": {
+        "model": "adjustable P20",
+        "active_operation": "press first stop and aspirate competent cells",
+        "visual_details": [
+          "contoured handle and rubber grip",
+          "digital volume window",
+          "metal nozzle and ejector sleeve",
+          "separate plunger and tip-ejector controls",
+          "detachable transparent tip with visible liquid column"
+        ],
+        "fresh_tip_for_each_transfer": true,
+        "plunger_stops": 2,
+        "used_tips_ejected_to_waste": true
+      }
+    },
+    "03b2-first-tip-ejection-left-of-ice-bath": {
+      "stage": 3,
+      "animation": {
+        "tube_and_plate_labelling": false,
+        "sequential_sterile_pipetting": true,
+        "fresh_tip_pickup": false,
+        "two_stop_plunger": false,
+        "liquid_visible_in_tip": false,
+        "tip_ejection_to_waste": true,
+        "tubes_move_ice_to_heat_block_and_back": false,
+        "plasmid_enters_plus_dna_cells_only": true,
+        "agar_spreading": false,
+        "sealed_plates_move_through_incubator": false,
+        "colonies_grow_progressively": false,
+        "gfp_glow_under_blue_light": false
+      },
+      "micropipette": {
+        "model": "adjustable P20",
+        "active_operation": "eject used tip to waste",
+        "visual_details": [
+          "contoured handle and rubber grip",
+          "digital volume window",
+          "metal nozzle and ejector sleeve",
+          "separate plunger and tip-ejector controls",
+          "detachable transparent tip with visible liquid column"
+        ],
+        "fresh_tip_for_each_transfer": true,
+        "plunger_stops": 2,
+        "used_tips_ejected_to_waste": true
+      },
+      "tip_management": {
+        "sterile_tip_rack_label_fully_visible": true,
+        "sterile_tip_rack_raised": true,
+        "used_tip_label_conforms_to_cup_curvature": true,
+        "resting_micropipette_tip_direction": "toward the tiled back wall",
+        "waste_cup_position": "to the left of the ice bath"
+      }
+    },
+    "03c-plasmid-to-plus-dna": {
+      "stage": 3,
+      "animation": {
+        "tube_and_plate_labelling": false,
+        "sequential_sterile_pipetting": true,
+        "fresh_tip_pickup": false,
+        "two_stop_plunger": true,
+        "liquid_visible_in_tip": true,
+        "tip_ejection_to_waste": false,
         "tubes_move_ice_to_heat_block_and_back": false,
         "plasmid_enters_plus_dna_cells_only": true,
         "agar_spreading": false,
@@ -58,6 +187,20 @@
         "minus_dna_receives_plasmid": false,
         "both_receive_equal_competent_cells": true,
         "processed_together": true
+      },
+      "micropipette": {
+        "model": "adjustable P20",
+        "active_operation": "dispense plasmid into +DNA through the second stop",
+        "visual_details": [
+          "contoured handle and rubber grip",
+          "digital volume window",
+          "metal nozzle and ejector sleeve",
+          "separate plunger and tip-ejector controls",
+          "detachable transparent tip with visible liquid column"
+        ],
+        "fresh_tip_for_each_transfer": true,
+        "plunger_stops": 2,
+        "used_tips_ejected_to_waste": true
       }
     },
     "04-paired-heat-shock": {
@@ -66,6 +209,10 @@
       "animation": {
         "tube_and_plate_labelling": false,
         "sequential_sterile_pipetting": false,
+        "fresh_tip_pickup": false,
+        "two_stop_plunger": false,
+        "liquid_visible_in_tip": false,
+        "tip_ejection_to_waste": false,
         "tubes_move_ice_to_heat_block_and_back": true,
         "plasmid_enters_plus_dna_cells_only": true,
         "agar_spreading": false,
@@ -82,11 +229,46 @@
         "complete": false
       }
     },
+    "06a-plate-second-stop-dispense": {
+      "stage": 9,
+      "animation": {
+        "tube_and_plate_labelling": false,
+        "sequential_sterile_pipetting": true,
+        "fresh_tip_pickup": false,
+        "two_stop_plunger": true,
+        "liquid_visible_in_tip": true,
+        "tip_ejection_to_waste": false,
+        "tubes_move_ice_to_heat_block_and_back": false,
+        "plasmid_enters_plus_dna_cells_only": true,
+        "agar_spreading": true,
+        "sealed_plates_move_through_incubator": false,
+        "colonies_grow_progressively": false,
+        "gfp_glow_under_blue_light": false
+      },
+      "micropipette": {
+        "model": "adjustable P20",
+        "active_operation": "dispense onto +DNA LB/amp/ara through the second stop",
+        "visual_details": [
+          "contoured handle and rubber grip",
+          "digital volume window",
+          "metal nozzle and ejector sleeve",
+          "separate plunger and tip-ejector controls",
+          "detachable transparent tip with visible liquid column"
+        ],
+        "fresh_tip_for_each_transfer": true,
+        "plunger_stops": 2,
+        "used_tips_ejected_to_waste": true
+      }
+    },
     "06-four-plate-spreading": {
       "stage": 9,
       "animation": {
         "tube_and_plate_labelling": false,
         "sequential_sterile_pipetting": true,
+        "fresh_tip_pickup": false,
+        "two_stop_plunger": false,
+        "liquid_visible_in_tip": false,
+        "tip_ejection_to_waste": false,
         "tubes_move_ice_to_heat_block_and_back": false,
         "plasmid_enters_plus_dna_cells_only": true,
         "agar_spreading": true,
@@ -101,6 +283,10 @@
       "animation": {
         "tube_and_plate_labelling": false,
         "sequential_sterile_pipetting": false,
+        "fresh_tip_pickup": false,
+        "two_stop_plunger": false,
+        "liquid_visible_in_tip": false,
+        "tip_ejection_to_waste": false,
         "tubes_move_ice_to_heat_block_and_back": false,
         "plasmid_enters_plus_dna_cells_only": true,
         "agar_spreading": false,

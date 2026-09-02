@@ -1,0 +1,56 @@
+{
+  "errors": [],
+  "renderer": {
+    "enabled": true,
+    "renderer": "WebGL / Three.js",
+    "performance_profile": "high",
+    "objects": 1,
+    "context_lost": false,
+    "scene_compiling": false,
+    "scene_warmup_frames": 0,
+    "canvas_visible": true,
+    "legacy_2d_apparatus": false
+  },
+  "initial_stage": 0,
+  "measuring_stage": 1,
+  "measured_stage": 2,
+  "lowering_stage": 3,
+  "submerged_stage": 4,
+  "diffusion_stage": 5,
+  "diffusion_elapsed_min": 5,
+  "soaked_stage": 6,
+  "blotting_stage": 7,
+  "ready_to_cut_stage": 8,
+  "cutting_stage": 9,
+  "cores_stage": 10,
+  "results": [
+    {
+      "cube_side_cm": 1,
+      "surface_area_to_volume_ratio": 6,
+      "pink_core_side_cm": 0.4,
+      "diffusion_depth_cm": 0.3,
+      "percentage_diffused": 93.6
+    },
+    {
+      "cube_side_cm": 2,
+      "surface_area_to_volume_ratio": 3,
+      "pink_core_side_cm": 1.4,
+      "diffusion_depth_cm": 0.3,
+      "percentage_diffused": 65.7
+    },
+    {
+      "cube_side_cm": 3,
+      "surface_area_to_volume_ratio": 2,
+      "pink_core_side_cm": 2.4,
+      "diffusion_depth_cm": 0.3,
+      "percentage_diffused": 48.8
+    }
+  ],
+  "graph_axes": {
+    "x": "agar cube side length / cm",
+    "y": "volume reached by diffusion / %",
+    "chart_type": "line graph"
+  },
+  "graph_modal_open": true,
+  "complete": true
+}

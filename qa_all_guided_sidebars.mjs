@@ -12,7 +12,7 @@ const errors = [];
 const baseUrl = process.env.LAB_URL || 'http://127.0.0.1:4173';
 const subjects = [
   { id: 'chemistry', tabX: 206, count: 15 },
-  { id: 'biology', tabX: 320, count: 15 },
+  { id: 'biology', tabX: 320, count: 16 },
   { id: 'physics', tabX: 434, count: 14 }
 ];
 
@@ -68,7 +68,7 @@ const desktop = await scan({ width: 1440, height: 900 }, false);
 const compact = await scan({ width: 1206, height: 584 }, true);
 const summary = { desktop, compact, errors };
 fs.writeFileSync(`${out}/summary.json`, JSON.stringify(summary, null, 2));
-if (desktop.length !== 44 || compact.length !== 44) throw new Error('Not every practical was checked.');
+if (desktop.length !== 45 || compact.length !== 45) throw new Error('Not every practical was checked.');
 if (errors.length) throw new Error(errors.join('\n'));
 console.log(JSON.stringify({ desktop_practicals: desktop.length, compact_practicals: compact.length, errors }, null, 2));
 await browser.close();
