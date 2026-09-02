@@ -1,8 +1,5 @@
 import { chromium } from 'playwright';
-import http from 'node:http';
 import fs from 'node:fs';
-import { readFile, stat } from 'node:fs/promises';
-import { extname, resolve, sep } from 'node:path';
 
 const out = 'output/assessment-qa';
 fs.mkdirSync(out, { recursive: true });
@@ -19,25 +16,43 @@ page.on('pageerror', err => errors.push(`page: ${err.message}`));
 
 try {
   await page.goto(`http://127.0.0.1:4173/?qa=${Date.now()}`, { waitUntil: 'networkidle' });
-  await page.waitForFunction(() => typeof window.render_game_to_text === 'function');
+  await page.waitForFunction(() => typeof window.render_game_to_text === 'function' && window.__lab);
 
   const getState = () => page.evaluate(() => JSON.parse(window.render_game_to_text()));
-  const click = async (x, y, wait = 120) => {
-    await page.mouse.click(x, y);
-    await page.waitForTimeout(wait);
+  const clickRegion = async (id, dataMatch = null) => {
+    const pt = await page.evaluate(({ id, dataMatch }) => {
+      const regions = window.__lab.getRegions();
+      const reg = regions.find(r => {
+        if (r.id !== id) return false;
+        if (dataMatch === null) return true;
+        if (typeof dataMatch === 'object') {
+          return Object.keys(dataMatch).every(k => r.data?.[k] === dataMatch[k]);
+        }
+        return r.data === dataMatch;
+      });
+      if (!reg) return null;
+      const canvas = document.getElementById('lab');
+      const rect = canvas.getBoundingClientRect();
+      const scale = window.__lab.getScale();
+      return {
+        x: rect.left + (reg.x + reg.w / 2) * scale,
+        y: rect.top + (reg.y + reg.h / 2) * scale
+      };
+    }, { id, dataMatch });
+
+    if (!pt) throw new Error(`Region ${id} (data: ${JSON.stringify(dataMatch)}) not found`);
+    await page.mouse.click(pt.x, pt.y);
+    await page.waitForTimeout(140);
   };
-  const advance = ms => page.evaluate(duration => window.advanceTime(duration), ms);
 
   // 1. Initial State Check
   const s0 = await getState();
-  console.log('1. Initial lab loaded:', s0.practical, 'assessment_mode:', s0.assessment_mode?.active);
+  console.log('1. Initial lab loaded:', s0.practical, '| assessment_mode:', s0.assessment_mode?.active);
   if (s0.assessment_mode?.active !== false) throw new Error('Assessment mode should start inactive');
 
-  // 2. Select Biology -> Anaerobic Respiration practical
-  // Click Biology tab (x approx 320, y approx 32)
-  await click(320, 32);
-  // Find respiration in sidebar (or switch practical directly)
+  // 2. Select Practical: Anaerobic respiration in yeast
   await page.evaluate(() => {
+    const { state, practicals, draw } = window.__lab;
     const pIdx = practicals.findIndex(p => p.id === 'respiration');
     if (pIdx >= 0) {
       state.selected = pIdx;
@@ -49,114 +64,105 @@ try {
   const s1 = await getState();
   console.log('2. Selected practical:', s1.practical);
 
-  // 3. Enter Assessment Mode via header toggle
-  // Click ASSESSMENT MODE in top header (W=1280, assessX = 1280 - 104 - 146 - 20 = 1010, y = 32)
-  await click(1080, 32);
-  await page.waitForTimeout(150);
+  // 3. Enter Assessment Mode via actual mouse click on header button
+  await clickRegion('toggle-assessment-mode');
   const s2 = await getState();
-  console.log('3. Entered assessment mode:', s2.assessment_mode);
+  console.log('3. Clicked header button -> Assessment mode active:', s2.assessment_mode?.active, 'phase:', s2.assessment_mode?.phase);
   if (!s2.assessment_mode?.active) throw new Error('Assessment mode failed to activate');
   await page.screenshot({ path: `${out}/01-apparatus-initial.png`, fullPage: true });
 
-  // 4. Activity 1: Apparatus Selection & Bench Arrangement
-  // Select items from the library on the left
+  // 4. Activity 1: Apparatus Selection & Bench Assignment via mouse clicks
+  // Select required apparatus from the equipment library:
+  const requiredEquip = ['conical_flask', 'bung_delivery_tube', 'gas_syringe', 'water_bath', 'stopwatch'];
+  for (const eqId of requiredEquip) {
+    await clickRegion('assessment-toggle-equipment', eqId);
+  }
+
+  // Assign items to bench slots
   await page.evaluate(() => {
+    const { state, draw } = window.__lab;
     const session = state.assessmentSession;
-    const challenge = session.data.apparatusChallenge;
-    // Select required items: conical_flask, bung_delivery_tube, gas_syringe, water_bath, stopwatch
-    challenge.slots.forEach(slot => {
-      session.selectedEquipment.add(slot.requiredItem);
+    session.data.apparatusChallenge.slots.forEach(slot => {
       session.slotAssignments[slot.id] = slot.requiredItem;
     });
-    // Trigger check
-    assessment.checkApparatusPhase(session);
     draw();
   });
-  await page.waitForTimeout(100);
+
+  // Click Check Apparatus Setup button
+  await clickRegion('assessment-check-apparatus');
   const s3 = await getState();
-  console.log('4. Apparatus checked, score:', s3.assessment_mode?.total_score, 'apparatus_checked:', s3.assessment_mode?.apparatus_checked);
-  if (s3.assessment_mode?.total_score <= 0) throw new Error('Apparatus score should be > 0');
+  console.log('4. Clicked CHECK APPARATUS SETUP -> Score:', s3.assessment_mode?.total_score, 'Evaluated:', s3.assessment_mode?.apparatus_checked);
+  if (s3.assessment_mode?.total_score !== 7) throw new Error(`Expected apparatus score 7, got ${s3.assessment_mode?.total_score}`);
   await page.screenshot({ path: `${out}/02-apparatus-evaluated.png`, fullPage: true });
 
-  // 5. Activity 2: Method Step Sequencing & Scientific Reasoning
-  // Move to method phase
-  await page.evaluate(() => {
-    state.assessmentSession.currentPhase = 'method';
-    draw();
-  });
-  await page.waitForTimeout(100);
+  // 5. Activity 2: Navigate to Method Steps via Next button
+  await clickRegion('assessment-next-phase');
+  const s4a = await getState();
+  console.log('5. Clicked NEXT -> Current phase:', s4a.assessment_mode?.phase);
+  if (s4a.assessment_mode?.phase !== 'method') throw new Error('Expected phase: method');
   await page.screenshot({ path: `${out}/03-method-phase.png`, fullPage: true });
 
-  // Reorder steps to correct sequence and answer reasoning questions
+  // Answer reasoning questions via mouse clicks
+  // Q1: liquid paraffin -> option A (index 0: prevent oxygen)
+  await clickRegion('assessment-answer-option', { questionId: 'q_layer', optionIndex: 0 });
+  // Q2: water bath pre-equilibration -> option A (index 0: reach target temp)
+  await clickRegion('assessment-answer-option', { questionId: 'q_equilibrate', optionIndex: 0 });
+  // Q3: 60 °C cessation -> option A (index 0: enzymes denature)
+  await clickRegion('assessment-answer-option', { questionId: 'q_high_temp', optionIndex: 0 });
+
+  // Also reorder steps so they are in correct order
   await page.evaluate(() => {
-    const session = state.assessmentSession;
-    const challenge = session.data.methodChallenge;
-    // Set correct step order
-    session.orderedStepIds = [...challenge.correctOrder];
-    // Answer questions correctly
-    challenge.reasoningQuestions.forEach(q => {
-      const correctIdx = q.options.findIndex(o => o.correct);
-      session.questionAnswers[q.id] = correctIdx;
-    });
-    assessment.checkMethodPhase(session);
+    const { state, draw } = window.__lab;
+    state.assessmentSession.orderedStepIds = [...state.assessmentSession.data.methodChallenge.correctOrder];
     draw();
   });
-  await page.waitForTimeout(100);
-  const s4 = await getState();
-  console.log('5. Method checked, total score:', s4.assessment_mode?.total_score);
+  await clickRegion('assessment-check-order');
+  await clickRegion('assessment-check-questions');
+  const s4b = await getState();
+  console.log('5. Clicked CHECK ORDER & CHECK QUESTIONS -> Score:', s4b.assessment_mode?.total_score);
+  if (s4b.assessment_mode?.total_score !== 18) throw new Error(`Expected score 18 after method phase, got ${s4b.assessment_mode?.total_score}`);
   await page.screenshot({ path: `${out}/04-method-evaluated.png`, fullPage: true });
 
-  // 6. Activity 3: Addressing Procedural Limitations & Selecting Upgrades
-  // Move to limitations phase
-  await page.evaluate(() => {
-    state.assessmentSession.currentPhase = 'limitations';
-    draw();
-  });
-  await page.waitForTimeout(100);
+  // 6. Activity 3: Navigate to Limitations & Upgrades
+  await clickRegion('assessment-next-phase');
+  const s5a = await getState();
+  console.log('6. Clicked NEXT -> Current phase:', s5a.assessment_mode?.phase);
+  if (s5a.assessment_mode?.phase !== 'limitations') throw new Error('Expected phase: limitations');
   await page.screenshot({ path: `${out}/05-limitations-phase.png`, fullPage: true });
 
-  // Select optimal apparatus upgrades (e.g. gas syringe vs balloon, wide temperature range 10-60 C, repeats)
-  await page.evaluate(() => {
-    const session = state.assessmentSession;
-    const challenges = session.data.limitationsChallenge;
-    challenges.forEach(lim => {
-      const correctIdx = lim.options.findIndex(o => o.correct);
-      session.limitationAnswers[lim.id] = correctIdx;
-    });
-    assessment.checkLimitationsPhase(session);
-    draw();
-  });
-  await page.waitForTimeout(100);
-  const s5 = await getState();
-  console.log('6. Limitations checked, total score:', s5.assessment_mode?.total_score);
+  // Click experimental upgrades via mouse clicks:
+  // Limitation 1 (Gas collection): 100 cm³ Gas Syringe (index 0)
+  await clickRegion('assessment-select-upgrade', { limitationId: 'lim_gas_collection', optionIndex: 0 });
+  // Limitation 2 (Temperature range): 10–60 °C range (index 0)
+  await clickRegion('assessment-select-upgrade', { limitationId: 'lim_temperature_range', optionIndex: 0 });
+  // Limitation 3 (Reliability): 3 repeat trials (index 0)
+  await clickRegion('assessment-select-upgrade', { limitationId: 'lim_repeats', optionIndex: 0 });
+
+  // Click Check Upgrade Choices button
+  await clickRegion('assessment-check-limitations');
+  const s5b = await getState();
+  console.log('6. Clicked CHECK UPGRADES -> Score:', s5b.assessment_mode?.total_score);
+  if (s5b.assessment_mode?.total_score !== 27) throw new Error(`Expected score 27 after limitations, got ${s5b.assessment_mode?.total_score}`);
   await page.screenshot({ path: `${out}/06-limitations-evaluated.png`, fullPage: true });
 
-  // 7. Activity 4: Final Summary & Estimated GCSE Grade Report
-  await page.evaluate(() => {
-    state.assessmentSession.currentPhase = 'summary';
-    draw();
-  });
-  await page.waitForTimeout(100);
+  // 7. Activity 4: Navigate to Final GCSE Score & Examiner Report
+  await clickRegion('assessment-next-phase');
   const s6 = await getState();
-  console.log('7. Final Summary - Score:', s6.assessment_mode?.total_score, '/', s6.assessment_mode?.max_score, 'Grade:', s6.assessment_mode?.grade);
-  if (!s6.assessment_mode?.grade) throw new Error('Expected GCSE grade to be calculated');
+  console.log('7. Final GCSE Summary - Score:', s6.assessment_mode?.total_score, '/', s6.assessment_mode?.max_score, '| Grade:', s6.assessment_mode?.grade);
+  if (s6.assessment_mode?.grade !== 'Grade 9') throw new Error(`Expected Grade 9, got ${s6.assessment_mode?.grade}`);
   await page.screenshot({ path: `${out}/07-final-gcse-summary.png`, fullPage: true });
 
-  // 8. Exit back to lab simulation
-  await page.evaluate(() => {
-    state.assessmentMode = false;
-    draw();
-  });
-  await page.waitForTimeout(100);
+  // 8. Exit Assessment Mode back to Lab Simulation via Return button
+  await clickRegion('assessment-exit');
   const s7 = await getState();
-  console.log('8. Exited back to Lab Simulation, assessment_mode:', s7.assessment_mode?.active);
+  console.log('8. Clicked RETURN TO SIMULATION LAB -> assessment_mode:', s7.assessment_mode?.active);
   if (s7.assessment_mode?.active !== false) throw new Error('Failed to exit assessment mode');
   await page.screenshot({ path: `${out}/08-lab-resumed.png`, fullPage: true });
 
-  console.log('All assessment mode tests completed successfully!');
-  console.log('Errors logged:', errors.length);
+  console.log('--- ALL ASSESMENT INTERACTIONS PASSED CLEANLY! ---');
+  console.log('Console / page errors logged:', errors.length);
   if (errors.length > 0) {
-    console.error('Console / page errors:', errors);
+    console.error(errors);
     process.exit(1);
   }
 } finally {

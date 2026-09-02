@@ -5427,6 +5427,7 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 window.advanceTime = ms => { for (let t = 0; t < ms; t += 16.67)update(1 / 60, true); draw() };
+window.__lab = { state, practicals, assessment, draw, getRegions: () => regions, getScale: () => UI_SCALE };
 window.render_game_to_text = () => {
   const p = practicals[state.selected], id = p.id, free = id === 'free', chrom = id === 'chrom', spec = free || ['mass', 'displacement', 'starchleaf', 'quadrats', 'shoretransect', 'ripple', 'convection', 'conduction', 'thermal', 'fieldlines'].includes(id) ? null : currentGraphSpec(), freeBurnerLit = state.workspace.some(it => it.type === 'bunsen' && it.lit), snapTargets = free ? state.workspace.filter(it => it.type === 'tripod').map(it => { const point = tripodGauzeScreenPoint(it); return { uid: it.uid, x: Math.round(point?.x || it.x), y: Math.round(point?.y || it.y) } }) : [];
   const massLidTarget = id === 'mass' && state.massStage === 2 && state.massLidOn && state.layout?.lid ? { x: Math.round(state.layout.lid.x), y: Math.round(state.layout.lid.y) } : null;
