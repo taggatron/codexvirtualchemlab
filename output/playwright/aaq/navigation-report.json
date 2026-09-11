@@ -1,0 +1,15 @@
+{
+  "practicals": [],
+  "checks": [
+    "Native course selector has no header overlap, and hides/returns for GCSE assessment.",
+    "Actual GCSE canvas subject, practical, assessment and exit controls respond across course switches.",
+    "Colorimetry requires bracketing standards and correctly interpolates 2.70 g dm⁻³."
+  ],
+  "screenshots": [
+    "output/playwright/aaq/03-gcse-default-dropdown.png",
+    "output/playwright/aaq/04-colorimetry-unknown.png",
+    "output/playwright/aaq/05-gcse-assessment-header.png",
+    "output/playwright/aaq/06-gcse-restored-dropdown.png"
+  ],
+  "errors": []
+}

@@ -1,0 +1,66 @@
+{
+  "thermal": {
+    "stage": 4,
+    "phase": "live camera display fills the lab view",
+    "timer_s": 0,
+    "leslie_cube": {
+      "filled_with_hot_water": true,
+      "water_temperature_c": 82,
+      "compared_surfaces": [
+        "matt black",
+        "white paint",
+        "brushed metal",
+        "polished metal"
+      ],
+      "rotating_slowly": true,
+      "rotation_degrees": 28.6,
+      "rotation_rate_degrees_per_second": 12.6,
+      "facing_surface": "matt black"
+    },
+    "thermal_camera": {
+      "selected_in_sequence": true,
+      "moving_toward_scene_camera": false,
+      "foreground_display_active": true,
+      "display_content": "live false-colour bench view with the hot-water flask, Leslie cube, filler neck, rails, work surface and tiled wall",
+      "crosshair_temperature_c": 82,
+      "palette_range_c": [
+        20,
+        90
+      ],
+      "foreground_screen_centered": true,
+      "screen_aligned_perpendicular_to_scene_camera": true,
+      "perspective_matches_lab_bench": true,
+      "image_captured": false
+    },
+    "sidebar_thermal_view": {
+      "dynamic_orientation": true,
+      "dynamic_temperature": true,
+      "facing_surface": "matt black",
+      "crosshair_temperature_c": 82,
+      "shares_camera_scene_renderer": true,
+      "visible_bench_objects": [
+        "hot-water flask",
+        "rotating Leslie cube",
+        "filler neck",
+        "cube rails",
+        "bench surface",
+        "tiled wall"
+      ]
+    },
+    "thermal_propagation_rings": {
+      "count": 8,
+      "visual_only": true,
+      "casts_shadows": false,
+      "receives_shadows": false
+    },
+    "apparent_surface_readings_c": {
+      "matt_black": 82,
+      "white_paint": 74,
+      "brushed_metal": 52,
+      "polished_metal": 39
+    },
+    "emissivity_conclusion": null,
+    "smooth_stage_animation": true
+  },
+  "errors": []
+}

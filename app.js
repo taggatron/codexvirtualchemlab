@@ -1,5 +1,7 @@
-import { drawThermalBenchScene } from './thermalview.js?v=20260823-1';
+import { drawThermalBenchScene } from './thermalview.js?v=20260908-4';
 import * as assessment from './assessment.js?v=20260902-1';
+import { createCourseExperience } from './aaq.js?v=20260908-4';
+let courseExperience = null;
 const canvas = document.getElementById('lab'), visibleCtx = canvas.getContext('2d'), buffer = document.createElement('canvas'), webglCanvas = document.getElementById('webgl');
 
 // Keep the catalogue and 2D interface interactive while the considerably larger
@@ -17,7 +19,7 @@ class DeferredLabRenderer {
     if (this.preloadTimer) clearTimeout(this.preloadTimer);
     if (this.idleHandle && 'cancelIdleCallback' in window) cancelIdleCallback(this.idleHandle);
     this.preloadTimer = 0; this.idleHandle = 0;
-    this.loading = import(`./lab3d.js?v=20260830-5`).then(({ LabRenderer3D }) => {
+    this.loading = import(`./lab3d.js?v=20260908-4`).then(({ LabRenderer3D }) => {
       const renderer = new LabRenderer3D(this.canvas);
       renderer.signature = this.pendingSignature;
       this.impl = renderer;
@@ -987,12 +989,24 @@ function graphReading() { const id = practicals[state.selected].id, s = currentG
 const asphaltTile = document.createElement('canvas'); asphaltTile.width = asphaltTile.height = 96; const asphaltCtx = asphaltTile.getContext('2d'); asphaltCtx.fillStyle = '#1b465c'; asphaltCtx.fillRect(0, 0, 96, 96); let asphaltSeed = 1297; const asphaltRandom = () => ((asphaltSeed = Math.imul(asphaltSeed, 1664525) + 1013904223 >>> 0) / 4294967296); for (let i = 0; i < 520; i++) { asphaltCtx.fillStyle = asphaltRandom() > .52 ? `rgba(137,186,201,${.06 + asphaltRandom() * .16})` : `rgba(3,26,40,${.08 + asphaltRandom() * .18})`; const r = .3 + asphaltRandom() * .9; asphaltCtx.beginPath(); asphaltCtx.arc(asphaltRandom() * 96, asphaltRandom() * 96, r, 0, Math.PI * 2); asphaltCtx.fill() }
 let W = 0, H = 0, D = 1, VIEW_W = 0, VIEW_H = 0, UI_SCALE = 1, portraitPromptVisible = false, mobileLandscapeLayout = false, regions = [], rightSidebarLayoutSnapshot = null, hookeGuidanceHitbox = null;
 function responsiveScale(width, height) {
-  // Keep the three-column canvas inside smaller CSS viewports as well as
-  // short phone landscapes. This matters on high-DPI displays where browser
-  // zoom can make the physical window look large while innerWidth is much
-  // smaller than the screenshot's pixel dimensions.
-  const compactLandscape = width > height && (width < 1400 || height < 800);
-  return compactLandscape ? Math.min(1, width / 1320, height / 760) : 1;
+  // Preserve enough logical bench width in tall tablet and narrow desktop
+  // windows as well as phone landscapes; sidebars must never crush the arena.
+  return Math.min(1, width / 1320, width > height ? height / 760 : 1);
+}
+function headerLayout() {
+  const compact = VIEW_W < 1120, dense = VIEW_W < 900;
+  if (!compact) {
+    const focus = { x: W - 118, y: 16, w: 104, h: 32 }, assessment = { x: W - 274, y: 16, w: 146, h: 32 };
+    return { compact, tabs: { x: 145, y: 12, w: 350, h: 40, itemWidth: 114 }, focus, assessment, picker: { x: assessment.x - 259, y: 16, w: 249, h: 32 }, fontScale: 1 };
+  }
+  // Keep narrow-header text and icons at readable CSS sizes independently of
+  // the bench scale. Hit regions retain the existing 44px touch expansion.
+  const unit = 1 / UI_SCALE, cssHeight = 64 * UI_SCALE, h = Math.min(32, cssHeight - 6), y = (cssHeight - h) / 2;
+  const focusW = dense ? 80 : 104, assessmentW = dense ? 106 : 146;
+  const focusX = VIEW_W - 14 - focusW, assessmentX = focusX - 8 - assessmentW;
+  const pickerRight = assessmentX - 12, pickerW = Math.min(249, pickerRight - 252);
+  const logical = (x, top, w, height) => ({ x: x * unit, y: top * unit, w: w * unit, h: height * unit });
+  return { compact, dense, fontScale: unit, tabs: { ...logical(100, Math.max(1, y - 2), 140, h + 4), itemWidth: 44 * unit }, focus: logical(focusX, y, focusW, h), assessment: logical(assessmentX, y, assessmentW, h), picker: logical(pickerRight - pickerW, y, pickerW, h) };
 }
 function resize() {
   D = Math.min(devicePixelRatio || 1, 2);
@@ -1171,44 +1185,33 @@ function drawWorkspace(x, w, benchY) { if (!state.workspace.length && !lab3d.ava
 function registerWebGLInteractions(id, cx, cy) { const fallback = { target: { x: cx + 72, y: cy - 1 }, source: { x: cx - 155, y: cy - 1 } }; if (id === 'free') { const priority = { tripod: 0, bunsen: 1, beaker: 3, tube: 3, phmeter: 4 };[...state.workspace].sort((a, b) => (priority[a.type] ?? 2) - (priority[b.type] ?? 2)).forEach(workspaceHitRegions); state.layout = fallback; return } if (id === 'rates' || id === 'temp') { const sourceGround = lab3d.projectToScreen(-2.1, 0, .1), receiver = id === 'rates' ? ratesReceiverWorld() : { x: 1.25, y: 0, z: .05 }, targetGround = lab3d.projectToScreen(receiver.x, receiver.y, receiver.z); state.layout = { source: sourceGround ? { x: sourceGround.x, y: sourceGround.y - 62 } : fallback.source, target: targetGround ? { x: targetGround.x, y: targetGround.y - 62 } : fallback.target }; if (!state.pour && (id === 'temp' || state.ratesStage === 2)) hit('reagent', state.layout.source.x - 72, state.layout.source.y - 96, 144, 174, 'HCl(aq)') } else if (id === 'mass' && state.massStage === 2 && state.massLidOn) { const lid = lab3d.projectToScreen(1.3, 2.58, .05); if (lid) { hit('crucible-lid', lid.x - 62, lid.y - 38, 124, 76); state.layout = { ...fallback, lid } } else state.layout = fallback } else state.layout = fallback }
 function header() {
   if (state.focusMode) return;
-  ctx.fillStyle = C.navy;
-  ctx.fillRect(0, 0, W, 64);
-  text('PRACTICAL', 26, 25, 12, '#71d5c8', 800);
-  text('LAB', 26, 43, 22, '#fff', 800);
-
-  const tabStartX = 145, tabY = 12, tabH = 40, totalW = 350, tabW = (totalW - 8) / subjects.length;
-  rr(tabStartX, tabY, totalW, tabH, 20, '#081a26', '#1a3344');
-
-  const activeIndex = Math.max(0, subjects.findIndex(s => s.id === (state.subject || 'chemistry')));
-  const targetX = tabStartX + 4 + activeIndex * tabW;
-  if (state.subjectTabX == null) {
-    state.subjectTabX = targetX;
-  } else if (Math.abs(targetX - state.subjectTabX) > 0.5) {
-    state.subjectTabX += (targetX - state.subjectTabX) * 0.32;
-    requestAnimationFrame(() => draw(true));
-  } else {
-    state.subjectTabX = targetX;
-  }
-
+  const layout = headerLayout(), fs = layout.fontScale;
+  ctx.fillStyle = C.navy; ctx.fillRect(0, 0, W, 64);
+  text('PRACTICAL', layout.compact ? 14 * fs : 26, layout.compact ? 32 - 8 * fs : 25, layout.compact ? 9 * fs : 12, '#71d5c8', 800);
+  text('LAB', layout.compact ? 14 * fs : 26, layout.compact ? 32 + 8 * fs : 43, layout.compact ? 18 * fs : 22, '#fff', 800);
+  const { x: tabStartX, y: tabY, h: tabH, w: totalW, itemWidth: tabW } = layout.tabs;
+  const inset = layout.compact ? 4 * fs : 4;
+  rr(tabStartX, tabY, totalW, tabH, tabH / 2, '#081a26', '#1a3344');
+  const activeIndex = Math.max(0, subjects.findIndex(s => s.id === (state.subject || 'chemistry'))), targetX = tabStartX + inset + activeIndex * tabW;
+  if (state.subjectTabX == null || state.subjectTabW !== tabW) state.subjectTabX = targetX;
+  else if (Math.abs(targetX - state.subjectTabX) > .5) { state.subjectTabX += (targetX - state.subjectTabX) * .32; requestAnimationFrame(() => draw(true)); }
+  else state.subjectTabX = targetX;
+  state.subjectTabW = tabW;
   const activeSubject = subjects[activeIndex] || subjects[0];
-  rr(state.subjectTabX, tabY + 4, tabW, tabH - 8, 16, activeSubject.color, null);
-
-  subjects.forEach((s, i) => {
-    const tx = tabStartX + 4 + i * tabW;
-    const isActive = (state.subject || 'chemistry') === s.id;
-    text(`${s.icon} ${s.title}`, tx + tabW / 2, tabY + tabH / 2, 12.5, isActive ? '#ffffff' : '#8da4ad', 750, 'center');
-    hit('subject-tab', tx, tabY + 4, tabW, tabH - 8, s.id);
+  rr(state.subjectTabX, tabY + inset, tabW, tabH - inset * 2, Math.max(4, (tabH - inset * 2) / 2), activeSubject.color);
+  subjects.forEach((subject, i) => {
+    const tx = tabStartX + inset + i * tabW, active = (state.subject || 'chemistry') === subject.id;
+    text(layout.compact ? subject.icon : `${subject.icon} ${subject.title}`, tx + tabW / 2, tabY + tabH / 2, layout.compact ? 19 * fs : 12.5, active ? '#fff' : '#8da4ad', 750, 'center');
+    hit('subject-tab', tx, layout.compact ? 0 : tabY + 4, tabW, layout.compact ? 64 : tabH - 8, subject.id);
   });
-
-  const focusW = 104, assessW = 146;
-  const focusX = W - focusW - 14, assessX = focusX - assessW - 10;
-  text('OCR GCSE Combined Science', assessX - 16, 33, 11, '#9fb2b8', 600, 'right');
-  rr(assessX, 16, assessW, 32, 16, state.assessmentMode ? C.teal : '#122b3b', state.assessmentMode ? '#4fc3b5' : '#2e4e63');
-  text('📝 ASSESSMENT MODE', assessX + assessW / 2, 32, 10, '#ffffff', 800, 'center');
-  hit('toggle-assessment-mode', assessX, 16, assessW, 32);
-  rr(focusX, 16, focusW, 32, 16, state.focusMode ? C.teal : '#122b3b', '#2e4e63');
-  text('FOCUS MODE ⛶', focusX + focusW / 2, 32, 10, '#ffffff', 800, 'center');
-  hit('toggle-focus-mode', focusX, 16, focusW, 32);
+  for (const [kind, bounds, label, active] of [
+    ['assessment', layout.assessment, layout.dense ? '📝 ASSESSMENT' : '📝 ASSESSMENT MODE', state.assessmentMode],
+    ['focus', layout.focus, layout.dense ? 'FOCUS ⛶' : 'FOCUS MODE ⛶', state.focusMode]
+  ]) {
+    rr(bounds.x, bounds.y, bounds.w, bounds.h, bounds.h / 2, active ? C.teal : '#122b3b', active ? '#4fc3b5' : '#2e4e63');
+    text(label, bounds.x + bounds.w / 2, bounds.y + bounds.h / 2, 10 * fs, '#fff', 800, 'center');
+    hit(`toggle-${kind}-mode`, bounds.x, bounds.y, bounds.w, bounds.h);
+  }
 }
 function sidebarMetrics(subject = state.subject || 'chemistry') {
   const visible = practicals.map((p, i) => ({ ...p, originalIndex: i })).filter(p => (p.subject || 'chemistry') === subject);
@@ -1249,7 +1252,19 @@ function sidebar() {
   ctx.fillStyle = '#eef3f2'; ctx.fillRect(x, metrics.contentBottom, w, H - metrics.contentBottom);
   text('Press F for fullscreen', 20, H - 15, 9, C.muted, 600)
 }
-function chemicalTag(label, world, offsetY = 7, options = {}) { const p = lab3d.projectToScreen(...world); if (!p) return; const size = options.size || 10, height = options.height || 23, padding = options.padding || 20; ctx.font = `750 ${size}px Inter,system-ui`; const w = Math.max(options.minWidth || 60, ctx.measureText(label).width + padding), x = p.x - w / 2, y = p.y + offsetY; ctx.save(); ctx.shadowColor = 'rgba(7,31,45,.2)'; ctx.shadowBlur = 5; ctx.shadowOffsetY = 2; rr(x, y, w, height, 6, 'rgba(255,255,255,.96)', 'rgba(95,125,137,.42)'); ctx.restore(); text(label, p.x, y + height / 2, size, C.ink, 750, 'center') }
+function chemicalTag(label, world, offsetY = 7, options = {}) {
+  const point = lab3d.projectToScreen(...world); if (!point) return;
+  const [left, top, arenaWidth, arenaHeight] = lab3d.resizeArgs || [0, 0, W, H];
+  const size = options.size || 10, height = options.height || 23, padding = options.padding || 20;
+  ctx.font = `750 ${size}px Inter,system-ui`;
+  const width = Math.min(arenaWidth - 20, Math.max(options.minWidth || 60, ctx.measureText(label).width + padding));
+  const x = Math.max(left + 10, Math.min(left + arenaWidth - width - 10, point.x - width / 2));
+  const y = Math.max(top + 8, Math.min(top + arenaHeight - height - 8, point.y + offsetY));
+  ctx.save(); ctx.shadowColor = 'rgba(7,31,45,.2)'; ctx.shadowBlur = 5; ctx.shadowOffsetY = 2;
+  rr(x, y, width, height, 6, 'rgba(255,255,255,.96)', 'rgba(95,125,137,.42)'); ctx.restore();
+  ctx.fillStyle = C.ink; ctx.font = `750 ${size}px Inter,system-ui`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(label, x + width / 2, y + height / 2, Math.max(1, width - padding));
+}
+
 function pondweedGeometry(distance = state.pondweedDistance || 20) {
   const beakerX = 1.5, beakerScale = 1.1, beakerEdgeX = beakerX - .7 * beakerScale, rulerUnitsPerCm = .05;
   const lampFaceX = beakerEdgeX - Math.max(10, Math.min(50, distance)) * rulerUnitsPerCm;
@@ -1518,9 +1533,9 @@ function drawMethodDropdownPanel() {
 }
 
 function main() {
-  const L = state.focusMode ? 0 : 270, R = state.focusMode ? 0 : Math.max(260, Math.min(330, W * .23)), x = L, w = W - L - R, p = practicals[state.selected], free = p.id === 'free', wrappedObjective = ['titration', 'displacement', 'alkali', 'starchleaf', 'lipase', 'transformation', 'respiration', 'antibiotics', 'osmosis', 'potometer', 'quadrats', 'capture', 'shoretransect', 'ripple', 'electromagnet', 'convection', 'conduction', 'thermal', 'hooke', 'specificheat', 'latentheat', 'wirelength', 'ivdevices', 'fieldlines'].includes(p.id), equationY = wrappedObjective ? 151 : 143;
+  const L = state.focusMode ? 0 : 270, R = state.focusMode ? 0 : Math.max(260, Math.min(330, W * .23)), x = L, w = W - L - R, p = practicals[state.selected], free = p.id === 'free', wrappedObjective = ['titration', 'displacement', 'alkali', 'starchleaf', 'lipase', 'transformation', 'respiration', 'antibiotics', 'osmosis', 'potometer', 'quadrats', 'capture', 'shoretransect', 'ripple', 'electromagnet', 'convection', 'conduction', 'thermal', 'hooke', 'specificheat', 'latentheat', 'wirelength', 'ivdevices', 'fieldlines'].includes(p.id) || wrapTextLines(p.objective, w - 56, 17, 650).length > 1, equationY = wrappedObjective ? 151 : 143;
   if (!state.focusMode) {
-    ctx.fillStyle = '#fff'; ctx.fillRect(x, 64, w, H - 64); text(p.title.toUpperCase(), x + 28, 91, 11, p.color || C.teal, 800); if (wrappedObjective) wrappedText(p.objective, x + 28, 113, Math.min(w - 56, 700), 17, C.ink, 650, 21, 2); else text(p.objective, x + 28, 119, 17, C.ink, 650); if (free) { if (state.reaction) drawFreeReactionCard(x, w); else { rr(x + 26, 143, w - 52, 54, 8, '#f1eefb'); text('QUICK START', x + 40, 158, 9, C.muted, 800); text(p.eq, x + 40, 179, 13, C.ink, 600) } } else { rr(x + 26, equationY, w - 52, 72, 8, '#f2f6f5'); text('SYMBOL EQUATION', x + 40, equationY + 17, 8.5, C.muted, 800); text(p.eq, x + 145, equationY + 17, 12, C.ink, 650); text('WORD EQUATION', x + 40, equationY + 47, 8.5, C.muted, 800); wrappedText(p.word, x + 145, equationY + 47, w - 190, 10.2, C.ink, 600, 12, 2) }
+    ctx.fillStyle = '#fff'; ctx.fillRect(x, 64, w, H - 64); wrappedText(p.title.toUpperCase(), x + 28, 91, w - 56, 11, p.color || C.teal, 800, 13, 1); if (wrappedObjective) wrappedText(p.objective, x + 28, 113, Math.min(w - 56, 700), 17, C.ink, 650, 21, 2); else text(p.objective, x + 28, 119, 17, C.ink, 650); if (free) { if (state.reaction) drawFreeReactionCard(x, w); else { rr(x + 26, 143, w - 52, 54, 8, '#f1eefb'); text('QUICK START', x + 40, 158, 9, C.muted, 800); wrappedText(p.eq, x + 40, 174, w - 80, 13, C.ink, 600, 15, 2) } } else { rr(x + 26, equationY, w - 52, 72, 8, '#f2f6f5'); text('SYMBOL EQUATION', x + 40, equationY + 17, 8.5, C.muted, 800); wrappedText(p.eq, x + 145, equationY + 12, w - 190, 12, C.ink, 650, 12, 2); text('WORD EQUATION', x + 40, equationY + 47, 8.5, C.muted, 800); wrappedText(p.word, x + 145, equationY + 47, w - 190, 10.2, C.ink, 600, 12, 2) }
   }
   const benchY = H - 128, arenaTop = state.focusMode ? 0 : (free ? 205 : wrappedObjective ? 229 : 221); let wall = ctx.createLinearGradient(x, arenaTop, x, benchY); wall.addColorStop(0, '#f9fbfb'); wall.addColorStop(1, '#e9efef'); ctx.fillStyle = wall; ctx.fillRect(x, arenaTop, w, benchY - arenaTop);
   // glazed laboratory tiles
@@ -3297,6 +3312,8 @@ function drawHookeFocusModal() {
 }
 function idDp(max) { return max < 10 ? 1 : 0 }
 function draw(skipWebGL = false) {
+  courseExperience?.syncViewport();
+  if (state.course === 'aaq') return;
   regions = [];
   window.__buttonLabelAudit = [];
   ctx.globalAlpha = 1;
@@ -3309,7 +3326,10 @@ function draw(skipWebGL = false) {
     if (state.assessmentMode) {
       assessment.drawAssessmentMode(ctx, W, H, state, practicals, hit);
     } else {
-      header(); sidebar(); main(); rightbar();
+      header(); sidebar();
+      const arenaLeft = state.focusMode ? 0 : 270, arenaRight = state.focusMode ? W : W - Math.max(260, Math.min(330, W * .23));
+      ctx.save(); ctx.beginPath(); ctx.rect(arenaLeft, state.focusMode ? 0 : 64, arenaRight - arenaLeft, H); ctx.clip(); main(); ctx.restore();
+      rightbar();
       if (state.focusMode && state.methodDropdown) drawMethodDropdownPanel();
       if (state.dose) drawDosePanel();
       if (state.evaluationModal) drawEvaluationModal();
@@ -4326,6 +4346,7 @@ canvas.addEventListener('pointermove', e => {
     canvas.style.cursor = 'grabbing'; draw(); return
   }
   const r = regionAtPoint(point);
+  canvas.title = r?.id === 'subject-tab' ? subjects.find(subject => subject.id === r.data)?.title || '' : '';
   canvas.style.cursor = r && ['palette', 'free-reactant', 'reagent', 'workspace-item', 'dose-slider', 'assessment-toggle-equipment', 'assessment-bench-slot', 'assessment-slot-assign'].includes(r.id) ? 'grab' : r ? 'pointer' : 'default'
 });
 canvas.addEventListener('pointerdown', e => {
@@ -4496,6 +4517,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && document.fullscreenElement) document.exitFullscreen();
 });
 function update(dt, skipDraw = false) {
+  if (state.course === 'aaq') return;
   state.flamePhase += dt * 3.4;
   const id = practicals[state.selected].id, free = id === 'free', heatLinks = free ? workspaceHeatLinks() : [], heated = new Set(heatLinks.map(link => link.beaker.uid)), reactionAnimating = free && state.reaction && !state.reaction.complete;
   const bunsenTransitionFrame = lab3d.advanceBunsenLoad(dt);
@@ -5398,6 +5420,7 @@ function installPhotosynthesisMessageApi() {
 
 let last = performance.now(), animationFrameId = 0, animationTimerId = 0;
 function simulationFrameMode() {
+  if (state.course === 'aaq') return 'idle';
   if (document.hidden || portraitPromptVisible || window.__manualSimulationTime) return 'idle';
   const id = practicals[state.selected]?.id;
   const active = state.running || state.burner || state.coolingWater || state.electroWeighing || state.pour || state.drag || state.massTransfer ||
@@ -6492,12 +6515,15 @@ window.render_game_to_text = () => {
     viewport_css_px: { width: Math.round(VIEW_W), height: Math.round(VIEW_H) },
     logical_canvas_px: { width: Math.round(W), height: Math.round(H) },
     scale: +UI_SCALE.toFixed(3),
-    mode: portraitPromptVisible ? 'portrait rotation prompt' : UI_SCALE < 1 ? 'compact landscape' : 'desktop',
+    mode: portraitPromptVisible ? 'portrait rotation prompt' : UI_SCALE < 1 ? (VIEW_W > VIEW_H ? 'compact landscape' : 'compact tall window') : 'desktop',
     portrait_prompt_visible: portraitPromptVisible,
     three_column_layout_preserved: !portraitPromptVisible,
     mobile_landscape_layout: mobileLandscapeLayout,
     pointer_coordinates_scaled: UI_SCALE < 1,
-    minimum_touch_target_css_px: UI_SCALE < 1 ? 44 : null
+    minimum_touch_target_css_px: UI_SCALE < 1 ? 44 : null,
+    header: headerLayout(),
+    minimum_logical_width_px: 1320,
+    workspace_logical_width_px: state.focusMode ? W : W - 270 - Math.max(260, Math.min(330, W * .23))
   };
   return JSON.stringify(payload)
 };
@@ -6844,4 +6870,24 @@ window.render_game_to_text = () => {
   };
   return JSON.stringify(payload);
 };
+state.course = 'gcse';
+courseExperience = createCourseExperience({
+  onCourseChange: course => {
+    state.course = course;
+    if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    if (animationTimerId) clearTimeout(animationTimerId);
+    animationFrameId = 0;
+    animationTimerId = 0;
+    last = performance.now();
+    if (course === 'gcse') { lab3d.signature = ''; resize(); }
+  },
+  getViewport: () => ({ width: W, height: H, cssWidth: VIEW_W, cssHeight: VIEW_H, scale: UI_SCALE, portrait: portraitPromptVisible, header: headerLayout() }),
+  isGCSEFocus: () => state.focusMode || state.assessmentMode
+});
+const advanceGCSETime = window.advanceTime;
+window.advanceTime = milliseconds => courseExperience.active() ? courseExperience.advanceTime(milliseconds) : advanceGCSETime(milliseconds);
+const renderGCSEState = window.render_game_to_text;
+window.render_game_to_text = () => courseExperience.active()
+  ? JSON.stringify({ course: 'OCR AAQ Human Biology', ...courseExperience.getState(), controls: ['Qualification dropdown', 'Method steps', 'Condition slider', 'Primary action', 'NEW TRIAL', 'RESULTS', 'EVALUATE', 'F fullscreen'] })
+  : JSON.stringify({ ...JSON.parse(renderGCSEState()), course: 'OCR GCSE Combined Science' });
 draw();

@@ -1,0 +1,321 @@
+{
+  "practicals": [
+    {
+      "id": "aaq-microscopy",
+      "bounds": {
+        "min": 10,
+        "max": 40,
+        "step": 10
+      },
+      "low": {
+        "value": 60,
+        "label": "Cell diameter",
+        "unit": "µm",
+        "explanation": "A 6 mm image at ×100 represents 60 µm. Changing magnification changes the image, not the actual cell size.",
+        "magnification": 100,
+        "imageSizeMm": 6
+      },
+      "high": {
+        "value": 60,
+        "label": "Cell diameter",
+        "unit": "µm",
+        "explanation": "A 24 mm image at ×400 represents 60 µm. Changing magnification changes the image, not the actual cell size.",
+        "magnification": 400,
+        "imageSizeMm": 24
+      },
+      "resultRows": 2
+    },
+    {
+      "id": "aaq-dna",
+      "bounds": {
+        "min": 0.5,
+        "max": 8,
+        "step": 0.5
+      },
+      "low": {
+        "value": 22.1,
+        "label": "Relative DNA recovery",
+        "unit": "%",
+        "explanation": "A conceptual precipitation model: recovery approaches a limit as cold ethanol is added. This percentage is illustrative, not a laboratory yield prediction."
+      },
+      "high": {
+        "value": 98.2,
+        "label": "Relative DNA recovery",
+        "unit": "%",
+        "explanation": "A conceptual precipitation model: recovery approaches a limit as cold ethanol is added. This percentage is illustrative, not a laboratory yield prediction."
+      },
+      "resultRows": 2
+    },
+    {
+      "id": "aaq-gel",
+      "bounds": {
+        "min": 100,
+        "max": 3000,
+        "step": 100
+      },
+      "low": {
+        "value": 40,
+        "label": "Migration distance",
+        "unit": "mm",
+        "explanation": "At a fixed voltage, gel concentration and run time, smaller fragments travel farther. Compare against a DNA ladder; distance is approximately linear with log₁₀(fragment length) over this modelled range."
+      },
+      "high": {
+        "value": 10.5,
+        "label": "Migration distance",
+        "unit": "mm",
+        "explanation": "At a fixed voltage, gel concentration and run time, smaller fragments travel farther. Compare against a DNA ladder; distance is approximately linear with log₁₀(fragment length) over this modelled range."
+      },
+      "resultRows": 2
+    },
+    {
+      "id": "aaq-colorimetry",
+      "bounds": {
+        "min": 0,
+        "max": 5,
+        "step": 0.5
+      },
+      "low": {
+        "value": 0,
+        "label": "Absorbance",
+        "unit": "AU",
+        "explanation": "The blank-corrected teaching calibration is A = 0.180 × concentration (g dm⁻³). Measure standards before interpolating an unknown; real calibrations need repeats and a verified linear range.",
+        "slope": 0.18
+      },
+      "high": {
+        "value": 0.9,
+        "label": "Absorbance",
+        "unit": "AU",
+        "explanation": "The blank-corrected teaching calibration is A = 0.180 × concentration (g dm⁻³). Measure standards before interpolating an unknown; real calibrations need repeats and a verified linear range.",
+        "slope": 0.18
+      },
+      "resultRows": 2
+    },
+    {
+      "id": "aaq-centrifuge",
+      "bounds": {
+        "min": 1000,
+        "max": 6000,
+        "step": 500
+      },
+      "low": {
+        "value": 89,
+        "label": "Relative centrifugal force",
+        "unit": "×g",
+        "explanation": "RCF = 1.118 × 10⁻⁵ × radius (cm) × speed² (rpm). The rotor radius is 8.0 cm. Balance opposite tubes before closing the lid; the illustrated layers are schematic."
+      },
+      "high": {
+        "value": 3220,
+        "label": "Relative centrifugal force",
+        "unit": "×g",
+        "explanation": "RCF = 1.118 × 10⁻⁵ × radius (cm) × speed² (rpm). The rotor radius is 8.0 cm. Balance opposite tubes before closing the lid; the illustrated layers are schematic."
+      },
+      "resultRows": 2
+    },
+    {
+      "id": "aaq-respiration",
+      "bounds": {
+        "min": 10,
+        "max": 50,
+        "step": 5
+      },
+      "low": {
+        "value": 0.09,
+        "label": "Oxygen uptake",
+        "unit": "cm³ min⁻¹",
+        "explanation": "Oxygen uptake is inferred from a pressure change after carbon dioxide is absorbed, corrected against an equal-volume control. This temperature-response model uses a fixed sample mass and 5-minute interval.",
+        "oxygenVolume": 0.45
+      },
+      "high": {
+        "value": 0.266,
+        "label": "Oxygen uptake",
+        "unit": "cm³ min⁻¹",
+        "explanation": "Oxygen uptake is inferred from a pressure change after carbon dioxide is absorbed, corrected against an equal-volume control. This temperature-response model uses a fixed sample mass and 5-minute interval.",
+        "oxygenVolume": 1.329
+      },
+      "resultRows": 2
+    },
+    {
+      "id": "aaq-lipase",
+      "bounds": {
+        "min": 10,
+        "max": 70,
+        "step": 5
+      },
+      "low": {
+        "value": 10.5,
+        "label": "Relative reaction rate",
+        "unit": "10⁻³ s⁻¹",
+        "explanation": "Pink fades as fatty acids lower the pH. The modelled endpoint is 95.2 s; rate = 1 / endpoint time. This is an illustrative temperature response for a fixed enzyme preparation.",
+        "endpointSeconds": 95.2
+      },
+      "high": {
+        "value": 0,
+        "label": "Relative reaction rate",
+        "unit": "10⁻³ s⁻¹",
+        "explanation": "No endpoint within the observation window. High temperature has greatly reduced enzyme activity in this model.",
+        "endpointSeconds": null
+      },
+      "resultRows": 2
+    },
+    {
+      "id": "aaq-foodtests",
+      "bounds": {
+        "min": 0,
+        "max": 4,
+        "step": 1
+      },
+      "low": {
+        "value": 0,
+        "label": "Benedict’s observation",
+        "unit": "colour category",
+        "explanation": "Benedict’s test screens for reducing sugars; it is not specific to glucose. Fixed reagent volumes and heating time make the sample comparison meaningful. Colour categories give only a semi-quantitative estimate.",
+        "display": "blue",
+        "qualitative": true
+      },
+      "high": {
+        "value": 4,
+        "label": "Benedict’s observation",
+        "unit": "colour category",
+        "explanation": "Benedict’s test screens for reducing sugars; it is not specific to glucose. Fixed reagent volumes and heating time make the sample comparison meaningful. Colour categories give only a semi-quantitative estimate.",
+        "display": "brick-red",
+        "qualitative": true
+      },
+      "resultRows": 2
+    },
+    {
+      "id": "aaq-spirometry",
+      "bounds": {
+        "min": 0,
+        "max": 100,
+        "step": 25
+      },
+      "low": {
+        "value": 6,
+        "label": "Minute ventilation",
+        "unit": "dm³ min⁻¹",
+        "explanation": "Tidal volume 0.5 dm³ × breathing frequency 12 min⁻¹. These are synthetic responses for one model participant, not reference or diagnostic values.",
+        "tidalVolume": 0.5,
+        "breathingRate": 12
+      },
+      "high": {
+        "value": 47.6,
+        "label": "Minute ventilation",
+        "unit": "dm³ min⁻¹",
+        "explanation": "Tidal volume 1.4 dm³ × breathing frequency 34 min⁻¹. These are synthetic responses for one model participant, not reference or diagnostic values.",
+        "tidalVolume": 1.4,
+        "breathingRate": 34
+      },
+      "resultRows": 2
+    },
+    {
+      "id": "aaq-cardiovascular",
+      "bounds": {
+        "min": 0,
+        "max": 100,
+        "step": 25
+      },
+      "low": {
+        "value": 72,
+        "label": "Heart rate",
+        "unit": "beats min⁻¹",
+        "explanation": "With a modelled stroke volume of 70 cm³, cardiac output is 5.04 dm³ min⁻¹. Individual exercise responses vary; this is not a clinical assessment.",
+        "cardiacOutput": 5.04,
+        "strokeVolume": 70
+      },
+      "high": {
+        "value": 157,
+        "label": "Heart rate",
+        "unit": "beats min⁻¹",
+        "explanation": "With a modelled stroke volume of 100 cm³, cardiac output is 15.7 dm³ min⁻¹. Individual exercise responses vary; this is not a clinical assessment.",
+        "cardiacOutput": 15.7,
+        "strokeVolume": 100
+      },
+      "resultRows": 2
+    },
+    {
+      "id": "aaq-response",
+      "bounds": {
+        "min": 5,
+        "max": 50,
+        "step": 1
+      },
+      "low": {
+        "value": 101,
+        "label": "Visual response time",
+        "unit": "ms",
+        "explanation": "t = √(2d/g), with catch distance converted from cm to m and g = 9.81 m s⁻². Catching a falling ruler is a conscious visual–motor response, not a spinal reflex. Repeat with the same hand and release position."
+      },
+      "high": {
+        "value": 319,
+        "label": "Visual response time",
+        "unit": "ms",
+        "explanation": "t = √(2d/g), with catch distance converted from cm to m and g = 9.81 m s⁻². Catching a falling ruler is a conscious visual–motor response, not a spinal reflex. Repeat with the same hand and release position."
+      },
+      "resultRows": 2
+    },
+    {
+      "id": "aaq-antimicrobial",
+      "bounds": {
+        "min": 0,
+        "max": 30,
+        "step": 5
+      },
+      "low": {
+        "value": 6,
+        "label": "Inhibition-zone diameter",
+        "unit": "mm",
+        "explanation": "The 6 mm water-control disc has no halo. Keep organism, inoculum, agar depth and incubation identical. This synthetic dose-response cannot rank clinical effectiveness; diffusion and susceptibility both affect zone size."
+      },
+      "high": {
+        "value": 19.3,
+        "label": "Inhibition-zone diameter",
+        "unit": "mm",
+        "explanation": "The 6 mm water-control disc has no halo. Keep organism, inoculum, agar depth and incubation identical. This synthetic dose-response cannot rank clinical effectiveness; diffusion and susceptibility both affect zone size."
+      },
+      "resultRows": 2
+    }
+  ],
+  "checks": [
+    "All supported parameter values are finite; unit conversions and key biological invariants pass.",
+    "Biomedical, genetics and physiology catalogue filters match the course activities.",
+    "All twelve assessment questions, wrong/right feedback, mode toggles and conclusion notes work.",
+    "Twelve four-stage practicals complete at both parameter endpoints with finite readings and persistent repeat rows.",
+    "Switching courses preserves GCSE selection and AAQ results.",
+    "CSV export saved (OCR-AAQ-aaq-antimicrobial-results.csv).",
+    "Focus mode and tablet/phone portrait/landscape layouts render without horizontal overflow.",
+    "Reset is scoped to the selected practical.",
+    "Direct AAQ URL loads and no console/page errors occur."
+  ],
+  "screenshots": [
+    "output/playwright/aaq/01-course-overview.png",
+    "output/playwright/aaq/practical-aaq-microscopy-low.png",
+    "output/playwright/aaq/practical-aaq-microscopy-high.png",
+    "output/playwright/aaq/practical-aaq-dna-low.png",
+    "output/playwright/aaq/practical-aaq-dna-high.png",
+    "output/playwright/aaq/practical-aaq-gel-low.png",
+    "output/playwright/aaq/practical-aaq-gel-high.png",
+    "output/playwright/aaq/practical-aaq-colorimetry-low.png",
+    "output/playwright/aaq/practical-aaq-colorimetry-high.png",
+    "output/playwright/aaq/practical-aaq-centrifuge-low.png",
+    "output/playwright/aaq/practical-aaq-centrifuge-high.png",
+    "output/playwright/aaq/practical-aaq-respiration-low.png",
+    "output/playwright/aaq/practical-aaq-respiration-high.png",
+    "output/playwright/aaq/practical-aaq-lipase-low.png",
+    "output/playwright/aaq/practical-aaq-lipase-high.png",
+    "output/playwright/aaq/practical-aaq-foodtests-low.png",
+    "output/playwright/aaq/practical-aaq-foodtests-high.png",
+    "output/playwright/aaq/practical-aaq-spirometry-low.png",
+    "output/playwright/aaq/practical-aaq-spirometry-high.png",
+    "output/playwright/aaq/practical-aaq-cardiovascular-low.png",
+    "output/playwright/aaq/practical-aaq-cardiovascular-high.png",
+    "output/playwright/aaq/practical-aaq-response-low.png",
+    "output/playwright/aaq/practical-aaq-response-high.png",
+    "output/playwright/aaq/practical-aaq-antimicrobial-low.png",
+    "output/playwright/aaq/practical-aaq-antimicrobial-high.png",
+    "output/playwright/aaq/02-focus-mode.png",
+    "output/playwright/aaq/responsive-1024x768.png",
+    "output/playwright/aaq/responsive-390x844.png",
+    "output/playwright/aaq/responsive-844x390.png"
+  ],
+  "errors": []
+}

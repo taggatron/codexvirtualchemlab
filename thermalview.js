@@ -310,6 +310,28 @@ export function drawThermalBenchScene(context, options) {
     context.stroke();
   }
 
+  // The same two back-wall outlets as the physical lab remain at ambient
+  // temperature in the IR view, regardless of how hot the apparatus becomes.
+  const wallScale = 46, socketWidth = .48 * wallScale, socketHeight = .32 * wallScale;
+  const socketY = horizon - 1.25 * wallScale;
+  for (const worldX of [-4.35, 1.45]) {
+    const socketX = logicalWidth / 2 + worldX * wallScale;
+    context.fillStyle = '#1a2252';
+    context.strokeStyle = 'rgba(87,105,160,.48)';
+    context.lineWidth = .8;
+    context.beginPath();
+    context.roundRect(socketX - socketWidth / 2, socketY - socketHeight / 2, socketWidth, socketHeight, 1.3);
+    context.fill();
+    context.stroke();
+    context.fillStyle = '#0b173a';
+    for (const contactX of [-.04]) {
+      for (const dx of [-.055, .055]) context.fillRect(socketX + (contactX + dx - .009) * wallScale, socketY + (.04 - .0225) * wallScale, .018 * wallScale, .045 * wallScale);
+      context.fillRect(socketX + (contactX - .013) * wallScale, socketY - (.046 + .0235) * wallScale, .026 * wallScale, .047 * wallScale);
+      context.strokeStyle = 'rgba(87,105,160,.32)';
+      context.strokeRect(socketX + (contactX + .185 - .0235) * wallScale, socketY - (.035 + .039) * wallScale, .047 * wallScale, .078 * wallScale);
+    }
+  }
+
   const bench = context.createLinearGradient(0, horizon, 0, 360);
   bench.addColorStop(0, '#17265e');
   bench.addColorStop(.54, '#111c50');

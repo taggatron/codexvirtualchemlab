@@ -1,0 +1,217 @@
+{
+  "arm": {
+    "yaw": -1.5707963267948966,
+    "footMinZ": -0.7305764257907867,
+    "footMaxZ": -0.212922915816307,
+    "footMinX": -1.5250000089406968,
+    "footMaxX": -1.0750000059604645
+  },
+  "rooms": [
+    {
+      "id": "free",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "rates",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "temp",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "titration",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "salts",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "mass",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "hydrogen",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "co2",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "electro",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "flame",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "displacement",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "alkali",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "chrom",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "water",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "thermite",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "starchleaf",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "lipase",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "transformation",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "respiration",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "antibiotics",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "osmosis",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "agardiffusion",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "potometer",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "pondweed",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "quadrats",
+      "sockets": false,
+      "count": 4
+    },
+    {
+      "id": "capture",
+      "sockets": false,
+      "count": 4
+    },
+    {
+      "id": "shoretransect",
+      "sockets": false,
+      "count": 4
+    },
+    {
+      "id": "ripple",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "newton2",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "electromagnet",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "convection",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "conduction",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "thermal",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "density",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "hooke",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "specificheat",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "latentheat",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "wirelength",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "ivdevices",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "fieldlines",
+      "sockets": true,
+      "count": 4
+    },
+    {
+      "id": "nuclear",
+      "sockets": true,
+      "count": 4
+    }
+  ],
+  "errors": []
+}
