@@ -1383,7 +1383,7 @@ function drawPotometerControls(x, benchY) {
   text(`TRIAL ${Math.min(potometerWindSpeeds.length, state.potometerTrialIndex + 1)} / ${potometerWindSpeeds.length}  ·  WIND ${state.potometerWindSpeed.toFixed(1)} m s⁻¹  ·  ${elapsed.toFixed(1)} min`, x + 24, benchY + 31, 8.8, '#d8e8ed', 750);
 }
 function quadratPrimaryLabel() {
-  if (state.quadratStage === 9) return state.complete ? 'VIEW RESULTS' : 'RECORD SAMPLE';
+  if (state.quadratStage === 9) return state.complete ? 'VIEW RESULTS' : 'NEXT SAMPLE';
   return ['LAY GRID TAPES', 'MEASURING…', 'GENERATE POINT', 'RANDOMISING…', 'PLACE QUADRAT', 'QUADRAT FALLING…', 'COUNT DAISIES', 'COUNTING…', 'RECORD SAMPLE'][state.quadratStage] || 'LAY GRID TAPES';
 }
 function drawQuadratViewControls(x, w, arenaTop) {
