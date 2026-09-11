@@ -1388,7 +1388,10 @@ function quadratPrimaryLabel() {
 }
 function drawQuadratViewControls(x, w, arenaTop) {
   const birdsEye = state.quadratCameraView === 'birdseye', btnH = 34, margin = 14, gap = 8;
-  const viewW = 150, viewX = x + w - viewW - margin, viewY = arenaTop + margin;
+  // Focus mode overlays its own top bar (incl. Exit Focus) across this same
+  // top-right corner, so drop below it there to avoid underlapping it.
+  const focusBarBottom = 14 + 34 + gap, topY = state.focusMode ? focusBarBottom : arenaTop + margin;
+  const viewW = 150, viewX = x + w - viewW - margin, viewY = topY;
   rr(viewX, viewY, viewW, btnH, 8, birdsEye ? C.teal : 'rgba(10,26,20,.62)', birdsEye ? C.teal : 'rgba(255,255,255,.32)');
   text(birdsEye ? '↓ BIRD\'S EYE' : '⤢ PERSPECTIVE', viewX + viewW / 2, viewY + btnH / 2, 9.6, '#fff', 800, 'center');
   hit('toggle-quadrat-view', viewX, viewY, viewW, btnH);
@@ -5339,6 +5342,48 @@ function parseExternalBoolean(value, fallback = false) {
   return fallback;
 }
 
+function isQuadratInvestigation(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  return ['quadrats', 'quadrat', 'random-sampling', 'random_sampling', 'sampling', 'abundance'].includes(normalized);
+}
+
+function openQuadratInvestigation(options = {}) {
+  const requestedFocus = options.focusMode;
+  const selectedIndex = practicals.findIndex(p => p.id === 'quadrats');
+  if (selectedIndex < 0) return false;
+
+  state.subject = 'biology';
+  state.selected = selectedIndex;
+  state.running = false;
+  state.complete = false;
+  state.progress = 0;
+  state.points = [];
+  state.temp = 25;
+  state.volume = 0;
+  state.ph = 7;
+  state.burner = false;
+  state.coolingWater = false;
+  state.transferred = 0;
+  state.pour = null;
+  state.drag = null;
+  state.dose = null;
+  state.graphModal = false;
+  state.evaluationModal = false;
+  state.reactantSafety = null;
+  state.hookeFocusModal = false;
+  state.hookeFocusProgress = 0;
+  state.methodDropdown = false;
+  state.tab = 'bench';
+
+  resetQuadratPractical();
+  state.focusMode = typeof requestedFocus === 'boolean' ? requestedFocus : true;
+  if (state.focusMode) {
+    state.toast = 'Random quadrat sampling practical loaded in focus mode.';
+  }
+  draw();
+  return true;
+}
+
 function isPhotosynthesisInvestigation(value) {
   const normalized = String(value || '').trim().toLowerCase();
   return ['pondweed', 'photosynthesis', 'light-intensity-pondweed', 'light_intensity_pondweed'].includes(normalized);
@@ -5392,12 +5437,23 @@ function applyPhotosynthesisFocusFromUrl() {
     return;
   }
 
+  const quadratsFocusRaw = params.get('quadrats-focus') ?? params.get('quadrat-focus') ?? params.get('sampling-focus');
+  if (quadratsFocusRaw != null) {
+    const enabled = parseExternalBoolean(quadratsFocusRaw, true);
+    openQuadratInvestigation({ focusMode: enabled });
+    return;
+  }
+
   const investigation = params.get('investigation') || params.get('practical') || params.get('experiment') || params.get('lab');
-  if (!isPhotosynthesisInvestigation(investigation)) return;
+  if (!investigation) return;
 
   const focusRaw = params.get('focus') ?? params.get('focusMode') ?? params.get('mode');
   const enabled = parseExternalBoolean(focusRaw, true);
-  openPondweedInvestigation({ focusMode: enabled });
+  if (isPhotosynthesisInvestigation(investigation)) {
+    openPondweedInvestigation({ focusMode: enabled });
+  } else if (isQuadratInvestigation(investigation)) {
+    openQuadratInvestigation({ focusMode: enabled });
+  }
 }
 
 function installPhotosynthesisMessageApi() {
@@ -5409,15 +5465,25 @@ function installPhotosynthesisMessageApi() {
     const action = typeof data.action === 'string' ? data.action : '';
     const cmd = typeof data.cmd === 'string' ? data.cmd : '';
 
-    const isDirectOpen = type === 'cvl:photosynthesis-focus' || action === 'photosynthesis-focus' || cmd === 'photosynthesis-focus';
+    const isDirectOpen = type === 'cvl:photosynthesis-focus' || action === 'photosynthesis-focus' || cmd === 'photosynthesis-focus' ||
+      type === 'cvl:quadrats-focus' || action === 'quadrats-focus' || cmd === 'quadrats-focus';
     const isInvestigationOpen = type === 'cvl:open-investigation' || action === 'open-investigation' || cmd === 'open-investigation';
     if (!isDirectOpen && !isInvestigationOpen) return;
 
-    const requestedInvestigation = data.investigation || data.practical || data.experiment || 'pondweed';
-    if (isInvestigationOpen && !isPhotosynthesisInvestigation(requestedInvestigation)) return;
-
+    const requestedInvestigation = data.investigation || data.practical || data.experiment || (type.includes('quadrat') || action.includes('quadrat') ? 'quadrats' : 'pondweed');
     const enabled = parseExternalBoolean(data.focusMode ?? data.focus ?? data.enabled, true);
-    const ok = openPondweedInvestigation({ focusMode: enabled });
+
+    let ok = false;
+    let practical = null;
+    if (isPhotosynthesisInvestigation(requestedInvestigation)) {
+      ok = openPondweedInvestigation({ focusMode: enabled });
+      practical = 'pondweed';
+    } else if (isQuadratInvestigation(requestedInvestigation)) {
+      ok = openQuadratInvestigation({ focusMode: enabled });
+      practical = 'quadrats';
+    } else {
+      return;
+    }
 
     if (event.source && typeof event.source.postMessage === 'function') {
       event.source.postMessage(
