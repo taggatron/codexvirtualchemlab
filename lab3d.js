@@ -121,7 +121,7 @@ function radialPortTunnel(theta, y, outerRadius, innerRadius, outerHoleRadius, i
 
 export class LabRenderer3D {
   constructor(canvas) {
-    this.canvas = canvas; this.available = false; this.signature = ''; this.flames = []; this.dynamic = []; this.width = 1; this.height = 1; this.left = 0; this.top = 0; this.coolantVisualLevel = 0; this.coolantTransitionTarget = 0; this.lastRenderTime = 0; this.thermiteAfterglowUntil = 0; this.thermiteGlowFraction = 0; this.osmosisRotationState = null; this.lastPracticalId = null; this.bunsenLoadDuration = 3.4; this.bunsenLoadElapsed = this.bunsenLoadDuration; this.bunsenTransitionActive = false; this.sceneWarmupFrames = 0; this.sceneNeedsCompile = false; this.sceneCompiling = false; this.sceneCompileGeneration = 0; this.contextLost = false; this.pendingCanvasReveal = true; canvas.style.visibility = 'hidden';
+    this.canvas = canvas; this.available = false; this.signature = ''; this.flames = []; this.dynamic = []; this.width = 1; this.height = 1; this.left = 0; this.top = 0; this.coolantVisualLevel = 0; this.coolantTransitionTarget = 0; this.lastRenderTime = 0; this.thermiteAfterglowUntil = 0; this.thermiteGlowFraction = 0; this.osmosisRotationState = null; this.lastPracticalId = null; this.quadratDisplayTilt = 0; this.bunsenLoadDuration = 3.4; this.bunsenLoadElapsed = this.bunsenLoadDuration; this.bunsenTransitionActive = false; this.sceneWarmupFrames = 0; this.sceneNeedsCompile = false; this.sceneCompiling = false; this.sceneCompileGeneration = 0; this.contextLost = false; this.pendingCanvasReveal = true; canvas.style.visibility = 'hidden';
     try {
       const constrainedDevice = (navigator.deviceMemory || 8) <= 4 || matchMedia('(pointer: coarse)').matches;
       this.performanceProfile = constrainedDevice ? 'balanced' : 'high';
@@ -182,7 +182,8 @@ export class LabRenderer3D {
     this.room.hemi.intensity = outdoor ? 2.75 : 2.25; this.room.key.intensity = outdoor ? 3.75 : 3.1; this.room.rim.intensity = outdoor ? 9 : 16;
     this.room.key.shadow.camera.left = outdoor ? -14.5 : -9; this.room.key.shadow.camera.right = outdoor ? 14.5 : 9; this.room.key.shadow.camera.updateProjectionMatrix();
   }
-  applyCameraForPractical(id, hookeFocusProgress = 0) {
+  applyCameraForPractical(id, hookeFocusProgress = 0, quadratBirdsEye = false) {
+    this.camera.up.set(0, 1, 0);
     if (id === 'quadrats' || id === 'capture') {
       // Preserve the normal 1.25-aspect horizontal field of view when the
       // browser makes the arena tall and narrow. This keeps the quadrat,
@@ -190,7 +191,16 @@ export class LabRenderer3D {
       // ordinary desktop view; portrait phones still use the rotate prompt.
       const baseFov = 40, baseAspect = 1.25, aspect = Math.max(.4, this.camera.aspect || baseAspect), baseHalfWidth = Math.tan(THREE.MathUtils.degToRad(baseFov * .5)) * baseAspect;
       this.camera.fov = aspect < baseAspect ? Math.min(96, THREE.MathUtils.radToDeg(2 * Math.atan(baseHalfWidth / aspect))) : baseFov;
-      this.camera.position.set(0, 5.35, 9.45); this.camera.lookAt(0, .55, .42)
+      if (id === 'quadrats' && quadratBirdsEye) {
+        // A directly-overhead view of the whole random-sampling grid, with
+        // the coordinate generator screen tilted flat to face this camera.
+        this.camera.fov = Math.max(this.camera.fov, 46);
+        this.camera.position.set(-.6, 10.4, 1.5);
+        this.camera.up.set(0, 0, -1);
+        this.camera.lookAt(-.6, 0, 1.5);
+      } else {
+        this.camera.position.set(0, 5.35, 9.45); this.camera.lookAt(0, .55, .42);
+      }
     }
     else if (id === 'shoretransect') { this.camera.fov = 42; this.camera.position.set(0, 5.7, 10.2); this.camera.lookAt(0, .72, -.24) }
     else if (id === 'ripple') { this.camera.fov = 38; this.camera.position.set(0, 5.5, 8.85); this.camera.lookAt(0, 1.12, -.05) }
@@ -1784,11 +1794,23 @@ export class LabRenderer3D {
     // (toward the foreground), matching every quadrat target below.
     const gridMinX = -2.8, gridMaxX = 2.8, gridMinZ = -1, gridMaxZ = 4.2, gridY = .375;
     const gridPts = []; for (let i = 0; i <= 10; i++) { const x = THREE.MathUtils.lerp(gridMinX, gridMaxX, i / 10), z = THREE.MathUtils.lerp(gridMinZ, gridMaxZ, i / 10); gridPts.push(x, gridY, gridMinZ, x, gridY, gridMaxZ, gridMinX, gridY, z, gridMaxX, gridY, z) } const gridGeo = new THREE.BufferGeometry(); gridGeo.setAttribute('position', new THREE.Float32BufferAttribute(gridPts, 3)); const habitatGrid = new THREE.LineSegments(gridGeo, new THREE.LineBasicMaterial({ color: 0xd9efc5, transparent: true, opacity: .2 })); g.add(habitatGrid);
+    // A bright, numbered overlay superimposed only in bird's-eye mode so the
+    // random coordinates can be read directly off the meadow from above.
+    const coordGrid = new THREE.Group(), coordGridLinePts = [];
+    for (let i = 0; i <= 10; i++) { const x = THREE.MathUtils.lerp(gridMinX, gridMaxX, i / 10), z = THREE.MathUtils.lerp(gridMinZ, gridMaxZ, i / 10); coordGridLinePts.push(x, gridY + .012, gridMinZ, x, gridY + .012, gridMaxZ, gridMinX, gridY + .012, z, gridMaxX, gridY + .012, z) }
+    const coordGridGeo = new THREE.BufferGeometry(); coordGridGeo.setAttribute('position', new THREE.Float32BufferAttribute(coordGridLinePts, 3));
+    const coordGridLines = new THREE.LineSegments(coordGridGeo, new THREE.LineBasicMaterial({ color: 0xfff29b, transparent: true, opacity: .88, depthTest: false })); coordGridLines.renderOrder = 6; coordGrid.add(coordGridLines);
+    const coordGridLabel = value => { const lc = document.createElement('canvas'); lc.width = lc.height = 64; const ctx2d = lc.getContext('2d'); ctx2d.fillStyle = 'rgba(6,26,29,.82)'; ctx2d.beginPath(); ctx2d.arc(32, 32, 29, 0, Math.PI * 2); ctx2d.fill(); ctx2d.fillStyle = '#fff29b'; ctx2d.font = '800 32px ui-monospace, SFMono-Regular, Menlo, monospace'; ctx2d.textAlign = 'center'; ctx2d.textBaseline = 'middle'; ctx2d.fillText(String(value), 32, 34); const labelTexture = new THREE.CanvasTexture(lc); labelTexture.colorSpace = THREE.SRGBColorSpace; const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: labelTexture, depthTest: false, transparent: true })); sprite.scale.set(.36, .36, 1); sprite.renderOrder = 7; return sprite };
+    for (let i = 0; i <= 10; i++) {
+      const x = THREE.MathUtils.lerp(gridMinX, gridMaxX, i / 10), xLabel = coordGridLabel(i); xLabel.position.set(x, gridY + .03, gridMaxZ + .32); coordGrid.add(xLabel);
+      const z = THREE.MathUtils.lerp(gridMinZ, gridMaxZ, i / 10), zLabel = coordGridLabel(i); zLabel.position.set(gridMinX - .32, gridY + .03, z); coordGrid.add(zLabel);
+    }
+    coordGrid.visible = false; g.add(coordGrid);
     const sampleTargets = [[-1.85, 3.48], [1.72, 2.36], [-.04, 2.98], [-2.35, 2.14], [1.18, 3.7]], sampleCounts = [4, 7, 5, 3, 6], daisies = [];
     sampleTargets.forEach(([cx, cz], si) => { for (let j = 0; j < sampleCounts[si]; j++) { const angle = j * 2.399 + si * .52, radius = .09 + (j % 3) * .12, pos = new THREE.Vector3(cx + Math.cos(angle) * radius, .36, cz + Math.sin(angle) * radius), plant = this.daisyPlant(si, j, pos, .78 + (j % 3) * .09); g.add(plant); daisies.push(plant) } });
     [[-3.15, 4.18], [-2.65, 3.12], [-1.15, 1.65], [-.62, 4.35], [.58, 1.62], [2.18, 3.24], [2.72, 1.95], [3.08, 4.15]].forEach(([x, z], i) => { const plant = this.daisyPlant(-1, i, new THREE.Vector3(x, .36, z), .72 + (i % 3) * .08); g.add(plant); daisies.push(plant) });
     const quadrat = this.samplingQuadratFrame(1.08); g.add(quadrat);
-    const displayCanvas = document.createElement('canvas'), dc = displayCanvas.getContext('2d'); displayCanvas.width = 512; displayCanvas.height = 220; const displayTexture = new THREE.CanvasTexture(displayCanvas); displayTexture.colorSpace = THREE.SRGBColorSpace; const generator = new THREE.Group(), generatorBody = new THREE.Mesh(roundedBox(1.2, .74, .2, .08), new THREE.MeshPhysicalMaterial({ color: 0x213d43, roughness: .38, metalness: .18, clearcoat: .45 })); generatorBody.position.y = .4; generator.add(generatorBody); const screen = new THREE.Mesh(new THREE.PlaneGeometry(.98, .42), new THREE.MeshBasicMaterial({ map: displayTexture, toneMapped: false })); screen.position.set(0, .43, .111); generator.add(screen); generator.position.set(-3.2, .36, -.25); generator.rotation.y = .12; g.add(generator);
+    const displayCanvas = document.createElement('canvas'), dc = displayCanvas.getContext('2d'); displayCanvas.width = 512; displayCanvas.height = 220; const displayTexture = new THREE.CanvasTexture(displayCanvas); displayTexture.colorSpace = THREE.SRGBColorSpace; const generator = new THREE.Group(), generatorBody = new THREE.Mesh(roundedBox(1.2, .74, .2, .08), new THREE.MeshPhysicalMaterial({ color: 0x213d43, roughness: .38, metalness: .18, clearcoat: .45 })); generatorBody.position.y = .4; generator.add(generatorBody); const screen = new THREE.Mesh(new THREE.PlaneGeometry(.98, .42), new THREE.MeshBasicMaterial({ map: displayTexture, toneMapped: false, side: THREE.DoubleSide })); screen.position.set(0, .43, .111); generator.add(screen); generator.position.set(-3.2, .36, -.25); generator.rotation.y = .12; g.add(generator);
     const tapeMaterial = new THREE.MeshBasicMaterial({ color: 0xf0d34f, side: THREE.DoubleSide, toneMapped: false }), tickMaterial = new THREE.MeshBasicMaterial({ color: 0x493d19, toneMapped: false });
     const makeGridTape = length => {
       const tape = new THREE.Group(), stripGeometry = new THREE.PlaneGeometry(length, .052); stripGeometry.translate(length / 2, 0, 0); stripGeometry.rotateX(-Math.PI / 2); const strip = new THREE.Mesh(stripGeometry, tapeMaterial); tape.add(strip);
@@ -1798,7 +1820,7 @@ export class LabRenderer3D {
     const tapeOrigin = new THREE.Vector3(gridMinX, meadowHeight(gridMinX, gridMinZ) + .06, gridMinZ), tapeXLength = gridMaxX - gridMinX, tapeYLength = gridMaxZ - gridMinZ;
     const tapeX = makeGridTape(tapeXLength), tapeZ = makeGridTape(tapeYLength), tapeCorner = new THREE.Mesh(new THREE.CylinderGeometry(.065, .065, .022, 24), tickMaterial); tapeX.position.copy(tapeOrigin); tapeZ.position.copy(tapeOrigin); tapeZ.rotation.y = -Math.PI / 2; tapeCorner.position.copy(tapeOrigin); tapeCorner.position.y += .006; g.add(tapeX, tapeZ, tapeCorner);
     const tapeXEnd = tapeOrigin.clone().add(new THREE.Vector3(tapeXLength, 0, 0)), tapeYEnd = tapeOrigin.clone().add(new THREE.Vector3(0, 0, tapeYLength));
-    this.dynamic.push({ kind: 'randomSampling', grassUniforms, grassMaterial: bladeMaterial, mossMaterial, clouds, trees, daisies, quadrat, display: { canvas: displayCanvas, context: dc, texture: displayTexture }, targets: sampleTargets, tapeX, tapeZ, tapeCorner, tapeXLength, tapeYLength });
+    this.dynamic.push({ kind: 'randomSampling', grassUniforms, grassMaterial: bladeMaterial, mossMaterial, clouds, trees, daisies, quadrat, display: { canvas: displayCanvas, context: dc, texture: displayTexture }, screen, coordGrid, targets: sampleTargets, tapeX, tapeZ, tapeCorner, tapeXLength, tapeYLength });
     Object.assign(g.userData, { randomQuadratHabitat: true, grassBladeCount: bladeCount, grassBladeDensityPerSquareMetre: +(bladeCount / (MEADOW_GRASS_WIDTH * MEADOW_GRASS_DEPTH)).toFixed(1), taperedGrassBlades: true, shortenedGrassBlades: true, subtleGrassToneVariation: true, meadowSurfaceBoundsWorld: { x: [-MEADOW_SURFACE_WIDTH / 2, MEADOW_SURFACE_WIDTH / 2], z: [MEADOW_CENTRE_Z - MEADOW_SURFACE_DEPTH / 2, MEADOW_CENTRE_Z + MEADOW_SURFACE_DEPTH / 2] }, meadowSurfaceExtendsBeyondVisibleView: true, supportedMaximumSceneAspect: 2.5, supportedMinimumArenaAspect: .43, narrowArenaHorizontalFramingPreserved: true, coordinateGeneratorPosition: [-3.2, .36, -.25], quadratStartPosition: [-2.75, .43, 1.2], apparatusWithinSupportedView: true, gridBoundsWorld: { x: [gridMinX, gridMaxX], z: [gridMinZ, gridMaxZ] }, gridTapeOriginWorld: tapeOrigin.toArray(), gridTapeXEndWorld: tapeXEnd.toArray(), gridTapeYEndWorld: tapeYEnd.toArray(), gridTapeDirections: { x: [1, 0, 0], y: [0, 0, 1] }, gridTapesShareOrigin: true, gridTapesRightAngleDegrees: 90, gridTapesLieOnMeadow: true, mossPatchCount: mossCount, daisyCount: daisies.length, treeCount: trees.length, cloudCount: clouds.length, realisticLayeredTrees: true, treeDepthRows: 3, curvedTaperedTrunks: true, radialConnectedBranching: true, canopyLobesPerTree: 11, upperCanopyWindFlex: true, forestShrubCount: shrubs.length, visibleRootFlares: true, lowPolygonBackgroundBranches: true, laboratoryTilesHidden: true, laboratoryBenchAndCupboardsReplaced: true, foregroundMeadowFillsArena: true, windAffectedTurf: true, mossBetweenGrassBlades: true, detailedDaisies: true }); const ready = shadowReady(g); trees.forEach(tree => tree.group.traverse(node => { if (node.isMesh) node.castShadow = false })); shrubs.forEach(shrub => shrub.castShadow = false); grass.castShadow = false; grass.receiveShadow = false; moss.castShadow = false; meadowSurface.castShadow = false; return ready
   }
   captureRig(state) {
@@ -4259,7 +4281,7 @@ export class LabRenderer3D {
     const litBunsens = this.flames.filter(f => f.loadTransition).length;
     if (litBunsens && (practicalChanged || litBunsens > previousLitBunsens)) this.bunsenLoadElapsed = 0;
     this.bunsenTransitionActive = litBunsens > 0 && this.bunsenLoadElapsed < this.bunsenLoadDuration;
-    this.applyCameraForPractical(p.id, state.hookeFocusProgress || 0);
+    this.applyCameraForPractical(p.id, state.hookeFocusProgress || 0, state.quadratCameraView === 'birdseye');
     if (this.sceneNeedsCompile) {
       if (this.pendingCanvasReveal && this.renderer.compileAsync) {
         this.sceneNeedsCompile = false;
@@ -5011,6 +5033,13 @@ export class LabRenderer3D {
         if (stage < 5) d.quadrat.position.copy(start); else d.quadrat.position.lerpVectors(start, target, eased);
         if (stage === 5) { d.quadrat.position.y += Math.sin(Math.PI * eased) * 1.78; if (q > .76) d.quadrat.position.y += Math.abs(Math.sin((q - .76) * Math.PI * 7)) * (1 - q) * .24; d.quadrat.rotation.set(Math.sin(Math.PI * q) * .18, (1 - eased) * Math.PI * 2.15 + rotations[sampleIndex], Math.sin(Math.PI * q * 2) * .13) } else d.quadrat.rotation.set(0, stage >= 6 ? rotations[sampleIndex] : -.12, 0);
         if (d.display) { const { canvas, context: dc, texture } = d.display, cycling = stage === 3, cx = cycling ? (Math.floor(clock * 8) % 10) + 1 : [2, 8, 5, 1, 7][sampleIndex], cy = cycling ? (Math.floor(clock * 13 + 3) % 10) + 1 : [7, 3, 5, 2, 8][sampleIndex]; dc.clearRect(0, 0, canvas.width, canvas.height); dc.fillStyle = '#071d20'; dc.fillRect(0, 0, canvas.width, canvas.height); dc.fillStyle = cycling ? '#fff07b' : '#85f3d2'; dc.shadowColor = cycling ? '#f9cf43' : '#57e8c1'; dc.shadowBlur = 18; dc.font = '800 90px ui-monospace, SFMono-Regular, Menlo, monospace'; dc.textAlign = 'center'; dc.textBaseline = 'middle'; dc.fillText(`X ${cx}   Y ${cy}`, 256, 91); dc.shadowBlur = 0; dc.fillStyle = '#bed3d3'; dc.font = '700 29px Inter, sans-serif'; dc.fillText(cycling ? 'RANDOMISING COORDINATES' : 'UNBIASED GRID POINT', 256, 174); texture.needsUpdate = true }
+        // Tilt the coordinate-generator screen flat so it reads clearly from
+        // directly overhead, and superimpose the numbered grid on request.
+        const birdsEye = state.quadratCameraView === 'birdseye', tiltTarget = birdsEye ? 1 : 0;
+        this.quadratDisplayTilt = THREE.MathUtils.lerp(this.quadratDisplayTilt, tiltTarget, 1 - Math.exp(-frameDt * 4.5));
+        if (Math.abs(this.quadratDisplayTilt - tiltTarget) < .003) this.quadratDisplayTilt = tiltTarget;
+        if (d.screen) { const tilt = this.quadratDisplayTilt; d.screen.rotation.x = THREE.MathUtils.lerp(0, -Math.PI / 2, tilt); d.screen.position.y = THREE.MathUtils.lerp(.43, .79, tilt); d.screen.position.z = THREE.MathUtils.lerp(.111, 0, tilt) }
+        if (d.coordGrid) d.coordGrid.visible = birdsEye && !!state.quadratShowGrid;
       }
       else if (d.kind === 'capture') {
         const clock = Math.max(0, state.meadowWindClock || 0), stage = state.captureStage || 0, timer = Math.max(0, state.captureTimer || 0), duration = CAPTURE_STAGE_DURATIONS[stage] || 1, clamp = q => Math.max(0, Math.min(1, q)), smooth = q => { q = clamp(q); return q * q * (3 - 2 * q) }, q = [1, 3, 5, 7].includes(stage) ? clamp(timer / duration) : 0, grow = smooth(clock / 2.8), wind = .72 + .28 * Math.sin(clock * .41);
