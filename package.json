@@ -3,7 +3,8 @@
   "scripts": {
     "start": "node server.mjs",
     "test:performance": "node qa_performance.mjs",
-    "vercel-build": "rm -rf public && mkdir -p public && cp index.html style.css app.js lab3d.js mains-leads.js thermalview.js assessment.js aaq.js aaq-catalog.js aaq-models.js aaq-scene.js aaq.css public/ && cp -R vendor public/vendor && cp -R 'hand (1)' 'public/hand (1)'",
-    "test:aaq": "node qa_aaq.mjs"
+    "vercel-build": "rm -rf public && mkdir -p public && cp index.html style.css app.js lab3d.js mains-leads.js thermalview.js assessment.js assessment-ui.js assessment-ui.css assessment-bench.js assessment-bench.css assessment-models.js assessment-assembly.js aaq.js aaq-catalog.js aaq-models.js aaq-scene.js aaq.css public/ && cp -R vendor public/vendor && cp -R 'hand (1)' 'public/hand (1)'",
+    "test:aaq": "node qa_aaq.mjs",
+    "test:assessment": "node qa_assessment_assembly.mjs && node --loader ./qa_playwright_loader.mjs qa_assessment_mode.mjs"
   }
 }

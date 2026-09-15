@@ -1,0 +1,25 @@
+.assembly-viewport{position:relative;isolation:isolate;overflow:hidden;min-height:380px;width:100%;height:100%;background:#eaf1f2;border-radius:14px}
+.assembly-canvas{position:absolute;inset:0;width:100%;height:100%;outline:none;touch-action:none}
+.assembly-canvas:focus-visible{outline:3px solid #079985;outline-offset:-4px}
+.assembly-guides,.assembly-labels{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.assembly-guides{z-index:2;overflow:visible}
+.assembly-labels{z-index:3}
+.assembly-item-label{position:absolute;transform:translateX(-50%);max-width:180px;padding:6px 10px;border:1px solid #d2dfe0;border-radius:7px;background:rgba(255,255,255,.94);box-shadow:0 3px 10px #0e263214;color:#263f49;font:600 13px/1.25 Inter,system-ui,sans-serif;text-align:center;pointer-events:auto;touch-action:none;cursor:grab}
+.assembly-item-label.is-selected{background:#e3f9f2;border-color:#078977;color:#065c52}
+.assembly-item-label:focus-visible{outline:3px solid #087f75;outline-offset:3px}
+.assembly-empty{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:12px;width:min(90%,480px);text-align:center;pointer-events:none;color:#233f4c}
+.assembly-empty[hidden]{display:none}
+.assembly-empty-symbol{display:grid;place-items:center;width:68px;height:68px;border:2px dashed #5d9e99;border-radius:20px;font:300 38px/1 system-ui;background:#faffffc9;color:#087f75}
+.assembly-empty strong{font-size:clamp(22px,2vw,30px);font-weight:700;letter-spacing:-.5px}
+.assembly-empty>span:last-child{font-size:17px;line-height:1.5;max-width:330px}
+.assembly-message{position:absolute;left:16px;right:16px;bottom:12px;z-index:4;padding:9px 13px;border:1px solid #c4ded9;border-radius:9px;background:#f8fffcf0;font-size:14px;line-height:1.35;color:#19544f;pointer-events:none;text-align:center}
+.assembly-message:empty{display:none}
+.assembly-fallback{background:linear-gradient(#ecf3f4 0 52%,#26495c 52% 92%,#183649 92%)}
+.assembly-fallback .assembly-item-label{padding:18px;min-width:100px;transform:translate(-50%,-100%)}
+@media(min-width:1700px){.assembly-item-label{font-size:16px;max-width:220px}.assembly-message{font-size:17px}}
+
+/* Numbered handles keep assembled glassware visible; full names stay in the library and selection toolbar. */
+.assembly-item-label{width:28px;height:28px;min-width:28px;max-width:28px;padding:0;display:grid;place-items:center;border-radius:50%;font-size:14px;font-weight:750;line-height:1;transform:translate(-50%,-50%);background:#fffffff0;border-color:#a8c5c8;box-shadow:0 2px 7px #12344125}
+.assembly-item-label.is-selected{background:#087f75;color:#fff;border-color:#087f75}
+.assembly-message{left:14px;right:auto;max-width:calc(100% - 28px);bottom:10px;opacity:.97;font-size:13px;padding:7px 11px}
+.assembly-fallback .assembly-item-label{width:90px;height:60px;min-width:90px;max-width:150px;border-radius:10px}

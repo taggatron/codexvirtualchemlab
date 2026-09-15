@@ -1,5 +1,8 @@
 import { drawThermalBenchScene } from './thermalview.js?v=20260908-4';
-import * as assessment from './assessment.js?v=20260902-1';
+import * as assessment from './assessment.js?v=20260916-1';
+import { createAssessmentUI } from './assessment-ui.js?v=20260916-1';
+import { serializeAssembly } from './assessment-assembly.js?v=20260916-1';
+let assessmentExperience = null;
 import { createCourseExperience } from './aaq.js?v=20260908-4';
 let courseExperience = null;
 const canvas = document.getElementById('lab'), visibleCtx = canvas.getContext('2d'), buffer = document.createElement('canvas'), webglCanvas = document.getElementById('webgl');
@@ -19,7 +22,7 @@ class DeferredLabRenderer {
     if (this.preloadTimer) clearTimeout(this.preloadTimer);
     if (this.idleHandle && 'cancelIdleCallback' in window) cancelIdleCallback(this.idleHandle);
     this.preloadTimer = 0; this.idleHandle = 0;
-    this.loading = import(`./lab3d.js?v=20260908-4`).then(({ LabRenderer3D }) => {
+    this.loading = import(`./lab3d.js?v=20260916-agar-tools-1`).then(({ LabRenderer3D }) => {
       const renderer = new LabRenderer3D(this.canvas);
       renderer.signature = this.pendingSignature;
       this.impl = renderer;
@@ -3331,6 +3334,7 @@ function drawHookeFocusModal() {
 function idDp(max) { return max < 10 ? 1 : 0 }
 function draw(skipWebGL = false) {
   courseExperience?.syncViewport();
+  assessmentExperience?.sync();
   if (state.course === 'aaq') return;
   regions = [];
   window.__buttonLabelAudit = [];
@@ -3342,7 +3346,8 @@ function draw(skipWebGL = false) {
   if (!portraitPromptVisible) {
     if (state.selected !== lastSelectedPractical) { state.reaction = null; lastSelectedPractical = state.selected }
     if (state.assessmentMode) {
-      assessment.drawAssessmentMode(ctx, W, H, state, practicals, hit);
+      // The native assessment overlay owns this view. Keep the underlying
+      // control canvas transparent so composite captures include that interface.
     } else {
       header(); sidebar();
       const arenaLeft = state.focusMode ? 0 : 270, arenaRight = state.focusMode ? W : W - Math.max(260, Math.min(330, W * .23));
@@ -4509,6 +4514,10 @@ canvas.addEventListener('pointercancel', () => {
   if (!state.drag) return;
   if (state.drag.kind === 'workspace') { const it = state.workspace.find(a => a.uid === state.drag.uid); if (it && state.drag.origin) Object.assign(it, state.drag.origin) } state.toast = 'Interaction cancelled.'; state.drag = null; draw() });
 document.addEventListener('keydown', e => {
+  if (state.assessmentMode) {
+    if (e.key.toLowerCase() === 'f' && !/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+    return;
+  }
   if (e.key === 'Escape') {
     if (state.graphModal || state.evaluationModal || state.reactantSafety || state.hookeFocusModal) {
       state.graphModal = false;
@@ -4537,7 +4546,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && document.fullscreenElement) document.exitFullscreen();
 });
 function update(dt, skipDraw = false) {
-  if (state.course === 'aaq') return;
+  if (state.course === 'aaq' || state.assessmentMode) return;
   state.flamePhase += dt * 3.4;
   const id = practicals[state.selected].id, free = id === 'free', heatLinks = free ? workspaceHeatLinks() : [], heated = new Set(heatLinks.map(link => link.beaker.uid)), reactionAnimating = free && state.reaction && !state.reaction.complete;
   const bunsenTransitionFrame = lab3d.advanceBunsenLoad(dt);
@@ -4800,11 +4809,13 @@ function update(dt, skipDraw = false) {
       const q = Math.max(0, Math.min(1, state.agarDiffusionTimer / duration));
       if (stage === 1) {
         state.progress = .08 * q;
-        state.toast = q < .34 ? 'The calliper jaws close gently around the 1 cm cube.' : q < .68 ? 'The 2 cm cube is checked along a second face.' : 'The 3 cm cube measures 3.0 cm in every direction.';
+        const sizeCm = Math.min(3, Math.floor(q * 3) + 1);
+        state.toast = `The calliper jaws touch opposite faces of the ${sizeCm} cm cube; the closed-jaw reading is ${sizeCm.toFixed(1)} cm.`;
         if (q >= 1) { state.agarDiffusionStage = 2; state.agarDiffusionTimer = 0; state.running = false; state.progress = .08; state.toast = 'Cube sides confirmed: 1.0 cm, 2.0 cm and 3.0 cm. Their surface-area-to-volume ratios are 6:1, 3:1 and 2:1.'; }
       } else if (stage === 3) {
         state.progress = .08 + .18 * q;
-        state.toast = q < .3 ? 'Forceps grip the 1 cm cube without crushing the agar.' : q < .72 ? 'Each cube arcs above its matching acid beaker in turn.' : 'The last cube lowers fully below the hydrochloric-acid meniscus.';
+        const index = Math.min(2, Math.floor(q * 3)), local = q * 3 - index, sizeCm = agarCubeSidesCm[index];
+        state.toast = local < .2 ? `Forceps close against opposite faces of the ${sizeCm} cm cube before lifting.` : local < .8 ? `The forceps hold the ${sizeCm} cm cube as it clears the rim and lowers into its acid beaker.` : `The ${sizeCm} cm cube rests fully below the acid surface before the forceps open and withdraw.`;
         if (q >= 1) { state.agarDiffusionStage = 4; state.agarDiffusionTimer = 0; state.running = false; state.progress = .26; state.toast = 'All three cubes are fully submerged in equal acid volumes. Start the shared 10-minute timer.'; }
       } else if (stage === 5) {
         state.time = 600 * q; state.progress = .26 + .38 * q;
@@ -4812,7 +4823,8 @@ function update(dt, skipDraw = false) {
         if (q >= 1) { state.agarDiffusionStage = 6; state.agarDiffusionTimer = 0; state.running = false; state.time = 600; state.progress = .64; state.toast = 'Ten minutes complete. Remove every cube promptly so the diffusion time remains controlled.'; }
       } else if (stage === 7) {
         state.progress = .64 + .14 * q;
-        state.toast = q < .34 ? 'Forceps lift the cubes clear and let excess acid drain into each beaker.' : q < .74 ? 'The cubes move to fresh blotting paper on the cutting tile.' : 'Blotting paper touches each surface lightly without compressing the agar.';
+        const sizeCm = agarCubeSidesCm[Math.min(2, Math.floor(q * 3))];
+        state.toast = `Forceps grip the ${sizeCm} cm cube, lift it clear of the beaker and place it on fresh blotting paper before releasing.`;
         if (q >= 1) { state.agarDiffusionStage = 8; state.agarDiffusionTimer = 0; state.running = false; state.progress = .78; state.toast = 'The blotted cubes are arranged by size on the cutting tile. Cut each one through its centre.'; }
       } else if (stage === 9) {
         state.progress = .78 + .17 * q;
@@ -5503,7 +5515,7 @@ function installPhotosynthesisMessageApi() {
 
 let last = performance.now(), animationFrameId = 0, animationTimerId = 0;
 function simulationFrameMode() {
-  if (state.course === 'aaq') return 'idle';
+  if (state.course === 'aaq' || state.assessmentMode) return 'idle';
   if (document.hidden || portraitPromptVisible || window.__manualSimulationTime) return 'idle';
   const id = practicals[state.selected]?.id;
   const active = state.running || state.burner || state.coolingWater || state.electroWeighing || state.pour || state.drag || state.massTransfer ||
@@ -6947,13 +6959,15 @@ window.render_game_to_text = () => {
     limitations_checked: !!session?.limitationsChecked,
     lowest_accuracy_identified: !!session?.benchInspection?.lowestAccuracyIdentified,
     upgraded_apparatus: session?.benchInspection?.upgradedApparatus || null,
-    dragged_apparatus_id: state.assessmentDrag?.itemId || null,
-    dragged_apparatus_moved: !!state.assessmentDrag?.moved,
-    slot_assignments: session?.slotAssignments || {}
+    dragged_apparatus_id: session?.assemblyDrag?.itemId || state.assessmentDrag?.itemId || null,
+    dragged_apparatus_moved: !!(session?.assemblyDrag?.moved || state.assessmentDrag?.moved),
+    slot_assignments: session?.slotAssignments || {},
+    assembly: session?.assemblySpec ? serializeAssembly(session) : null
   };
   return JSON.stringify(payload);
 };
 state.course = 'gcse';
+assessmentExperience = createAssessmentUI({ state, practicals, assessment, draw });
 courseExperience = createCourseExperience({
   onCourseChange: course => {
     state.course = course;
@@ -6973,4 +6987,13 @@ const renderGCSEState = window.render_game_to_text;
 window.render_game_to_text = () => courseExperience.active()
   ? JSON.stringify({ course: 'OCR AAQ Human Biology', ...courseExperience.getState(), controls: ['Qualification dropdown', 'Method steps', 'Condition slider', 'Primary action', 'NEW TRIAL', 'RESULTS', 'EVALUATE', 'F fullscreen'] })
   : JSON.stringify({ ...JSON.parse(renderGCSEState()), course: 'OCR GCSE Combined Science' });
+// Shareable local assessment links open the selected practical directly.
+const requestedAssessment = new URLSearchParams(location.search).get('assessment');
+const requestedAssessmentIndex = practicals.findIndex(practical => practical.id === requestedAssessment && practical.id !== 'free');
+if (requestedAssessmentIndex >= 0) {
+  state.selected = requestedAssessmentIndex;
+  state.subject = practicals[requestedAssessmentIndex].subject;
+  state.assessmentMode = true;
+  state.assessmentSession = assessment.createAssessmentSession(practicals[requestedAssessmentIndex]);
+}
 draw();

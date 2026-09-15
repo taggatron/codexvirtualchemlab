@@ -1100,6 +1100,15 @@ export class LabRenderer3D {
   }
   agarDiffusionRig(state) {
     const g = new THREE.Group(), sizesCm = [1, 2, 3], xs = [-1.85, 0, 1.85], beakerZ = -.78, boardZ = .86;
+    // Extruded bevels extend beyond the requested outline. Keep this practical's
+    // samples at their stated dimensions so the contact faces measure real cm.
+    const agarBox = (width, height, depth, radius) => {
+      const geometry = roundedBox(width, height, depth, radius);
+      geometry.computeBoundingBox();
+      const size = geometry.boundingBox.getSize(new THREE.Vector3());
+      geometry.scale(width / size.x, height / size.y, depth / size.z);
+      return geometry;
+    };
     const makeLabel = (line1, line2, width = .72, height = .25, accent = '#c64882') => {
       const canvas = document.createElement('canvas'), dc = canvas.getContext('2d'); canvas.width = 480; canvas.height = 168;
       dc.fillStyle = '#fffdf7'; dc.fillRect(0, 0, canvas.width, canvas.height); dc.strokeStyle = accent; dc.lineWidth = 9; dc.strokeRect(5, 5, canvas.width - 10, canvas.height - 10);
@@ -1118,12 +1127,12 @@ export class LabRenderer3D {
     const topPaper = new THREE.Mesh(roundedBox(1.22, .02, 1.06, .03), new THREE.MeshPhysicalMaterial({ color: 0xfffdf0, roughness: .96, clearcoat: .01, side: THREE.DoubleSide })); topPaper.visible = false; g.add(topPaper);
     const beakers = [];
     for (let i = 0; i < 3; i++) {
-      const beaker = this.beaker(.76, 0xb6dce2); beaker.position.set(xs[i], .035, beakerZ); beaker.scale.setScalar(.83); beaker.userData.liquidVolume.material.opacity = .48; beaker.userData.liquidVolume.material.transmission = .28; beaker.userData.liquidMeniscus.material.opacity = .42; g.add(beaker); beakers.push(beaker);
+      const beaker = this.beaker(.84, 0xb6dce2); beaker.position.set(xs[i], .035, beakerZ); beaker.userData.liquidVolume.material.opacity = .48; beaker.userData.liquidVolume.material.transmission = .28; beaker.userData.liquidMeniscus.material.opacity = .42; g.add(beaker); beakers.push(beaker);
       // The shared beaker helper keeps graduations readable through glass by
       // disabling depth tests. Here the callipers pass in front of the beakers,
       // so restore physical occlusion to keep those curved lines behind them.
       beaker.traverse(object => { if (object.geometry?.type === 'CylinderGeometry' && object.material?.isMeshBasicMaterial && object.material.depthTest === false) { object.material.depthTest = true; object.renderOrder = 1 } });
-      const label = makeLabel(`${sizesCm[i]} cm CUBE`, '100 cm³ DILUTE HCl', .92, .27); label.position.set(xs[i], .45, beakerZ + .585); g.add(label)
+      const label = makeLabel(`${sizesCm[i]} cm CUBE`, '100 cm³ DILUTE HCl', .92, .27); label.position.set(xs[i], .45, beakerZ + .705); g.add(label)
     }
     const acidBottle = this.labelledBiologyBottle('DILUTE HCl', 0xb8e4e9); acidBottle.position.set(-3.12, .05, -1.14); acidBottle.scale.setScalar(.55); g.add(acidBottle);
     const timer = this.digitalStopwatch(); timer.position.set(3.08, .05, -1.0); timer.rotation.y = -.08; timer.scale.setScalar(.68); g.add(timer);
@@ -1132,26 +1141,41 @@ export class LabRenderer3D {
     for (let mm = 0; mm <= 30; mm++) { const major = mm % 10 === 0, mid = mm % 5 === 0, mark = new THREE.Mesh(new THREE.BoxGeometry(.012, .012, major ? .22 : mid ? .16 : .1), markMat); mark.position.set(-2.48 + mm / 30 * 4.96, .069, -.17 + (major ? .11 : mid ? .08 : .05)); ruler.add(mark) }
     ruler.position.set(0, .125, 1.7); g.add(ruler);
     const callipers = new THREE.Group(), calliperSteel = metal(0xbcc8ca, .13), calliperDark = new THREE.MeshPhysicalMaterial({ color: 0x294149, roughness: .35, metalness: .18, clearcoat: .38 });
-    const calliperRail = new THREE.Mesh(roundedBox(1.35, .07, .09, .02), calliperSteel); callipers.add(calliperRail);
-    const calliperBody = new THREE.Mesh(roundedBox(.38, .28, .12, .04), calliperDark); calliperBody.position.set(.12, .04, 0); callipers.add(calliperBody);
-    const fixedJaw = new THREE.Mesh(roundedBox(.08, .52, .1, .018), calliperSteel); fixedJaw.position.set(-.58, -.2, 0); callipers.add(fixedJaw);
-    const movingJaw = new THREE.Mesh(roundedBox(.08, .52, .1, .018), calliperSteel); movingJaw.position.set(.32, -.2, 0); callipers.add(movingJaw); Object.assign(callipers.userData, { movingJaw }); callipers.visible = false; g.add(callipers);
-    const forceps = this.biologyForceps(); forceps.scale.setScalar(.62); forceps.visible = false; g.add(forceps);
+    const calliperRail = new THREE.Mesh(roundedBox(1.5, .06, .09, .015), calliperSteel); callipers.add(calliperRail);
+    const calliperBody = new THREE.Mesh(roundedBox(.44, .27, .14, .025), calliperDark); callipers.add(calliperBody);
+    // Flat inner faces provide a well-defined measuring gap, including thickness.
+    const fixedJaw = new THREE.Mesh(new THREE.BoxGeometry(.05, 1, .1), calliperSteel); fixedJaw.position.x = -.64; callipers.add(fixedJaw);
+    const movingJaw = new THREE.Mesh(new THREE.BoxGeometry(.05, 1, .1), calliperSteel); callipers.add(movingJaw);
+    const displayCanvas = document.createElement('canvas'); displayCanvas.width = 384; displayCanvas.height = 160;
+    const displayContext = displayCanvas.getContext('2d'), displayTexture = new THREE.CanvasTexture(displayCanvas); displayTexture.colorSpace = THREE.SRGBColorSpace;
+    const display = new THREE.Mesh(new THREE.PlaneGeometry(.4, .18), new THREE.MeshBasicMaterial({ map: displayTexture, toneMapped: false })); display.position.set(0, .035, .098); calliperBody.add(display);
+    const calliperDisplay = { canvas: displayCanvas, context: displayContext, texture: displayTexture, lastKey: '' };
+    Object.assign(callipers.userData, { fixedJaw, movingJaw }); callipers.visible = false; g.add(callipers);
+    // Cube tongs have broad, parallel pads and opening arms. Their origin is the
+    // midpoint of the contact faces, shared with the cube throughout transport.
+    const forceps = new THREE.Group(), forcepsPads = [], forcepsArms = [], tongSteel = metal(0xc9d3d5, .15);
+    for (const sign of [-1, 1]) {
+      const pad = new THREE.Mesh(new THREE.BoxGeometry(.04, .15, .16), calliperSteel); forceps.add(pad); forcepsPads.push(pad);
+      const lower = cylinder(.021, 1, tongSteel, 16), upper = cylinder(.024, 1, tongSteel, 16); forceps.add(lower, upper); forcepsArms.push({ sign, lower, upper });
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(.12, .024, 12, 36), tongSteel); ring.position.set(sign * .115, 1.38, 0); forceps.add(ring);
+    }
+    const hinge = cylinder(.055, .1, calliperDark, 24); hinge.rotation.x = Math.PI / 2; hinge.position.y = 1.12; forceps.add(hinge);
+    forceps.visible = false; g.add(forceps);
     const scalpel = new THREE.Group(), handle = new THREE.Mesh(roundedBox(1.02, .15, .18, .05), new THREE.MeshPhysicalMaterial({ color: 0x24444b, roughness: .42, clearcoat: .3 })); handle.position.x = .37; scalpel.add(handle);
     const bladeShape = new THREE.Shape(); bladeShape.moveTo(-.22, -.13); bladeShape.lineTo(-.72, -.035); bladeShape.lineTo(-.22, .13); bladeShape.lineTo(.02, .08); bladeShape.lineTo(.02, -.08); bladeShape.closePath();
     const blade = new THREE.Mesh(new THREE.ExtrudeGeometry(bladeShape, { depth: .035, bevelEnabled: true, bevelSegments: 2, bevelSize: .01, bevelThickness: .008 }), metal(0xd8e1e2, .08)); blade.position.set(-.2, 0, -.018); scalpel.add(blade); scalpel.visible = false; g.add(scalpel);
     const cubes = [], acidParticles = [];
     sizesCm.forEach((sizeCm, index) => {
       const side = sizeCm * .26, coreSide = Math.max(.04, (sizeCm - .6) * .26), group = new THREE.Group(), pinkMat = new THREE.MeshPhysicalMaterial({ color: 0xe43f91, transparent: true, opacity: .95, transmission: .08, roughness: .25, clearcoat: .36, clearcoatRoughness: .25 }), outerMat = pinkMat.clone(), paleMat = new THREE.MeshPhysicalMaterial({ color: 0xf7e8dc, transparent: true, opacity: .84, transmission: .12, roughness: .38, clearcoat: .2 }), coreMat = new THREE.MeshPhysicalMaterial({ color: 0xe43f91, transparent: true, opacity: .96, transmission: .06, roughness: .26, clearcoat: .3 });
-      const full = new THREE.Mesh(roundedBox(side, side, side, Math.min(.045, side * .1)), outerMat); group.add(full);
-      const core = new THREE.Mesh(roundedBox(side * .96, side * .96, side * .96, Math.min(.035, side * .08)), coreMat); core.visible = false; core.renderOrder = 9; group.add(core);
-      const halves = new THREE.Group(), halfDepth = side / 2 - .012, backHalf = new THREE.Group(), frontHalf = new THREE.Group(), backBlock = new THREE.Mesh(roundedBox(side, side, halfDepth, Math.min(.035, side * .08)), paleMat.clone()), frontBlock = new THREE.Mesh(roundedBox(side, side, halfDepth, Math.min(.035, side * .08)), paleMat.clone()); backHalf.add(backBlock); frontHalf.add(frontBlock);
+      const full = new THREE.Mesh(agarBox(side, side, side, Math.min(.045, side * .1)), outerMat); group.add(full);
+      const core = new THREE.Mesh(agarBox(side, side, side, Math.min(.035, side * .08)), coreMat); core.visible = false; core.renderOrder = 9; group.add(core);
+      const halves = new THREE.Group(), halfDepth = side / 2 - .012, backHalf = new THREE.Group(), frontHalf = new THREE.Group(), backBlock = new THREE.Mesh(agarBox(side, side, halfDepth, Math.min(.035, side * .08)), paleMat.clone()), frontBlock = new THREE.Mesh(agarBox(side, side, halfDepth, Math.min(.035, side * .08)), paleMat.clone()); backHalf.add(backBlock); frontHalf.add(frontBlock);
       const makeCutFace = z => { const face = new THREE.Mesh(new THREE.PlaneGeometry(side * .96, side * .96), new THREE.MeshBasicMaterial({ color: 0xf5e5d8, side: THREE.DoubleSide, toneMapped: false })); face.position.z = z; face.renderOrder = 11; const pink = new THREE.Mesh(new THREE.PlaneGeometry(coreSide, coreSide), new THREE.MeshBasicMaterial({ color: 0xe5388a, side: THREE.DoubleSide, toneMapped: false })); pink.position.z = z + Math.sign(z || 1) * .003; pink.renderOrder = 12; const border = new THREE.LineSegments(new THREE.EdgesGeometry(pink.geometry), new THREE.LineBasicMaterial({ color: 0xa82167 })); border.position.copy(pink.position); border.renderOrder = 13; return { face, pink, border } };
       const backFace = makeCutFace(halfDepth / 2 + .004), frontFace = makeCutFace(-halfDepth / 2 - .004); backHalf.add(backFace.face, backFace.pink, backFace.border); frontHalf.add(frontFace.face, frontFace.pink, frontFace.border); halves.add(backHalf, frontHalf); halves.visible = false; group.add(halves);
       group.position.set(xs[index], .15 + side / 2, boardZ); g.add(group); cubes.push({ group, side, sizeCm, coreSide, full, outerMat, core, halves, backHalf, frontHalf, pinkMat, paleMat });
       for (let particleIndex = 0; particleIndex < 12; particleIndex++) { const particle = new THREE.Mesh(new THREE.SphereGeometry(.018 + particleIndex % 3 * .003, 12, 8), new THREE.MeshBasicMaterial({ color: 0x68c8e5, transparent: true, opacity: .82, depthWrite: false, depthTest: false, toneMapped: false })); particle.visible = false; particle.renderOrder = 18; g.add(particle); acidParticles.push({ mesh: particle, cubeIndex: index, particleIndex }) }
     });
-    this.dynamic.push({ kind: 'agarDiffusion', cubes, xs, beakerZ, boardZ, beakers, forceps, callipers, calliperMovingJaw: movingJaw, scalpel, topPaper, acidParticles, timerDisplay: timer.userData.display });
+    this.dynamic.push({ kind: 'agarDiffusion', cubes, xs, beakerZ, boardZ, beakers, forceps, forcepsPads, forcepsArms, callipers, calliperFixedJaw: fixedJaw, calliperMovingJaw: movingJaw, calliperBody, calliperDisplay, scalpel, topPaper, acidParticles, timerDisplay: timer.userData.display });
     Object.assign(g.userData, { agarDiffusionRig: true, cubeSidesCm: sizesCm, acidVolumeCm3Each: 100, equalImmersionMinutes: 10, diffusionDepthCm: .3, phenolphthaleinAlkalineAgar: true, separateIdenticalAcidBeakers: 3, centralCutRevealsPinkCore: true }); return shadowReady(g)
   }
   potometerLeafyShoot() {
@@ -5112,23 +5136,24 @@ export class LabRenderer3D {
       }
       else if (d.kind === 'agarDiffusion') {
         const stage = state.agarDiffusionStage || 0, timer = Math.max(0, state.agarDiffusionTimer || 0), durations = { 1: 3.4, 3: 4.2, 5: 7.2, 7: 4.4, 9: 5.6 }, duration = durations[stage] || 1, q = Math.max(0, Math.min(1, timer / duration)), clamp = value => Math.max(0, Math.min(1, value)), smooth = value => { value = clamp(value); return value * value * (3 - 2 * value) };
-        const diffusionQ = stage < 5 ? 0 : stage === 5 ? smooth(q) : 1, pinkColour = new THREE.Color(0xe43f91), paleColour = new THREE.Color(0xf6e5d9); let heldCube = null;
+        const diffusionQ = stage < 5 ? 0 : stage === 5 ? smooth(q) : 1, pinkColour = new THREE.Color(0xe43f91), paleColour = new THREE.Color(0xf6e5d9);
+        const activeIndex = Math.min(d.cubes.length - 1, Math.floor(q * d.cubes.length)), local = clamp(q * d.cubes.length - activeIndex), transferring = stage === 3 || stage === 7;
+        const activeCube = d.cubes[activeIndex];
         d.cubes.forEach((cube, index) => {
-          const boardPosition = new THREE.Vector3(d.xs[index], .15 + cube.side / 2, d.boardZ), acidPosition = new THREE.Vector3(d.xs[index], .4 + cube.side * .08, d.beakerZ), aboveAcid = new THREE.Vector3(d.xs[index], 1.72 + cube.side * .22, d.beakerZ), position = new THREE.Vector3(); let transferLocal = 0;
+          const beaker = d.beakers[index], boardPosition = new THREE.Vector3(d.xs[index], .15 + cube.side / 2, d.boardZ), acidPosition = new THREE.Vector3(d.xs[index], beaker.position.y + .13 + cube.side / 2, d.beakerZ), position = new THREE.Vector3();
           if (stage <= 2) position.copy(boardPosition);
-          else if (stage === 3) {
-            transferLocal = smooth((q - index * .17) / .66);
-            if (transferLocal < .58) { const move = smooth(transferLocal / .58); position.lerpVectors(boardPosition, aboveAcid, move); position.y += Math.sin(Math.PI * move) * .35 }
-            else position.lerpVectors(aboveAcid, acidPosition, smooth((transferLocal - .58) / .42));
-            if (transferLocal > .015 && transferLocal < .995) heldCube = cube
+          else if (transferring) {
+            const from = stage === 3 ? boardPosition : acidPosition, to = stage === 3 ? acidPosition : boardPosition;
+            // One complete grip/lift/place/release cycle per cube. Horizontal
+            // travel begins only once the cube's bottom clears the beaker rim.
+            const transferLocal = clamp((clamp(q * d.cubes.length - index) - .2) / .6), clearanceY = beaker.position.y + 1.5 + cube.side / 2;
+            const aboveFrom = from.clone().setY(clearanceY), aboveTo = to.clone().setY(clearanceY);
+            if (transferLocal < .3) position.lerpVectors(from, aboveFrom, smooth(transferLocal / .3));
+            else if (transferLocal < .65) { const across = smooth((transferLocal - .3) / .35); position.lerpVectors(aboveFrom, aboveTo, across); position.y += Math.sin(Math.PI * across) * .12 }
+            else position.lerpVectors(aboveTo, to, smooth((transferLocal - .65) / .35));
           } else if (stage <= 6) position.copy(acidPosition);
-          else if (stage === 7) {
-            transferLocal = smooth((q - index * .17) / .66);
-            if (transferLocal < .42) position.lerpVectors(acidPosition, aboveAcid, smooth(transferLocal / .42));
-            else { const move = smooth((transferLocal - .42) / .58); position.lerpVectors(aboveAcid, boardPosition, move); position.y += Math.sin(Math.PI * move) * .28 }
-            if (transferLocal > .015 && transferLocal < .995) heldCube = cube
-          } else position.copy(boardPosition);
-          cube.group.position.copy(position); cube.group.rotation.y = stage === 3 || stage === 7 ? Math.sin(transferLocal * Math.PI) * .08 : 0;
+          else position.copy(boardPosition);
+          cube.group.position.copy(position); cube.group.rotation.set(0, 0, 0);
           cube.outerMat.color.copy(pinkColour).lerp(paleColour, diffusionQ); cube.outerMat.opacity = .95 - diffusionQ * .28; cube.outerMat.transmission = .08 + diffusionQ * .1;
           const coreScale = THREE.MathUtils.lerp(.96, cube.coreSide / cube.side, diffusionQ); cube.core.scale.setScalar(coreScale); cube.core.visible = diffusionQ > .015 && stage < 9;
           const cutLocal = stage < 9 ? 0 : stage === 9 ? smooth((q - index * .27) / .4) : 1, separated = smooth((cutLocal - .42) / .58);
@@ -5138,13 +5163,35 @@ export class LabRenderer3D {
           cube.frontHalf.rotation.y = -.1 * separated; cube.backHalf.rotation.y = .04 * separated;
         });
         d.callipers.visible = stage === 1;
-        if (d.callipers.visible) { const index = Math.min(2, Math.floor(q * 3)), cube = d.cubes[index], local = (q * 3) % 1, close = smooth(local / .32) * (1 - smooth((local - .78) / .22)); d.callipers.position.set(d.xs[index], .78 + cube.side, d.boardZ + .18); d.callipers.rotation.set(.05, 0, -.05 + .025 * Math.sin(time * .006)); d.callipers.scale.setScalar(.86); d.calliperMovingJaw.position.x = THREE.MathUtils.lerp(.42, -.58 + cube.side / .86, close) }
-        d.forceps.visible = !!heldCube;
-        if (heldCube) { d.forceps.position.copy(heldCube.group.position).add(new THREE.Vector3(0, .82 + heldCube.side * .35, .03)); d.forceps.rotation.set(.02, 0, Math.PI / 2); d.forceps.scale.setScalar(.62) }
+        if (d.callipers.visible) {
+          const close = smooth((local - .16) / .14) * (1 - smooth((local - .72) / .12)), gap = activeCube.side + .16 * (1 - close), jawHeight = activeCube.side / 2 + .24;
+          const lift = .55 * (1 - smooth(local / .16) + smooth((local - .84) / .16));
+          d.callipers.position.copy(activeCube.group.position).add(new THREE.Vector3(-activeCube.side / 2 + .615, activeCube.side / 2 + .14 + lift, 0));
+          d.callipers.rotation.set(0, 0, 0);
+          d.calliperMovingJaw.position.x = d.calliperFixedJaw.position.x + .05 + gap;
+          for (const jaw of [d.calliperFixedJaw, d.calliperMovingJaw]) { jaw.scale.y = jawHeight; jaw.position.y = -jawHeight / 2 + .025 }
+          d.calliperBody.position.set(d.calliperMovingJaw.position.x, .035, 0);
+          // Read the inner-face separation, not a hardcoded sample label.
+          const measuredCm = (d.calliperMovingJaw.position.x - d.calliperFixedJaw.position.x - .05) / .26, reading = `${measuredCm.toFixed(1)} cm`, display = d.calliperDisplay;
+          if (display.lastKey !== reading) { const dc = display.context; dc.fillStyle = '#d7eee1'; dc.fillRect(0, 0, display.canvas.width, display.canvas.height); dc.fillStyle = '#153e35'; dc.font = '700 86px ui-monospace, monospace'; dc.textAlign = 'center'; dc.textBaseline = 'middle'; dc.fillText(reading, 192, 84); display.texture.needsUpdate = true; display.lastKey = reading }
+        }
+        d.forceps.visible = transferring;
+        if (d.forceps.visible) {
+          const close = smooth((local - .1) / .1) * (1 - smooth((local - .86) / .06)), gap = activeCube.side + .16 * (1 - close);
+          const lift = (1 - smooth(local / .1) + smooth((local - .92) / (stage === 7 ? .04 : .08))) * 1.55;
+          d.forceps.position.copy(activeCube.group.position).add(new THREE.Vector3(0, lift, 0)); d.forceps.quaternion.copy(activeCube.group.quaternion);
+          const up = new THREE.Vector3(0, 1, 0), setArm = (arm, from, to) => { const direction = to.clone().sub(from); arm.position.copy(from).add(to).multiplyScalar(.5); arm.scale.y = direction.length(); arm.quaternion.setFromUnitVectors(up, direction.normalize()) };
+          d.forcepsArms.forEach(({ sign, lower, upper }, index) => {
+            const x = sign * (gap / 2 + .02), shoulder = new THREE.Vector3(x, activeCube.side / 2 + .13, 0);
+            d.forcepsPads[index].position.set(x, 0, 0);
+            setArm(lower, new THREE.Vector3(x, .055, 0), shoulder); setArm(upper, shoulder, new THREE.Vector3(sign * .055, 1.28, 0));
+          });
+        }
         d.scalpel.visible = stage === 9;
         if (d.scalpel.visible) { const index = Math.min(2, Math.floor(q * 3)), cube = d.cubes[index], local = (q * 3) % 1, down = smooth(local / .4), across = smooth((local - .18) / .52), rise = smooth((local - .78) / .22); d.scalpel.position.set(d.xs[index] + THREE.MathUtils.lerp(-.38, .32, across), .66 + cube.side - down * .42 + rise * .34, d.boardZ + .12); d.scalpel.rotation.set(0, -.1, -.3 + across * .16) }
-        d.topPaper.visible = stage === 7 && !!heldCube && q > .55;
-        if (d.topPaper.visible) { const index = d.cubes.indexOf(heldCube), local = smooth((q - Math.max(.55, index * .17 + .46)) / .16); d.topPaper.position.set(d.xs[index], THREE.MathUtils.lerp(1.28, .34 + heldCube.side, local), d.boardZ); d.topPaper.rotation.z = .04 * (1 - local) }
+        // Wait until the open tongs are above the sample before blotting it.
+        d.topPaper.visible = stage === 7 && local >= .96;
+        if (d.topPaper.visible) { const press = Math.sin(Math.PI * clamp((local - .96) / .04)); d.topPaper.position.set(d.xs[activeIndex], .15 + activeCube.side + .01 + .28 * (1 - press), d.boardZ); d.topPaper.rotation.z = .04 * (1 - press) }
         for (const entry of d.acidParticles) { const cube = d.cubes[entry.cubeIndex], active = stage === 5, cycle = (time * .00034 * (1 + entry.particleIndex % 4 * .08) + entry.particleIndex * .113 + entry.cubeIndex * .19) % 1, eased = smooth(cycle), angle = entry.particleIndex * 2.399 + entry.cubeIndex * .58, startRadius = .57, targetRadius = Math.max(.05, cube.side * .42 * (1 - diffusionQ * .42)); entry.mesh.visible = active; if (active) { entry.mesh.position.set(cube.group.position.x + Math.cos(angle) * THREE.MathUtils.lerp(startRadius, targetRadius, eased), cube.group.position.y + (entry.particleIndex % 5 - 2) * cube.side * .12 + Math.sin(cycle * Math.PI) * .05, cube.group.position.z + Math.sin(angle) * THREE.MathUtils.lerp(startRadius * .66, targetRadius, eased)); entry.mesh.material.opacity = Math.sin(Math.PI * Math.min(.999, cycle)) * .84; entry.mesh.scale.setScalar(.66 + (1 - eased) * .5) } }
         d.beakers.forEach((beaker, index) => { const meniscus = beaker.userData.liquidMeniscus, active = stage === 5; if (meniscus) { const pulse = active ? 1 + .012 * Math.sin(time * .005 + index) : 1; meniscus.scale.set(pulse, 1, pulse) } });
         if (d.timerDisplay) { const { canvas, context: dc, texture } = d.timerDisplay, minutes = stage < 5 ? 0 : stage === 5 ? q * 10 : 10, active = stage === 5; dc.clearRect(0, 0, canvas.width, canvas.height); dc.fillStyle = '#071c22'; dc.fillRect(0, 0, canvas.width, canvas.height); dc.shadowColor = active ? '#ff79bb' : '#79f2df'; dc.shadowBlur = 18; dc.fillStyle = active ? '#ff96c8' : '#8af4df'; dc.font = '800 82px ui-monospace, SFMono-Regular, Menlo, monospace'; dc.textAlign = 'center'; dc.textBaseline = 'middle'; dc.fillText(`${String(Math.floor(minutes)).padStart(2, '0')}:${String(Math.floor((minutes % 1) * 60)).padStart(2, '0')}`, 256, 86); dc.shadowBlur = 0; dc.fillStyle = '#b6c9cd'; dc.font = '700 27px Inter, sans-serif'; dc.fillText(active ? 'EQUAL DIFFUSION TIME' : '10 MIN TIMER', 256, 171); texture.needsUpdate = true }

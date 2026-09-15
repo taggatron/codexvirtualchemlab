@@ -1,3 +1,5 @@
+import { createAssemblySpec, evaluateAssembly } from './assessment-assembly.js?v=20260916-1';
+
 // Assessment and Testing Mode Module for OCR GCSE Combined Science Lab
 // Provides interactive practical assessments: apparatus selection and bench arrangement,
 // method step sequencing and scientific reasoning questions, and addressing procedural limitations
@@ -939,9 +941,19 @@ export function getPracticalAssessment(practical) {
 // ----------------------------------------------------------------------------
 
 export function createAssessmentSession(practical) {
-  const data = getPracticalAssessment(practical);
-  
-  return {
+  const data = structuredClone(getPracticalAssessment(practical));
+  const shuffle = values => {
+    const result = [...values];
+    for (let i = result.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [result[i], result[j]] = [result[j], result[i]]; }
+    return result;
+  };
+  data.methodChallenge.reasoningQuestions.forEach(q => { q.options = shuffle(q.options); });
+  data.limitationsChallenge.forEach(q => { q.options = shuffle(q.options); });
+  const stepIds = data.methodChallenge.scrambledSteps.map(s => s.id);
+  let orderedStepIds = shuffle(stepIds);
+  if (orderedStepIds.length > 1 && orderedStepIds.every((id, i) => id === data.methodChallenge.correctOrder[i])) orderedStepIds.push(orderedStepIds.shift());
+  const assemblySpec = createAssemblySpec(practical, data);
+  const session = {
     practicalId: practical.id,
     data,
     currentPhase: 'apparatus', // 'apparatus' | 'method' | 'limitations' | 'summary'
@@ -957,13 +969,17 @@ export function createAssessmentSession(practical) {
     
     // Phase 1: Apparatus state
     selectedEquipment: new Set(),
-    slotAssignments: {}, // slotId -> itemId
+    slotAssignments: {}, // Legacy diagnostic compatibility
+    assemblySpec,
+    placedEquipment: {},
+    assemblyConnections: [],
+    assemblyHistory: [],
     apparatusChecked: false,
     apparatusScore: 0,
     apparatusFeedback: null,
     
     // Phase 2: Method state
-    orderedStepIds: [...data.methodChallenge.scrambledSteps.map(s => s.id)],
+    orderedStepIds,
     methodOrderChecked: false,
     methodOrderScore: 0,
     questionAnswers: {}, // questionId -> optionIndex
@@ -988,51 +1004,23 @@ export function createAssessmentSession(practical) {
     maxPossibleScore: 0,
     grade: 'Pending'
   };
+  updateSessionTotals(session);
+  return session;
 }
 
 // Check Apparatus phase
 export function checkApparatusPhase(session) {
-  const challenge = session.data.apparatusChallenge;
-  let score = 0;
-  let max = challenge.slots.length + 2; // Marks for slots + marks for avoiding distractors
-  const feedbackItems = [];
-  
-  // Check slot assignments
-  challenge.slots.forEach(slot => {
-    const assignedId = session.slotAssignments[slot.id];
-    if (assignedId === slot.requiredItem) {
-      score += 1;
-      feedbackItems.push({ slot: slot.label, status: 'correct', message: `✓ Correct: Assigned required ${slot.hint}.` });
-    } else if (assignedId) {
-      const item = challenge.palette.find(p => p.id === assignedId);
-      feedbackItems.push({ slot: slot.label, status: 'incorrect', message: `✕ Incorrect: ${item?.name || 'Selected item'} does not match ${slot.label}.` });
-    } else {
-      feedbackItems.push({ slot: slot.label, status: 'missing', message: `⚠ Empty: ${slot.label} was not assigned.` });
-    }
-  });
-  
-  // Check distractors avoided
-  const chosenDistractors = Array.from(session.selectedEquipment)
-    .map(id => challenge.palette.find(p => p.id === id))
-    .filter(p => p && !p.isCorrect);
-  
-  if (chosenDistractors.length === 0) {
-    score += 2;
-    feedbackItems.push({ slot: 'Selection Precision', status: 'correct', message: '✓ Full marks: No distractor apparatus selected.' });
-  } else {
-    chosenDistractors.forEach(d => {
-      feedbackItems.push({ slot: 'Distractor Identified', status: 'incorrect', message: `✕ Penalty: ${d.name} is unsuitable (${d.distractorReason}).` });
-    });
-  }
-  
-  session.apparatusScore = score;
+  const result = evaluateAssembly(session);
+  session.apparatusScore = result.score;
+  session.apparatusMaxScore = result.max;
   session.apparatusChecked = true;
-  session.apparatusFeedback = feedbackItems;
+  session.apparatusFeedback = result.feedback;
+  session.assemblyEvaluation = result;
   updateSessionTotals(session);
 }
 
 // Check Method phase
-export function checkMethodPhase(session) {
+export function checkMethodPhase(session, section = 'both') {
   const challenge = session.data.methodChallenge;
   let orderScore = 0;
   const correct = challenge.correctOrder;
@@ -1041,8 +1029,10 @@ export function checkMethodPhase(session) {
   session.orderedStepIds.forEach((id, idx) => {
     if (id === correct[idx]) orderScore += 1;
   });
-  session.methodOrderScore = orderScore;
-  session.methodOrderChecked = true;
+  if (section !== 'questions') {
+    session.methodOrderScore = orderScore;
+    session.methodOrderChecked = true;
+  }
   
   // Check reasoning questions
   let qScore = 0;
@@ -1052,8 +1042,10 @@ export function checkMethodPhase(session) {
       qScore += 2; // 2 marks per GCSE question
     }
   });
-  session.methodQuestionsScore = qScore;
-  session.methodQuestionsChecked = true;
+  if (section !== 'order') {
+    session.methodQuestionsScore = qScore;
+    session.methodQuestionsChecked = true;
+  }
   updateSessionTotals(session);
 }
 
@@ -1077,25 +1069,26 @@ export function checkLimitationsPhase(session) {
 // Update total scores and estimated GCSE grade
 export function updateSessionTotals(session) {
   const challenge = session.data;
-  const maxApparatus = challenge.apparatusChallenge.slots.length + 2;
+  const maxApparatus = session.assemblySpec ? evaluateAssembly(session).max : challenge.apparatusChallenge.slots.length + 2;
+  session.apparatusMaxScore = maxApparatus;
   const maxOrder = challenge.methodChallenge.correctOrder.length;
   const maxQuestions = challenge.methodChallenge.reasoningQuestions.length * 2;
   const maxLimitations = challenge.limitationsChallenge.length * 3;
   
   const totalMax = maxApparatus + maxOrder + maxQuestions + maxLimitations;
+  // An edited response earns no marks until it has been checked again.
+  if (!session.apparatusChecked) session.apparatusScore = 0;
+  if (!session.methodOrderChecked) session.methodOrderScore = 0;
+  if (!session.methodQuestionsChecked) session.methodQuestionsScore = 0;
+  if (!session.limitationsChecked) session.limitationsScore = 0;
   const currentTotal = session.apparatusScore + session.methodOrderScore + session.methodQuestionsScore + session.limitationsScore;
   
   session.maxPossibleScore = totalMax;
   session.totalScore = currentTotal;
   
   const pct = totalMax > 0 ? (currentTotal / totalMax) * 100 : 0;
-  if (pct >= 85) session.grade = 'Grade 9';
-  else if (pct >= 75) session.grade = 'Grade 8';
-  else if (pct >= 65) session.grade = 'Grade 7';
-  else if (pct >= 55) session.grade = 'Grade 6';
-  else if (pct >= 45) session.grade = 'Grade 5';
-  else if (pct >= 35) session.grade = 'Grade 4 (Pass)';
-  else session.grade = 'Working Towards';
+  const complete = session.apparatusChecked && session.methodOrderChecked && session.methodQuestionsChecked && session.limitationsChecked;
+  session.grade = !complete ? 'In progress' : pct >= 85 ? 'Secure understanding' : pct >= 60 ? 'Developing confidence' : 'Keep practising';
 }
 
 // ----------------------------------------------------------------------------

@@ -1,247 +1,147 @@
 import { chromium } from 'playwright';
 import fs from 'node:fs';
-
-const out = 'output/assessment-qa';
+import assert from 'node:assert/strict';
+const out = 'output/playwright/assessment-spatial';
 fs.mkdirSync(out, { recursive: true });
-
-const browser = await chromium.launch({
-  headless: true,
-  args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader']
-});
-
-const page = await browser.newPage({ viewport: { width: 1280, height: 720 }, deviceScaleFactor: 1 });
+const browser = await chromium.launch({ headless: true, args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
+const page = await browser.newPage({ viewport: { width: 1600, height: 1000 }, deviceScaleFactor: 1 });
 const errors = [];
-page.on('console', msg => { if (msg.type() === 'error') errors.push(`console: ${msg.text()}`); });
-page.on('pageerror', err => errors.push(`page: ${err.message}`));
-
-try {
-  await page.goto(`http://127.0.0.1:4173/?qa=${Date.now()}`, { waitUntil: 'networkidle' });
-  await page.waitForFunction(() => typeof window.render_game_to_text === 'function' && window.__lab);
-
-  const getState = () => page.evaluate(() => JSON.parse(window.render_game_to_text()));
-
-  const getRegionCenter = async (id, dataMatch = null) => {
-    return page.evaluate(({ id, dataMatch }) => {
-      const regions = window.__lab.getRegions();
-      const reg = regions.find(r => {
-        if (r.id !== id) return false;
-        if (dataMatch === null) return true;
-        if (typeof dataMatch === 'object') {
-          return Object.keys(dataMatch).every(k => r.data?.[k] === dataMatch[k]);
-        }
-        return r.data === dataMatch;
-      });
-      if (!reg) return null;
-      const canvas = document.getElementById('lab');
-      const rect = canvas.getBoundingClientRect();
-      const scale = window.__lab.getScale();
-      return {
-        x: rect.left + (reg.x + reg.w / 2) * scale,
-        y: rect.top + (reg.y + reg.h / 2) * scale
-      };
-    }, { id, dataMatch });
-  };
-
-  const clickRegion = async (id, dataMatch = null) => {
-    const pt = await getRegionCenter(id, dataMatch);
-    if (!pt) throw new Error(`Region ${id} (data: ${JSON.stringify(dataMatch)}) not found`);
-    await page.mouse.click(pt.x, pt.y);
-    await page.waitForTimeout(140);
-  };
-
-  const dragRegion = async (sourceId, sourceData, targetId, targetData) => {
-    const src = await getRegionCenter(sourceId, sourceData);
-    if (!src) throw new Error(`Source region ${sourceId} not found`);
-    const tgt = await getRegionCenter(targetId, targetData);
-    if (!tgt) throw new Error(`Target region ${targetId} not found`);
-    await page.mouse.move(src.x, src.y);
-    await page.mouse.down();
-    await page.mouse.move((src.x + tgt.x) / 2, (src.y + tgt.y) / 2, { steps: 5 });
-    await page.mouse.move(tgt.x, tgt.y, { steps: 5 });
-    await page.mouse.up();
-    await page.waitForTimeout(120);
-  };
-
-  // 1. Initial State Check
-  const s0 = await getState();
-  console.log('1. Initial lab loaded:', s0.practical, '| assessment_mode:', s0.assessment_mode?.active);
-  if (s0.assessment_mode?.active !== false) throw new Error('Assessment mode should start inactive');
-
-  // 2. Select Practical: Anaerobic respiration in yeast
-  await page.evaluate(() => {
-    const { state, practicals, draw } = window.__lab;
-    const pIdx = practicals.findIndex(p => p.id === 'respiration');
-    if (pIdx >= 0) {
-      state.selected = pIdx;
-      state.subject = 'biology';
-      draw();
-    }
-  });
-  await page.waitForTimeout(100);
-  const s1 = await getState();
-  console.log('2. Selected practical:', s1.practical);
-
-  // 3. Enter Assessment Mode via actual mouse click on header button
-  await clickRegion('toggle-assessment-mode');
-  const s2 = await getState();
-  console.log('3. Clicked header button -> Assessment mode active:', s2.assessment_mode?.active, 'phase:', s2.assessment_mode?.phase);
-  if (!s2.assessment_mode?.active) throw new Error('Assessment mode failed to activate');
-  await page.screenshot({ path: `${out}/01-apparatus-initial.png`, fullPage: true });
-
-  // 4. Activity 1: Direct Tactical Drag & Drop Apparatus Assembly
-  // A. Test dragging gas_syringe from library palette directly onto the gas collector slot
-  console.log('4a. Dragging gas_syringe onto gas collector slot...');
-  await dragRegion('assessment-toggle-equipment', 'gas_syringe', 'assessment-bench-slot', 'collector');
-  const sDrag1 = await getState();
-  console.log('   Slot assignments after drag 1:', sDrag1.assessment_mode?.slot_assignments);
-  if (sDrag1.assessment_mode?.slot_assignments?.collector !== 'gas_syringe') {
-    throw new Error(`Expected collector slot to be gas_syringe, got ${sDrag1.assessment_mode?.slot_assignments?.collector}`);
-  }
-
-  // B. Test dragging between bench slots (move collector item to temperature slot, then restore)
-  console.log('4b. Dragging from bench slot collector to temperature slot...');
-  await dragRegion('assessment-bench-slot', 'collector', 'assessment-bench-slot', 'temperature');
-  const sDragMove = await getState();
-  if (sDragMove.assessment_mode?.slot_assignments?.temperature !== 'gas_syringe') {
-    throw new Error(`Expected temperature slot to hold moved item, got ${sDragMove.assessment_mode?.slot_assignments?.temperature}`);
-  }
-  await dragRegion('assessment-bench-slot', 'temperature', 'assessment-bench-slot', 'collector');
-
-  // C. Drag & drop remaining pieces to fully assemble the apparatus rig on the workbench
-  console.log('4c. Dragging remaining equipment onto workbench stations...');
-  await dragRegion('assessment-toggle-equipment', 'conical_flask', 'assessment-bench-slot', 'vessel');
-  await dragRegion('assessment-toggle-equipment', 'bung_delivery_tube', 'assessment-bench-slot', 'seal');
-  await dragRegion('assessment-toggle-equipment', 'water_bath', 'assessment-bench-slot', 'temperature');
-  await dragRegion('assessment-toggle-equipment', 'stopwatch', 'assessment-bench-slot', 'timer');
-
-  const sDragAll = await getState();
-  console.log('   All stations assembled via drag-and-drop:', sDragAll.assessment_mode?.slot_assignments);
-  for (const slotId of ['vessel', 'seal', 'collector', 'temperature', 'timer']) {
-    if (!sDragAll.assessment_mode?.slot_assignments?.[slotId]) {
-      throw new Error(`Slot ${slotId} is missing assignment after drag-and-drop assembly`);
-    }
-  }
-
-  // Capture screenshot during floating drag preview (drag gas_syringe towards workbench)
-  const dragSrc = await getRegionCenter('assessment-toggle-equipment', 'gas_syringe');
-  const dragDest = await getRegionCenter('assessment-bench-slot', 'collector');
-  await page.mouse.move(dragSrc.x, dragSrc.y);
-  await page.mouse.down();
-  await page.mouse.move((dragSrc.x + dragDest.x) / 2, (dragSrc.y + dragDest.y) / 2, { steps: 5 });
-  await page.screenshot({ path: `${out}/10-apparatus-drag-preview.png`, fullPage: true });
-  await page.mouse.move(dragDest.x, dragDest.y, { steps: 5 });
-  await page.mouse.up();
-
-  // Click Check Apparatus Setup button
-  await clickRegion('assessment-check-apparatus');
-  const s3 = await getState();
-  console.log('4. Clicked CHECK APPARATUS SETUP -> Score:', s3.assessment_mode?.total_score, 'Evaluated:', s3.assessment_mode?.apparatus_checked);
-  if (s3.assessment_mode?.total_score !== 7) throw new Error(`Expected apparatus score 7, got ${s3.assessment_mode?.total_score}`);
-  await page.screenshot({ path: `${out}/02-apparatus-evaluated.png`, fullPage: true });
-
-  // 5. Activity 2: Navigate to Method Steps via Next button
-  await clickRegion('assessment-next-phase');
-  const s4a = await getState();
-  console.log('5. Clicked NEXT -> Current phase:', s4a.assessment_mode?.phase);
-  if (s4a.assessment_mode?.phase !== 'method') throw new Error('Expected phase: method');
-  await page.screenshot({ path: `${out}/03-method-phase.png`, fullPage: true });
-
-  // Answer reasoning questions via mouse clicks
-  // Q1: liquid paraffin -> option A (index 0: prevent oxygen)
-  await clickRegion('assessment-answer-option', { questionId: 'q_layer', optionIndex: 0 });
-  // Q2: water bath pre-equilibration -> option A (index 0: reach target temp)
-  await clickRegion('assessment-answer-option', { questionId: 'q_equilibrate', optionIndex: 0 });
-  // Q3: 60 °C cessation -> option A (index 0: enzymes denature)
-  await clickRegion('assessment-answer-option', { questionId: 'q_high_temp', optionIndex: 0 });
-
-  // Also reorder steps so they are in correct order
-  await page.evaluate(() => {
-    const { state, draw } = window.__lab;
-    state.assessmentSession.orderedStepIds = [...state.assessmentSession.data.methodChallenge.correctOrder];
-    draw();
-  });
-  await clickRegion('assessment-check-order');
-  await clickRegion('assessment-check-questions');
-  const s4b = await getState();
-  console.log('5. Clicked CHECK ORDER & CHECK QUESTIONS -> Score:', s4b.assessment_mode?.total_score);
-  if (s4b.assessment_mode?.total_score !== 18) throw new Error(`Expected score 18 after method phase, got ${s4b.assessment_mode?.total_score}`);
-  await page.screenshot({ path: `${out}/04-method-evaluated.png`, fullPage: true });
-
-  // 6. Activity 3: Navigate to Limitations & Upgrades
-  await clickRegion('assessment-next-phase');
-  const s5a = await getState();
-  console.log('6. Clicked NEXT -> Current phase:', s5a.assessment_mode?.phase);
-  if (s5a.assessment_mode?.phase !== 'limitations') throw new Error('Expected phase: limitations');
-  await page.screenshot({ path: `${out}/05-limitations-phase.png`, fullPage: true });
-
-  // ON-BENCH ACCURACY CHALLENGE:
-  // Click directly on the Rubber Balloon on the live bench canvas!
-  await clickRegion('assessment-bench-apparatus-click', { id: 'balloon' });
-  const s5bench = await getState();
-  console.log('6b. Clicked Rubber Balloon on bench -> Lowest accuracy identified:', s5bench.assessment_mode?.lowest_accuracy_identified);
-  if (!s5bench.assessment_mode?.lowest_accuracy_identified) throw new Error('Failed to identify lowest accuracy apparatus on bench');
-
-  // Click experimental upgrades via mouse clicks:
-  // Limitation 1 (Gas collection): 100 cm³ Gas Syringe (index 0)
-  await clickRegion('assessment-select-upgrade', { limitationId: 'lim_gas_collection', optionIndex: 0 });
-  // Limitation 2 (Temperature range): 10–60 °C range (index 0)
-  await clickRegion('assessment-select-upgrade', { limitationId: 'lim_temperature_range', optionIndex: 0 });
-  // Limitation 3 (Reliability): 3 repeat trials (index 0)
-  await clickRegion('assessment-select-upgrade', { limitationId: 'lim_repeats', optionIndex: 0 });
-
-  // Click Check Upgrade Choices button
-  await clickRegion('assessment-check-limitations');
-  const s5b = await getState();
-  console.log('6. Clicked CHECK UPGRADES -> Score:', s5b.assessment_mode?.total_score);
-  if (s5b.assessment_mode?.total_score !== 27) throw new Error(`Expected score 27 after limitations, got ${s5b.assessment_mode?.total_score}`);
-  await page.screenshot({ path: `${out}/06-limitations-evaluated.png`, fullPage: true });
-
-  // 7. Activity 4: Navigate to Final GCSE Score & Examiner Report
-  await clickRegion('assessment-next-phase');
-  const s6 = await getState();
-  console.log('7. Final GCSE Summary - Score:', s6.assessment_mode?.total_score, '/', s6.assessment_mode?.max_score, '| Grade:', s6.assessment_mode?.grade);
-  if (s6.assessment_mode?.grade !== 'Grade 9') throw new Error(`Expected Grade 9, got ${s6.assessment_mode?.grade}`);
-  await page.screenshot({ path: `${out}/07-final-gcse-summary.png`, fullPage: true });
-
-  // 8. Exit Assessment Mode back to Lab Simulation via Return button
-  await clickRegion('assessment-exit');
-  const s7 = await getState();
-  console.log('8. Clicked RETURN TO SIMULATION LAB -> assessment_mode:', s7.assessment_mode?.active);
-  if (s7.assessment_mode?.active !== false) throw new Error('Failed to exit assessment mode');
-  await page.screenshot({ path: `${out}/08-lab-resumed.png`, fullPage: true });
-
-  // 9. Test Mass Practical (Conservation of Mass, 4 stations - verify scaled workbench layout)
-  await page.evaluate(() => {
-    const { state, practicals, draw } = window.__lab;
-    const pIdx = practicals.findIndex(p => p.id === 'mass');
-    if (pIdx >= 0) {
-      state.selected = pIdx;
-      state.subject = 'chemistry';
-      state.assessmentMode = true;
-      delete state.assessmentSession;
-      draw();
-    }
-  });
-  await page.waitForTimeout(150);
-  const sMass = await getState();
-  console.log('9. Loaded Conservation of Mass in assessment mode:', sMass.practical);
-  await page.screenshot({ path: `${out}/09-mass-apparatus-scaled.png`, fullPage: true });
-
-  // Test drag and drop on mass practical (item_0 is Balance, slot_0 is Station 1: Balance)
-  console.log('9b. Dragging Balance onto Station 1...');
-  await dragRegion('assessment-toggle-equipment', 'item_0', 'assessment-bench-slot', 'slot_0');
-  const sMassDrag = await getState();
-  if (sMassDrag.assessment_mode?.slot_assignments?.slot_0 !== 'item_0') {
-    throw new Error(`Expected mass slot_0 to have item_0, got ${sMassDrag.assessment_mode?.slot_assignments?.slot_0}`);
-  }
-  await page.screenshot({ path: `${out}/09-mass-apparatus-assigned.png`, fullPage: true });
-
-  console.log('--- ALL ASSESMENT INTERACTIONS PASSED CLEANLY! ---');
-  console.log('Console / page errors logged:', errors.length);
-  if (errors.length > 0) {
-    console.error(errors);
-    process.exit(1);
-  }
-} finally {
-  await browser.close();
+page.on('pageerror', error => errors.push(error.message));
+page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+const wait = () => page.waitForTimeout(180);
+const state = () => page.evaluate(() => JSON.parse(window.render_game_to_text()).assessment_mode);
+const phase = async name => { await page.locator(`.assessment-phase[data-phase="${name}"]`).click(); await wait(); };
+const getSession = async expression => page.evaluate(expression);
+const setup = async id => {
+  await page.evaluate(id => { const { state, practicals, draw } = window.__lab; state.selected = practicals.findIndex(p => p.id === id); state.subject = practicals[state.selected].subject; state.assessmentMode = true; state.assessmentSession = null; draw(); }, id);
+  await page.locator('.assembly-canvas').waitFor();
+  await page.waitForFunction(() => document.querySelector('.assembly-canvas')?.style.visibility === 'visible');
+  await wait();
+};
+const palette = id => page.locator(`.assessment-equipment[data-item-id="${id}"]`);
+async function benchPoint(x, y) {
+  const r = await page.locator('.assembly-viewport').boundingBox();
+  const scale = Math.min(r.width / 1000, r.height / 600);
+  return { x: r.x + (r.width - scale * 1000) / 2 + x * scale, y: r.y + (r.height - scale * 600) / 2 + y * scale };
 }
+async function dragTo(id, x, y, fromBench = false) {
+  const source = fromBench ? page.locator(`.assembly-item-label[data-item-id="${id}"]`) : palette(id);
+  await source.scrollIntoViewIfNeeded();
+  const r = await source.boundingBox(), dest = await benchPoint(x, y);
+  await page.mouse.move(r.x + r.width / 2, r.y + r.height / 2); await page.mouse.down();
+  await page.mouse.move(dest.x, dest.y, { steps: 15 }); await page.mouse.up(); await wait();
+}
+try {
+  await page.goto(`http://127.0.0.1:4173/?spatialQA=${Date.now()}`, { waitUntil: 'networkidle' });
+  await page.waitForFunction(() => window.__lab && window.render_game_to_text);
+  // Enter through the actual GCSE canvas header control.
+  const enter = await page.evaluate(() => { const r = window.__lab.getRegions().find(r => r.id === 'toggle-assessment-mode'); const c = document.getElementById('lab').getBoundingClientRect(), scale = window.__lab.getScale(); return { x: c.x + (r.x + r.w / 2) * scale, y: c.y + (r.y + r.h / 2) * scale }; });
+  await page.mouse.click(enter.x, enter.y); await wait();
+  assert.equal((await state()).active, true);
+  await setup('respiration');
+  assert.equal((await state()).assembly.items.length, 0);
+  await page.getByRole('button', { name: 'Check my setup', exact: true }).click();
+  assert.equal((await state()).total_score, 0, 'Empty bench earns zero');
+  await page.screenshot({ path: `${out}/01-empty-bench.png` });
+  await dragTo('water_bath', 400, 500);
+  await dragTo('conical_flask', 365, 480);
+  await dragTo('bung_delivery_tube', 395, 330);
+  await dragTo('gas_syringe', 585, 315);
+  await dragTo('stopwatch', 815, 480);
+  let snapshot = await state();
+  assert.equal(snapshot.assembly.items.length, 5);
+  assert.equal(snapshot.assembly.connections.filter(c => c.valid).length, 3, 'All respiration joints snap');
+  await page.getByRole('button', { name: 'Check my setup', exact: true }).click();
+  snapshot = await state(); assert.equal(snapshot.total_score, snapshot.assembly.max);
+  await page.screenshot({ path: `${out}/02-connected-respiration.png` });
+  // Reposition child to detach, making previous marks stale.
+  await dragTo('gas_syringe', 780, 300, true);
+  snapshot = await state(); assert.equal(snapshot.apparatus_checked, false); assert.equal(snapshot.total_score, 0);
+  assert.equal(snapshot.assembly.connections.filter(c => c.valid).length, 2);
+  await page.getByRole('button', { name: 'Undo', exact: true }).click(); await wait();
+  assert.equal((await state()).assembly.connections.filter(c => c.valid).length, 3);
+  // An irrelevant item affects selection marks, and can be removed.
+  await palette('rubber_balloon').focus(); await page.keyboard.press('Enter'); await wait();
+  assert.equal((await state()).assembly.items.length, 6);
+  await page.keyboard.press('Delete'); await wait(); assert.equal((await state()).assembly.items.length, 5);
+  // Pointer cancellation and out-of-bench drops never add equipment.
+  const before = (await state()).assembly.items.length;
+  const extra = palette('open_beaker'); await extra.scrollIntoViewIfNeeded(); const r = await extra.boundingBox();
+  await page.mouse.move(r.x+20,r.y+20); await page.mouse.down(); await page.mouse.move(8,8,{steps:8}); await page.mouse.up(); await wait();
+  assert.equal((await state()).assembly.items.length, before);
+  await palette('stopwatch').focus(); await page.keyboard.press('Enter'); await wait();
+  const originalX = (await state()).assembly.items.find(item=>item.id==='stopwatch').x;
+  await page.keyboard.press('ArrowLeft'); await wait();
+  assert.equal((await state()).assembly.items.find(item=>item.id==='stopwatch').x, originalX-20);
+  await page.keyboard.press('ArrowRight'); await wait();
+  await page.getByRole('button', { name: 'Clear bench', exact: true }).click(); await wait();
+  assert.equal((await state()).assembly.items.length,0);
+  await page.getByRole('button', { name: 'Undo', exact: true }).click(); await wait();
+  assert.equal((await state()).assembly.items.length,5);
+  await page.getByRole('button', { name: 'Check my setup', exact: true }).click();
+  await phase('method');
+  console.log('PASS: physical dragging, snapping, detach, undo, keyboard and clear.');
+  const beforeMethodDrag = await getSession(() => [...window.__lab.state.assessmentSession.orderedStepIds]);
+  await page.locator('.assessment-method-step').first().dragTo(page.locator('.assessment-method-step').nth(1)); await wait();
+  assert.notDeepEqual(await getSession(() => window.__lab.state.assessmentSession.orderedStepIds), beforeMethodDrag);
+
+  const ordered = await getSession(() => ({ actual: window.__lab.state.assessmentSession.orderedStepIds, correct: window.__lab.state.assessmentSession.data.methodChallenge.correctOrder }));
+  assert.notDeepEqual(beforeMethodDrag, ordered.correct, 'Method begins scrambled');
+  // Real up controls put all five steps in their known scientifically correct order.
+  for (let target = 0; target < ordered.correct.length; target++) {
+    while (true) {
+      const index = await getSession(() => window.__lab.state.assessmentSession.orderedStepIds);
+      const current = index.indexOf(ordered.correct[target]); if (current <= target) break;
+      await page.locator(`.assessment-method-step[data-step-id="${ordered.correct[target]}"] button`).first().click(); await wait();
+    }
+  }
+  await page.getByRole('button', { name: 'Check step order', exact: true }).click();
+  assert.equal((await state()).method_order_checked, true);
+  assert.equal((await state()).method_questions_checked, false, 'Order check does not mark questions');
+  const answers = await getSession(() => window.__lab.state.assessmentSession.data.methodChallenge.reasoningQuestions.map(q => ({ id: q.id, correct: q.options.findIndex(o=>o.correct) })));
+  for (const q of answers) await page.locator(`input[name="assessment-questions-${q.id}"][value="${q.correct}"]`).check();
+  await page.getByRole('button', { name: 'Check answers', exact: true }).click();
+  assert.equal((await state()).method_questions_checked, true);
+  await page.locator('.assessment-main').evaluate(el => el.scrollTop = 0);
+  await page.screenshot({ path: `${out}/03-method-large-text.png` });
+  await phase('limitations');
+  const improvements = await getSession(() => window.__lab.state.assessmentSession.data.limitationsChallenge.map(q => ({ id: q.id, correct: q.options.findIndex(o=>o.correct) })));
+  for (const q of improvements) await page.locator(`input[name="assessment-limitations-${q.id}"][value="${q.correct}"]`).check();
+  await page.getByRole('button', { name: 'Check improvements', exact: true }).click();
+  await phase('summary'); snapshot = await state(); assert.equal(snapshot.total_score, snapshot.max_score);
+  await page.screenshot({ path: `${out}/04-results.png` });
+  await page.getByRole('button', { name: 'Back to lab', exact: true }).click();
+  assert.equal((await state()).active, false);
+  // The requested antibiotic practical has individually assembled plate components.
+  await setup('antibiotics');
+  await dragTo('petri_dish', 470, 440);
+  await dragTo('antibiotic_discs', 445, 409);
+  await dragTo('control_disc', 534, 409);
+  await dragTo('petri_lid', 470, 395);
+  await dragTo('bunsen_burner', 190, 460);
+  for (const [id,x,y] of [['sterile_swab',740,340],['sterile_forceps',805,510],['marker',400,540],['ruler',665,540]]) await dragTo(id,x,y);
+  await page.getByRole('button', { name: 'Check my setup', exact: true }).click(); snapshot = await state();
+  assert.equal(snapshot.total_score, snapshot.assembly.max, 'Antibiotics fully assembled');
+  console.log('PASS: all stages scored correctly; antibiotic plate assembled.');
+  await page.screenshot({ path: `${out}/05-antibiotics-assembled.png` });
+  await phase('method'); await page.screenshot({ path: `${out}/06-antibiotics-method.png` });
+  for (const size of [{width:1280,height:720},{width:1024,height:768},{width:844,height:390},{width:2560,height:1440}]) {
+    await page.setViewportSize(size); await phase('apparatus'); await wait();
+    const overflow = await page.locator('.assessment-app').evaluate(node => ({w:node.clientWidth,scroll:node.scrollWidth}));
+    assert.ok(overflow.scroll <= overflow.w+2, `No horizontal page overflow ${size.width}`);
+    await page.screenshot({ path: `${out}/07-responsive-${size.width}.png` });
+  }
+  await page.setViewportSize({width:1600,height:1000});
+  // Smoke-render all current GCSE practical libraries and every distinct model kind.
+  const ids = await getSession(() => window.__lab.practicals.map(p=>p.id));
+  for (const [index,id] of ids.entries()) {
+    await setup(id);
+    await page.evaluate(async () => { const {state,draw} = window.__lab; const mod = await import('./assessment-assembly.js?v=20260916-1'); state.assessmentSession.assemblySpec.items.filter(i=>i.required).forEach((item,index)=>mod.placeAssemblyItem(state.assessmentSession,item.id,180+(index%4)*190,450+Math.floor(index/4)*70,{snap:false})); draw(); });
+    await wait();
+    assert.equal(await page.locator('.assembly-fallback').count(),0, `3D rendering for ${id}`);
+    if (index%10===0) console.log(`Rendered ${index+1}/${ids.length} practical libraries.`);
+  }
+  assert.deepEqual(errors, [], 'No browser errors');
+  fs.writeFileSync(`${out}/report.json`, JSON.stringify({passed:true,practicals:ids.length,errors},null,2));
+  console.log(`PASS: spatial drag/drop, snap/detach/undo/delete, scoring, method, results, responsive and ${ids.length} practicals.`);
+} finally { await browser.close(); }
